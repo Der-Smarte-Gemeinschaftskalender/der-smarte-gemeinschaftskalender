@@ -1,0 +1,593 @@
+/* Theme: Kern/Primeflex */
+@use "sass:string";
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: light !important;
+    }
+}
+
+
+:root {
+    color-scheme: light dark;
+    --kern-action-default: #2b2c6a !important;
+    --kern-theme-color: #2b2c6a !important;
+    --p-text-color:#495057 !important;
+    --p-text-color-secondary:#6c757d !important;
+    --p-border-radius:6px !important;
+    --p-primary-color:#3B82F6 !important;
+    --p-primary-color-text:#ffffff !important;
+    --p-surface-ground:#eff3f8 !important;
+    --p-surface-section:#ffffff !important;
+    --p-surface-card:#ffffff !important;
+    --p-surface-overlay:#ffffff !important;
+    --p-surface-border:#dfe7ef !important;
+    --p-surface-hover:#f6f9fc !important;
+    --p-surface-0: #ffffff;
+    --p-surface-50: #FAFAFA;
+    --p-surface-100: #F5F5F5;
+    --p-surface-200: #EEEEEE;
+    --p-surface-300: #E0E0E0;
+    --p-surface-400: #BDBDBD;
+    --p-surface-500: #9E9E9E;
+    --p-surface-600: #757575;
+    --p-surface-700: #616161;
+    --p-surface-800: #424242;
+    --p-surface-900: #212121;
+    --p-slate-50: #f8fafc;
+    --p-slate-100: #f1f5f9;
+    --p-slate-200: #e2e8f0;
+    --p-slate-300: #cbd5e1;
+    --p-slate-400: #94a3b8;
+    --p-slate-500: #64748b;
+    --p-slate-600: #475569;
+    --p-slate-700: #334155;
+    --p-slate-800: #1e293b;
+    --p-slate-900: #0f172a;
+    --p-blue-50:#f5f9ff;
+    --p-blue-100:#d0e1fd;
+    --p-blue-200:#abc9fb;
+    --p-blue-300:#85b2f9;
+    --p-blue-400:#609af8;
+    --p-blue-500:#3b82f6;
+    --p-blue-600:#326fd1;
+    --p-blue-700:#295bac;
+    --p-blue-800:#204887;
+    --p-blue-900:#183462;
+    --p-lightblue-50: #e1f5fe;
+    --p-lightblue-100: #b3e5fc;
+    --p-lightblue-200: #81d4fa;
+    --p-lightblue-300: #4fc3f7;
+    --p-lightblue-400: #29b6f6;
+    --p-lightblue-500: #03a9f4;
+    --p-lightblue-600: #039be5;
+    --p-lightblue-700: #0288d1;
+    --p-lightblue-800: #0277bd;
+    --p-lightblue-900: #01579b;
+    --p-green-50:#f4fcf7;
+    --p-green-100:#caf1d8;
+    --p-green-200:#a0e6ba;
+    --p-green-300:#76db9b;
+    --p-green-400:#4cd07d;
+    --p-green-500:#22c55e;
+    --p-green-600:#1da750;
+    --p-green-700:#188a42;
+    --p-green-800:#136c34;
+    --p-green-900:#0e4f26;
+    --p-lime-50: #f5fbe7;
+    --p-lime-100: #e6f4c3;
+    --p-lime-200: #d3ee9c;
+    --p-lime-300: #cee775;
+    --p-lime-400: #c3e157;
+    --p-lime-500: #b3dc39;
+    --p-lime-600: #a4ca33;
+    --p-lime-700: #9bb42b;
+    --p-lime-800: #889e24;
+    --p-lime-900: #778217;
+    --p-yellow-50:#fefbf3;
+    --p-yellow-100:#faedc4;
+    --p-yellow-200:#f6de95;
+    --p-yellow-300:#f2d066;
+    --p-yellow-400:#eec137;
+    --p-yellow-500:#eab308;
+    --p-yellow-600:#c79807;
+    --p-yellow-700:#a47d06;
+    --p-yellow-800:#816204;
+    --p-yellow-900:#5e4803;
+    --p-brown-50: #efebe9;
+    --p-brown-100: #d7ccc8;
+    --p-brown-200: #bcaaa4;
+    --p-brown-300: #a1887f;
+    --p-brown-400: #8d6e63;
+    --p-brown-500: #795548;
+    --p-brown-600: #6d4c41;
+    --p-brown-700: #5d4037;
+    --p-brown-800: #4e342e;
+    --p-brown-900: #3e2723;
+    --p-cyan-50:#f3fbfd;
+    --p-cyan-100:#c3edf5;
+    --p-cyan-200:#94e0ed;
+    --p-cyan-300:#65d2e4;
+    --p-cyan-400:#35c4dc;
+    --p-cyan-500:#06b6d4;
+    --p-cyan-600:#059bb4;
+    --p-cyan-700:#047f94;
+    --p-cyan-800:#036475;
+    --p-cyan-900:#024955;
+    --p-pink-50:#fef6fa;
+    --p-pink-100:#fad3e7;
+    --p-pink-200:#f7b0d3;
+    --p-pink-300:#f38ec0;
+    --p-pink-400:#f06bac;
+    --p-pink-500:#ec4899;
+    --p-pink-600:#c93d82;
+    --p-pink-700:#a5326b;
+    --p-pink-800:#822854;
+    --p-pink-900:#5e1d3d;
+    --p-indigo-50:#f7f7fe;
+    --p-indigo-100:#dadafc;
+    --p-indigo-200:#bcbdf9;
+    --p-indigo-300:#9ea0f6;
+    --p-indigo-400:#8183f4;
+    --p-indigo-500:#6366f1;
+    --p-indigo-600:#5457cd;
+    --p-indigo-700:#4547a9;
+    --p-indigo-800:#363885;
+    --p-indigo-900:#282960;
+    --p-teal-50:#f3fbfb;
+    --p-teal-100:#c7eeea;
+    --p-teal-200:#9ae0d9;
+    --p-teal-300:#6dd3c8;
+    --p-teal-400:#41c5b7;
+    --p-teal-500:#14b8a6;
+    --p-teal-600:#119c8d;
+    --p-teal-700:#0e8174;
+    --p-teal-800:#0b655b;
+    --p-teal-900:#084a42;
+    --p-orange-50:#fff8f3;
+    --p-orange-100:#feddc7;
+    --p-orange-200:#fcc39b;
+    --p-orange-300:#fba86f;
+    --p-orange-400:#fa8e42;
+    --p-orange-500:#f97316;
+    --p-orange-600:#d46213;
+    --p-orange-700:#ae510f;
+    --p-orange-800:#893f0c;
+    --p-orange-900:#642e09;
+    --p-amber-50: #fff8e1;
+    --p-amber-100: #ffecb3;
+    --p-amber-200: #ffe082;
+    --p-amber-300: #ffd54f;
+    --p-amber-400: #ffca28;
+    --p-amber-500: #ffc107;
+    --p-amber-600: #ffb300;
+    --p-amber-700: #ffa000;
+    --p-amber-800: #ff8f00;
+    --p-amber-900: #ff6f00;
+    --p-bluegray-50:#f7f8f9;
+    --p-bluegray-100:#dadee3;
+    --p-bluegray-200:#bcc3cd;
+    --p-bluegray-300:#9fa9b7;
+    --p-bluegray-400:#818ea1;
+    --p-bluegray-500:#64748b;
+    --p-bluegray-600:#556376;
+    --p-bluegray-700:#465161;
+    --p-bluegray-800:#37404c;
+    --p-bluegray-900:#282e38;
+    --p-purple-50:#fbf7ff;
+    --p-purple-100:#ead6fd;
+    --p-purple-200:#dab6fc;
+    --p-purple-300:#c996fa;
+    --p-purple-400:#b975f9;
+    --p-purple-500:#a855f7;
+    --p-purple-600:#8f48d2;
+    --p-purple-700:#763cad;
+    --p-purple-800:#5c2f88;
+    --p-purple-900:#432263;
+    --p-deeppurple-50: #ede7f6;
+    --p-deeppurple-100: #d1c4e9;
+    --p-deeppurple-200: #b39ddb;
+    --p-deeppurple-300: #9575cd;
+    --p-deeppurple-400: #7e57c2;
+    --p-deeppurple-500: #673ab7;
+    --p-deeppurple-600: #5e35b1;
+    --p-deeppurple-700: #512da8;
+    --p-deeppurple-800: #4527a0;
+    --p-deeppurple-900: #311b92;
+    --p-red-50:#fff5f5;
+    --p-red-100:#ffd0ce;
+    --p-red-200:#ffaca7;
+    --p-red-300:#ff8780;
+    --p-red-400:#ff6259;
+    --p-red-500:#ff3d32;
+    --p-red-600:#d9342b;
+    --p-red-700:#b32b23;
+    --p-red-800:#8c221c;
+    --p-red-900:#661814;
+    --p-primary-50:#f5f9ff;
+    --p-primary-100:#d0e1fd;
+    --p-primary-200:#abc9fb;
+    --p-primary-300:#85b2f9;
+    --p-primary-400:#609af8;
+    --p-primary-500:#3b82f6;
+    --p-primary-600:#326fd1;
+    --p-primary-700:#295bac;
+    --p-primary-800:#204887;
+    --p-primary-900:#183462;
+    --p-gray-50: #FAFAFA;
+    --p-gray-100: #F5F5F5;
+    --p-gray-200: #EEEEEE;
+    --p-gray-300: #E0E0E0;
+    --p-gray-400: #BDBDBD;
+    --p-gray-500: #9E9E9E;
+    --p-gray-600: #757575;
+    --p-gray-700: #616161;
+    --p-gray-800: #424242;
+    --p-gray-900: #212121;
+}
+
+/* Kern Overrides *//* Base (mobile) */
+h1.kern-heading {
+    font-size: 2rem !important;        /* 32px */
+    line-height: 2.5rem !important;    /* 40px */
+    padding: 0.5rem 0;      /* 8px */
+}
+
+h2.kern-heading {
+    font-size: 1.625rem !important;    /* 26px */
+    line-height: 2rem !important;      /* 32px */
+    padding: 0.25rem 0;     /* 4px */
+}
+
+h3.kern-heading {
+    font-size: 1.3125rem !important;   /* 21px */
+    line-height: 2rem !important;      /* 32px */
+    padding: 0.125rem 0;    /* 2px */
+}
+
+h4.kern-heading {
+    font-size: 1rem !important;        /* 16px */
+    line-height: 1.5rem !important;    /* 24px */
+    padding: 0.125rem 0;    /* 2px */
+}
+
+/* ≥640px */
+@media (min-width: 640px) {
+    h1.kern-heading {
+        font-size: 2.375rem !important;    /* ~38px */
+        line-height: 2.625rem !important;  /* ~42px */
+        padding: 0.5rem 0;      /* 8px */
+    }
+
+    h2.kern-heading {
+        font-size: 1.75rem !important;     /* 28px */
+        line-height: 2.125rem !important;  /* ~34px */
+        padding: 0.375rem 0;    /* 6px */
+    }
+
+    h3.kern-heading {
+        font-size: 1.4375rem !important;   /* 23px */
+        line-height: 2rem !important;      /* 32px */
+        padding: 0.25rem 0;     /* 4px */
+    }
+
+    h4.kern-heading {
+        font-size: 1.125rem !important;    /* 18px */
+        line-height: 1.625rem !important;  /* ~26px */
+        padding: 0.25rem 0;     /* 4px */
+    }
+}
+
+/* ≥768px */
+@media (min-width: 768px) {
+    h1.kern-heading {
+        font-size: 2.75rem !important;     /* 44px */
+        line-height: 3.125rem !important;  /* 50px */
+        padding: 0.625rem 0;    /* 10px */
+    }
+
+    h2.kern-heading {
+        font-size: 2rem !important;       /* 32px */
+        line-height: 2.375rem !important; /* 38px */
+        padding: 0.5rem 0;     /* 8px */
+    }
+
+    h3.kern-heading {
+        font-size: 1.5625rem !important;  /* 25px */
+        line-height: 2.125rem !important; /* 34px */
+        padding: 0.375rem 0;   /* 6px */
+    }
+
+    h4.kern-heading {
+        font-size: 1.25rem !important;    /* 20px */
+        line-height: 1.75rem !important;  /* 28px */
+        padding: 0.25rem 0;    /* 4px */
+    }
+}
+
+/* ≥1048px */
+@media (min-width: 1048px) {
+    h1.kern-heading {
+        font-size: 2.875rem !important;   /* 46px */
+        line-height: 3.25rem !important;  /* 52px */
+        padding: 0.625rem 0;   /* 10px */
+    }
+
+    h2.kern-heading {
+        font-size: 2.125rem !important;   /* 34px */
+        line-height: 2.5rem !important;   /* 40px */
+        padding: 0.5rem 0;     /* 8px */
+    }
+
+    h3.kern-heading {
+        font-size: 1.625rem !important;   /* 26px */
+        line-height: 2.25rem !important;  /* 36px */
+        padding: 0.375rem 0;   /* 6px */
+    }
+
+    h4.kern-heading {
+        font-size: 1.375rem !important;   /* 22px */
+        line-height: 1.75rem !important;  /* 28px */
+        padding: 0.25rem 0;    /* 4px */
+    }
+}
+
+/* ≥1200px (keep your original desktop values) */
+@media (min-width: 1200px) {
+    h1.kern-heading {
+        font-size: 3rem !important;        /* 48px */
+        line-height: 3.5rem !important;    /* 56px */
+        padding: 0.75rem 0;     /* 12px */
+    }
+
+    h2.kern-heading {
+        font-size: 2rem !important;        /* 32px */
+        line-height: 2.5rem !important;    /* 40px */
+        padding: 0.625rem 0;    /* 10px */
+    }
+
+    h3.kern-heading {
+        font-size: 1.5rem !important;      /* 24px */
+        line-height: 2rem !important;      /* 32px */
+        padding: 0.5rem 0;      /* 8px */
+    }
+
+    h4.kern-heading {
+        font-size: 1.3125rem !important;   /* 21px */
+        line-height: 1.5rem !important;    /* 24px */
+        padding: 0.375rem 0;    /* 6px */
+    }
+}
+
+/* Custom Theme Classes */
+.bg-theme-primary {
+    background-color: var(--kern-theme-color) !important;
+}
+
+.text-theme-primary {
+    color: var(--kern-theme-color) !important;
+}
+
+.cards-template {
+    display: grid;
+    justify-content: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1600px;
+
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+
+    & > div {
+        width: 100%;
+        display: flex;
+        justify-content: start;
+
+        & > article {
+          max-width: 450px;
+          width: 100%;
+        }
+    }
+}
+
+@media (max-width: 700px) {
+    .cards-template > div {
+      justify-content: center;
+    }
+}
+
+/* App Layout */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+}
+
+.header-content {
+    max-width: 1600px;
+    width: 100%;
+    overflow: hidden;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 5vw, 2rem);
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 1600px;
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 5vw, 2rem);
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+    scrollbar-color: transparent transparent;
+}
+
+.main::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+}
+
+
+@media (max-width: 640px) {
+    .main {
+        padding-inline: clamp(.5rem, 3vw, 1rem) !important;
+    }
+}
+
+
+a {
+    text-decoration: none;
+}
+
+/* Additional Styles */
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.font-semilight {
+    font-weight: 400 !important;
+}
+
+.white-space-pre-line {
+    white-space: pre-line !important;
+}
+
+.object-cover {
+    object-fit: cover !important;
+}
+
+.flex-direction-unset {
+    flex-direction: unset !important;
+}
+
+.gap-unset {
+    gap: unset !important;
+}
+
+.aspect-ratio-1-1 {
+    aspect-ratio: 1 / 1 !important;
+}
+
+.aspect-ratio-16-9 {
+    aspect-ratio: 16 / 9 !important;
+}
+
+.aspect-ratio-4-3 {
+    aspect-ratio: 4 / 3 !important;
+}
+
+.aspect-ratio-3-2 {
+    aspect-ratio: 3 / 2 !important;
+}
+
+.aspect-ratio-2-1 {
+    aspect-ratio: 2 / 1 !important;
+}
+
+$rem-sizes: 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 96;
+$breakpoints: (
+        null: 0, // No breakpoint
+        sm: 576px,
+        md: 768px,
+        lg: 992px,
+        xl: 1200px,
+);
+
+@function str-replace($string, $search, $replace: "") {
+    $index: string.index($string, $search);
+
+    @if $index {
+        @return string.slice($string, 1, $index - 1)
+      + $replace
+      + str-replace(string.slice($string, $index + string.length($search), -1), $search, $replace);
+    }
+
+    @return $string;
+}
+
+
+@mixin generate-utility($prefix, $properties, $value, $important: true) {
+    .#{$prefix} {
+        @each $property in $properties {
+            #{$property}: $value !important;
+        }
+    }
+}
+
+@each $breakpoint, $breakpoint-value in $breakpoints {
+    @if $breakpoint == null {
+
+        @each $size in $rem-sizes {
+            $class-suffix: str-replace(#{$size}, ".", "-");
+            $value: $size + rem;
+
+            @include generate-utility("p-#{$class-suffix}rem", (padding), $value);
+            @include generate-utility("pt-#{$class-suffix}rem", (padding-top), $value);
+            @include generate-utility("pr-#{$class-suffix}rem", (padding-right), $value);
+            @include generate-utility("pb-#{$class-suffix}rem", (padding-bottom), $value);
+            @include generate-utility("pl-#{$class-suffix}rem", (padding-left), $value);
+            @include generate-utility("px-#{$class-suffix}rem", (padding-left, padding-right), $value);
+            @include generate-utility("py-#{$class-suffix}rem", (padding-bottom padding-top), $value);
+            @include generate-utility("w-#{$class-suffix}rem", (width), $value);
+            @include generate-utility("h-#{$class-suffix}rem", (height), $value);
+            @include generate-utility("min-w-#{$class-suffix}rem", (min-width), $value);
+            @include generate-utility("min-h-#{$class-suffix}rem", (min-height), $value);
+            @include generate-utility("max-w-#{$class-suffix}rem", (max-width), $value);
+            @include generate-utility("max-h-#{$class-suffix}rem", (max-height), $value);
+        }
+
+        @include generate-utility("border-1", (border), 1px solid var(--p-surface-border));
+        @include generate-utility("border-2", (border), 2px solid var(--p-surface-border));
+        @include generate-utility("border-3", (border), 3px solid var(--p-surface-border));
+        @include generate-utility("border-4", (border), 4px solid var(--p-surface-border));
+    }
+    @else {
+        @media screen and (min-width: #{$breakpoint-value}) {
+            $prefix: "#{$breakpoint}\:";
+
+            @each $size in $rem-sizes {
+                $class-suffix: str-replace(#{$size}, ".", "-");
+                $value: $size + rem;
+
+                @include generate-utility("#{$prefix}p-#{$class-suffix}rem", (padding), $value);
+                @include generate-utility("#{$prefix}pt-#{$class-suffix}rem", (padding-top), $value);
+                @include generate-utility("#{$prefix}pr-#{$class-suffix}rem", (padding-right), $value);
+                @include generate-utility("#{$prefix}pb-#{$class-suffix}rem", (padding-bottom), $value);
+                @include generate-utility("#{$prefix}pl-#{$class-suffix}rem", (padding-left), $value);
+                @include generate-utility("#{$prefix}px-#{$class-suffix}rem", (padding-left, padding-right), $value);
+                @include generate-utility("#{$prefix}py-#{$class-suffix}rem", (padding-bottom padding-top), $value);
+                @include generate-utility("#{$prefix}w-#{$class-suffix}rem", (width), $value);
+                @include generate-utility("#{$prefix}h-#{$class-suffix}rem", (height), $value);
+                @include generate-utility("#{$prefix}min-w-#{$class-suffix}rem", (min-width), $value);
+                @include generate-utility("#{$prefix}min-h-#{$class-suffix}rem", (min-height), $value);
+                @include generate-utility("#{$prefix}max-w-#{$class-suffix}rem", (max-width), $value);
+                @include generate-utility("#{$prefix}max-h-#{$class-suffix}rem", (max-height), $value);
+            }
+
+            @include generate-utility("#{$prefix}border-1", (border), 1px solid var(--p-surface-border));
+            @include generate-utility("#{$prefix}border-2", (border), 2px solid var(--p-surface-border));
+            @include generate-utility("#{$prefix}border-3", (border), 3px solid var(--p-surface-border));
+            @include generate-utility("#{$prefix}border-4", (border), 4px solid var(--p-surface-border));
+        }
+    }
+}

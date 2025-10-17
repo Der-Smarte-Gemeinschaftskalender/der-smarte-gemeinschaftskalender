@@ -1,0 +1,70 @@
+---
+- name: Ensure ~/.ssh exists
+  file:
+    path: /home/{{ ansible_user }}/.ssh
+    state: directory
+    mode: '0700'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  when: build_on_server | bool 
+
+- name: Add GitHub to known_hosts
+  known_hosts:
+    name: github.com
+    key: "{{ lookup('pipe', 'ssh-keyscan github.com') }}"
+    state: present
+  when: build_on_server | bool 
+
+- name: Clone a private Git repository
+  git:
+    repo: "git@github.com:Der-Smarte-Gemeinschaftskalender/der-smarte-gemeinschaftskalender.git"
+    dest: "/opt/der-smarte-gemeinschaftskalender"
+    version: main
+  when: build_on_server | bool 
+
+- name: env frontend config
+  template:
+    src: frontend.env
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/.env"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: env backend config
+  template:
+    src: backend.env
+    dest: "/opt/der-smarte-gemeinschaftskalender/backend/.env"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: env main config
+  template:
+    src: docker.env
+    dest: "/opt/der-smarte-gemeinschaftskalender/.env"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Tear down existing services
+  community.docker.docker_compose_v2:
+    project_src: "/opt/der-smarte-gemeinschaftskalender"
+    state: absent
+  when: build_on_server | bool 
+
+- name: Build Docker Compose services
+  community.docker.docker_compose_v2:
+    project_src: "/opt/der-smarte-gemeinschaftskalender"
+    build: always
+    state: present
+  when: build_on_server | bool 
+
+- name: Setup Path
+  command: docker-compose exec backend ./fix_folder.sh
+  args:
+    chdir: /opt/der-smarte-gemeinschaftskalender/
+
+- name: Migrate Database
+  command: docker-compose exec backend php artisan migrate --force
+  args:
+    chdir: /opt/der-smarte-gemeinschaftskalender/

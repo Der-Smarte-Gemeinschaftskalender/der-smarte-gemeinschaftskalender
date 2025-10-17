@@ -1,0 +1,39 @@
+---
+- name: wait for mobilizon
+  pause:
+    seconds: 30
+- name: Check if user is administrator
+  command: docker-compose exec mobilizon mobilizon_ctl users.show {{ admin_mail }}
+  args:
+    chdir: /opt/der-smarte-gemeinschaftskalender
+  register: user_info
+  changed_when: false  # prevents Ansible from marking this task as changed
+  failed_when: false
+  tags:
+  - createuser
+
+- name: Create mobilizon user
+  command: "docker compose exec -T mobilizon mobilizon_ctl users.new {{ admin_mail }} --admin --password {{ admin_password }}"
+  args:
+    chdir: /opt/der-smarte-gemeinschaftskalender
+  tags:
+  - createuser
+  when: "'administrator' not in user_info.stdout"
+
+- name: Check if user is administrator
+  command: docker-compose exec mobilizon mobilizon_ctl users.show {{ admin_mail }}
+  args:
+    chdir: /opt/der-smarte-gemeinschaftskalender
+  register: user_info
+  changed_when: false  # prevents Ansible from marking this task as changed
+  failed_when: false
+  tags:
+  - createuser
+
+- name: Create user in laravel backend
+  command: docker compose exec -T backend php artisan app:create-first-admin-user --email="{{ admin_mail }}" --password="{{ admin_password }}" --mobilizon_email="{{ admin_mail }}" --mobilizon_password="{{ admin_password }}"
+  args:
+    chdir: /opt/der-smarte-gemeinschaftskalender
+  when: "'administrator' in user_info.stdout"
+  tags:
+  - createuser

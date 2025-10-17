@@ -1,0 +1,152 @@
+services:
+  # PostgreSQL Database with PostGIS extension
+  postgres:
+    image: postgis/postgis:15-3.4-alpine
+    container_name: dsg_postgres
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-laravel}
+      POSTGRES_USER: ${DB_USERNAME:-laravel}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      # Create additional database for Mobilizon
+      POSTGRES_MULTIPLE_DATABASES: mobilizon
+    command: |
+      postgres -c 'shared_preload_libraries=pg_stat_statements'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-mobilizon-db.sql:/docker-entrypoint-initdb.d/init-mobilizon-db.sql:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - dsg_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME:-laravel}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis for caching, sessions and job queues
+  redis:
+    image: redis:7-alpine
+    container_name: dsg_redis
+    command: redis-server --appendonly yes --dir /data --replica-read-only no
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - dsg_network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  # Laravel Backend with API endpoints and web authentication
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dsg_backend
+    volumes:
+      - ../storage:/var/www/html/storage
+      - backend_logs:/var/log
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dsg_network
+    ports:
+      - "127.0.0.1:8083:80"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Vue.js Frontend SPA
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dsg_frontend
+    environment:
+      - VITE_DSG_API_URL=${VITE_DSG_API_URL:-/dsgapi}
+      - VITE_APP_URL=${VITE_APP_URL:-}
+      - VITE_MOBILIZON_API_URL=${VITE_MOBILIZON_API_URL:-/api}
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8081:80"
+    networks:
+      - dsg_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Mobilizon event platform (requires separate subdomain)
+  mobilizon:
+    image: kaihuri/mobilizon:5.1.5
+    container_name: dsg_mobilizon
+    environment:
+      MOBILIZON_INSTANCE_NAME: ${MOBILIZON_INSTANCE_NAME:-DSG Mobilizon}
+      MOBILIZON_INSTANCE_HOST: ${MOBILIZON_HOST:-events.localhost}
+      MOBILIZON_DATABASE_USERNAME: ${DB_USERNAME:-laravel}
+      MOBILIZON_DATABASE_PASSWORD: ${DB_PASSWORD:-password}
+      MOBILIZON_DATABASE_HOST: postgres
+      MOBILIZON_DATABASE_PORT: 5432
+      MOBILIZON_DATABASE_DBNAME: mobilizon
+      MOBILIZON_INSTANCE_EMAIL: ${MOBILIZON_EMAIL:-admin@localhost}
+      MOBILIZON_REPLY_EMAIL: ${MOBILIZON_REPLY_EMAIL:-noreply@localhost}
+      MOBILIZON_SMTP_SERVER: ${MAIL_HOST:-maildev}
+      MOBILIZON_SMTP_PORT: ${MAIL_PORT:-1025}
+      MOBILIZON_SMTP_USERNAME: ${MAIL_USERNAME:-}
+      MOBILIZON_SMTP_PASSWORD: ${MAIL_PASSWORD:-}
+      MOBILIZON_SMTP_SSL: ${MAIL_ENCRYPTION:-false}
+      MOBILIZON_LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      - mobilizon_uploads:/var/lib/mobilizon/uploads
+      - mobilizon_data:/var/lib/mobilizon/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8082:4000"
+    networks:
+      - dsg_network
+    restart: unless-stopped
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "127.0.0.1:8085:1080"
+    networks:
+      - dsg_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_logs:
+    driver: local
+  mobilizon_uploads:
+    driver: local
+  mobilizon_data:
+    driver: local
+  nginx_logs:
+    driver: local
+
+networks:
+  dsg_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

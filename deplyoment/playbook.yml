@@ -1,0 +1,12 @@
+---
+- name: DSG
+  hosts: all
+  become: true
+  vars:
+    ansible_ssh_common_args: "-o ForwardAgent=yes"
+  roles:
+  - base
+  - webserver
+  - docker
+  - dsgdev
+  - dsguser

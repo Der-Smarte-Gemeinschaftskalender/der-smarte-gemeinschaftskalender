@@ -1,0 +1,36 @@
+---
+- name: Install a list of packages
+  ansible.builtin.apt:
+    pkg:
+    - ca-certificates
+    - curl
+    - gnupg
+  tags:
+  - setup
+    
+- name: Add an Apt signing key, uses whichever key is at the URL
+  ansible.builtin.apt_key:
+    url:  https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags:
+  - setup
+
+- name: Add docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+    state: present
+  tags:
+  - setup
+
+- name: Install a list of packages
+  ansible.builtin.apt:
+    update_cache: yes
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin
+    - docker-compose
+  tags:
+  - setup

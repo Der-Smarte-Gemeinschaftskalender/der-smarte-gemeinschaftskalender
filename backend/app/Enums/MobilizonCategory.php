@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Enums;
+
+enum MobilizonCategory: string
+{
+    case ARTS = 'ARTS';
+    case BOOK_CLUBS = 'BOOK_CLUBS';
+    case BUSINESS = 'BUSINESS';
+    case CAUSES = 'CAUSES';
+    case COMEDY = 'COMEDY';
+    case CRAFTS = 'CRAFTS';
+    case FOOD_DRINK = 'FOOD_DRINK';
+    case HEALTH = 'HEALTH';
+    case MUSIC = 'MUSIC';
+    case AUTO_BOAT_AIR = 'AUTO_BOAT_AIR';
+    case COMMUNITY = 'COMMUNITY';
+    case FAMILY_EDUCATION = 'FAMILY_EDUCATION';
+    case FASHION_BEAUTY = 'FASHION_BEAUTY';
+    case FILM_MEDIA = 'FILM_MEDIA';
+    case GAMES = 'GAMES';
+    case LANGUAGE_CULTURE = 'LANGUAGE_CULTURE';
+    case LEARNING = 'LEARNING';
+    case LGBTQ = 'LGBTQ';
+    case MOVEMENTS_POLITICS = 'MOVEMENTS_POLITICS';
+    case NETWORKING = 'NETWORKING';
+    case PARTY = 'PARTY';
+    case PERFORMING_VISUAL_ARTS = 'PERFORMING_VISUAL_ARTS';
+    case PETS = 'PETS';
+    case PHOTOGRAPHY = 'PHOTOGRAPHY';
+    case OUTDOORS_ADVENTURE = 'OUTDOORS_ADVENTURE';
+    case SPIRITUALITY_RELIGION_BELIEFS = 'SPIRITUALITY_RELIGION_BELIEFS';
+    case SCIENCE_TECH = 'SCIENCE_TECH';
+    case SPORTS = 'SPORTS';
+    case THEATRE = 'THEATRE';
+    case MEETING = 'MEETING';
+}

@@ -1,0 +1,77 @@
+---
+- name: Install apt
+  apt:
+    name:
+      - nginx
+      - certbot
+      - python3-certbot-nginx
+    state: present
+  tags:
+  - setup
+- name: Check if cert exists
+  stat:
+    path: "/etc/letsencrypt/live/{{domain}}/fullchain.pem"
+  register: cert_file
+  tags:
+  - setup
+
+- name: Stop NGINX
+  service:
+    name: nginx
+    state: stopped
+  when: not cert_file.stat.exists
+  tags:
+  - setup
+
+- name: Get SSL Cert (main domain and mobilizon subdomain)
+  command: "certbot certonly --standalone -d {{ domain }} -d {{ domain_mobilizon }} --non-interactive --agree-tos -m {{ certbot_email }}"
+  args:
+    creates: "/etc/letsencrypt/live/{{domain}}/fullchain.pem"
+  when: not cert_file.stat.exists
+  tags:
+  - setup
+
+- name: Try to expand certificate to include www subdomain
+  command: "certbot certonly --standalone -d {{ domain }} -d {{ domain_mobilizon }} -d www.{{ domain }} --expand --non-interactive --agree-tos -m {{ certbot_email }}"
+  when: not cert_file.stat.exists
+  ignore_errors: yes
+  register: www_cert_result
+  tags:
+  - setup
+
+- name: Log www certificate result
+  debug:
+    msg: "www subdomain certificate {{ 'successfully added' if www_cert_result.rc == 0 else 'failed - continuing without www (Error: ' + (www_cert_result.stderr | default('unknown')) + ')' }}"
+  when: not cert_file.stat.exists
+  tags:
+  - setup
+
+- name: Stop NGINX
+  service:
+    name: nginx
+    state: started
+  when: not cert_file.stat.exists
+  tags:
+  - setup
+
+- name: nginx config
+  template:
+    src: nginx-combined.conf
+    dest: "/etc/nginx/sites-available/{{ domain }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+  - setup
+
+- name: Create symlink for Nginx site
+  file:
+    src: "/etc/nginx/sites-available/{{ domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ domain }}.conf"
+    state: link
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded
+
