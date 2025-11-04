@@ -177,6 +177,8 @@ if (!user.value.person) {
             <div class="">
                 <RouterLink :to="{ name: 'singleEvents.create' }">
                     <Button
+                        title="Einzeltermin anlegen"
+                        aria-label="Einzeltermin anlegen"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
@@ -188,6 +190,8 @@ if (!user.value.person) {
             <div class="">
                 <RouterLink :to="{ name: 'seriesEvents.create' }">
                     <Button
+                        title="Serientermin anlegen"
+                        aria-label="Serientermin anlegen"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
@@ -199,6 +203,8 @@ if (!user.value.person) {
             <div class="">
                 <RouterLink :to="{ name: 'uploadedEvents.create' }">
                     <Button
+                        title="Kalenderdatei hochladen"
+                        aria-label="Kalenderdatei hochladen"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
@@ -210,6 +216,8 @@ if (!user.value.person) {
             <div class="">
                 <RouterLink :to="{ name: 'importedEvents.create' }">
                     <Button
+                        title="Kalenderintegration anlegen"
+                        aria-label="Kalenderintegration anlegen"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"

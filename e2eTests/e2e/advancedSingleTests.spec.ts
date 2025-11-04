@@ -215,8 +215,8 @@ test("single termin use as template", async ({ page }) => {
   await expect(page.locator("#name")).toHaveValue(eventName);
   await page.locator("#name").fill(`${eventName} - kopie`);
 
-  await expect(page.locator("#description")).toHaveValue(eventData.description);
-  await page.locator("#description").fill(`${eventData.description} - kopie`);
+  await expect(page.locator(".ProseMirror")).toHaveValue(eventData.description);
+  await page.locator(".ProseMirror").fill(`${eventData.description} - kopie`);
 
   await submitSingleEvent(page);
 

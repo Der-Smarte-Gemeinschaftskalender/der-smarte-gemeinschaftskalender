@@ -90,12 +90,25 @@ export const truncate = (str: string, n: number): string => {
  */
 export const buildAddress = (address: AddressForm | null): string => {
     return [
-        address?.street,
+        address?.street ? normalizeStreet(address.street) : null,
         address?.postalCode && address?.locality
             ? `${address.postalCode} ${address.locality}`
             : address?.locality,
     ].filter(part => part).join(',\n').trim();
 };
+
+
+export const normalizeStreet = (street: string): string => {
+    if (!street?.trim()) return '';
+
+    const match = street.match(/^\s*(\d+(?:\s*[-–]\s*\d+)?[a-zA-Z]?)\s+(.+)/) as [string, string, string]|undefined;
+    if (match) {
+        const [_, number, name] = match;
+        return `${name.trim()} ${number.trim()}`;
+    }
+
+    return street.trim();
+}
 
 /**
  * Returns the main category for a given subcategory.
@@ -139,7 +152,7 @@ export const formatCoordinates = (coordinates: string): [number, number] | null 
     if (!coordinates) {
         return null;
     }
-    const coords = coordinates.split(';');
+    const coords = coordinates.split(';') as [string, string];
     if (coords.length !== 2) {
         return null;
     }
@@ -196,3 +209,16 @@ export const getBeginsEndsOn = (searchBegin: string): { beginsOn: dayjs.Dayjs, e
     }
     return { beginsOn, endsOn };
 };
+
+/**
+ * Strips HTML tags and non-breaking spaces from a string.
+ * @param input
+ */
+export const stripHtml = (input: string) => {
+    if (!input) return '';
+
+    return input
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .trim();
+}

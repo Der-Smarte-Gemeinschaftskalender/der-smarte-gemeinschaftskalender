@@ -65,7 +65,13 @@ watch(
     <header class="py-3">
         <div class="header-content">
             <div class="flex flex-column lg:flex-row gap-3 lg:gap-0">
-                <div class="lg:w-fit flex align-items-center justify-content-between">
+                <div
+                    class="flex  justify-content-between"
+                    :class="{
+                        'lg:w-fit flex-column lg:flex-row gap-4 lg:align-items-center': !showNavigation,
+                        'lg:w-fit': showNavigation
+                     }"
+                >
                     <RouterLink :to="{ name: 'landingpage' }">
                         <img
                             class="logo-image"
@@ -73,7 +79,7 @@ watch(
                             :alt="`Logo ${instanceName}`"
                         />
                     </RouterLink>
-                    <slot name="after-logo" />
+                    <slot name="after-logo" class="text-right" />
                     <div
                         v-if="showNavigation"
                         class="flex lg:hidden gap-2"

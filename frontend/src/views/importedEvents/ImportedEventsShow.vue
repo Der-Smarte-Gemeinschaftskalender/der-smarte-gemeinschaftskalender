@@ -9,6 +9,7 @@ import DescriptionList from '@/components/KERN/DescriptionList.vue';
 import CreatedEventsTable from '@/components/CreatedEventsTable.vue';
 import ChangeImportedEventStatus from '@/components/ChangeImportedEventStatus.vue';
 import type { ImportedEvent } from '@/types/events/ImportedEvents';
+import { stripHtml } from '@/lib/helper';
 
 const error = ref(false);
 const loading = ref(false);
@@ -37,10 +38,6 @@ const loadImportedEvent = async () => {
                 value: importedEvent.value.url,
             },
             {
-                name: 'Default Beschreibung',
-                value: importedEvent.value?.mobilizon_fields?.description,
-            },
-            {
                 name: 'ID',
                 value: importedEvent.value.id,
             },
@@ -63,6 +60,12 @@ const loadImportedEvent = async () => {
             {
                 name: 'Angelegt am',
                 value: formatDateTime(importedEvent.value.created_at),
+            },
+            {
+                name: 'Default Beschreibung',
+                value: importedEvent.value?.mobilizon_fields?.description,
+                slot: true,
+                key: 'description',
             },
         ];
     } catch (e) {
@@ -88,7 +91,18 @@ loadImportedEvent();
 
     <div v-if="!loading">
         <div v-if="!error">
-            <DescriptionList :data="importedEventListData" />
+            <DescriptionList :data="importedEventListData">
+                <template #description>
+                    <p
+                        v-html="
+                            stripHtml(importedEvent?.mobilizon_fields?.description)
+                                ? importedEvent?.mobilizon_fields?.description
+                                : 'Es wurde keine Beschreibung angegeben.'
+                        "
+                        class="kern-text prose"
+                    ></p>
+                </template>
+            </DescriptionList>
 
             <h3 class="kern-heading mt-8 text-theme-primary">Angelegte Termine</h3>
             <CreatedEventsTable

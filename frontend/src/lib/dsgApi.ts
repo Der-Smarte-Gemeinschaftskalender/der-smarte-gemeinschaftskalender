@@ -1,4 +1,4 @@
-import { checkLogin, user } from "@/composables/UserComposoable";
+import { checkLogin, localLogout, user } from "@/composables/UserComposoable";
 import axios, { AxiosError } from "axios";
 
 const dsgApi = axios.create({
@@ -11,6 +11,19 @@ const checkAuthDsgApi = () => {
 };
 
 checkAuthDsgApi();
+
+dsgApi.interceptors.response.use(
+    (response) => response,
+    (error) => {
+
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+            localLogout();
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 
 interface IErrorBase<T> {
     error: Error | AxiosError<T>;

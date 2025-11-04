@@ -35,7 +35,13 @@ defineProps<Props>();
                 v-if="event.uuid"
                 :to="{ name: 'public.event', params: { uuid: event.uuid } }"
             >
-                <Button icon-left="visibility">Ansehen</Button>
+                <Button
+                    title="Veranstaltung ansehen"
+                    aria-label="Veranstaltung ansehen"
+                    icon-left="visibility"
+                >
+                    Ansehen
+                </Button>
             </RouterLink>
         </template>
     </Card>

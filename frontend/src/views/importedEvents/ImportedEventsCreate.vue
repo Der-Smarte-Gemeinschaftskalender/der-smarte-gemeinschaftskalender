@@ -18,11 +18,13 @@ import Alert from '@/components/KERN/Alert.vue';
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import Map from '@/components/Map.vue';
+import LinkToDocs from '@/components/LinkToDocs.vue';
+import InputTags from '@/components/InputTags.vue';
 
 import { MobilizonEventJoinOptions, type Option } from '@/types/General';
 import type { RemoveKeys } from '@/types/Generics';
@@ -34,8 +36,7 @@ import {
     ImportedEventFormSchema,
     ImportedEventSchema,
 } from '@/types/events/ImportedEvents';
-import LinkToDocs from '@/components/LinkToDocs.vue';
-import InputTags from '@/components/InputTags.vue';
+
 
 const errorMessageContent = ref<string>('');
 const mobilizionGroupOptions = ref<Option[]>([]);
@@ -123,7 +124,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 :content="errorMessageContent"
                 severity="danger"
             />
-            <InputTextarea
+            <InputRichText
                 class="mt-3"
                 v-model="description"
                 label="Beschreibung (optional)"
@@ -153,8 +154,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         </p>
                         <p>
                             Weitere Informationen finden Sie im
-                            <LinkToDocs />
-                            .
+                            <LinkToDocs path="/" />.
                         </p>
                     </Alert>
                 </div>

@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { normalizeStreet } from "@/lib/helper";
+
 import Card from './KERN/Card.vue';
 import Button from './KERN/Button.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
@@ -26,7 +28,9 @@ defineProps<Props>();
         >
             <Icon name="location_on" />
             <div>
-                <div v-if="organisation?.physicalAddress?.street">{{ organisation?.physicalAddress?.street }},</div>
+                <div v-if="organisation?.physicalAddress?.street">
+                    {{ normalizeStreet(organisation?.physicalAddress?.street) }},
+                </div>
                 <div v-if="organisation?.physicalAddress?.postalCode">
                     {{ organisation?.physicalAddress?.postalCode }} {{ organisation?.physicalAddress?.locality }}
                 </div>
@@ -41,7 +45,13 @@ defineProps<Props>();
                     params: { preferredUsername: organisation.preferredUsername },
                 }"
             >
-                <Button icon-left="visibility">Ansehen</Button>
+                <Button
+                    title="Organisation ansehen"
+                    aria-label="Organisation ansehen"
+                    icon-left="visibility"
+                >
+                    Ansehen
+                </Button>
             </RouterLink>
         </template>
     </Card>

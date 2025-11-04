@@ -359,6 +359,78 @@ h4.kern-heading {
     }
 }
 
+
+/* Prose/TipTap */
+
+.prose, .ProseMirror {
+    ol, ul {
+        margin-left: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    blockquote {
+        border-left: 4px solid #a8abaf;
+        padding-left: 1rem;
+        color: #32353c;
+        margin-left: 0;
+        margin-right: 0;
+
+        p {
+            &:before {
+                content: "“";
+                font-size: 1.5rem;
+                line-height: 1;
+                vertical-align: top;
+                margin-right: 0.2rem;
+                color: #292828;
+            }
+
+            &:after {
+                content: "”";
+                font-size: 1.5rem;
+                line-height: 1;
+                vertical-align: bottom;
+                margin-left: 0.2rem;
+                color: #292828;
+            }
+        }
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-top: 0.67em;
+        margin-bottom: 0.67em;
+        font-weight: bold;
+    }
+
+    h2 {
+        font-size: 1.5em;
+        margin-top: 0.75em;
+        margin-bottom: 0.75em;
+        font-weight: bold;
+    }
+
+    h3 {
+        font-size: 1.17em;
+        margin-top: 0.83em;
+        margin-bottom: 0.83em;
+        font-weight: bold;
+    }
+
+    a {
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    s {
+        text-decoration: line-through;
+    }
+}
+
 /* Custom Theme Classes */
 .bg-theme-primary {
     background-color: var(--kern-theme-color) !important;

@@ -7,7 +7,6 @@ import { handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } 
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { buildSuggestions } from '@/composables/EventCreateFormComposable';
-import { type DescriptionListData } from '@/types/KERN';
 import {
     mobilizon_category_options,
     mobilizon_event_join_options,
@@ -19,7 +18,7 @@ import DescriptionList from '@/components/KERN/DescriptionList.vue';
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
@@ -31,7 +30,12 @@ import Loader from '@/components/KERN/cosmetics/Loader.vue';
 import ChangeEventStatus from '@/components/ChangeEventStatus.vue';
 import EventStatusBadge from '@/components/EventStatusBadge.vue';
 import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
+import InputImage from '@/components/KERN/inputs/InputImage.vue';
+import InputTags from '@/components/InputTags.vue';
+import LinkToDocs from '@/components/LinkToDocs.vue';
+import DeleteCreatedEvent from '@/components/DeleteCreatedEvent.vue';
 
+import { type DescriptionListData } from '@/types/KERN';
 import { type EventTag, MobilizonEventJoinOptions } from '@/types/General';
 import {
     type CreatedEventForm,
@@ -40,10 +44,6 @@ import {
     CreatedEventFormSchema,
 } from '@/types/events/CreatedEvents';
 import { type AddressForm, type MobilizonFields, addressDefaults } from '@/types/Mobilizon';
-import InputImage from '@/components/KERN/inputs/InputImage.vue';
-import InputTags from '@/components/InputTags.vue';
-import LinkToDocs from '@/components/LinkToDocs.vue';
-import DeleteCreatedEvent from '@/components/DeleteCreatedEvent.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -289,7 +289,7 @@ loadCreatedEvent();
                     :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                     :errors="submitCount === 0 ? undefined : errors.picture"
                 />
-                <InputTextarea
+                <InputRichText
                     v-model="description"
                     label="Beschreibung"
                     name="description"

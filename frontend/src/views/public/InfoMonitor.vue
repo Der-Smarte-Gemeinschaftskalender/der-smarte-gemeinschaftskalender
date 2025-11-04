@@ -97,7 +97,7 @@ loadEvents();
 <template>
     <Header :show-navigation="false">
         <template #after-logo>
-            <div class="kern-col">
+            <div class="lg:px-5">
                 <h1
                     v-if="!organisationName"
                     class="kern-heading text-theme-primary"
@@ -123,7 +123,7 @@ loadEvents();
         </div>
         <div
             v-else
-            class="p-3 mx-6 infomonitor"
+            class="py-3 px-2 md:px-3 mx-2 lg:mx-4 xl:mx-6 infomonitor"
         >
             <div
                 class="main-infomonitor-content"

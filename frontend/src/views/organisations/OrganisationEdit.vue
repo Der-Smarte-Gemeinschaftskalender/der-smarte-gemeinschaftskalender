@@ -9,17 +9,18 @@ import { dsgApi } from '@/lib/dsgApi';
 
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import Map from '@/components/Map.vue';
+import LinkToDocs from '@/components/LinkToDocs.vue';
 
 import { ZodType } from 'zod';
 import { addressDefaults, type AddressForm, AddressFormSchema } from '@/types/Mobilizon';
 import type { AxiosError } from '@/lib/dsgApi';
 import { loadImage } from '@/lib/dsgClient';
-import LinkToDocs from '@/components/LinkToDocs.vue';
+
 
 interface EditOrganisationForm {
     name: string;
@@ -27,6 +28,7 @@ interface EditOrganisationForm {
     id?: number | string;
     avatar?: any;
 }
+
 
 const showErrorMessage = ref<boolean>(false);
 const errorMessageContent = ref<string>('');
@@ -144,8 +146,7 @@ loadOrganisation();
         <b>Hinweis:</b>
         In diesem Formular können Sie die öffentlichen Angaben Ihrer Organisation anpassen. Weitere Informationen finden
         Sie im
-        <LinkToDocs path="" />
-        .
+        <LinkToDocs path="" />.
     </p>
 
     <form
@@ -173,7 +174,7 @@ loadOrganisation();
                     name="preferredUsername"
                     disabled
                 />
-                <InputTextarea
+                <InputRichText
                     v-model="summary"
                     label="Beschreibung (optional)"
                     name="summary"

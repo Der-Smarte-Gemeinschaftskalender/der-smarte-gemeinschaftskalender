@@ -81,8 +81,14 @@ if (checkLogin()) {
 <template>
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="register-card">
-            <Card title="Registrieren">
-                <Fieldset v-if="!showSuccessMessage">
+            <Card
+                title="Registrieren"
+                class="p-2"
+            >
+                <Fieldset
+                    v-if="!showSuccessMessage"
+                    class="px-1"
+                >
                     <Alert
                         v-if="showRegisterErrorMessage"
                         title="Fehler"

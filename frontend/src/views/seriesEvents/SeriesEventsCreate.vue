@@ -19,7 +19,7 @@ import {
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
@@ -197,7 +197,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                 :errors="submitCount === 0 ? undefined : errors.picture"
             />
-            <InputTextarea
+            <InputRichText
                 class="mt-3"
                 v-model="description"
                 label="Beschreibung"

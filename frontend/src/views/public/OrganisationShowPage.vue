@@ -2,14 +2,16 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { findOrganisation } from '@/lib/mobilizonClient';
+import {formatCoordinates, normalizeStreet, stripHtml} from '@/lib/helper';
+
 import EventCard from '@/components/EventCard.vue';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
 import Button from '@/components/KERN/Button.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import NavigatePhysicalAddress from '@/components/NavigatePhysicalAddress.vue';
-import { formatCoordinates } from '@/lib/helper';
 import ShareLinks from '@/components/ShareLinks.vue';
 import Map from '@/components/Map.vue';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -77,8 +79,8 @@ loadOrganisations();
                 <div class="lg:col-6 p-0">
                     <h2 class="kern-heading font-semilight text-theme-primary mb-4">Über die Organisation</h2>
                     <p
-                        v-html="organisation.summary"
-                        class="kern-text"
+                        v-html="stripHtml(organisation.summary) ? organisation.summary : 'Es wurde keine Beschreibung angegeben.'"
+                        class="kern-text prose"
                     ></p>
                     <h3 class="kern-heading font-semilight text-theme-primary mb-3 mt-6">Adresse</h3>
                     <template v-if="organisation?.physicalAddress">
@@ -86,7 +88,9 @@ loadOrganisations();
                             <Icon name="location_on" />
                             <!--<div>{{ event?.physicalAddress?.description }}</div>-->
                             <div>
-                                <div>{{ organisation?.physicalAddress?.street }}</div>
+                                <div v-if="organisation?.physicalAddress?.street">
+                                    {{ normalizeStreet(organisation?.physicalAddress?.street) }},
+                                </div>
                                 <div>
                                     {{ organisation?.physicalAddress?.postalCode }}
                                     {{ organisation?.physicalAddress?.locality }}
@@ -180,3 +184,4 @@ loadOrganisations();
         <Loader />
     </template>
 </template>
+

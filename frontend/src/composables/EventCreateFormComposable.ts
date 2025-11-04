@@ -1,5 +1,6 @@
 import type { AddressForm } from "@/types/Mobilizon";
 import { getMobilizionGroupOptions } from "@/lib/dsgClient";
+import { normalizeStreet } from "@/lib/helper";
 import { current_organisation, user_organisations } from "@/composables/OrganisationComposable";
 
 import type { Ref } from "vue";
@@ -17,7 +18,7 @@ export const buildSuggestions = (suggestions: AddressForm[], postalCodeOnly: boo
             return [suggestion.description, suggestion.region].filter(part => part?.trim()).join(', ');
         }
 
-        const street = suggestion.street || '';
+        const street = suggestion.street ? normalizeStreet(suggestion.street) : '';
         const region = suggestion.region || suggestion.country || '';
         const locality = suggestion.postalCode && suggestion.locality
             ? `${ suggestion.postalCode } ${ suggestion.locality }`

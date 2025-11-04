@@ -19,11 +19,9 @@ const showErrorMessage = ref(false);
 const showSuccessMessage = ref(false);
 const messageContent = ref('');
 const token = ref(route.path.split('/').at(-1) || '');
-const email = ref(route.path.split('/').at(-2) || '');
 
 interface ResetPasswordForm {
   token: string;
-  email: string;
   password: string;
   password_confirmation: string;
 }
@@ -52,7 +50,6 @@ const onSubmit = handleSubmit(async (values) => {
         const response = await dsgApi.post('/auth/reset-password', {
             ...values,
             token: token.value,
-            email: email.value,
         } as ResetPasswordForm);
 
         showSuccessMessage.value = true;
@@ -61,7 +58,7 @@ const onSubmit = handleSubmit(async (values) => {
     catch (error: AxiosError|any) {
         console.error(error);
         showErrorMessage.value = true;
-        messageContent.value = error.response?.data?.message || 'Es ist ein Fehler aufgetreten.';
+        messageContent.value = error.response?.data?.error || 'Es ist ein Fehler aufgetreten.';
     }
 });
 </script>

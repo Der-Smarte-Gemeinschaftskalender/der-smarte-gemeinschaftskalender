@@ -92,7 +92,10 @@ const selected = (name: string) => {
                 />
                 {{ user?.person?.preferredUsername }}
             </h4>
-            <h6 class="kern-heading font-light p-0 text-600">
+            <h6
+                v-if="user?.type"
+                class="kern-heading font-light p-0 text-600"
+            >
                 {{ user_types_keys[user.type as keyof typeof user_types_keys] }}
             </h6>
             <ChangeCurrentOrganisation />
@@ -162,7 +165,7 @@ const selected = (name: string) => {
                 </ul>
             </div>
         </template>
-        <LogoutButton class="mx-auto" />
+        <LogoutButton class="mx-auto mb-2" />
     </Card>
 </template>
 

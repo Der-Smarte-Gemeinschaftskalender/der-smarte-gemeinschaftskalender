@@ -1,5 +1,6 @@
 import zod from "@/lib/zod";
 import { DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
+import { stripHtml } from "@/lib/helper";
 
 export const CreatedEventSchema = zod.object({
     id: zod
@@ -96,7 +97,10 @@ export const CreatedEventFormSchema = DefaultEventFormSchema.extend({
         .nonempty(),
     description: zod
         .string()
-        .nonempty(),
+        .refine(
+            (val) => stripHtml(val).length > 0,
+            { message: "Die Beschreibung darf nicht leer sein." }
+        ),
     start: zod
         .string()
         .nonempty(),

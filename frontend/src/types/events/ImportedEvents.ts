@@ -15,7 +15,7 @@ export const ImportedEventFormSchema = DefaultEventFormSchema.extend({
         .string()
         .default('')
         .refine(
-            (val) => val === '' || /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val),
+            (val) => /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val),
             { message: 'Bitte eine gültige URL eingeben.' }
         ),
     is_active: zod

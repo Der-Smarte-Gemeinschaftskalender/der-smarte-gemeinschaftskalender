@@ -3,8 +3,16 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { findEvent, findNextEvents } from '@/lib/mobilizonClient';
 import { checkLogin } from '@/composables/UserComposoable';
+import { normalizeStreet } from "@/lib/helper";
+import {
+  formatOnDate,
+  formatOnDateTime,
+  formatOnTime,
+  formatCoordinates,
+  formattedLanguage,
+  stripHtml
+} from '@/lib/helper';
 import { user_organisations } from '@/composables/OrganisationComposable';
-import { formatOnDate, formatOnDateTime, formatOnTime, formatCoordinates, formattedLanguage } from '@/lib/helper';
 import { mobilizon_category_options } from '@/lib/const';
 
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
@@ -202,7 +210,11 @@ loadEvent();
                                 <Icon name="location_on" />
                                 <!--<div>{{ event?.physicalAddress?.description }}</div>-->
                                 <div>
-                                    <div>{{ event?.physicalAddress?.street }}</div>
+                                    <div
+                                        v-if="event?.physicalAddress?.street"
+                                    >
+                                        {{ normalizeStreet(event?.physicalAddress?.street) }},
+                                    </div>
                                     <div>
                                         {{ event?.physicalAddress?.postalCode }}
                                         {{ event?.physicalAddress?.locality }}
@@ -233,8 +245,8 @@ loadEvent();
                     </div>
                     <h3 class="kern-heading font-medium text-theme-primary mb-3 mt-6">Was?</h3>
                     <div
-                        class="kern-text"
-                        v-html="event.description"
+                        class="kern-text prose"
+                        v-html="stripHtml(event.description!) ? event.description : '<p>Keine Beschreibung vorhanden.</p>'"
                     ></div>
                     <div class="mt-5">
                         <div class="flex justify-content-between gap-5">

@@ -54,7 +54,18 @@ type IconName =
     | 'group'
     | 'settings'
     | 'menu'
-    | 'contact';
+    | 'contact'
+    | 'bold'
+    | 'italic'
+    | 'strike'
+    | 'h1'
+    | 'h2'
+    | 'h3'
+    | 'bullet-list'
+    | 'ordered-list'
+    | 'blockquote'
+    | 'undo'
+    | 'redo'
 
 type ColorName = 'black' | 'white';
 
@@ -62,6 +73,7 @@ interface Props {
     name: IconName | string;
     size?: IconSize;
     color?: ColorName;
+    disabled?: boolean;
 }
 
 const isMaterialIcons = (name: string): boolean => {
@@ -87,6 +99,17 @@ const isMaterialIcons = (name: string): boolean => {
         'settings', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:settings:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=cog&icon.size=24&icon.color=%231f1f1f
         'menu', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:menu_open:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=menu&icon.size=24&icon.color=%23000000,
         'contact', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:contact_page:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=about&icon.size=24&icon.color=%23000000
+        'bold', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_bold:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=bold&icon.size=24&icon.color=%23000000
+        'italic', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_italic:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=italic&icon.size=24&icon.color=%23000000
+        'strike', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_strikethrough:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=stri&icon.size=24&icon.color=%23000000
+        'h1', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h1:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h1&icon.size=24&icon.color=%23000000
+        'h2', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h2:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h2&icon.size=24&icon.color=%23000000
+        'h3', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h3:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h3&icon.size=24&icon.color=%23000000
+        'bullet_list', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_list_bulleted:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=bullet&icon.size=24&icon.color=%23000000
+        'ordered_list', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_list_numbered:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=ordere&icon.size=24&icon.color=%23000000
+        'blockquote', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_quote:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=quote&icon.size=24&icon.color=%23000000
+        'undo', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:undo:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=undo&icon.size=24&icon.color=%23000000
+        'redo', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:redo:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=redo&icon.size=24&icon.color=%23000000
     ].includes(name);
 };
 
@@ -104,9 +127,13 @@ withDefaults(defineProps<Props>(), {
     />
     <img
         v-else
-        :style="`${color === 'white' ? 'filter: brightness(0) invert(1)' : ''}`"
+        :style="`
+            ${color === 'white' ? 'filter: brightness(0) invert(1)' : ''}
+            ${disabled ? 'opacity: 0.5; pointer-events: none;' : ''}
+        `"
         :src="`/icons/${name}.svg`"
         :class="`kern-icon kern-icon--${size}`"
+
         aria-hidden="true"
         alt=""
     />
@@ -115,6 +142,7 @@ withDefaults(defineProps<Props>(), {
 <style scoped lang="scss">
 
 img.kern-icon {
-  background-color: transparent !important;
+  user-select: none;
+  background-color: transparent;
 }
 </style>

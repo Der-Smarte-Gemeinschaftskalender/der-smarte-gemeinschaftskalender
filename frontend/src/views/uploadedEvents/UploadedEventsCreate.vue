@@ -23,13 +23,14 @@ import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputFile from '@/components/KERN/inputs/InputFile.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import Table from '@/components/KERN/Table.vue';
 import Map from '@/components/Map.vue';
 import InputUrl from '@/components/KERN/inputs/InputUrl.vue';
 import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import InputTags from '@/components/InputTags.vue';
+import LinkToDocs from '@/components/LinkToDocs.vue';
 
 import { EventPlaceType, MobilizonEventJoinOptions, type Option } from '@/types/General';
 import {
@@ -41,7 +42,7 @@ import {
     UploadedEventSchema,
 } from '@/types/events/UploadedEvents';
 import { type AddressForm, addressDefaults, mobilizonFieldsDefaults } from '@/types/Mobilizon';
-import LinkToDocs from '@/components/LinkToDocs.vue';
+
 
 const router = useRouter();
 const isSubmitting = ref<boolean>(false);
@@ -114,6 +115,10 @@ const onSubmit = handleSubmit(async (values: UploadedEventForm) => {
                 resDataKey: 'events',
                 schema: zod.array(UploadedEventSchema),
             })) ?? [];
+
+        if (uploadedEvents.value.length === 0) {
+            errorMessageContent.value = 'Es wurden keine Veranstaltungen in der hochgeladenen Datei gefunden.';
+        }
     } catch (error: any) {
         errorMessageContent.value = error;
     } finally {
@@ -256,8 +261,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <LinkToDocs
                 path="Terminverwaltung/iCal-Dateien/"
                 fragment="ical-datei-hochladen"
-            />
-            .
+            />.
         </p>
         <form
             novalidate
@@ -271,7 +275,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             />
 
             <Fieldset>
-                <InputTextarea
+                <InputRichText
                     v-model="description"
                     name="description"
                     label="Beschreibung (optional)"

@@ -49,9 +49,10 @@ const onSubmit = handleSubmit(async (values) => {
         const { data } = await dsgApi.post('/auth/login', <LoginForm>{
             ...values,
         });
+
         setUserData(data.user, data.access_token, data.person);
-        await setOrganisationData();
         checkAuthDsgApi();
+        await setOrganisationData();
         if (!data?.person) {
             router.push('/app/profile/register-person');
         } else if (route?.query?.redirect) {
@@ -82,8 +83,11 @@ if (checkLogin()) {
 <template>
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="login-card">
-            <Card title="Login">
-                <Fieldset>
+            <Card
+                title="Login"
+                class="p-2"
+            >
+                <Fieldset class="px-1">
                     <Alert
                         v-if="route.query.message"
                         title="Erfolg"

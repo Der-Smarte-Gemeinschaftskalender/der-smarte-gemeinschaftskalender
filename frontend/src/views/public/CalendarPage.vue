@@ -186,13 +186,12 @@ watch(searchTerm, async (newSearchTerm) => {
                     class="w-full"
                 >
                     <template #content-1>
-                        <fieldset class="kern-fieldset">
-                            <div class="kern-fieldset__content">
+                        <fieldset class="kern-fieldset pr-1">
+                            <div class="search kern-fieldset__content">
                                 <InputText
                                     v-model="searchTerm"
                                     placeholder="Schlagwort, Veranstaltungstitel, Organisation,..."
                                     name="searchTerm"
-                                    class="col"
                                 />
                             </div>
                         </fieldset>
@@ -311,6 +310,11 @@ watch(searchTerm, async (newSearchTerm) => {
 </template>
 
 <style lang="scss">
+.search.kern-fieldset__content * {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
 /* ===== FullCalendar Buttons ===== */
 .fc-button {
     background-color: var(--kern-theme-color) !important;

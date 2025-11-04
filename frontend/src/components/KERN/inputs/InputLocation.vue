@@ -46,8 +46,8 @@ const radiusOptions = [
 // Turn coordinates into a geo hash
 const base32 = '0123456789bcdefghjkmnpqrstuvwxyz';
 function encodeGeoHash(latitude: number, longitude: number, precision = 8): string {
-    const latRange = [-90.0, 90.0];
-    const lonRange = [-180.0, 180.0];
+    const latRange: [number, number] = [-90.0, 90.0];
+    const lonRange: [number, number] = [-180.0, 180.0];
     let hash = '';
     let isEven = true;
     let bit = 0;
@@ -96,10 +96,10 @@ watch(address, async (newAddress) => {
     debounceTimeout = setTimeout(async () => {
         try {
             const results = await extendedSearchAddress(newAddress, 'de', 'ADMINISTRATIVE');
-            if (results.length > 0 && results[0].geom) {
+            if (results.length > 0 && results[0]?.geom) {
                 addressForm.value = results[0];
-                const lat = results[0].geom.split(';')[1];
-                const lon = results[0].geom.split(';')[0];
+                const lat = results[0].geom.split(';')[1]!;
+                const lon = results[0].geom.split(';')[0]!;
 
                 coordinates.value = { lat: parseFloat(lat), lon: parseFloat(lon) };
                 geoHash.value = encodeGeoHash(parseFloat(lat), parseFloat(lon));

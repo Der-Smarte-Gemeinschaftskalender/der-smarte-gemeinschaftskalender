@@ -15,7 +15,7 @@ defineProps<Props>();
 </script>
 <template>
     <Card
-        bodyClass="p-1 m-1 flex-direction-unset gap-unset kern-text w-full"
+        bodyClass="p-1 m-1 flex-direction-unset gap-unset kern-text w-full px-1 py-0"
         class="p-1"
         :image-src="event.picture?.url || '/default_card.png'"
         :image-alt="event.title"
@@ -77,11 +77,12 @@ defineProps<Props>();
                 <RouterLink
                     v-if="event.uuid"
                     :to="{ name: 'public.event', params: { uuid: event.uuid } }"
-                    class="mt-0 mb-3"
                 >
                     <Button
+                        title="Veranstaltung ansehen"
+                        aria-label="Veranstaltung ansehen"
                         icon-left="visibility"
-                        class="px-4"
+                        class="px-4 m-2"
                     >
                         Ansehen
                     </Button>

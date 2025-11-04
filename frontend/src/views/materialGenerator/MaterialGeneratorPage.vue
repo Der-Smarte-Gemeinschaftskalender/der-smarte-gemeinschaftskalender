@@ -184,6 +184,8 @@ const loadDefaultValues = async (groupId = null, mobilizonPreferredUsername = nu
             params,
         });
 
+        if (!data) return;
+
         if (data.default_text_settings) {
             underlineColor.value = data.default_text_settings.underlineColor || '#7dcce8';
             selectedTextColor.value = data.default_text_settings.selectedTextColor || '#000000';

@@ -49,7 +49,7 @@ const router = createRouter({
             component: () => import("@/views/public/exports/emailNotifications/EmailNotificationsCreate.vue"),
         },
         {
-            path: "/exports/email/confirm/:email/:verificationToken",
+            path: "/exports/email/confirm/:verificationToken",
             name: "public.exports.email.confirm",
             component: () => import("@/views/public/exports/emailNotifications/EmailNotificationsConfirm.vue"),
         },
@@ -89,7 +89,7 @@ const router = createRouter({
             component: () => import("@/views/public/auth/ForgotPasswordPage.vue"),
         },
         {
-            path: "/reset-password/:email/:resetToken",
+            path: "/reset-password/:resetToken",
             name: "resetPassword",
             component: () => import("@/views/public/auth/ResetPasswordPage.vue"),
         },

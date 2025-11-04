@@ -1,6 +1,6 @@
 import zod from "@/lib/zod";
 import dayjs from "@/lib/dayjs";
-import { formatInputDate } from "@/lib/helper";
+import { formatInputDate, stripHtml } from "@/lib/helper";
 import { DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
 import { CreatedEventSchema } from "@/types/events/CreatedEvents";
 
@@ -44,7 +44,10 @@ export const SingleEventFormSchema = DefaultEventFormSchema.extend({
         .min(2),
     description: zod
         .string()
-        .nonempty(),
+        .refine(
+            (val) => stripHtml(val).length > 0,
+            { message: "Die Beschreibung darf nicht leer sein." }
+        ),
     start: zod
         .string()
         .date()

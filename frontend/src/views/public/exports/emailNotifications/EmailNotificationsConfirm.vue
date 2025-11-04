@@ -30,12 +30,11 @@ const disallowSuccess = ref(false);
 const confirmEmail = async () => {
     loading.value = true;
     try {
-        if (!route.params.email || !route.params.verificationToken) {
+        if (!route.params.verificationToken) {
             errorMessageContent.value = 'Kein Bestätigungstoken gefunden.';
             return;
         }
-        const response = await dsgApi.post(`notifications/confirm`, {
-            email: route.params.email,
+        await dsgApi.post(`notifications/confirm`, {
             verificationToken: route.params.verificationToken,
         });
         confirmSuccess.value = true;
@@ -49,12 +48,11 @@ const confirmEmail = async () => {
 const disallowEmail = async () => {
     loading.value = true;
     try {
-        if (!route.params.email || !route.params.verificationToken) {
+        if (!route.params.verificationToken) {
             errorMessageContent.value = 'Kein Bestätigungstoken gefunden.';
             return;
         }
-        const response = await dsgApi.post(`notifications/disallow`, {
-            email: route.params.email,
+        await dsgApi.post(`notifications/disallow`, {
             verificationToken: route.params.verificationToken,
         });
         disallowSuccess.value = true;

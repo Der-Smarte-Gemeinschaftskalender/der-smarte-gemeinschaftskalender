@@ -102,7 +102,7 @@ const unsubscribe = async (disallow: boolean = false) => {
     try {
         const { data } = await dsgApi.post('/notifications/unsubscribe', {
             token: token.value,
-            disallow,
+            disallow
         });
         message.value = {
             title: 'Erfolg',

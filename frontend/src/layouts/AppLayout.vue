@@ -21,8 +21,10 @@ const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
               class="w-full overflow-y-hidden"
             />
         </Overlayable>
-        <main class="w-full overflow-x-scroll">
+        <main class="w-full overflow-x-scroll px-2 pb-2">
             <Button
+                aria-label="Seitenmenü öffnen"
+                title="Seitenmenü öffnen"
                 class="lg:hidden mb-5 mt-1"
                 icon-left="menu"
                 variant="secondary"

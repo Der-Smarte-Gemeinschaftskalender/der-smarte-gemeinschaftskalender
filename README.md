@@ -40,12 +40,12 @@ npx playwright install
 
 #### Alle Tests ausführen
 ```bash
-npx playwright test
+npx playwright test --workers=1
 ```
 
 #### Tests im UI Mode (empfohlen für Entwicklung)
 ```bash
-npx playwright test --ui
+npx playwright test --ui --workers=1
 ```
 Im UI Mode muss dann der "Start" Button oben links angeklickt werden um den test zu starten.
 

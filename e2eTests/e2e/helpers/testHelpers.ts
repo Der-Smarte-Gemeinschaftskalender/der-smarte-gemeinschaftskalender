@@ -21,11 +21,11 @@ export function loadEnv(): TestConfig {
     const userPassword = process.env.USER_PASSWORD;
     const testAddress = process.env.TEST_ADDRESS;
     const confirmationTestAddress = process.env.CONFIRMATION_TEST_ADDRESS;
-    
+
     if (!siteUrl) {
       throw new Error("SITE_URL is not defined");
     }
-    
+
     return {
       siteUrl,
       adminEmail,
@@ -55,7 +55,7 @@ export function generateRandomTestName(prefix: string): string {
 export async function login(page: Page, config: TestConfig, userType: 'admin' | 'user' = 'admin'): Promise<void> {
   const email = userType === 'admin' ? config.adminEmail : config.userEmail;
   const password = userType === 'admin' ? config.adminPassword : config.userPassword;
-  
+
   if (!email || !password) {
     throw new Error(`${userType.toUpperCase()}_EMAIL or ${userType.toUpperCase()}_PASSWORD is not defined`);
   }
@@ -63,11 +63,11 @@ export async function login(page: Page, config: TestConfig, userType: 'admin' | 
   await page.goto(config.siteUrl);
   await page.getByRole("button").getByText("Intern").click();
   await expect(page).toHaveURL(/.*\/login/);
-  
+
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(password);
   await page.getByRole("button", { name: "Einloggen" }).click();
-  
+
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 }
 
@@ -111,7 +111,7 @@ export interface EventFormData {
 
 export async function fillEventForm(page: Page, data: EventFormData): Promise<void> {
   await page.locator("#name").fill(data.name);
-  await page.locator("#description").fill(data.description);
+  await page.locator(".ProseMirror").fill(data.description);
 
   if (data.category) {
     await page.locator("select[name='category']").selectOption(data.category);
@@ -142,7 +142,7 @@ export async function fillEventForm(page: Page, data: EventFormData): Promise<vo
     await page.locator("#start").pressSequentially(data.date.day, { delay: 150 });
     await page.locator("input[placeholder='hh']").first().pressSequentially(data.date.startHour, { delay: 150 });
     await page.locator("input[placeholder='mm']").first().pressSequentially(data.date.startMinute, { delay: 150 });
-    
+
     if (data.date.durationHours) {
       await page.locator("input[placeholder='hh']").nth(1).pressSequentially(data.date.durationHours);
     }
@@ -154,11 +154,11 @@ export async function fillEventForm(page: Page, data: EventFormData): Promise<vo
   if (data.location) {
     await page.locator(".leaflet-container").scrollIntoViewIfNeeded();
     await page.waitForTimeout(2000);
-    
+
     await page.locator("#physicalAddress").click();
     await page.locator("#physicalAddress").clear();
     await page.locator("#physicalAddress").pressSequentially(data.location.address, { delay: 150 });
-    
+
     await page.waitForTimeout(3000);
     await page.waitForSelector("ul.z-10.w-full.border.list-none.absolute:visible", { timeout: 10000 });
     await page.waitForSelector(`text=${data.location.confirmationAddress}`, { timeout: 10000 });
@@ -196,7 +196,7 @@ export async function copyEventFromList(page: Page, eventName: string): Promise<
 
 export async function copySerialEventFromList(page: Page, eventName: string): Promise<void> {
   await page.waitForLoadState("networkidle");
-  
+
   const rows = await page.locator("tr.kern-table__row").all();
   for (const row of rows) {
     const rowText = await row.textContent();
@@ -258,17 +258,17 @@ export async function editEventForm(page: Page, data: EventFormData): Promise<vo
   }
 
   if (data.description) {
-    await page.locator("#description").click();
-    await page.locator("#description").scrollIntoViewIfNeeded();
-    await page.locator("#description").fill("");
-    await page.locator("#description").pressSequentially(data.description);
+    await page.locator(".ProseMirror").click();
+    await page.locator(".ProseMirror").scrollIntoViewIfNeeded();
+    await page.locator(".ProseMirror").fill("");
+    await page.locator(".ProseMirror").pressSequentially(data.description);
   }
 
   if (data.name) {
     await expect(page.locator("#name")).toHaveValue(data.name);
   }
   if (data.description) {
-    await expect(page.locator("#description")).toHaveValue(data.description);
+    await expect(page.locator(".ProseMirror")).toHaveValue(data.description);
   }
 }
 
@@ -293,6 +293,7 @@ export async function register(page: Page, config: TestConfig, email?: string): 
   await page.locator("#email").fill(testEmail);
   await page.getByLabel("Passwort").first().fill(testPassword);
   await page.getByLabel("Passwort").nth(1).fill(testPassword);
+  await page.locator("#accept_terms").check();
 
   await page.getByRole("button", { name: "Jetzt registrieren" }).click();
   await expect(page.getByText("Erfolg").first()).toBeVisible();
@@ -314,7 +315,7 @@ export async function expectErrorMessage(page: Page, errorText: string): Promise
 
 export async function viewSerialEventFromList(page: Page, eventName: string): Promise<void> {
   await page.waitForLoadState("networkidle");
-  
+
   const rows = await page.locator("tr.kern-table__row").all();
   for (const row of rows) {
     const rowText = await row.textContent();
@@ -328,12 +329,12 @@ export async function viewSerialEventFromList(page: Page, eventName: string): Pr
   await expect(page.getByText(eventName).first()).toBeVisible();
 }
 
-export async function fillSerialEventFormWithCustomDate(page: Page, data: EventFormData & { 
-  endDate?: string; 
-  interval?: string; 
+export async function fillSerialEventFormWithCustomDate(page: Page, data: EventFormData & {
+  endDate?: string;
+  interval?: string;
 }): Promise<void> {
   await page.locator("#name").fill(data.name);
-  await page.locator("#description").fill(data.description);
+  await page.locator(".ProseMirror").fill(data.description);
 
   if (data.category) {
     await page.locator("select[name='category']").selectOption(data.category);
@@ -357,7 +358,7 @@ export async function fillSerialEventFormWithCustomDate(page: Page, data: EventF
   if (data.date) {
     await page.locator("input[placeholder='hh']").first().pressSequentially(data.date.startHour, { delay: 150 });
     await page.locator("input[placeholder='mm']").first().pressSequentially(data.date.startMinute, { delay: 150 });
-    
+
     if (data.date.durationHours) {
       await page.locator("input[placeholder='hh']").nth(1).pressSequentially(data.date.durationHours);
     }
@@ -374,41 +375,41 @@ export async function fillSerialEventFormWithCustomDate(page: Page, data: EventF
 export async function verifySerialEventDates(page: Page, startDate: Date, endDate: Date, interval: string): Promise<void> {
   const currentDate = new Date(startDate);
   const targetDate = new Date(endDate);
-  
+
   let expectedCount = 0;
   if (interval === "Monatlich") {
-    let monthDiff = targetDate.getMonth() - currentDate.getMonth() + 
-                    12 * (targetDate.getFullYear() - currentDate.getFullYear());
-    
+    let monthDiff = targetDate.getMonth() - currentDate.getMonth() +
+      12 * (targetDate.getFullYear() - currentDate.getFullYear());
+
     if (targetDate.getDate() < currentDate.getDate()) {
       monthDiff--;
     }
-    
+
     expectedCount = monthDiff + 1;
   }
 
   await page.waitForLoadState("networkidle");
-  
+
   let dateRows = 0;
-  
+
   const specificSelector = "tbody.kern-table__body tr.kern-table__row";
   const specificElements = await page.locator(specificSelector).count();
-  
+
   if (specificElements > 0) {
     dateRows = specificElements;
   } else {
     const generalSelector = "tr.kern-table__row";
     const generalElements = await page.locator(generalSelector).count();
-    
+
     if (generalElements > 0) {
       dateRows = generalElements;
     } else {
       console.log("No date rows found. Page URL:", await page.url());
       console.log("Page title:", await page.title());
-      
+
       const anyRows = await page.locator("tr").count();
       console.log("Total tr elements found:", anyRows);
-      
+
       throw new Error(`No date rows found on the page. Expected table with individual event dates.`);
     }
   }

@@ -59,8 +59,11 @@ const onSubmit = handleSubmit(async (values) => {
 <template>
   <div class="flex align-self-center align-items-center justify-content-center">
     <div class="forgot-password-card">
-      <Card title="Passwort vergessen">
-        <Fieldset>
+      <Card
+          title="Passwort vergessen"
+          class="p-2"
+      >
+        <Fieldset class="px-1">
           <Alert
               v-if="showSuccessMessage"
               title="Erfolg"

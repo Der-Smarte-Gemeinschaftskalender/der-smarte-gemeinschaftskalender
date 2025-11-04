@@ -18,7 +18,7 @@ import {
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
@@ -28,6 +28,8 @@ import Map from '@/components/Map.vue';
 import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
+import InputTags from '@/components/InputTags.vue';
+import Divider from '@/components/KERN/cosmetics/Divider.vue';
 
 import { MobilizonEventJoinOptions, type Option } from '@/types/General';
 import { addressDefaults, type AddressForm } from '@/types/Mobilizon';
@@ -37,8 +39,7 @@ import {
     SingleEventFormSchema,
     SingleEventResponseSchema,
 } from '@/types/events/SingleEvents';
-import InputTags from '@/components/InputTags.vue';
-import Divider from '@/components/KERN/cosmetics/Divider.vue';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -77,6 +78,7 @@ const onSubmit = handleSubmit(async (values) => {
         'time',
         'duration',
     ]);
+
     try {
         isSubmitting.value = true;
         errorMessageContent.value = '';
@@ -189,9 +191,9 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                     :errors="submitCount === 0 ? undefined : errors.picture"
                 />
-                <InputTextarea
+                <InputRichText
                     v-model="description"
-                    label="Beschreibung (optional)"
+                    label="Beschreibung"
                     name="description"
                     :errors="submitCount === 0 ? undefined : errors.description"
                 />
