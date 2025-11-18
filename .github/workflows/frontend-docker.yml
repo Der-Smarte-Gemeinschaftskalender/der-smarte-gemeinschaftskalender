@@ -30,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/smarte-gemeinschaftskalender-frontend
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/smarte-gemeinschaftskalender-frontend-dev
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
@@ -40,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: ./frontend/Dockerfile.dev
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
