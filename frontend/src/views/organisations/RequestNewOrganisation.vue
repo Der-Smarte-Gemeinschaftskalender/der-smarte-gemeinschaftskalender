@@ -28,9 +28,21 @@ interface RequestOrganisationForm {
 
 const validationSchema = toTypedSchema(
     zod.object({
-        name: zod.string().nonempty(),
-        preferredUsername: zod.string().nonempty(),
-        summary: zod.string().nonempty(),
+        name: zod
+            .string({
+                required_error: 'Der Name der Organisation ist erforderlich.',
+            })
+            .nonempty('Der Name der Organisation darf nicht leer sein.'),
+        preferredUsername: zod
+            .string({
+                required_error: 'Der Benutzername der Organisation ist erforderlich.',
+            })
+            .nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
+        summary: zod
+            .string({
+                required_error: 'Die Beschreibung der Organisation ist erforderlich.',
+            })
+            .nonempty('Die Beschreibung der Organisation darf nicht leer sein.'),
     }) satisfies ZodType<RequestOrganisationForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
@@ -138,12 +150,11 @@ watch(name, async (newName) => {
                             </p>
                             <p>
                                 Weitere Informationen zur Wahl eines Benutzernamens finden Sie im
-                                <a
-                                    href="#"
-                                    target="_blank"
-                                >
-                                    Handbuch
-                                </a>
+
+                                <LinkToDocs
+                                    path="Terminverwaltung/Organisation/"
+                                    fragment="schritt-2-formular-zur-organisationserstellung"
+                                />
                                 .
                             </p>
                         </Alert>

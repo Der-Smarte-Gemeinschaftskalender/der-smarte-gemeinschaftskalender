@@ -11,7 +11,7 @@ import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputColor from '@/components/KERN/inputs/InputColor.vue';
 import { downloadCanvas } from '@/lib/canvas-drawing';
-import { formatOnMonthDayTime, getMainCategoryFromSubCategory, formatInputDate } from '@/lib/helper';
+import { formatOnMonthDayTime, getMainCategoryFromSubCategory, formatInputDate, normalizeStreet } from '@/lib/helper';
 import Alert from '@/components/KERN/Alert.vue';
 import dayjs from 'dayjs';
 import { fontSelectionOptions } from '@/lib/const';
@@ -364,7 +364,7 @@ const eventInfo = (event) => {
     canvasText(event.organisation.name, startX, newStartY);
     if (event.physicalAddress) {
         newStartY += defaultTextSize;
-        canvasText(event?.physicalAddress?.street, startX, newStartY);
+        canvasText(normalizeStreet(event?.physicalAddress?.street), startX, newStartY);
         newStartY += defaultTextSize;
         canvasText(`${event?.physicalAddress?.postalCode} ${event?.physicalAddress?.locality}`, startX, newStartY);
     }
@@ -386,7 +386,7 @@ const eventListOrganisation = (name: string, physicalAddress) => {
     let newStartY: number = selectedDimensionInfoBox.value?.organisationInfoStartY || 0;
     canvasText(name, 40, newStartY, 'bold');
     newStartY += defaultTextSize + 10;
-    canvasText(physicalAddress?.street || '', 40, newStartY);
+    canvasText(normalizeStreet(physicalAddress?.street) || '', 40, newStartY);
     newStartY += defaultTextSize + 10;
     canvasText(`${physicalAddress?.postalCode || ''} ${physicalAddress?.locality || ''}`, 40, newStartY);
 };
@@ -609,7 +609,7 @@ watch(toDate, async (newValue) => {
             erstellt werden. Weitere Informationen finden Sie im
             <LinkToDocs
                 path="Werbemittelgenerator/"
-                fragment="hintergrunde-fur-veranstaltungsubersichten-gestalten"
+                fragment="werbemittelgenerator-fur-ankundigungen-einzelner-veranstaltungen"
             />
             .
         </p>
@@ -666,12 +666,12 @@ watch(toDate, async (newValue) => {
                 />
                 <p class="mt-2">
                     <b>Hinweis:</b>
-                    <a
-                        href="#"
-                        class="ml-1"
+                    <LinkToDocs
+                        path="Werbemittelgenerator/"
+                        fragment="hintergrunde-fur-veranstaltungsubersichten-gestalten"
                     >
                         Layout-Vorlagen
-                    </a>
+                    </LinkToDocs>
                 </p>
                 <p
                     v-if="selectedDimensionData.width && selectedDimensionData.height"

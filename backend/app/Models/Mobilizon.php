@@ -83,7 +83,7 @@ class Mobilizon
 
     public static function getInstanceAdmin(bool $useWithoutLogin = false, $user = null, $createNew = false): Mobilizon
     {
-        $user = User::where('type', 'admin')->first();
+        $user = User::find(1);
         return self::getInstance($useWithoutLogin, $user, $createNew);
     }
 
@@ -295,6 +295,25 @@ class Mobilizon
                 if ($group['role'] === 'ADMINISTRATOR') {
                     $groupsArray[] = $group['parent'];
                 }
+            }
+        }
+        return $groupsArray;
+    }
+
+    public function adminGetAllGroupsArray(): array
+    {
+        $query = Query::query("groups");
+        $query->field("groups")->field('elements');
+        $query->groups->attributes(["limit" => 1000, 'page' => 1, 'name' => '']);
+        $query->groups->elements->fields(['id', 'name', 'preferredUsername']);
+        if ($this->debug) var_dump($query->build());
+
+        $groups = $this->requestWithoutMedia($query->build());
+        $groupsArray = [];
+
+        if (isset($groups['data']['groups']['elements'])) {
+            foreach ($groups['data']['groups']['elements'] as $group) {
+                $groupsArray[$group['id']] = $group;
             }
         }
         return $groupsArray;

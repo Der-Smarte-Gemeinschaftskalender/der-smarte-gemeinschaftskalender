@@ -2,6 +2,7 @@
 import dayjs from '@/lib/dayjs';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import { getBeginsEndsOn } from '@/lib/helper';
 import { searchEvents } from '@/lib/mobilizonClient';
@@ -15,28 +16,39 @@ import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
 import InputLocation from '@/components/KERN/inputs/InputLocation.vue';
 import Button from '@/components/KERN/Button.vue';
-import EventCard from "@/components/EventCard.vue";
-import Overlayable from "@/components/Overlayable.vue";
+import EventCard from '@/components/EventCard.vue';
+import Overlayable from '@/components/Overlayable.vue';
 import ShareLinks from '@/components/ShareLinks.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
-import Loader from "@/components/KERN/cosmetics/Loader.vue";
+import Loader from '@/components/KERN/cosmetics/Loader.vue';
 
 import { type Accordion } from '@/types/KERN';
 
-
 const route = useRoute();
+const router = useRouter();
 
 const searchTerm = ref((route.query.tag as string) || localStorage.getItem('searchTerm') || '');
 const searchTarget = ref(localStorage.getItem('searchTarget') || import.meta.env.VITE_SEARCH_TARGET);
 const searchBegin = ref(localStorage.getItem('searchBegin') || 'all');
-const searchCategory = ref<string[]>((route.query.category as string) || JSON.parse(localStorage.getItem('searchCategory') || '[]') || []);
+const searchCategory = ref<string[]>(
+    (route.query.category as string) || JSON.parse(localStorage.getItem('searchCategory') || '[]') || []
+);
 const searchStatus = ref<string[]>(JSON.parse(localStorage.getItem('searchStatus') || '["CONFIRMED"]'));
 const searchLanguage = ref<string[]>(JSON.parse(localStorage.getItem('searchLanguage') || '[]'));
-const searchAddress = ref((route.query.address as string) || localStorage.getItem('searchAddress') || import.meta.env.VITE_SEARCH_LOCATION_ADDRESS || '');
+
+const searchAddress = ref(
+    (route.query.address as string) || localStorage.getItem('searchAddress') !== null
+        ? localStorage.getItem('searchAddress')
+        : import.meta.env.VITE_SEARCH_LOCATION_ADDRESS || ''
+);
 const searchRadius = ref((route.query.radius as string) || parseInt(localStorage.getItem('searchRadius') || '10', 10));
 
 const locationSearchRef = ref<InstanceType<typeof InputLocation> | null>(null);
-const locationSearchGeoHash = computed(() => (searchAddress.value != '' ? import.meta.env.VITE_SEARCH_LOCATION_GEO_HASH : null) || locationSearchRef.value?.geoHash);
+const locationSearchGeoHash = computed(
+    () =>
+        (searchAddress.value != '' ? import.meta.env.VITE_SEARCH_LOCATION_GEO_HASH : null) ||
+        locationSearchRef.value?.geoHash
+);
 const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
 const loading = ref(false);
 
@@ -79,7 +91,24 @@ const searchBeginsEndsOn = computed(() => {
     return { beginsOn, endsOn };
 });
 
+const maxResultsPerPage = 25;
+
 const events = ref([]);
+const totalEvents = ref(0);
+const currentPage = ref(route.query.page ? parseInt(route.query.page as string, 10) : 1);
+const totalPages = computed(() => Math.ceil(totalEvents.value / maxResultsPerPage));
+const visiblePages = computed(() => {
+    const total = totalPages.value;
+    const current = currentPage.value;
+    const delta = 1;
+    const pages: number[] = [];
+
+    const start = Math.max(1, current - delta);
+    const end = Math.min(total, current + delta);
+
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+});
 
 const searchAccordions: Accordion[] = [
     {
@@ -100,8 +129,11 @@ const searchAccordions: Accordion[] = [
     },
 ];
 
-const loadSearchEvents = async () => {
+const loadSearchEvents = async (loadChangePage: boolean = true) => {
     try {
+        if (loadChangePage) {
+            changePage(1, false);
+        }
         loading.value = true;
         let beginsOn, endsOn;
         const { beginsOn: newBeginsOn, endsOn: newEndsOn } = getBeginsEndsOn(searchBegin.value);
@@ -109,8 +141,8 @@ const loadSearchEvents = async () => {
         endsOn = newEndsOn;
 
         const result = await searchEvents(
-            1,
-            50,
+            currentPage.value,
+            maxResultsPerPage,
             searchTerm.value,
             searchTarget.value,
             beginsOn?.toISOString(),
@@ -123,14 +155,15 @@ const loadSearchEvents = async () => {
         );
 
         overlayable.value?.closeOverlay();
-        events.value = result.elements;
+        events.value = result.searchEvents.elements;
+        totalEvents.value = result.searchEvents.total;
         localStorage.setItem('searchTerm', searchTerm.value);
+        localStorage.setItem('searchAddress', searchAddress.value);
         localStorage.setItem('searchTarget', searchTarget.value);
         localStorage.setItem('searchBegin', searchBegin.value);
         localStorage.setItem('searchCategory', JSON.stringify(searchCategory.value));
         localStorage.setItem('searchStatus', JSON.stringify(searchStatus.value));
         localStorage.setItem('searchLanguage', JSON.stringify(searchLanguage.value));
-
     } catch (error) {
         console.error('Error loading events:', error);
     }
@@ -150,8 +183,20 @@ const resetSearch = () => {
     loadSearchEvents();
 };
 
-loadSearchEvents();
+const changePage = (newPage: number, callLoadSearchEvents: boolean = true) => {
+    currentPage.value = newPage;
+    router.push({
+        query: {
+            ...route.query,
+            page: newPage.toString(),
+        },
+    });
+    if (callLoadSearchEvents) {
+        loadSearchEvents(false);
+    }
+};
 
+loadSearchEvents(false);
 </script>
 <template>
     <Teleport to="#headerslot">
@@ -170,7 +215,7 @@ loadSearchEvents();
             toggle-breakpoint="lg"
         >
             <Card
-                class="aside overflow-x-hidden whitespace-normal break-words p-3 "
+                class="aside overflow-x-hidden whitespace-normal break-words p-3"
                 body-class="px-0 w-full"
             >
                 <Button
@@ -306,10 +351,10 @@ loadSearchEvents();
             v-if="!loading"
             class="w-full"
         >
-            <div>
+            <div class="second-search-bar">
                 <!-- Zweite Suche -->
                 <div class="flex flex-column w-full m-0 justify-content-between align-content-center gap-3">
-                    <div class="flex flex-column md:flex-row align-items-center gap-4 pt-1">
+                    <div class="flex flex-column md:flex-row align-items-center gap-4 pt-4 md:pt-1">
                         <InputText
                             v-model="searchTerm"
                             placeholder="Schlagwort, Veranstaltungstitel, Organisation,..."
@@ -345,15 +390,13 @@ loadSearchEvents();
             </div>
 
             <div>
-                <template v-if="!events.length">
+                <template v-if="!totalEvents">
                     <div class="kern-row">
                         <div class="kern-col">
                             <h4 class="kern-heading font-medium my-4 text-theme-primary">
                                 Keine Veranstaltungen gefunden
                             </h4>
-                            <p>
-                                Versuchen Sie es mit einem anderen Suchbegriff oder passen Sie die Filter an.
-                            </p>
+                            <p>Versuchen Sie es mit einem anderen Suchbegriff oder passen Sie die Filter an.</p>
                             <Button
                                 @click="resetSearch()"
                                 variant="secondary"
@@ -369,7 +412,7 @@ loadSearchEvents();
                     <div class="kern-row mb-5">
                         <div class="kern-col-lg-6">
                             <h4 class="kern-heading font-medium my-4 text-theme-primary">
-                                {{ events.length }} Veranstaltungen gefunden
+                                {{ totalEvents }} Veranstaltungen gefunden
                             </h4>
                         </div>
                         <div class="kern-col-lg-6">
@@ -385,45 +428,107 @@ loadSearchEvents();
                                 >
                                     <RouterLink
                                         :to="{
-                                                      name: 'public.infomonitor',
-                                                      query: {
-                                                          searchTerm,
-                                                          searchTarget,
-                                                          searchBegin,
-                                                          searchCategory,
-                                                          searchStatus,
-                                                          searchLanguage,
-                                                          locationSearchGeoHash,
-                                                          searchRadius,
-                                                          beginsOn: searchBeginsEndsOn.beginsOn?.toISOString(),
-                                                          endsOn: searchBeginsEndsOn.endsOn?.toISOString(),
-                                                      },
-                                                  }"
+                                            name: 'public.infomonitor',
+                                            query: {
+                                                searchTerm,
+                                                searchTarget,
+                                                searchBegin,
+                                                searchCategory,
+                                                searchStatus,
+                                                searchLanguage,
+                                                locationSearchGeoHash,
+                                                searchRadius,
+                                                beginsOn: searchBeginsEndsOn.beginsOn?.toISOString(),
+                                                endsOn: searchBeginsEndsOn.endsOn?.toISOString(),
+                                            },
+                                        }"
                                     >
-                                      <Icon
-                                          name="info"
-                                          class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
-                                          title="Infomonitor anzeige"
-                                      />
+                                        <Icon
+                                            name="info"
+                                            class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
+                                            title="Infomonitor anzeige"
+                                        />
                                     </RouterLink>
                                 </ShareLinks>
                             </div>
                         </div>
                     </div>
                     <div class="w-full">
-                        <template
-                            v-for="event in events"
-                        >
-                          <EventCardHorizontal
-                              :event="event"
-                              class="mb-5 hidden md:flex lg:hidden xl:flex"
-                          />
-                          <EventCard
-                              :event="event"
-                              class="mb-5 flex md:hidden lg:flex xl:hidden"
-                          />
+                        <template v-for="event in events">
+                            <EventCardHorizontal
+                                :event="event"
+                                class="mb-5 hidden md:flex lg:hidden xl:flex"
+                            />
+                            <EventCard
+                                :event="event"
+                                class="mb-5 flex md:hidden lg:flex xl:hidden"
+                            />
                         </template>
                     </div>
+
+                    <template v-if="totalPages > 1">
+                        <div class="flex justify-content-center align-items-center gap-2 my-6">
+                            <Button
+                                variant="secondary"
+                                :hide-text-on-mobile="true"
+                                :disabled="currentPage === 1"
+                                icon-left="keyboard-double-arrow-left"
+                                @click="changePage(currentPage - 1)"
+                                class="px-2 sm:px-3 mx-1 hidden sm:flex"
+                            >
+                                Zurück
+                            </Button>
+                            <Button
+                                v-if="visiblePages[0]! > 1"
+                                variant="secondary"
+                                @click="changePage(1)"
+                                class="px-2 sm:px-3"
+                            >
+                                1
+                            </Button>
+                            <span
+                                v-if="visiblePages[0]! > 2"
+                                class="text-theme-primary mb-2"
+                                style="line-height: 1px"
+                            >
+                                …
+                            </span>
+                            <Button
+                                v-for="page in visiblePages"
+                                :key="page"
+                                @click="changePage(page)"
+                                :variant="page === currentPage ? 'primary' : 'secondary'"
+                                class="px-2 sm:px-3"
+                            >
+                                {{ page }}
+                            </Button>
+                            <span
+                                v-if="visiblePages[visiblePages.length - 1]! < totalPages - 1"
+                                class="text-theme-primary mb-2"
+                                style="line-height: 1px"
+                            >
+                                …
+                            </span>
+                            <Button
+                                v-if="visiblePages[visiblePages.length - 1]! < totalPages"
+                                class="px-2 sm:px-3"
+                                variant="secondary"
+                                @click="changePage(totalPages)"
+                            >
+                                {{ totalPages }}
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                :hide-text-on-mobile="true"
+                                :disabled="currentPage === totalPages"
+                                icon-right="keyboard-double-arrow-right"
+                                @click="changePage(currentPage + 1)"
+                                class="px-2 sm:px-3 mx-1 hidden sm:flex"
+                            >
+                                Weiter
+                            </Button>
+                        </div>
+                    </template>
                 </template>
             </div>
         </div>
@@ -436,11 +541,9 @@ loadSearchEvents();
     </div>
 </template>
 <style lang="scss" scoped>
-
 .aside {
     min-width: 250px;
     max-width: 279px !important;
-
 }
 @media screen and (max-width: 991px) {
     .aside {
@@ -449,4 +552,3 @@ loadSearchEvents();
     }
 }
 </style>
-

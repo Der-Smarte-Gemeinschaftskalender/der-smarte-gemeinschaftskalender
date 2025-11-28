@@ -37,7 +37,6 @@ import {
     ImportedEventSchema,
 } from '@/types/events/ImportedEvents';
 
-
 const errorMessageContent = ref<string>('');
 const mobilizionGroupOptions = ref<Option[]>([]);
 const rawAddress = ref<string>('');
@@ -154,7 +153,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         </p>
                         <p>
                             Weitere Informationen finden Sie im
-                            <LinkToDocs path="/" />.
+                            <LinkToDocs
+                                path="Terminverwaltung/Kalenderintegration/"
+                                fragment="kalender-integrieren-ical-url-anbinden"
+                            />
+                            .
                         </p>
                     </Alert>
                 </div>
@@ -210,7 +213,10 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             </p>
                             <p>
                                 Weitere Informationen finden Sie im
-                                <LinkToDocs path="" />
+                                <LinkToDocs
+                                    path="Terminverwaltung/Einzeltermine/"
+                                    fragment="beitrittsoptionen"
+                                />
                                 .
                             </p>
                         </Alert>

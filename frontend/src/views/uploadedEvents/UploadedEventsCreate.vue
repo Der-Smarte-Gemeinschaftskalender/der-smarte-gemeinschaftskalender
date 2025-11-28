@@ -43,7 +43,6 @@ import {
 } from '@/types/events/UploadedEvents';
 import { type AddressForm, addressDefaults, mobilizonFieldsDefaults } from '@/types/Mobilizon';
 
-
 const router = useRouter();
 const isSubmitting = ref<boolean>(false);
 const errorMessageContent = ref<string>('');
@@ -105,6 +104,7 @@ const onSubmit = handleSubmit(async (values: UploadedEventForm) => {
     const preparedValues = prepareEventsValues<UploadedEventForm, UploadedEventRequest>(values, ['uploaded_file']);
 
     try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         isSubmitting.value = true;
         errorMessageContent.value = '';
 
@@ -117,7 +117,8 @@ const onSubmit = handleSubmit(async (values: UploadedEventForm) => {
             })) ?? [];
 
         if (uploadedEvents.value.length === 0) {
-            errorMessageContent.value = 'Es wurden keine Veranstaltungen in der hochgeladenen Datei gefunden.';
+            errorMessageContent.value =
+                'Es wurden keine bevorstehende Veranstaltungen in der hochgeladenen Datei gefunden.';
         }
     } catch (error: any) {
         errorMessageContent.value = error;
@@ -261,7 +262,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <LinkToDocs
                 path="Terminverwaltung/iCal-Dateien/"
                 fragment="ical-datei-hochladen"
-            />.
+            />
+            .
         </p>
         <form
             novalidate
@@ -365,7 +367,10 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                 </p>
                                 <p>
                                     Weitere Informationen finden Sie im
-                                    <LinkToDocs path="" />
+                                    <LinkToDocs
+                                        path="Terminverwaltung/Einzeltermine/"
+                                        fragment="beitrittsoptionen"
+                                    />
                                     .
                                 </p>
                             </Alert>

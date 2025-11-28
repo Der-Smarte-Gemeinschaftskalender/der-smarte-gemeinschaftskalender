@@ -1,10 +1,12 @@
 import zod from "@/lib/zod";
+import { stripHtml } from "@/lib/helper";
 import {
     mobilizon_category_options,
     mobilizon_event_join_options,
     mobilizon_event_language_options,
     mobilizon_event_status
 } from "@/lib/const";
+
 import { EventPlaceType } from "@/types/General";
 
 export const addressDefaults = {
@@ -86,15 +88,21 @@ export const PictureSchema = zod.object({
         .instanceof(File)
         .optional()
         .refine((file) => {
-            if (file === undefined) return true;
-            if (file instanceof File && file.size > 0) return ['image/gif', 'image/png', 'image/jpeg', 'image/webp'].includes(file.type);
-            return false;
-        },
-            {
-                message: 'Bitte eine gültige Bilddatei auswählen.',
-                params: { mimeType: 'image/jpeg, image/png' }
-            }
-        )
+            if (!file) return true;
+
+            const maxSize = 2_097_152;
+            const allowed = ['image/gif', 'image/png', 'image/jpeg', 'image/webp'];
+
+            return (
+                file instanceof File &&
+                maxSize > file.size &&
+                file.size > 0 &&
+                allowed.includes(file.type)
+            );
+        }, {
+            message: 'Bitte eine gültige Bilddatei (max. 2 MB) auswählen.',
+            params: { mimeType: 'image/jpeg, image/png' }
+        }),
 
 });
 
@@ -103,11 +111,11 @@ export const mobilizonFieldsDefaults = {
     picture: undefined,
     pictureAlt: '',
     description: '',
-    category: mobilizon_category_options[0].value,
-    joinOptions: mobilizon_event_join_options[0].value,
+    category: mobilizon_category_options[0]!.value,
+    joinOptions: mobilizon_event_join_options[0]!.value,
     externalParticipationUrl: undefined,
-    language: mobilizon_event_language_options[0].value,
-    status: mobilizon_event_status[1].value,
+    language: mobilizon_event_language_options[0]!.value,
+    status: mobilizon_event_status[1]!.value,
     visibility: 'PUBLIC',
     onlineAddress: '',
     tags: <Array<string>>[],
@@ -118,15 +126,21 @@ export const MobilizonFieldsFormSchema = zod.object({
         .instanceof(File)
         .optional()
         .refine((file) => {
-            if (file === undefined) return true;
-            if (file instanceof File && file.size > 0) return ['image/gif', 'image/png', 'image/jpeg', 'image/webp'].includes(file.type);
-            return false;
-        },
-            {
-                message: 'Bitte eine gültige Bilddatei auswählen.',
-                params: { mimeType: 'image/jpeg, image/png' }
-            }
-        ),
+            if (!file) return true;
+
+            const maxSize = 2_097_152;
+            const allowed = ['image/gif', 'image/png', 'image/jpeg', 'image/webp'];
+
+            return (
+                file instanceof File &&
+                maxSize > file.size &&
+                file.size > 0 &&
+                allowed.includes(file.type)
+            );
+        }, {
+            message: 'Bitte eine gültige Bilddatei (max. 2 MB) auswählen.',
+            params: { mimeType: 'image/jpeg, image/png' }
+        }),
     pictureAlt: zod
         .string()
         .optional()
@@ -195,7 +209,11 @@ export const MobilizonFieldsSchema = zod.object({
         .optional()
         .nullable(),
     description: zod
-        .string(),
+        .string()
+        .refine(
+            (val) => stripHtml(val).length > 0,
+            { message: "Die Beschreibung darf nicht leer sein." }
+        ),
     category: zod
         .string()
         .nonempty(),

@@ -52,6 +52,7 @@ async function fetchAndRender(
     limit: $limit,
     searchTarget: $searchTarget,
     categoryOneOf: $categoryOneOf,
+    sortBy: START_TIME_ASC
   ) {
     total
     elements {

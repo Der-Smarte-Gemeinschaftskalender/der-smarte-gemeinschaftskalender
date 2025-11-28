@@ -33,9 +33,8 @@ class SingleEventController extends Controller implements HasMiddleware
         $page = max($page, 1);
         $pageSize = max($pageSize, 1);
 
-        $query = SingleEvent::where('user_id', $request->user()->id)
+        $query = SingleEvent::where('mobilizon_group_id', (int)$request->input('mobilizon_group_id'))
             ->orderBy('created_at', 'desc')
-            ->where('mobilizon_group_id', (int)$request->input('mobilizon_group_id'))
             ->with('created_event');
 
         $data = $query->paginate(

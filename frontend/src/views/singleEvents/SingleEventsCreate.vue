@@ -40,7 +40,6 @@ import {
     SingleEventResponseSchema,
 } from '@/types/events/SingleEvents';
 
-
 const route = useRoute();
 const router = useRouter();
 const mobilizionGroupOptions = ref<Option[]>([]);
@@ -266,7 +265,10 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             </p>
                             <p>
                                 Weitere Informationen finden Sie im
-                                <LinkToDocs path="" />
+                                <LinkToDocs
+                                    path="Terminverwaltung/Einzeltermine/"
+                                    fragment="beitrittsoptionen"
+                                />
                             </p>
                         </Alert>
                     </div>

@@ -17,7 +17,7 @@ class ImportedEventController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('in_group', except: ['show'])
+            new Middleware('in_group', except: ['show', 'changeStatus'])
         ];
     }
 
@@ -29,10 +29,9 @@ class ImportedEventController extends Controller implements HasMiddleware
         $page = max($page, 1);
         $pageSize = max($pageSize, 1);
 
-        $query = ImportedEvent::where('user_id', $request->user()->id)
+        $query = ImportedEvent::where('mobilizon_group_id', (int)$request->input('mobilizon_group_id'))
             ->withCount('created_events')
-            ->orderBy('created_at', 'desc')
-            ->where('mobilizon_group_id', (int)$request->input('mobilizon_group_id'));
+            ->orderBy('created_at', 'desc');
 
         $data = $query->paginate(
             $pageSize,

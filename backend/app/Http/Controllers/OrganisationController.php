@@ -53,11 +53,13 @@ class OrganisationController extends Controller implements HasMiddleware
             'summary' => 'string',
         ]);
 
-        $mclient = Mobilizon::getInstance(false, auth()->user());
-        $existingGroups = $mclient->getGroups(['username' => $validated['preferredUsername']]);
-
-        if (!empty($existingGroups['data']['groups']['elements'])) {
-            return response()->json(['error' => 'preferredUsername is already taken'], 400);
+        $systemAdmin = User::find(1);
+        $adminClient = Mobilizon::getInstance(false, $systemAdmin, true);
+        $existingGroups = $adminClient->adminGetAllGroupsArray();
+        foreach ($existingGroups as $group) {
+            if ($group['preferredUsername'] === $validated['preferredUsername']) {
+                return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits vergeben ist.'], 422);
+            }
         }
 
         $newOrganisationStatus = new OrganisationStatus();
@@ -111,16 +113,24 @@ class OrganisationController extends Controller implements HasMiddleware
         $newStatus = $validated['status'];
 
         if ($newStatus === 'ACTIVE') {
+            $systemAdmin = User::find(1);
+            $adminClient = Mobilizon::getInstance(false, $systemAdmin, true);
+            $existingGroups = $adminClient->adminGetAllGroupsArray();
+            foreach ($existingGroups as $group) {
+                if ($group['preferredUsername'] === $organisation->requested_organisation_data['preferredUsername']) {
+                    return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits vergeben ist.'], 422);
+                }
+            }
             $organisation->load('requested_by_user');
             try {
-                $mclient = Mobilizon::getInstance(false, $organisation->requested_by_user);
+                $mclient = Mobilizon::getInstance(false, $organisation->requested_by_user, true);
                 $createdMobilizonGroup = $mclient->createGroup(
                     $organisation->requested_organisation_data
                 );
                 $organisation->mobilizon_group_id = $createdMobilizonGroup['data']['createGroup']['id'];
             } catch (\Exception $e) {
                 Log::error('Error creating Mobilizon group: ' . $e->getMessage());
-                return response()->json(['error' => 'Failed to create organisation in Mobilizon'], 500);
+                return response()->json(['error' => 'Organisation konnte nicht in Mobilizon von dem Benutzer erstellt werden'], 500);
             }
         }
 

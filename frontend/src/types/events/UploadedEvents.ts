@@ -48,7 +48,12 @@ export const UploadedEventRequestSchema = DefaultEventSchema.extend({
         .instanceof(File)
         .nullable()
         .default(null)
-        .refine((file) => file?.size ? file.size > 0 : false, 'Bitte eine iCal-Datei hochladen'),
+        .refine((file) => {
+            if (!file) return false;
+
+            const maxSize = 2_097_152;
+            return maxSize > file.size && file.size > 0;
+        }, 'Bitte eine iCal-Datei (max. 2 MB) hochladen')
 })
 
 export type UploadedEventRequest = zod.infer<typeof UploadedEventRequestSchema>;
@@ -59,7 +64,12 @@ export const UploadedEventFormSchema = DefaultEventFormSchema.extend({
         .instanceof(File)
         .nullable()
         .default(null)
-        .refine((file) => file?.size ? file.size > 0 : false, 'Bitte eine iCal-Datei hochladen'),
+        .refine((file) => {
+            if (!file) return false;
+
+            const maxSize = 2_097_152;
+            return maxSize > file.size && file.size > 0;
+        }, 'Bitte eine iCal-Datei (max. 2 MB) hochladen')
 });
 
 export type UploadedEventForm = zod.infer<typeof UploadedEventFormSchema>;

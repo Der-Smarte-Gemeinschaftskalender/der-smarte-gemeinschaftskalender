@@ -27,14 +27,19 @@ class FetchImportedEvents implements ShouldQueue
     public function handle(): void
     {
         $mclient = Mobilizon::getInstanceAdmin();
-        $groups = $mclient->getGroupsAsArray();
+        $groups = $mclient->adminGetAllGroupsArray();
 
         $importedEventsQuery = $this->eventId === -1
-            ? ImportedEvent::where('is_active', true)
-            : ImportedEvent::where('id', $this->eventId);
+            ? ImportedEvent::where('is_active', true)->with('user')
+            : ImportedEvent::where('id', $this->eventId)->with('user');
 
         $importedEventsQuery->chunk(20, function ($importedEvents) use ($mclient, $groups) {
             foreach ($importedEvents as $importedEvent) {
+                if (!$importedEvent->user) {
+                    Log::warning("Imported Event ID {$importedEvent->id} has no associated user.");
+                    continue;
+                }
+                $mclient = Mobilizon::getInstance(false, $importedEvent->user, true);
                 if (!isset($groups[$importedEvent->mobilizon_group_id])) {
                     Log::warning("Group ID {$importedEvent->mobilizon_group_id} does not exist.");
                     continue;
@@ -84,17 +89,9 @@ class FetchImportedEvents implements ShouldQueue
                         $deletedEvent = $existingEvents[$deletedUid];
                         Log::info("Deleting event no longer in iCal feed: {$deletedUid}");
 
-                        // Optional: delete or mark as deleted (soft delete or set `is_active = false`, etc.)
                         $deletedEvent->delete();
-                    }
-
-
-                    foreach ($deletedUids as $deletedUid) {
-                        $deletedEvent = $existingEvents[$deletedUid];
-                        Log::info("Deleting event no longer in iCal feed: {$deletedUid}");
-
-                        // Optional: delete or mark as deleted (soft delete or set `is_active = false`, etc.)
-                        $deletedEvent->delete();
+                        $deleteEventResponse = $mclient->deleteEvent($deletedEvent->mobilizon_id);
+                        Log::info("Mobilizon delete response for UID {$deletedUid}: " . json_encode($deleteEventResponse));
                     }
 
                     foreach ($eventsToCreate as $uid => $event) {

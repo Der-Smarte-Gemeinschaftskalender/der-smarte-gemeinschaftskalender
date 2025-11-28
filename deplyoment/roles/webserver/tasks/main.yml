@@ -75,3 +75,26 @@
     name: nginx
     state: reloaded
 
+- name: Setup certbot renewal cron job (every 12 days with random 12h offset)
+  cron:
+    name: "Certbot certificate renewal"
+    minute: "0"
+    hour: "0"
+    day: "*/12"
+    job: "sleep $((RANDOM \\% 43200)) && certbot renew --quiet --post-hook 'systemctl reload nginx'"
+    user: root
+    state: present
+  tags:
+  - setup
+
+- name: Run Laravel Scheduler cron job
+  cron:
+    name: "Laravel Scheduler"
+    minute: "*"
+    hour: "*"
+    day: "*"
+    job: "cd /opt/der-smarte-gemeinschaftskalender/ && docker compose exec -T backend php artisan schedule:run >> /dev/null 2>&1"
+    user: root
+    state: present
+  tags:
+  - setup

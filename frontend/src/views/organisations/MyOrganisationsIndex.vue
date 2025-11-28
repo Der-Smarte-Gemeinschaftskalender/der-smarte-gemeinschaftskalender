@@ -104,7 +104,10 @@ const acceptInvitation = async (membershipId: string) => {
         <b>Hinweis:</b>
         Hier finden Sie alle Organisationen in denen Sie Mitglied sind und können diese bearbeiten. Weitere
         Informationen finden Sie im
-        <LinkToDocs path="" />
+        <LinkToDocs
+            path="Terminverwaltung/Organisation/"
+            fragment="organisationsadministration"
+        />
         .
     </p>
 

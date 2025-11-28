@@ -5,6 +5,8 @@ import { useField, useForm } from 'vee-validate';
 import { useRoute } from 'vue-router';
 import { toTypedSchema } from '@vee-validate/zod';
 import { buildSuggestions } from '@/composables/EventCreateFormComposable';
+import { loadImage } from '@/lib/dsgClient';
+import { stripHtml } from '@/lib/helper';
 import { dsgApi } from '@/lib/dsgApi';
 
 import Fieldset from '@/components/KERN/Fieldset.vue';
@@ -19,8 +21,6 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 import { ZodType } from 'zod';
 import { addressDefaults, type AddressForm, AddressFormSchema } from '@/types/Mobilizon';
 import type { AxiosError } from '@/lib/dsgApi';
-import { loadImage } from '@/lib/dsgClient';
-
 
 interface EditOrganisationForm {
     name: string;
@@ -28,7 +28,6 @@ interface EditOrganisationForm {
     id?: number | string;
     avatar?: any;
 }
-
 
 const showErrorMessage = ref<boolean>(false);
 const errorMessageContent = ref<string>('');
@@ -43,8 +42,12 @@ const preferredUsername = route.params.preferredUsername as string;
 
 const validationSchema = toTypedSchema(
     zod.object({
-        name: zod.string().nonempty(),
-        summary: zod.string().nonempty(),
+        name: zod.string().refine((val) => val.trim().length > 0, {
+            message: 'Der Name der Organisation darf nicht leer sein.',
+        }),
+        summary: zod
+            .string()
+            .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' }),
         avatar: zod.any().optional(),
         physicalAddress: AddressFormSchema.optional(),
     }) satisfies ZodType<EditOrganisationForm>
@@ -146,7 +149,11 @@ loadOrganisation();
         <b>Hinweis:</b>
         In diesem Formular können Sie die öffentlichen Angaben Ihrer Organisation anpassen. Weitere Informationen finden
         Sie im
-        <LinkToDocs path="" />.
+        <LinkToDocs
+            path="Terminverwaltung/Organisation/"
+            fragment="organisation-bearbeiten"
+        />
+        .
     </p>
 
     <form

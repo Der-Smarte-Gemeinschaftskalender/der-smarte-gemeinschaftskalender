@@ -497,15 +497,7 @@ body {
     width: 100%;
     margin-inline: auto;
     padding-inline: clamp(1rem, 5vw, 2rem);
-    -ms-overflow-style: none;  /* Internet Explorer 10+ */
-    scrollbar-width: none;  /* Firefox */
-    scrollbar-color: transparent transparent;
 }
-
-.main::-webkit-scrollbar {
-    display: none;  /* Safari and Chrome */
-}
-
 
 @media (max-width: 640px) {
     .main {

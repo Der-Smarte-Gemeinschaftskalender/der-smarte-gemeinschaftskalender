@@ -63,7 +63,6 @@ export const getMobilizionGroupOptions = async (mobilizionGroups?: MobilizonGrou
 export const getEventsStatistics = async (mobilizionGroupId: string | number): Promise<EventsStatistics> => {
     try {
         const { data } = await dsgApi.get(`/created-events/statistics/${mobilizionGroupId}`);
-        console.log(data);
         return data;
     } catch (error) {
         console.error("Error fetching events statistics:", error);
@@ -86,14 +85,12 @@ export const handleSubmitCallback = async (url: string, {
 }: SubmitOptions) => {
     try {
 
-        console.log('Submitting values:', values);
         const { data } = await dsgApi.post(url, values, {
             headers: {
                 ...headers
             }
         });
 
-        console.log('Response data:', data);
         schema?.parse(resDataKey ? data[resDataKey] : data);
 
         return resDataKey ? data[resDataKey] : data;
@@ -139,20 +136,18 @@ export const prepareEventsValues = <
         },
     };
 
-    console.log('Prepared values:', preparedValues);
-
     additionalValues.forEach((key: string) => {
         if (values.hasOwnProperty(key)) preparedValues[key] = values[key];
     });
 
-    if(preparedValues.mobilizon_fields.externalParticipationUrl) {
+    if (preparedValues.mobilizon_fields.externalParticipationUrl) {
         const result = MobilizonFieldsSchema.shape.externalParticipationUrl.safeParse(preparedValues.mobilizon_fields);
         preparedValues.mobilizon_fields.externalParticipationUrl = result.success
             ? result.data
             : preparedValues.mobilizon_fields.externalParticipationUrl;
     }
 
-    if(preparedValues.mobilizon_fields.onlineAddress) {
+    if (preparedValues.mobilizon_fields.onlineAddress) {
         const result = MobilizonFieldsSchema.shape.onlineAddress.safeParse(preparedValues.mobilizon_fields);
         preparedValues.mobilizon_fields.onlineAddress = result.success
             ? result.data

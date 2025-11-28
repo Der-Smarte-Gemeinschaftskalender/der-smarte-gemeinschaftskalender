@@ -4,8 +4,7 @@ import { dsgApi } from '@/lib/dsgApi';
 
 import Button from '@/components/KERN/Button.vue';
 
-import type { Column } from "@/types/General";
-
+import type { Column } from '@/types/General';
 
 interface Props {
     title?: string;
@@ -32,7 +31,7 @@ const props = defineProps<Props>();
 const pageSize = computed(() => props.pageSize ?? 10);
 const rawData = computed<Array<any>>(() => {
     if (props.api) return [];
-    return isRef(props.data) ? props.data.value : props.data ?? [];
+    return isRef(props.data) ? props.data.value : (props.data ?? []);
 });
 
 const displayData = ref<Array<any>>([]);
@@ -110,7 +109,7 @@ if (props.api) loadData();
 else handleArrayData();
 </script>
 <template>
-    <div class="kern-table--responsive w-full overflow-x-scroll p-0">
+    <div class="kern-table--responsive w-full p-0">
         <table
             class="kern-table kern-table--striped w-full"
             :columns="columns"
@@ -132,9 +131,9 @@ else handleArrayData();
                             scope="col"
                             class="kern-table__header vertical-align-middle px-2"
                             :class="[
-                                    { 'kern-table__header--numeric': !!column.numeric },
-                                    column.align ? `text-${ column.align }` : 'text-left'
-                                ]"
+                                { 'kern-table__header--numeric': !!column.numeric },
+                                column.align ? `text-${column.align}` : 'text-left',
+                            ]"
                         >
                             {{ column.name }}
                         </th>
@@ -156,7 +155,7 @@ else handleArrayData();
                             class="kern-table__cell vertical-align-middle px-2"
                             :class="[
                                 { 'kern-table__cell--numeric': !!column.numeric },
-                                column.align ? `text-${ column.align }` : 'text-left'
+                                column.align ? `text-${column.align}` : 'text-left',
                             ]"
                         >
                             <slot
@@ -166,9 +165,13 @@ else handleArrayData();
                                 :deleteEntry="deleteEntry"
                             >
                                 <template v-if="!column.format">
-                                    {{ typeof row[column?.key] === 'string' && props.valuesMaxLength && row[column?.key].length > props.valuesMaxLength
-                                        ? `${row[column?.key].slice(0, props.valuesMaxLength)}...`
-                                        : row[column?.key] }}
+                                    {{
+                                        typeof row[column?.key] === 'string' &&
+                                        props.valuesMaxLength &&
+                                        row[column?.key].length > props.valuesMaxLength
+                                            ? `${row[column?.key].slice(0, props.valuesMaxLength)}...`
+                                            : row[column?.key]
+                                    }}
                                 </template>
                                 <template v-else>
                                     {{ column.format(row[column?.key], row) }}
@@ -198,7 +201,9 @@ else handleArrayData();
                         class="kern-table__cell"
                     >
                         <div class="pagination-controls flex justify-content-center">
-                            <div class="flex align-items-center justify-content-around gap-2 sm:px-3 md:px-6 max-w-56rem w-full">
+                            <div
+                                class="flex align-items-center justify-content-around gap-2 sm:px-3 md:px-6 max-w-56rem w-full"
+                            >
                                 <Button
                                     @click="currentPage = 1"
                                     :disabled="currentPage <= 1"

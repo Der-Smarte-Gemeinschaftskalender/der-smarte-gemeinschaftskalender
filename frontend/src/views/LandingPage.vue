@@ -13,7 +13,7 @@ const router = useRouter();
 const locationSearchRef = ref<InstanceType<typeof InputLocation> | null>(null);
 const searchTerm = ref<string>('');
 const searchAddress = ref<string>(import.meta.env.VITE_SEARCH_LOCATION_ADDRESS || '');
-const searchRadius = ref<number>(5);
+const searchRadius = ref<number>(10);
 const instanceName = ref<string>(import.meta.env.VITE_INSTANCE_NAME);
 
 const openSearch = () => {

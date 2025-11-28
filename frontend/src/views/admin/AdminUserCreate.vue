@@ -24,9 +24,24 @@ const errorMessageContent = ref<string | undefined>(undefined);
 
 const validationSchema = toTypedSchema(
     zod.object({
-        email: zod.string().nonempty().email(),
-        password: zod.string().min(8),
-        type: zod.string().nonempty().default('user'),
+        email: zod.string({
+                required_error: 'Die E-Mail-Adresse ist erforderlich.',
+            })
+            .email({
+                message: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+            }),
+        password: zod
+            .string({
+                required_error: 'Das Passwort ist erforderlich.'
+            })
+            .min(8, 'Das Passwort muss mindestens 8 Zeichen lang sein.')
+            .refine((val) => val.trim().length > 0, {
+                message: 'Das Passwort darf nicht leer sein.'
+            }),
+        type: zod
+            .string()
+            .nonempty()
+            .default('user'),
     }) satisfies ZodType<UserView>
 );
 

@@ -263,9 +263,8 @@ test("single termin with location and custom date", async ({ page }) => {
   await fillEventForm(page, eventData);
   await submitSingleEvent(page);
   await page.waitForLoadState("networkidle");
+  await page.goto(`${config.siteUrl}/search?tag=${eventName}`);
+  await page.waitForLoadState("domcontentloaded");
 
-  await page.getByText("Veranstaltungen").first().click();
-  await page.waitForLoadState("networkidle");
-  await expect(page).toHaveURL(/.*\/search/);
   await expect(page.getByText(eventName).first()).toBeVisible();
 });

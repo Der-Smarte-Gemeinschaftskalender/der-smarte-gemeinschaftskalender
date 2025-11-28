@@ -16,7 +16,7 @@
         damit wir Sie regelmäßig über neue Veranstaltungen informieren dürfen.
     </h4>
 
-    <a href="{{ env('APP_URL') }}/exports/email/confirm/{{ $email }}/{{ $token }}"
+    <a href="{{ env('APP_URL') }}/exports/email/confirm/{{ $token }}"
         class="btn">E-Mail-Adresse bestätigen</a>
 
 </div>

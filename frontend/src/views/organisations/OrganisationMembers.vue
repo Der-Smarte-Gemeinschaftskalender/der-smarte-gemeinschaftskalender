@@ -42,7 +42,13 @@ const organisation = ref<IOrganisation | null>(null);
 
 const validationSchema = toTypedSchema(
     zod.object({
-        invite_username: zod.string().nonempty(),
+        invite_username: zod
+            .string({
+                required_error: 'Der Benutzername ist erforderlich.',
+            })
+            .refine((val) => val.trim().length > 0, {
+                message: 'Der Benutzername darf nicht leer sein.',
+            }),
     }) satisfies ZodType<OrganisationMemberInviteForm>
 );
 

@@ -47,7 +47,7 @@ findOrganisationOptions(true).then((options) => {
         <p class="mt-4 kern-text">
             <b>Hinweis:</b>
             Weitere Informationen finden Sie im
-            <LinkToDocs path="" />
+            <LinkToDocs path="Entwicklungsbereich/Kalender%20einbinden/" />
             .
         </p>
         <Fieldset class="mb-4">

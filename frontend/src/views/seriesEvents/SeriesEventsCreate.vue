@@ -328,7 +328,10 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             </p>
                             <p>
                                 Weitere Informationen finden Sie im
-                                <LinkToDocs path="" />
+                                <LinkToDocs
+                                    path="Terminverwaltung/Einzeltermine/"
+                                    fragment="beitrittsoptionen"
+                                />
                                 .
                             </p>
                         </Alert>

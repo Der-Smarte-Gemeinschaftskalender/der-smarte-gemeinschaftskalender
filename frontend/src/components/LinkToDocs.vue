@@ -9,5 +9,10 @@ const { path, fragment } = defineProps<Props>();
 const fullDocsUrl = `${docsUrl}/${path}${fragment ? `#${fragment}` : ''}`;
 </script>
 <template>
-    <a :href="fullDocsUrl" target="_blank">Handbuch</a>
+    <a
+        :href="fullDocsUrl"
+        target="_blank"
+    >
+        <slot>Handbuch</slot>
+    </a>
 </template>

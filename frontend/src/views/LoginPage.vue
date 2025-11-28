@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import zod from '@/lib/zod';
+
 import { dsgApi, checkAuthDsgApi } from '@/lib/dsgApi';
 import { setUserData, checkLogin } from '@/composables/UserComposoable';
 import { setOrganisationData } from '@/composables/OrganisationComposable';
 import { useRouter, useRoute } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { ZodType } from 'zod';
-import zod from '@/lib/zod';
+
 import Card from '@/components/KERN/Card.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputEmail from '@/components/KERN/inputs/InputEmail.vue';
 import InputPassword from '@/components/KERN/inputs/InputPassword.vue';
 import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
+
+import type { AxiosError } from "axios";
 
 const router = useRouter();
 const route = useRoute();
@@ -29,14 +32,15 @@ const validationSchema = toTypedSchema(
     zod.object({
         email: zod
             .string()
-            .nonempty()
-            .email()
+            .nonempty('Die E-Mail-Adresse ist erforderlich.')
+            .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
             .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
         password: zod
             .string()
-            .nonempty()
-            .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
-    }) satisfies ZodType<LoginForm>
+            .nonempty('Das Passwort ist erforderlich.')
+            .trim()
+            .default(import.meta.env.VITE_LOGIN_PASSWORD || '')
+    })
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
     validationSchema,
@@ -61,7 +65,7 @@ const onSubmit = handleSubmit(async (values) => {
         } else {
             router.push('/app');
         }
-    } catch (error) {
+    } catch (error: any | AxiosError) {
         console.error(error);
         showLoginErrorMessage.value = true;
         if (error.status === 401) {

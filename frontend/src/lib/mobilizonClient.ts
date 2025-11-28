@@ -162,7 +162,10 @@ export const findEvent = async (uuid: string): Promise<IEventDetailed> => {
   return response?.data?.event;
 }
 
-export const searchEvents = async (page = 1, limit: number | null = null, term = '', searchTarget: string | null = null, beginsOn: string = new Date().toISOString(), endsOn: string | null = null, categoryOneOf: string[] | null = null, statusOneOf: string[] | null = null, languageOneOf: string[] | null = null, location: string | null = null, radius: number | null = null, fields: string = '') => {
+export const searchEvents = async (page = 1, limit: number | null = null, term = '', searchTarget: string | null = null, beginsOn: string = new Date().toISOString(), endsOn: string | null = null, categoryOneOf: string[] | null = null, statusOneOf: string[] | null = null, languageOneOf: string[] | null = null, location: string | null = null, radius: number | null = null, fields: string = ''): Promise<{
+    searchEvents: any,
+    total: number
+}> => {
   const response = await apolloClient.query({
     query: gql`
             query SearchEvents(
@@ -336,7 +339,7 @@ fragment ActorFragment on Actor {
       radius,
     },
   });
-  return response?.data?.searchEvents;
+  return response?.data;
 
 }
 

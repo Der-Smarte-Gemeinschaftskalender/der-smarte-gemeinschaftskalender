@@ -26,7 +26,13 @@ interface ForgotPasswordForm {
 
 const validationSchema = toTypedSchema(
     zod.object({
-        email: zod.string().nonempty().email(),
+        email: zod
+            .string({
+                required_error: 'Die E-Mail-Adresse ist erforderlich.',
+            })
+            .nonempty('Die E-Mail-Adresse ist erforderlich.')
+            .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+            .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
     }) satisfies ZodType<ForgotPasswordForm>
 );
 
@@ -42,7 +48,6 @@ const onSubmit = handleSubmit(async (values) => {
             ...values,
         });
 
-        console.log(resp.data)
         showSuccessMessage.value = true;
         showErrorMessage.value = false;
         messageContent.value = resp.data.message;

@@ -68,7 +68,10 @@ const columns: Array<Column> = [
         <b>Hinweis:</b>
         Als Administrator*in der Instanz können Sie hier die Mitglieder aller Organisationen einsehen und bearbeiten.
         Über den Button Bearbeiten können sie Nutzer*innen entfernen. Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/Instanz/" />
+        <LinkToDocs
+            path="Terminverwaltung/Instanz/"
+            fragment="nutzer-innen-verwalten"
+        />
         .
     </p>
     <Table

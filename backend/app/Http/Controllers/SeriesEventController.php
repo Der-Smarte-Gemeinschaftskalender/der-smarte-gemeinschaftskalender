@@ -21,7 +21,7 @@ class SeriesEventController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('in_group', except: ['loadMobilizonGroups', 'getMobilizonGroups', 'show'])
+            new Middleware('in_group', except: ['show'])
         ];
     }
 
@@ -33,9 +33,8 @@ class SeriesEventController extends Controller implements HasMiddleware
         $page = max($page, 1);
         $pageSize = max($pageSize, 1);
 
-        $query = SeriesEvent::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->where('mobilizon_group_id', (int)$request->input('mobilizon_group_id'));
+        $query = SeriesEvent::where('mobilizon_group_id', (int)$request->input('mobilizon_group_id'))
+            ->orderBy('created_at', 'desc');
 
         $data = $query->paginate(
             $pageSize,

@@ -221,7 +221,10 @@ loadCreatedEvent();
     <p class="mt-1 mb-6">
         <b>Hinweis:</b>
         Weitere Informationen finden Sie im
-        <LinkToDocs path="" />
+        <LinkToDocs
+            path="Terminverwaltung/Einzeltermine/"
+            fragment="kalender-integrieren-ical-url-anbinden"
+        />
         .
     </p>
     <template v-if="loading">
@@ -353,7 +356,10 @@ loadCreatedEvent();
                             </p>
                             <p>
                                 Weitere Informationen finden Sie im
-                                <LinkToDocs path="" />
+                                <LinkToDocs
+                                    path="Terminverwaltung/Einzeltermine/"
+                                    fragment="beitrittsoptionen"
+                                />
                                 .
                             </p>
                         </Alert>

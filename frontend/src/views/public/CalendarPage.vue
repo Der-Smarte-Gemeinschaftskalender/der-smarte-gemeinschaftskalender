@@ -87,7 +87,7 @@ const calendarOptions = reactive<CalendarOptions>({
         }
 
         successCallback(
-            (result.elements ?? []).map((event: IEvent) => {
+            (result.searchEvents.elements ?? []).map((event: IEvent) => {
                 const mainCategory = getMainCategoryFromSubCategory(event.category);
                 return {
                     id: event.uuid,

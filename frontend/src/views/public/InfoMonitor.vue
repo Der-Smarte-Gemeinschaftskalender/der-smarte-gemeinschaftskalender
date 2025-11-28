@@ -68,7 +68,7 @@ const loadEvents = async () => {
                 ((parseInt(route.query.searchRadius as string) || 10) as number) || 10,
                 'language, description,joinOptions'
             );
-            events.value = result.elements;
+            events.value = result.searchEvents.elements;
         }
     } catch (error) {
         console.error('Error loading events:', error);

@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { watch } from "vue";
+
 import FormInputLabel from "./FormInputLabel.vue";
+
+
 const model = defineModel<string>();
 
 interface Props {
@@ -9,6 +13,14 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+
+watch(
+    () => model.value,
+    (newValue) => {
+        if (newValue) model.value = newValue.replace(/\s+/g, '');
+    }
+);
 </script>
 <template>
   <FormInputLabel :id="name" :label="label" :errors="errors">

@@ -5,12 +5,20 @@ export const ImportedEventSchema = DefaultEventSchema.extend({
     id: zod.number(),
     url: zod.string().nonempty(),
     is_active: zod.boolean(),
+    mobilizon_fields: zod.object({
+        description: zod
+            .string()
+            .optional(),
+    }),
 });
 
 export type ImportedEvent = zod.infer<typeof ImportedEventSchema>;
 
 
 export const ImportedEventFormSchema = DefaultEventFormSchema.extend({
+    description: zod
+        .string()
+        .optional(),
     url: zod
         .string()
         .default('')

@@ -11,9 +11,10 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
         <b>Hinweis:</b>
         Weitere Informationen finden Sie im
         <LinkToDocs
-            path="Terminverwaltung/Organisation"
+            path="Terminverwaltung/Organisation/"
             fragment="profil-bearbeiten-einzelperson"
-        />.
+        />
+        .
     </p>
 
     <ProfileForm />

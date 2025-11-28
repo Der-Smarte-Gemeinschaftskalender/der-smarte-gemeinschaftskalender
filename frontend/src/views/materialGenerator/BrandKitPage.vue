@@ -170,7 +170,7 @@ loadBrandKit();
                 Layout-Vorlagen zur passgenauen Gestaltung der Hintergründe finden Sie im
                 <LinkToDocs
                     path="Werbemittelgenerator/"
-                    fragment="ankundigungen-fur-eine-einzelne-veranstaltung"
+                    fragment="richtlinien-fur-die-hintergrunderstellung"
                 />
                 .
             </p>

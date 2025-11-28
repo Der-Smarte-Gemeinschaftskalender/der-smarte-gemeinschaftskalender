@@ -58,7 +58,7 @@ const validationSchema = toTypedSchema(
             intervall: zod.nativeEnum(Intervall),
             category: zod.nativeEnum(MobilizonCategoryAndAll),
             eventType: zod.nativeEnum(EventType),
-            email: zod.string().email().nonempty(),
+            email: zod.string().email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
             organisation: zod.string().optional(),
             postal_code: zod.string().optional(),
             radius: zod.nativeEnum(Radius).optional(),
@@ -267,9 +267,7 @@ findOrganisationOptions().then((options) => {
                         <RouterLink
                             :to="{ name: 'public.terms' }"
                             class="terms-link"
-                        >
-                            Nutzungsbedingungen
-                        </RouterLink>
+                        >Nutzungsbedingungen</RouterLink>
                         gelesen und akzeptiere sie.
                     </template>
                 </InputCheckbox>

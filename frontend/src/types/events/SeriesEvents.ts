@@ -14,14 +14,14 @@ export const SeriesEventsDefaults = {
     start: formatInputDate(),
     end: formatInputDate(dayjs().add(1, 'day').toDate()),
     time: dayjs().startOf('hour').format('HH:mm'),
-    intervall: intervall_options[0].value,
+    intervall: intervall_options[0]!.value,
     mobilizon_group_id: 0,
     duration: '1:00',
     description: '',
-    category: mobilizon_category_options[0].value,
-    joinOptions: mobilizon_event_join_options[0].value,
-    language: mobilizon_event_language_options[0].value,
-    status: mobilizon_event_status[1].value,
+    category: mobilizon_category_options[0]!.value,
+    joinOptions: mobilizon_event_join_options[0]!.value,
+    language: mobilizon_event_language_options[0]!.value,
+    status: mobilizon_event_status[1]!.value,
     visibility: 'PUBLIC',
     onlineAddress: '',
     tags: <Array<string>>[],
@@ -34,7 +34,7 @@ export const SeriesEventSchema = DefaultEventSchema.extend({
         .nonnegative(),
     name: zod
         .string()
-        .min(2),
+        .min(3),
     start: zod
         .string()
         .date()
@@ -83,14 +83,21 @@ export type SeriesEvent = zod.infer<typeof SeriesEventSchema>;
 
 export const SeriesEventFormSchema = DefaultEventFormSchema.extend({
     name: zod
-        .string()
-        .nonempty(),
+        .string({
+            required_error: 'Der Name ist erforderlich.',
+        })
+        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
+        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .refine(
+            (val) => val.trim().length >= 3, {
+                message: "Der Name darf nicht leer sein."
+        }),
     description: zod
         .string()
         .refine(
-            (val) => stripHtml(val).length > 0,
-            { message: "Die Beschreibung darf nicht leer sein." }
-        ),
+            (val) => stripHtml(val).length > 0, {
+                message: "Die Beschreibung darf nicht leer sein."
+         }),
     start: zod
         .string()
         .date()

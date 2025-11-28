@@ -7,10 +7,14 @@ import Table from '@/components/KERN/Table.vue';
 import Button from '@/components/KERN/Button.vue';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
+import Alert from '@/components/KERN/Alert.vue';
 
 import type { Column } from '@/types/General';
 
 const loading = ref(false);
+const loadingNewState = ref(false);
+const showErrorMessage = ref(false);
+const errorMessageContent = ref('');
 
 const columns: Array<Column> = [
     {
@@ -41,13 +45,17 @@ const columns: Array<Column> = [
     },
 ];
 const changeStatus = async (id: number, status: string) => {
-    loading.value = true;
+    loadingNewState.value = true;
+    showErrorMessage.value = false;
     try {
         await dsgApi.post(`/organisations/changeOrganisationStatus/${id}`, { status });
     } catch (error) {
-        console.error('Error changing status:', error);
+        console.error('Error changing status:', error.response.data.error);
+        showErrorMessage.value = true;
+        errorMessageContent.value =
+            error?.response?.data?.error || 'Beim Ändern des Organisationsstatus ist ein Fehler aufgetreten.';
     } finally {
-        loading.value = false;
+        loadingNewState.value = false;
     }
 };
 </script>
@@ -67,10 +75,19 @@ const changeStatus = async (id: number, status: string) => {
         </span>
         <span class="block">
             Weitere Informationen finden Sie im
-            <LinkToDocs path="" />
+            <LinkToDocs
+                path="Terminverwaltung/Instanz/"
+                fragment="organisationen-verwalten"
+            />
             .
         </span>
     </p>
+    <Alert
+        v-if="showErrorMessage"
+        title="Fehler"
+        :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
+        severity="danger"
+    />
     <Loader v-if="loading" />
     <template v-else>
         <Table
@@ -87,6 +104,7 @@ const changeStatus = async (id: number, status: string) => {
                         @click="changeStatus(row.id, 'ACTIVE')"
                         icon-left="check"
                         :hide-text-on-mobile="true"
+                        :disabled="loadingNewState"
                     >
                         Annehmen
                     </Button>
@@ -97,6 +115,7 @@ const changeStatus = async (id: number, status: string) => {
                         icon-left="close"
                         variant="secondary"
                         :hide-text-on-mobile="true"
+                        :disabled="loadingNewState"
                     >
                         Ablehnen
                     </Button>

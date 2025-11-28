@@ -15,7 +15,7 @@
         Bitte klicken Sie auf den folgenden Button, um Ihr Passwort zurückzusetzen:
     </h4>
 
-    <a href="{{ env('APP_URL') }}/reset-password/{{ $email }}/{{ $resetToken }}"
+    <a href="{{ env('APP_URL') }}/reset-password/{{ $resetToken }}"
         class="btn">Passwort zurücksetzen</a>
 
     <h4>

@@ -16,7 +16,6 @@ import Alert from '@/components/KERN/Alert.vue';
 import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
 
 const router = useRouter();
-const route = useRoute();
 const showRegisterErrorMessage = ref(false);
 const registerErrorMessage = ref('');
 const showSuccessMessage = ref(false);
@@ -27,34 +26,54 @@ interface RegisterForm {
     password_confirmation: string;
     accept_terms: boolean;
 }
-
 const validationSchema = toTypedSchema(
     zod.object({
         email: zod
-            .string()
-            .nonempty()
-            .email()
-            .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
+            .string({
+               required_error: 'Die E-Mail-Adresse ist erforderlich.',
+            })
+            .nonempty('Die E-Mail-Adresse ist erforderlich.')
+            .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
         password: zod
-            .string()
-            .min(6)
-            .nonempty()
-            .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
+            .string({
+                required_error: 'Das Passwort ist erforderlich.',
+            })
+            .nonempty('Das Passwort ist erforderlich.')
+            .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+            .trim(),
         password_confirmation: zod
-            .string()
-            .min(6)
-            .nonempty()
+            .string({
+                required_error: 'Die Passwortbestätigung ist erforderlich.',
+            })
+            .nonempty('Das Passwort ist erforderlich.')
+            .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+            .trim()
             .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
         accept_terms: zod
             .boolean()
-            .default(false)
-            .refine((val) => val === true, {
+            .refine((val) => val, {
                 message: 'Die Nutzungsbedingungen müssen akzeptiert werden.',
-            }),
-    }) satisfies ZodType<RegisterForm>
+            })
+            .default(false),
+    }).superRefine(({ password, password_confirmation }, ctx) => {
+        if (password !== password_confirmation) {
+            ctx.addIssue({
+                path: ['password_confirmation'],
+                code: zod.ZodIssueCode.custom,
+                message: 'Die Passwörter stimmen nicht überein.',
+            });
+        }
+    })
 );
+
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
     validationSchema,
+    initialValues: {
+        email: import.meta.env.VITE_LOGIN_EMAIL || '',
+        password: import.meta.env.VITE_LOGIN_PASSWORD || '',
+        password_confirmation: import.meta.env.VITE_LOGIN_PASSWORD || '',
+        accept_terms: false
+    }
 });
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
@@ -63,7 +82,7 @@ const { value: accept_terms } = useField<boolean>('accept_terms');
 
 const onSubmit = handleSubmit(async (values) => {
     try {
-        const { data } = await dsgApi.post('/auth/register', <RegisterForm>{
+        await dsgApi.post('/auth/register', <RegisterForm>{
             ...values,
         });
         showSuccessMessage.value = true;
@@ -98,6 +117,7 @@ if (checkLogin()) {
                     <form
                         novalidate
                         @submit.prevent="onSubmit"
+                        class="flex flex-column gap-2"
                     >
                         <InputEmail
                             v-model="email"
@@ -115,7 +135,7 @@ if (checkLogin()) {
                         <InputPassword
                             v-model="password_confirmation"
                             label="Passwort bestätigen"
-                            name="password_confirm"
+                            name="password_confirmation"
                             :errors="submitCount === 0 ? undefined : errors.password_confirmation"
                         />
                         <InputCheckbox

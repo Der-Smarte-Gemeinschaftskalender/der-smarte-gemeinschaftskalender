@@ -84,7 +84,7 @@ onBeforeUnmount(() => {
         :errors="errors"
         class="rich-text-editor-container"
     >
-        <div class="w-full">
+        <div class="w-full rich-text-wrapper">
             <section
                 class="toolbar flex flex-wrap gap-2 align-items-center border-top-1 border-left-1 border-right-1 border-gray-300 p-2"
             >
@@ -175,35 +175,42 @@ onBeforeUnmount(() => {
     </FormInputLabel>
 </template>
 
-<style scoped>
-.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+<style>
+.kern-form-input--error .prose {
+    border-color: #BD0F09 !important;
+    background-color: #FEECE8 !important;
+}
 
-    .kern-icon {
-        border-radius: 6px;
-        padding: 4px;
-        transition: all 0.15s ease;
-        cursor: pointer;
-        scale: 1.2;
+.rich-text-wrapper {
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
 
-        &:hover {
-            opacity: 1;
-            filter: brightness(1);
-            background-color: #f3f3f3;
-        }
+        .kern-icon {
+            border-radius: 6px;
+            padding: 4px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            scale: 1.2;
 
-        &.is-active {
-            opacity: 1;
-            filter: none;
-            background-color: rgba(43, 44, 106, 0.2);
-        }
+            &:hover {
+                opacity: 1;
+                filter: brightness(1);
+                background-color: #f3f3f3;
+            }
 
-        &[disabled] {
-            opacity: 0.4;
-            pointer-events: none;
-            filter: grayscale(1);
+            &.is-active {
+                opacity: 1;
+                filter: none;
+                background-color: rgba(43, 44, 106, 0.2);
+            }
+
+            &[disabled] {
+                opacity: 0.4;
+                pointer-events: none;
+                filter: grayscale(1);
+            }
         }
     }
 }

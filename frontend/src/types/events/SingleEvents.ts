@@ -6,8 +6,15 @@ import { CreatedEventSchema } from "@/types/events/CreatedEvents";
 
 export const SingleEventRequestSchema = DefaultEventSchema.extend({
     name: zod
-        .string()
-        .nonempty(),
+        .string({
+            required_error: 'Der Name des Termins ist erforderlich.',
+        })
+        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
+        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .refine(
+            (val) => val.trim().length > 0, {
+                message: "Der Name darf nicht leer sein."
+        }),
     start: zod
         .string()
         .date()
@@ -28,7 +35,7 @@ export const SingleEventResponseSchema = DefaultEventSchema.extend({
         .nonnegative(),
     name: zod
         .string()
-        .nonempty(),
+        .min(3),
     user_id: zod
         .number()
         .nonnegative()
@@ -40,14 +47,21 @@ export type SingleEventResponse = zod.infer<typeof SingleEventResponseSchema>;
 
 export const SingleEventFormSchema = DefaultEventFormSchema.extend({
     name: zod
-        .string()
-        .min(2),
+        .string({
+            required_error: 'Der Name ist erforderlich.',
+        })
+        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
+        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .refine(
+            (val) => val.trim().length >= 3, {
+                message: "Der Name darf nicht leer sein."
+        }),
     description: zod
         .string()
         .refine(
-            (val) => stripHtml(val).length > 0,
-            { message: "Die Beschreibung darf nicht leer sein." }
-        ),
+            (val) => stripHtml(val).length > 0, {
+                message: "Die Beschreibung darf nicht leer sein."
+        }),
     start: zod
         .string()
         .date()
