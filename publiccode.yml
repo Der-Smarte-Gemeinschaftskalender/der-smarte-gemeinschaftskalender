@@ -1,0 +1,61 @@
+publiccodeYmlVersion: "0.4"
+name: "Der Smarte Gemeinschaftskalender"    # Name ihres Projekts
+url: "https://gitlab.opencode.de/sh/digitalhub-sh/landesprogramm-offene-innovationen/smarter-gemeinschaftskalender"    # URL zu Ihrem Projekt (es muss sich um eine URL zu einem Projekt, nicht zu einer Gruppe handeln)
+landingURL: "https://der-smarte-gemeinschaftskalender.de/"    # URL zu der Webseite ihrer Software
+softwareVersion: "1.0.1"    # Version ihrer Software
+releaseDate: "2025-10-17"    # Veröffentlichungsdatum ihrer Software
+logo: DSG-Icon.png     # Pfad zu ihrem Logo im Wurzelverzeichnis. Erlaubte Dateiformate sind: .svg, .svgz und .png
+platforms:    # Unterstützte Plattformen. Mögliche Angaben: web, windows, mac, linux, ios, android
+  - linux
+usedBy:    # Prominente Nutzung Ihrer Software / Wer nutzt Ihre Sotware bereits?
+  - Amt Süderbrarup
+categories:    # Kategorien, die Ihre Software beschreiben 
+  - community
+  - termine
+  - veranstaltungen
+  - organisationen
+developmentStatus: development    # Entwicklungsstatus (Mögliche Angaben: concept, development, beta, stable, obsolete)
+softwareType: "standalone/web"    # Typ (Mögliche Angaben: standalone/backend, standalone/desktop, standalone/iot, 
+                                      # standalone/mobile, standalone/web, standalone/other, addon, library, configurationFiles)
+localisation:
+  localisationReady: true
+  availableLanguages:    # Unterstützte Sprachen (gemäß IETF BCP 47 language tag)
+    - de
+intendedAudience:
+    countries: # Länder (https://de.wikipedia.org/wiki/ISO-3166-1-Kodierliste), die der Zielgruppe entsprechen. In Kleinbuchstaben!
+        - "de"
+    scope: # Themenbereiche, die am ehsten denen Ihrer Software entsprechen. Die unterstützten Einträge finden sich unter https://yml.publiccode.tools/scope-list.html#scope-list. Es sind keine eigenen Einträge möglich
+        - "local-authorities"
+        - "environment"
+description:
+  de:
+    genericName: "Web Browser, Email, Ical, Kalender"    # Funktion ihre Projekts (max. 35 Zeichen, z.B. "Texteditor", "Textverarbeitung", "Webbrowser", "Chat")
+    shortDescription: >    # Kurze Beschreibung AUF DEUTSCH (Maximal 150 Zeichen)
+      Alle Termine im Blick – die Open-Source-Lösung für eine starke Gemeinschaft
+    longDescription: >    # Ausführliche Beschreibung AUF DEUTSCH (zwischen 500 und 10000 Zeichen)
+      Der Smarte Gemeinschaftskalender ist eine Open-Source-Lösung, die darauf abzielt, die Planung und Kommunikation von Veranstaltungen in Gemeinden und Organisationen zu optimieren. Verschiedenste Funktionen und Automatisierungen unterstützen Veranstalter*innen bei der Verbreitung ihrer Angebote – Einzel- und Serientermine, iCal-Importe oder Kalenderintegrationen.
+
+      Gleichzeitig gewährleistet die Integration unterschiedlicher barrierearmer Kommunikationskanäle – von Webanwendung über personalisierte E-Mail-Benachrichtigungen und Infotafelanbindungen –, dass alle interessierten Bürger*innen, unabhängig von ihren technischen Fähigkeiten, über aktuelle Veranstaltungen informiert werden.
+
+      Als offene Lösung ermöglicht unsere Softwarelösung eine dezentrale Vernetzung von Kalendern. Das bedeutet: Veranstaltungsdaten können nicht nur lokal, sondern auch (über-)regional über verschiedene Installationen geteilt werden.
+
+    features:    # Auflistung der Features ihrer Software
+      - Das erste Feature 
+      - Ein anderes zweites Feature
+    screenshots:    # Screenshots zu ihrem Projekt 
+      - .opencode/screenshots/screenshot-startseite.png
+      - .opencode/screenshots/screenshot_kalender.png
+      - .opencode/screenshots/screenshot-organisations-seite.png
+      - .opencode/screenshots/screenshot_werbemittel_generator.png
+legal:
+  license: AGPL-3.0-or-later    # Die Open-Source-Lizenz ihrer Software 
+maintenance:
+  type: "contract"    # Art der Betreuung der Software (Mögliche Angaben: internal, contract, community, none)
+  contacts:    # Auflistung von Kontakten, welche ihre Software betreuen
+    - name: "54 Grad Software GmbH"
+      email: "kontakt@54gradsoftware.de"
+  contractors:    # Vertragspartner:innen
+    - name: "54 Grad Software GmbH"
+      email: "kontakt@54gradsoftware.de"
+      website: "54gradsoftware.de"
+      until: "2033-01-01"
