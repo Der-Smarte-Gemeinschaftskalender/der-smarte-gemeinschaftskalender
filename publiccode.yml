@@ -57,5 +57,5 @@ maintenance:
   contractors:    # Vertragspartner:innen
     - name: "54 Grad Software GmbH"
       email: "kontakt@54gradsoftware.de"
-      website: "54gradsoftware.de"
+      website: "https://54gradsoftware.de"
       until: "2033-01-01"
