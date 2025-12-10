@@ -54,7 +54,9 @@ class SeriesEventController extends Controller implements HasMiddleware
 
     public function show(SeriesEvent $seriesEvent): SeriesEvent
     {
-        $seriesEvent->load('created_events');
+        $seriesEvent->created_events = CreatedEvent::where('series_events_id', $seriesEvent->id)
+            ->orderBy('start', 'ASC')
+            ->get();
         $seriesEvent->load('user');
         return $seriesEvent;
     }

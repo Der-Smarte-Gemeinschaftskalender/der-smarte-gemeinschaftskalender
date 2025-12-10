@@ -37,6 +37,10 @@ const validationSchema = toTypedSchema(
             .string({
                 required_error: 'Der Benutzername der Organisation ist erforderlich.',
             })
+            .regex(/^[a-z][a-z0-9_]*$/, {
+                message:
+                    'Bitte einen gültigen Benutzernamen eingeben z.B.: Kleinbuchstaben ohne Umlaute, Zahlen oder Unterstrich.',
+            })
             .nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
         summary: zod
             .string({

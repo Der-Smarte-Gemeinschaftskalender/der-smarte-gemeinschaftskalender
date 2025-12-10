@@ -91,7 +91,6 @@ export const mobilizon_main_category_options: Option[] = [
             MobilizonCategoryAndAll.BOOK_CLUBS,
             MobilizonCategoryAndAll.MEETING,
             MobilizonCategoryAndAll.CAUSES,
-            MobilizonCategoryAndAll.FAMILY_EDUCATION
         ]
     },
     {
@@ -104,7 +103,8 @@ export const mobilizon_main_category_options: Option[] = [
             MobilizonCategoryAndAll.FASHION_BEAUTY,
             MobilizonCategoryAndAll.GAMES,
             MobilizonCategoryAndAll.AUTO_BOAT_AIR,
-            MobilizonCategoryAndAll.FOOD_DRINK
+            MobilizonCategoryAndAll.FOOD_DRINK,
+            MobilizonCategoryAndAll.FAMILY_EDUCATION
         ]
     },
     {

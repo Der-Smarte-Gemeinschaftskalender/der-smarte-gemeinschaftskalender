@@ -48,6 +48,7 @@ const changeStatus = async (id: number, status: string) => {
     loadingNewState.value = true;
     showErrorMessage.value = false;
     try {
+        loading.value = true;
         await dsgApi.post(`/organisations/changeOrganisationStatus/${id}`, { status });
     } catch (error) {
         console.error('Error changing status:', error.response.data.error);
@@ -56,6 +57,7 @@ const changeStatus = async (id: number, status: string) => {
             error?.response?.data?.error || 'Beim Ändern des Organisationsstatus ist ein Fehler aufgetreten.';
     } finally {
         loadingNewState.value = false;
+        loading.value = false;
     }
 };
 </script>

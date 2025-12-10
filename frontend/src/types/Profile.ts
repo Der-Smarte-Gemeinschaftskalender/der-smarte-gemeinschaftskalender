@@ -1,4 +1,4 @@
-import zod, {ZodType} from 'zod';
+import zod, { ZodType } from 'zod';
 
 
 

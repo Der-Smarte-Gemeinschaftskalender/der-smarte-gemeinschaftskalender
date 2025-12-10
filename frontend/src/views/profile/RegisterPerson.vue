@@ -29,7 +29,10 @@ const validationSchema = toTypedSchema(
         preferredUsername: zod
             .string()
             .nonempty()
-            .regex(/^[a-zA-Z0-9_]+$/, 'Der Benutzername darf nur Buchstaben und Zahlen enthalten.'),
+            .regex(/^[a-z][a-z0-9_]*$/, {
+                message:
+                    'Bitte einen gültigen Benutzernamen eingeben z.B.: Kleinbuchstaben ohne Umlaute, Zahlen oder Unterstrich.',
+            }),
     }) satisfies ZodType<RegisterPersonForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
