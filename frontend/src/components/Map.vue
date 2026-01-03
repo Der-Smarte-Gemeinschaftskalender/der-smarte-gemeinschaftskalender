@@ -37,6 +37,7 @@ const isLoading = ref(false);
 // custom icon
 let myIcon = L.icon({
     iconUrl: '/marker-icon.png',
+    iconAnchor: [13, 40],
     shadowUrl: '/marker-shadow.png',
 });
 
