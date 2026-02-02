@@ -31,7 +31,7 @@ const columns = [
     {
         key: 'is_active',
         name: 'Status',
-        format: (value: number) => (!!value ? 'Aktiv' : 'Inaktiv'),
+        format: (value: number) => (value ? 'Aktiv' : 'Inaktiv'),
         align: 'left',
     },
     {

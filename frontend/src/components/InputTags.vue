@@ -58,18 +58,18 @@ const removeTag = (tag: string) => {
         <div class="flex flex-wrap align-items-baseline gap-4">
             <div class="col-12 md:col-6 px-0">
                 <InputText
+                    v-model="newTag"
                     label="Schlagwörter hinzufügen"
                     name="tags"
-                    v-model="newTag"
                     @keyup.enter="addTag(newTag)"
                 />
             </div>
 
             <div class="">
                 <Button
-                    @click.prevent="addTag(newTag)"
                     class="mt-5"
                     icon-left="add"
+                    @click.prevent="addTag(newTag)"
                 >
                     Hinzufügen
                 </Button>
@@ -91,9 +91,9 @@ const removeTag = (tag: string) => {
             >
                 <Button
                     variant="secondary"
-                    @click.capture="removeTag(tag)"
                     icon-left="delete"
                     class="mr-2 mb-2"
+                    @click.capture="removeTag(tag)"
                 >
                     {{ tag }}
                 </Button>
@@ -107,12 +107,12 @@ const removeTag = (tag: string) => {
                 :key="suggestion"
             >
                 <Button
+                    v-if="!tags.find((tag) => suggestion === tag)?.length"
                     variant="secondary"
-                    @click="addSuggestion(suggestion)"
                     icon-left="add"
                     :submit="false"
                     class="mr-2 mb-2 tag-suggestion-button"
-                    v-if="!tags.find((tag) => suggestion === tag)?.length"
+                    @click="addSuggestion(suggestion)"
                 >
                     {{ suggestion }}
                 </Button>

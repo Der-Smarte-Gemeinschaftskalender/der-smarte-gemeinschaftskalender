@@ -5,50 +5,62 @@ import { useRoute } from 'vue-router';
 import Icon from './KERN/cosmetics/Icon.vue';
 import Button from './KERN/Button.vue';
 import Overlayable from '@/components/Overlayable.vue';
+import { instanceInformation, mainHeader } from '@/lib/instanceConfig';
 
 interface Props {
-  showNavigation?: boolean;
+    showNavigation?: boolean;
 }
 
-const logoUrl = import.meta.env.VITE_APP_LOGO_PATH || '/logo.png';
+const logoUrl = '/logo.png';
 const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
-const instanceName = ref<string>(import.meta.env.VITE_INSTANCE_NAME);
+const instanceName = ref<string>(instanceInformation.name);
 
 const route = useRoute();
 
 const { showNavigation = true } = defineProps<Props>();
 
-const navigationItems = [
+let navigationItems = [
     {
         title: 'Veranstaltungen',
         icon: 'list_alt',
         name: 'public.search',
         button: false,
     },
-    {
-        title: 'Kalender',
-        icon: 'calendar_month',
-        name: 'public.calendar',
-        button: false,
-    },
-    {
-        title: 'Organisationen',
-        icon: 'account_balance',
-        name: 'public.organisations',
-        button: false,
-    },
-    {
-        title: 'Über den Kalender',
-        icon: 'contact',
-        link: 'https://der-smarte-gemeinschaftskalender.de',
-        button: false,
-    },
-    {
-        title: 'Intern',
-        icon: 'login',
-        name: 'login',
-        button: true,
-    },
+];
+if (mainHeader.showCalendarLink) {
+    navigationItems = [
+        ...navigationItems,
+        {
+            title: 'Kalender',
+            icon: 'calendar_month',
+            name: 'public.calendar',
+            button: false,
+        },
+    ];
+}
+
+navigationItems = [
+    ...navigationItems,
+    ...[
+        {
+            title: 'Organisationen',
+            icon: 'account_balance',
+            name: 'public.organisations',
+            button: false,
+        },
+        {
+            title: mainHeader.externalLinkText,
+            icon: 'contact',
+            link: mainHeader.externalLinkUrl,
+            button: false,
+        },
+        {
+            title: 'Intern',
+            icon: 'login',
+            name: 'login',
+            button: true,
+        },
+    ],
 ];
 
 const showNotificationImageInHeader = ref<boolean>(false);
@@ -62,15 +74,15 @@ watch(
 </script>
 
 <template>
-    <header class="py-3">
+    <header class="py-3 main-header">
         <div class="header-content">
             <div class="flex flex-column lg:flex-row gap-3 lg:gap-0">
                 <div
-                    class="flex  justify-content-between"
+                    class="flex justify-content-between"
                     :class="{
                         'lg:w-fit flex-column lg:flex-row gap-4 lg:align-items-center': !showNavigation,
-                        'lg:w-fit': showNavigation
-                     }"
+                        'lg:w-fit': showNavigation,
+                    }"
                 >
                     <RouterLink :to="{ name: 'landingpage' }">
                         <img
@@ -79,24 +91,27 @@ watch(
                             :alt="`Logo ${instanceName}`"
                         />
                     </RouterLink>
-                    <slot name="after-logo" class="text-right" />
+                    <slot
+                        name="after-logo"
+                        class="text-right"
+                    />
                     <div
                         v-if="showNavigation"
                         class="flex lg:hidden gap-2"
                     >
                         <RouterLink
                             v-if="!$route.path?.toString().includes('app')"
-                            :to="{ name: navigationItems[4].name }"
-                            class="py-0"
+                            :to="{ name: navigationItems[navigationItems.length - 1]?.name }"
+                            class="py-0 hidden sm:flex md:hidden"
                         >
                             <Button
                                 :icon-size="'md'"
                                 class="text-sm min-h-0 p-2"
                                 :body-class="'py-0'"
-                                :icon-left="navigationItems[4].icon"
+                                :icon-left="navigationItems[navigationItems.length - 1]?.icon"
                                 variant="secondary"
-                                :title="navigationItems[4].title"
-                                :aria-label="navigationItems[4].title"
+                                :title="navigationItems[navigationItems.length - 1]?.title"
+                                :aria-label="navigationItems[navigationItems.length - 1]?.title"
                             />
                         </RouterLink>
                         <Button
@@ -112,10 +127,10 @@ watch(
                     </div>
                 </div>
                 <Overlayable
+                    v-if="showNavigation"
                     ref="overlayable"
                     panel-class="main-navigation kern-col hidden sm:flex flex-wrap w-full align-content-center justify-content-end"
                     overlay-class="flex flex-column gap-2 p-4"
-                    v-if="showNavigation"
                 >
                     <template
                         v-for="(navigationItem, index) in navigationItems"
@@ -125,17 +140,17 @@ watch(
                             v-if="navigationItem.name"
                             :to="{ name: navigationItem.name }"
                             class="my-2 py-1 w-min align-items-center align-content-center underline text-theme-primary font-medium"
-                            @click="overlayable?.closeOverlay()"
                             :active-class="
                                 navigationItem.name != 'login' ? 'router-link-active' : 'router-link-active-button'
                             "
                             :class="{
                                 hidden: navigationItem.name === 'login' && $route.path?.toString().includes('app'),
-                                'flex sm:hidden lg:flex sm:pl-3':
+                                'sm:hidden md:flex md:pl-3':
                                     navigationItem.name === 'login' && !$route.path?.toString().includes('app'),
                                 'sm:px-3': !navigationItem.button && index !== 0,
                                 'pr-3': index === 0,
                             }"
+                            @click="overlayable?.closeOverlay()"
                         >
                             <span
                                 v-if="!navigationItem.button"
@@ -226,8 +241,6 @@ header {
         height: 0.5rem;
         background-image: linear-gradient(to right, #a9d3a9, #7dcce8);
     }
-
-
 
     @media (min-width: 1024px) {
         .logo-image {

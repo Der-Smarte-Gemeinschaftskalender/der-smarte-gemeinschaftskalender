@@ -5,15 +5,15 @@ import type { IEvent, IEventDetailed, IOrganisation, MobilizonStatistics } from 
 import type { AddressForm } from '@/types/Mobilizon';
 
 
-export const findNextEvents = async (limit: number = 5, beginsOn: Date | null = null, endsOn: Date | null = null): Promise<{
+export const findNextEvents = async (limit: number = 5, beginsOn: Date | null = null, endsOn: Date | null = null, searchTarget: string = 'INTERNAL'): Promise<{
   __typename: string,
   elements: IEvent[],
   total: number
 }> => {
   const response = await apolloClient.query({
     query: gql`
-                query SearchEvents($limit: Int!, $sortBy: SearchEventSortOptions!, $beginsOn: DateTime, $endsOn: DateTime) {
-                    searchEvents(limit: $limit, sortBy: $sortBy, beginsOn: $beginsOn, endsOn: $endsOn) {
+                query SearchEvents($limit: Int!, $sortBy: SearchEventSortOptions!, $beginsOn: DateTime, $endsOn: DateTime, $searchTarget: SearchTarget!) {
+                    searchEvents(limit: $limit, sortBy: $sortBy, beginsOn: $beginsOn, endsOn: $endsOn, searchTarget: $searchTarget) {
                         elements {
                             beginsOn
                             category
@@ -32,6 +32,9 @@ export const findNextEvents = async (limit: number = 5, beginsOn: Date | null = 
                                 id
                                 name
                             }
+                            physicalAddress {
+                                geom
+                            }
                         }
                         total
                     }
@@ -41,9 +44,11 @@ export const findNextEvents = async (limit: number = 5, beginsOn: Date | null = 
       limit,
       sortBy: 'START_TIME_ASC',
       beginsOn,
-      endsOn
+      endsOn,
+      searchTarget
     },
   });
+  console.log(response);
 
   return response?.data?.searchEvents;
 }
@@ -163,8 +168,8 @@ export const findEvent = async (uuid: string): Promise<IEventDetailed> => {
 }
 
 export const searchEvents = async (page = 1, limit: number | null = null, term = '', searchTarget: string | null = null, beginsOn: string = new Date().toISOString(), endsOn: string | null = null, categoryOneOf: string[] | null = null, statusOneOf: string[] | null = null, languageOneOf: string[] | null = null, location: string | null = null, radius: number | null = null, fields: string = ''): Promise<{
-    searchEvents: any,
-    total: number
+  searchEvents: any,
+  total: number
 }> => {
   const response = await apolloClient.query({
     query: gql`
@@ -209,7 +214,7 @@ export const searchEvents = async (page = 1, limit: number | null = null, term =
       beginsOn
       endsOn
       
-      ${!!fields ? '... on Event {' + fields + '}' : ''}
+      ${fields ? '... on Event {' + fields + '}' : ''}
   
         attributedTo {
             name
@@ -364,7 +369,7 @@ export const findMobilizonStatistics = async (): Promise<MobilizonStatistics | u
   return response?.data?.statistics as MobilizonStatistics;
 }
 
-export const findOrganisations = async (limit = 50): Promise<{ elements: IOrganisation[], total: number }> => {
+export const findOrganisations = async (limit = 500): Promise<{ elements: IOrganisation[], total: number }> => {
   const response = await apolloClient.query({
     query: gql`
             query SearchGroups($limit: Int) {

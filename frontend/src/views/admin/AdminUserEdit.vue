@@ -111,8 +111,7 @@ loadUser();
         <LinkToDocs
             path="Terminverwaltung/Instanz/"
             fragment="nutzer-innen-verwalten"
-        />
-        .
+        />.
     </p>
     <Alert
         v-if="showErrorMessage"
@@ -188,8 +187,8 @@ loadUser();
         <ConfirmDialog
             v-model="showDeleteDialog"
             title="Willst du diesen Benutzer wirklich löschen?"
+            :confirm-text="'Löschen'"
             @confirm="deleteUser"
-            :confirmText="'Löschen'"
         />
         <div class="flex flex-wrap justify-content-center gap-4 mt-6">
             <Button

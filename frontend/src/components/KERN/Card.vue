@@ -52,8 +52,8 @@ const onImageError = (event: Event) => {
             :class="[bodyClass]"
         >
             <header
-                class="kern-card__header"
                 v-if="!!label || !!title || !!subtitle"
+                class="kern-card__header"
             >
                 <p
                     v-if="label"

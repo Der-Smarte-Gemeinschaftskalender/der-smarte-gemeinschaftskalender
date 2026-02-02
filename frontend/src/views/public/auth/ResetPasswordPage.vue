@@ -82,9 +82,9 @@ const onSubmit = handleSubmit(async (values) => {
                     />
 
                     <form
+                        v-if="!showSuccessMessage"
                         novalidate
                         @submit.prevent="onSubmit"
-                        v-if="!showSuccessMessage"
                     >
                         <InputPassword
                             v-model="password"

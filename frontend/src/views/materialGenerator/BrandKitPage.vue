@@ -107,12 +107,10 @@ loadBrandKit();
             Im Markenkit können Sie die Designvorgaben Ihrer Organisation speichern. Diese können für die Erstellung von
             Veranstalungsakündigungen genutzt werden. Jedes Mitglied Ihrer Organisation kann bei der Nutzung des
             Werbemittelgenerators darauf zugreifen. So sparen Sie Zeit und stellen ein einheitliches Erscheinungsbild
-            sicher. Ihr Logo hinterlegen Sie im Bereich Organisation. Weitere Informationen finden Sie im
-            <LinkToDocs
+            sicher. Ihr Logo hinterlegen Sie im Bereich Organisation. Weitere Informationen finden Sie im <LinkToDocs
                 path="Werbemittelgenerator/"
                 fragment="markenkit"
-            />
-            .
+            />.
         </p>
     </div>
     <div>
@@ -120,44 +118,44 @@ loadBrandKit();
         <h3 class="kern-heading text-theme-primary mt-5">Texte</h3>
 
         <InputColor
+            v-model="underlineColor"
             class="mt-3"
             name="underlineColor"
             label="Farbe der Trennlinien"
-            v-model="underlineColor"
         />
         <InputColor
+            v-model="selectedTextColor"
             class="mt-3"
             name="selectedTextColor"
             label="Textfarbe"
-            v-model="selectedTextColor"
         />
         <InputSelect
+            v-model="selectedFont"
             label="Schriftart"
             name="selectedFont"
             :options="fontSelectionOptions"
-            v-model="selectedFont"
         />
 
         <h3 class="kern-heading text-theme-primary mt-5">Überschrift (optional)</h3>
 
         <InputText
+            v-model="headlineText"
             label="Text Überschrift"
             name="headlineText"
-            v-model="headlineText"
         />
 
         <InputSelect
+            v-model="selectedFontHeadline"
             label="Schriftart"
             name="selectedFontHeadline"
             :options="fontSelectionOptions"
-            v-model="selectedFontHeadline"
         />
 
         <InputColor
+            v-model="selectedTextColorHeadline"
             class="mt-3"
             name="selectedTextColorHeadline"
             label="Textfarbe"
-            v-model="selectedTextColorHeadline"
         />
         <h2 class="kern-heading text-theme-primary mt-5">Hintergrundbilder</h2>
         <Alert title="Information">
@@ -171,8 +169,7 @@ loadBrandKit();
                 <LinkToDocs
                     path="Werbemittelgenerator/"
                     fragment="richtlinien-fur-die-hintergrunderstellung"
-                />
-                .
+                />.
             </p>
         </Alert>
         <h3 class="kern-heading text-theme-primary mt-5">Veranstaltungsübersichten</h3>

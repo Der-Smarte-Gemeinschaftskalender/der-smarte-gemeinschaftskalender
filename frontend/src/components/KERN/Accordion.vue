@@ -40,8 +40,8 @@ defineProps<Props>();
             </summary>
             <section class="kern-accordion__content">
                 <p
-                    class="kern-text"
                     v-if="accordion.content"
+                    class="kern-text"
                 >
                     {{ accordion.content }}
                 </p>

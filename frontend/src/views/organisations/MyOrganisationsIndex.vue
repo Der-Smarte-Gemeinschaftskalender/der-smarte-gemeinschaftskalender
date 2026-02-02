@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { setOrganisationData } from '@/composables/OrganisationComposable';
 import { requested_organisation_status } from '@/lib/const';
 import { dsgApi } from '@/lib/dsgApi';
 
 import Button from '@/components/KERN/Button.vue';
 import Table from '@/components/KERN/Table.vue';
+import Alert from '@/components/KERN/Alert.vue';
 
 import type { Column } from '@/types/General';
 
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
 const router = useRouter();
+const route = useRoute();
 
 const columns: Array<Column> = [
     {
@@ -107,9 +109,14 @@ const acceptInvitation = async (membershipId: string) => {
         <LinkToDocs
             path="Terminverwaltung/Organisation/"
             fragment="organisationsadministration"
-        />
-        .
+        />.
     </p>
+    <Alert
+        v-if="route.query.requestSent === 'true'"
+        title="Anfrage gesendet"
+        content="Ihr Organisationsantrag wurde zur Genehmigung eingereicht. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde."
+        severity="info"
+    />
 
     <Table
         :api="{
@@ -120,8 +127,8 @@ const acceptInvitation = async (membershipId: string) => {
     >
         <template #aktionen="{ row }">
             <div
-                class="flex justify-content-end flex-wrap gap-2"
                 v-if="row.role === 'ADMINISTRATOR' && row?.parent"
+                class="flex justify-content-end flex-wrap gap-2"
             >
                 <RouterLink
                     :to="{
@@ -170,15 +177,15 @@ const acceptInvitation = async (membershipId: string) => {
                 </RouterLink>
             </div>
             <div
-                class="flex justify-content-end flex-wrap gap-2"
                 v-else-if="row.role === 'INVITED'"
+                class="flex justify-content-end flex-wrap gap-2"
             >
                 <Button
                     title="Annehmen"
                     aria-label="Annehmen"
                     variant="secondary"
-                    @click="acceptInvitation(row.id)"
                     :hide-text-on-mobile="true"
+                    @click="acceptInvitation(row.id)"
                 >
                     Einladung annehmen
                 </Button>
@@ -186,8 +193,8 @@ const acceptInvitation = async (membershipId: string) => {
                     title="Ablehnen"
                     aria-label="Ablehnen"
                     variant="secondary"
-                    @click="rejectInvitation(row.id)"
                     :hide-text-on-mobile="true"
+                    @click="rejectInvitation(row.id)"
                 >
                     Einladung ablehnen
                 </Button>

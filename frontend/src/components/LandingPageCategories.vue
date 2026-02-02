@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { mobilizon_main_category_options } from "@/lib/const";
+import { mobilizon_main_category_options } from '@/lib/const';
 
-import Button from "@/components/KERN/Button.vue";
-import Card from "@/components/KERN/Card.vue";
+import Button from '@/components/KERN/Button.vue';
+import Card from '@/components/KERN/Card.vue';
 
 const router = useRouter();
 
 const navigateToCategorySearch = (categoryValue: string) => {
-    const subCategories = mobilizon_main_category_options.find(cat => cat.value === categoryValue)?.sub_categories;
+    const subCategories = mobilizon_main_category_options.find((cat) => cat.value === categoryValue)?.sub_categories;
     localStorage.setItem('searchCategory', JSON.stringify(subCategories));
 
     router.push({ name: 'public.search' });
@@ -17,9 +17,7 @@ const navigateToCategorySearch = (categoryValue: string) => {
 
 <template>
     <div>
-        <h3 class="kern-heading text-theme-primary mb-4 pt-0">
-            Kategorien erkunden
-        </h3>
+        <h3 class="kern-heading text-theme-primary mb-4 pt-0">Kategorien erkunden</h3>
 
         <div class="cards-template">
             <div
@@ -45,6 +43,4 @@ const navigateToCategorySearch = (categoryValue: string) => {
     </div>
 </template>
 
-<style scoped lang="scss">
-
-</style>
+<style scoped lang="scss"></style>

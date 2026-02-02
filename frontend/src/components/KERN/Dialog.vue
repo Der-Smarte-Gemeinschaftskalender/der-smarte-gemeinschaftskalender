@@ -18,8 +18,8 @@ watch(model, (newVal) => {
 </script>
 <template>
     <div
-        class="dialog-overlay h-full w-full fixed top-0 left-0 flex align-items-center justify-content-center"
         v-if="model"
+        class="dialog-overlay h-full w-full fixed top-0 left-0 flex align-items-center justify-content-center"
     >
         <dialog
             id="modal1"
@@ -31,8 +31,8 @@ watch(model, (newVal) => {
         >
             <header class="kern-dialog__header">
                 <h2
-                    class="kern-dialog__heading"
                     id="modal1_heading"
+                    class="kern-dialog__heading"
                 >
                     {{ title }}
                 </h2>
@@ -44,8 +44,8 @@ watch(model, (newVal) => {
                 ></Button>
             </header>
             <section
-                class="kern-dialog__content"
                 v-if="showContent"
+                class="kern-dialog__content"
             >
                 <slot />
             </section>

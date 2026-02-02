@@ -1,8 +1,13 @@
 import zod from "@/lib/zod";
 import dayjs from "@/lib/dayjs";
 import { formatInputDate, stripHtml } from "@/lib/helper";
-import { DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
+import {
+    ApprovalRequestResponseSchema,
+    DefaultEventFormSchema,
+    DefaultEventSchema,
+} from "@/types/events/DefaultEvents";
 import { CreatedEventSchema } from "@/types/events/CreatedEvents";
+import { isStrictModeEnabled } from "@/lib/instanceConfig";
 
 export const SingleEventRequestSchema = DefaultEventSchema.extend({
     name: zod
@@ -44,6 +49,12 @@ export const SingleEventResponseSchema = DefaultEventSchema.extend({
 });
 
 export type SingleEventResponse = zod.infer<typeof SingleEventResponseSchema>;
+
+export const SingleEventCreateResponseSchema = isStrictModeEnabled
+    ? ApprovalRequestResponseSchema
+    : SingleEventResponseSchema;
+
+export type SingleEventCreateResponse = zod.infer<typeof SingleEventCreateResponseSchema>;
 
 export const SingleEventFormSchema = DefaultEventFormSchema.extend({
     name: zod

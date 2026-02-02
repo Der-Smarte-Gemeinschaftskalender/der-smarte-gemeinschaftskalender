@@ -9,6 +9,7 @@ use App\Models\Mobilizon;
 use App\Models\MobilizonTag;
 use App\Models\OrganisationStatus;
 use App\Models\User;
+use App\Models\ApprovalRequest;
 use Exception;
 use Http;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Mail;
 use Log;
 use rdx\graphqlquery\Query;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Services\ApprovalRequestService;
 
 class OrganisationController extends Controller implements HasMiddleware
 {
@@ -27,7 +29,7 @@ class OrganisationController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('is_admin', only: ['indexRequestedOrganisation', 'changeOrganisationStatus', 'indexOrganisation']),
+            new Middleware('is_admin', only: ['indexRequestedOrganisation', 'changeOrganisationStatus', 'indexOrganisation', 'showGroupById']),
         ];
     }
 
@@ -62,26 +64,33 @@ class OrganisationController extends Controller implements HasMiddleware
             }
         }
 
+    
+        $userWithSameUsernameExists = (bool) $adminClient->findProfileByPreferredUsername($validated['preferredUsername']);
+        if ($userWithSameUsernameExists) {
+            return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits von einem Benutzer verwendet wird.'], 422);
+        }
+        
+
         $newOrganisationStatus = new OrganisationStatus();
         $newOrganisationStatus->status = 'REQUESTED';
         $newOrganisationStatus->requested_organisation_data = $validated;
-        $newOrganisationStatus->requested_by_user_id = auth()->id();
+        $newOrganisationStatus->requested_by_user_id = $request->user()->id; // Authenticated user ?? manipulated user
         $newOrganisationStatus->save();
 
-        try {
-            $adminUsers = User::where('type', 'admin')->get();
-            foreach ($adminUsers as $adminUser) {
-                try {
-                    Mail::to($adminUser->email)
-                        ->send(new SendRequestOrganisationCreationEmail($validated['name']));
-                } catch (Exception $e) {
-                    Log::error('Error sending emails organisation request: ' . $e->getMessage());
-                }
-            }
-        } catch (Exception $e) {
-            Log::error('Error fetching admin users: ' . $e->getMessage());
+        $approvalRequestService = new ApprovalRequestService();
+        $result = $approvalRequestService->createApprovalRequest($request, 'Organisation', 'changeOrganisationStatus', $newOrganisationStatus->id);  
+        if ($result['success']) {
+            return response()->json([
+                    'message' => $result['message'],
+                    'approval_request_id' => $result['approval_request_id'],
+                ], 202);
+        } else {
+            $newOrganisationStatus->delete();
+            return response()->json([
+                'error' => $result['error'],
+                'details' => $result['details'] ?? null,
+            ], 500);
         }
-        return response()->json(['message' => 'Organisation creation requested successfully.'], 201);
     }
 
     public function indexRequestedOrganisationFromMe(): array
@@ -94,19 +103,24 @@ class OrganisationController extends Controller implements HasMiddleware
 
     public function indexRequestedOrganisation(): array
     {
-        $requestedOrganisations = OrganisationStatus::where('status', 'REQUESTED')->get();
+        $requestedOrganisations = OrganisationStatus::where('status', 'REQUESTED')
+            ->with(['requested_by_user' => function ($query) {
+                $query->select('id', 'mobilizon_name', 'mobilizon_preferred_username', 'email');
+            }])
+            ->get();
         return ['data' => $requestedOrganisations];
     }
 
     public function indexOrganisation(Request $request): array
     {
-        $status = $request->get('status') ?? 'ACTIVE';
+        $status = $request->input('status', 'ACTIVE');
         $organisations = OrganisationStatus::where('status', $status)->get();
         return ['data' => $organisations];
     }
 
-    public function changeOrganisationStatus(Request $request, OrganisationStatus $organisation): JsonResponse|OrganisationStatus
+    public function changeOrganisationStatus(Request $request, OrganisationStatus $organisation): JsonResponse
     {
+        // Seems like INACTIVE wasn't set anywhere before, so nothing changes here
         $validated = $request->validate([
             'status' => 'required|string|in:REQUEST_DENIED,ACTIVE,INACTIVE',
         ]);
@@ -127,6 +141,7 @@ class OrganisationController extends Controller implements HasMiddleware
                 $createdMobilizonGroup = $mclient->createGroup(
                     $organisation->requested_organisation_data
                 );
+
                 $organisation->mobilizon_group_id = $createdMobilizonGroup['data']['createGroup']['id'];
             } catch (\Exception $e) {
                 Log::error('Error creating Mobilizon group: ' . $e->getMessage());
@@ -137,7 +152,9 @@ class OrganisationController extends Controller implements HasMiddleware
         $organisation->status = $newStatus;
         $organisation->save();
 
-        return $organisation;
+        return response()->json([
+            'organisation' => $organisation
+        ], 200);
     }
 
     public function showGroup(Request $request)
@@ -148,8 +165,32 @@ class OrganisationController extends Controller implements HasMiddleware
         return $result;
     }
 
-    public function updateGroup(Request $request): array
+    public function showGroupById(Request $request, $group_id)
     {
+        $mclient = Mobilizon::getInstance();
+        $result = $mclient->getGroup($group_id);
+        return $result;
+    }
+
+    public function updateGroup(Request $request): JsonResponse|array
+    {
+        // Strict mode: create approval request instead of updating immediately
+        if (config('dsg.strict_mode')) {
+            $approvalRequestService = new ApprovalRequestService();
+            $result = $approvalRequestService->createApprovalRequest($request, 'Organisation', 'updateGroup', $request->input('id'));
+            if ($result['success']) {
+                return response()->json([
+                    'message' => $result['message'],
+                    'approval_request_id' => $result['approval_request_id'],
+                ], 202);
+            } else {
+                return response()->json([
+                    'error' => $result['error'],
+                    'details' => $result['details'] ?? null,
+                ], 500);
+            }
+        }
+
         $mclient = Mobilizon::getInstance();
         $groupData = [
             'id' => $request->input('id'),
@@ -167,7 +208,18 @@ class OrganisationController extends Controller implements HasMiddleware
         }
 
         $mresponse = $mclient->updateGroup($groupData, $request->hasFile('avatar.media.file'));
-        return $mresponse;
+        
+        // Check for errors in the Mobilizon response
+        if (isset($mresponse['errors']) || (isset($mresponse['data']) && isset($mresponse['data']['updateGroup']) && isset($mresponse['data']['updateGroup']['errors']))) {
+            return response()->json([
+                'error' => 'Failed to update group',
+                'details' => $mresponse['errors'] ?? $mresponse['data']['updateGroup']['errors'] ?? null,
+            ], 400);
+        }
+        
+        return response()->json([
+            'organisation' => $mresponse['data']['updateGroup']
+        ], 200);
     }
 
     public function inviteMember(Request $request): array

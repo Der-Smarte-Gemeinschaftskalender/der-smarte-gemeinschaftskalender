@@ -13,7 +13,7 @@ interface Props {
     pageSize?: number;
     valuesMaxLength?: number;
     data?: Ref<Array<any>> | Array<any>;
-    deleteUrl?: String;
+    deleteUrl?: string;
     deleteFunction?: (value: any) => Promise<void>;
     api?: {
         url: string;
@@ -116,8 +116,8 @@ else handleArrayData();
             :data="data"
         >
             <caption
-                class="kern-table__caption"
                 v-if="title"
+                class="kern-table__caption"
             >
                 {{ title }}
             </caption>
@@ -142,8 +142,8 @@ else handleArrayData();
             </thead>
             <tbody class="kern-table__body">
                 <tr
-                    v-if="displayData.length"
                     v-for="row in displayData"
+                    v-if="displayData.length"
                     :key="row.key"
                     class="kern-table__row"
                 >
@@ -162,7 +162,7 @@ else handleArrayData();
                                 :name="column.key"
                                 :column="column"
                                 :row="row"
-                                :deleteEntry="deleteEntry"
+                                :delete-entry="deleteEntry"
                             >
                                 <template v-if="!column.format">
                                     {{
@@ -205,33 +205,33 @@ else handleArrayData();
                                 class="flex align-items-center justify-content-around gap-2 sm:px-3 md:px-6 max-w-56rem w-full"
                             >
                                 <Button
-                                    @click="currentPage = 1"
                                     :disabled="currentPage <= 1"
                                     class="pagination-button text-3xl px-1"
                                     label="«"
                                     aria-label="Erste Seite"
+                                    @click="currentPage = 1"
                                 />
                                 <Button
-                                    @click="currentPage--"
                                     :disabled="currentPage <= 1"
                                     class="pagination-button text-3xl px-2"
                                     label="‹"
                                     aria-label="Voherige Seite"
+                                    @click="currentPage--"
                                 />
                                 <span class="pagination-info">Seite {{ currentPage }} von {{ allPages }}</span>
                                 <Button
-                                    @click="currentPage++"
                                     :disabled="currentPage >= allPages"
                                     class="pagination-button text-3xl px-2"
                                     label="›"
                                     aria-label="Nächste Seite"
+                                    @click="currentPage++"
                                 />
                                 <Button
-                                    @click="currentPage = allPages"
                                     :disabled="currentPage >= allPages"
                                     class="pagination-button text-3xl px-1"
                                     label="»"
                                     aria-label="Letzte Seite"
+                                    @click="currentPage = allPages"
                                 />
                             </div>
                         </div>

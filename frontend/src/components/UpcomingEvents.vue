@@ -6,6 +6,7 @@ import EventCard from './EventCard.vue';
 import Button from './KERN/Button.vue';
 
 import type { IEvent } from '@/types/General';
+import { landingPage } from '@/lib/instanceConfig';
 
 const events = ref<IEvent[]>([]);
 const totalEvents = ref<number>(0);
@@ -16,7 +17,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    maxEvents: 3,
+    maxEvents: landingPage.numberOfUpcomingEvents ?? 3,
     showLinkAllEventsButton: true,
 });
 
@@ -26,6 +27,11 @@ const loadEvents = async () => {
     totalEvents.value = nextEvents.total;
 };
 loadEvents();
+
+defineExpose({
+    events,
+    totalEvents,
+});
 </script>
 <template>
     <template v-if="events.length">

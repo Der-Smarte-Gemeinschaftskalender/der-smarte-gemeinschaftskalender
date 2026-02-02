@@ -1,13 +1,21 @@
-import { createRouter, createWebHashHistory, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory, createWebHistory, type RouteRecordRaw } from "vue-router";
 import { checkLogin, user } from "@/composables/UserComposoable";
 import type { RouteToMeta } from "@/types/Route";
-
-
+import { isStrictModeEnabled } from "@/lib/instanceConfig";
+import { allowedEventCreationsMethods } from '@/lib/instanceConfig';
 
 const router = createRouter({
     history: import.meta.env.PROD ? createWebHistory() : createWebHashHistory(),
-    scrollBehavior() {
-        return { top: 0 }
+    scrollBehavior(to, from, savedPosition) {
+        if (savedPosition) {
+            return savedPosition;
+        }
+        
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({ left: 0, top: 0, behavior: 'smooth' });
+            }, 0);
+        });
     },
     routes: [
         {
@@ -82,6 +90,14 @@ const router = createRouter({
             path: "/register",
             name: "register",
             component: () => import("@/views/public/auth/RegisterPage.vue"),
+        },
+        {
+            path: "/register-with-profile-and-organisation",
+            name: "registerWithProfileAndOrganisation",
+            meta: {
+                isInActive: !isStrictModeEnabled
+            },
+            component: () => import("@/views/public/auth/RegisterWithProfileAndOrganisationPage.vue"),
         },
         {
             path: "/forgot-password",
@@ -164,102 +180,114 @@ const router = createRouter({
                     component: () => import("@/views/materialGenerator/BrandKitPage.vue"),
                 },
                 {
-                    path: "series-events",
-                    component: () => import("@/layouts/EventsLayout.vue"),
-                    children: [
-                        {
-                            path: "",
-                            name: "seriesEvents.index",
-                            component: () => import("@/views/seriesEvents/SeriesEventsIndex.vue"),
+                        path: "series-events",
+                        component: () => import("@/layouts/EventsLayout.vue"),
+                        meta: {
+                            isInActive: !allowedEventCreationsMethods.seriesEvent,
                         },
-                        {
-                            path: ":id",
-                            name: "seriesEvents.show",
-                            component: () => import("@/views/seriesEvents/SeriesEventsShow.vue"),
+                        children: [
+                            {
+                                path: "",
+                                name: "seriesEvents.index",
+                                component: () => import("@/views/seriesEvents/SeriesEventsIndex.vue"),
+                            },
+                            {
+                                path: ":id",
+                                name: "seriesEvents.show",
+                                component: () => import("@/views/seriesEvents/SeriesEventsShow.vue"),
+                            },
+                            {
+                                path: "create",
+                                name: "seriesEvents.create",
+                                component: () =>
+                                    import("@/views/seriesEvents/SeriesEventsCreate.vue"),
+                            }
+                        ]
+                    },
+                    {
+                        path: "imported-events",
+                        component: () => import("@/layouts/EventsLayout.vue"),
+                        meta: {
+                            isInActive: !allowedEventCreationsMethods.importedEvent,
                         },
-                        {
-                            path: "create",
-                            name: "seriesEvents.create",
-                            component: () =>
-                                import("@/views/seriesEvents/SeriesEventsCreate.vue"),
-                        }
-                    ]
-                },
-                {
-                    path: "imported-events",
-                    component: () => import("@/layouts/EventsLayout.vue"),
-                    children: [
-                        {
-                            path: "",
-                            name: "importedEvents.index",
-                            component: () => import("@/views/importedEvents/ImportedEventsIndex.vue"),
+                        children: [
+                            {
+                                path: "",
+                                name: "importedEvents.index",
+                                component: () => import("@/views/importedEvents/ImportedEventsIndex.vue"),
+                            },
+                            {
+                                path: ":id",
+                                name: "importedEvents.show",
+                                component: () => import("@/views/importedEvents/ImportedEventsShow.vue"),
+                            },
+                            {
+                                path: "create",
+                                name: "importedEvents.create",
+                                component: () =>
+                                    import("@/views/importedEvents/ImportedEventsCreate.vue"),
+                            }
+                        ]
+                    },
+                    {
+                        path: "uploaded-events",
+                        component: () => import("@/layouts/EventsLayout.vue"),
+                        meta: {
+                            isInActive: !allowedEventCreationsMethods.uploadedEvent,
                         },
-                        {
-                            path: ":id",
-                            name: "importedEvents.show",
-                            component: () => import("@/views/importedEvents/ImportedEventsShow.vue"),
+                        children: [
+                            {
+                                path: "",
+                                name: "uploadedEvents.index",
+                                component: () => import("@/views/uploadedEvents/UploadedEventsIndex.vue"),
+                            },
+                            {
+                                path: ":id",
+                                name: "uploadedEvents.show",
+                                component: () => import("@/views/uploadedEvents/UploadedEventsShow.vue"),
+                            },
+                            {
+                                path: "create",
+                                name: "uploadedEvents.create",
+                                component: () => import("@/views/uploadedEvents/UploadedEventsCreate.vue"),
+                            }
+                        ]
+                    },
+                    {
+                        path: "single-events",
+                        component: () => import("@/layouts/EventsLayout.vue"),
+                        meta: {
+                            isInActive: !allowedEventCreationsMethods.singleEvent,
                         },
-                        {
-                            path: "create",
-                            name: "importedEvents.create",
-                            component: () =>
-                                import("@/views/importedEvents/ImportedEventsCreate.vue"),
-                        }
-                    ]
-                },
-                {
-                    path: "uploaded-events",
-                    component: () => import("@/layouts/EventsLayout.vue"),
-                    children: [
-                        {
-                            path: "",
-                            name: "uploadedEvents.index",
-                            component: () => import("@/views/uploadedEvents/UploadedEventsIndex.vue"),
-                        },
-                        {
-                            path: ":id",
-                            name: "uploadedEvents.show",
-                            component: () => import("@/views/uploadedEvents/UploadedEventsShow.vue"),
-                        },
-                        {
-                            path: "create",
-                            name: "uploadedEvents.create",
-                            component: () => import("@/views/uploadedEvents/UploadedEventsCreate.vue"),
-                        }
-                    ]
-                },
-                {
-                    path: "single-events",
-                    component: () => import("@/layouts/EventsLayout.vue"),
-                    children: [
-                        {
-                            path: "",
-                            name: "singleEvents.index",
-                            component: () => import("@/views/singleEvents/SingleEventsIndex.vue"),
-                        },
-                        {
-                            path: "create",
-                            name: "singleEvents.create",
-                            component: () => import("@/views/singleEvents/SingleEventsCreate.vue"),
-                        },
-                    ]
-                },
-                {
-                    path: "created-events",
-                    component: () => import("@/layouts/EventsLayout.vue"),
-                    children: [
-                        {
-                            path: ":id/edit",
-                            name: "createdEvent.edit",
-                            component: () => import("@/views/createdEvents/CreatedEventsEdit.vue"),
-                        },
-                        {
-                            path: "/findEvent/:uuid",
-                            name: "createdEvent.findEvent",
-                            component: () => import("@/views/createdEvents/CreatedEventsRedirect.vue"),
-                        },
-                    ]
-                },
+                        children: [
+                            {
+                                path: "",
+                                name: "singleEvents.index",
+                                component: () => import("@/views/singleEvents/SingleEventsIndex.vue"),
+                            },
+                            {
+                                path: "create",
+                                name: "singleEvents.create",
+                                component: () => import("@/views/singleEvents/SingleEventsCreate.vue"),
+                            },
+                        ]
+                    },
+                    {
+                        path: "created-events",
+                        component: () => import("@/layouts/EventsLayout.vue"),
+                        children: [
+                            {
+                                path: ":id/edit",
+                                name: "createdEvent.edit",
+                                component: () => import("@/views/createdEvents/CreatedEventsEdit.vue"),
+                            },
+                            {
+                                path: "/findEvent/:uuid",
+                                name: "createdEvent.findEvent",
+                                component: () => import("@/views/createdEvents/CreatedEventsRedirect.vue"),
+                            },
+                        ]
+                    },
                 {
                     path: "profile",
                     component: () => import("@/layouts/EventsLayout.vue"),
@@ -328,9 +356,30 @@ const router = createRouter({
                             component: () => import("@/views/admin/AdminUserEdit.vue"),
                         },
                         {
-                            path: "requested-organisations",
-                            name: "admin.requestedOrganisations",
-                            component: () => import("@/views/admin/RequestedOrganisationsIndex.vue"),
+                            path: "events/requests",
+                            name: "admin.events.requests",
+                            meta: {
+                                isInActive: !isStrictModeEnabled,
+                            },
+                            component: () => import("@/views/admin/EventRequestsIndex.vue"),
+                        },
+                        {
+                            path: "events/requests/:id",
+                            name: "admin.events.requests.show",
+                            meta: {
+                                isInActive: !isStrictModeEnabled,
+                            },
+                            component: () => import("@/views/admin/EventRequestsShow.vue"),
+                        },
+                        {
+                            path: "organisations/requests",
+                            name: "admin.organisations.requests",
+                            component: () => import("@/views/admin/OrganisationRequestsIndex.vue"),
+                        },
+                        {
+                            path: "organisations/requests/:id",
+                            name: "admin.organisations.requests.show",
+                            component: () => import("@/views/admin/OrganisationRequestsShow.vue"),
                         },
                         {
                             path: "instance",
@@ -341,13 +390,27 @@ const router = createRouter({
                 },
             ],
         },
-    ],
+    ]
 });
 
 router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
     if (requiresAuth && !checkLogin()) next({ name: 'login', query: { redirect: to.fullPath } });
+
+    if (to.name === 'registerPerson' && user.value?.person?.id) {
+        next({ name: 'app.profile' });
+        return;
+    }
+    else if (to.path?.startsWith('/app') && to.name !== 'registerPerson' && !user.value?.person?.id) {
+        next({ name: 'registerPerson' });
+        return;
+    }
+
+    if (to.meta.isInActive) {
+        next({ name: 'dashboard' });
+        return;
+    }
 
     const meta: RouteToMeta = to.meta;
     const typeIsAllowed = meta.allowedTypes?.includes(user.value.type) ?? true;

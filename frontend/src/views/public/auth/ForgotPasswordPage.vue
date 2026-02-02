@@ -82,9 +82,9 @@ const onSubmit = handleSubmit(async (values) => {
               severity="danger"
           />
           <form
+              v-if="!showSuccessMessage"
               novalidate
               @submit.prevent="onSubmit"
-              v-if="!showSuccessMessage"
           >
             <InputEmail
                 v-model="email"
@@ -102,7 +102,7 @@ const onSubmit = handleSubmit(async (values) => {
             </Button>
           </form>
         </Fieldset>
-        <div class="text-center mt-3">
+        <div class="text-sm mt-3">
           <RouterLink :to="{ name: 'login' }">Zurück zum Login</RouterLink>
         </div>
       </Card>

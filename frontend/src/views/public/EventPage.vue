@@ -3,14 +3,15 @@ import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { findEvent, findNextEvents } from '@/lib/mobilizonClient';
 import { checkLogin } from '@/composables/UserComposoable';
-import { normalizeStreet } from "@/lib/helper";
+import { normalizeStreet } from '@/lib/helper';
 import {
-  formatOnDate,
-  formatOnDateTime,
-  formatOnTime,
-  formatCoordinates,
-  formattedLanguage,
-  stripHtml
+    formatOnDate,
+    formatOnDateTime,
+    formatOnTime,
+    formatCoordinates,
+    formattedLanguage,
+    stripHtml,
+    getCardImageUrl,
 } from '@/lib/helper';
 import { user_organisations } from '@/composables/OrganisationComposable';
 import { mobilizon_category_options } from '@/lib/const';
@@ -20,11 +21,12 @@ import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import EventStatusBadge from '@/components/EventStatusBadge.vue';
 import Button from '@/components/KERN/Button.vue';
 import EventCard from '@/components/EventCard.vue';
-import Map from "@/components/Map.vue";
+import Map from '@/components/Map.vue';
 import EventShare from '@/components/ShareLinks.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import NavigatePhysicalAddress from '@/components/NavigatePhysicalAddress.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
+import { instanceInformation, showEventPage } from '@/lib/instanceConfig';
 
 import { type IEvent, type IEventDetailed, MobilizonCategory, MobilizonEventJoinOptions } from '@/types/General';
 
@@ -107,8 +109,8 @@ loadEvent();
                         </h1>
                     </div>
                     <div
-                        class="kern-col flex justify-content-end align-items-center"
                         v-if="event.status != 'CONFIRMED'"
+                        class="kern-col flex justify-content-end align-items-center"
                     >
                         <EventStatusBadge
                             v-if="event.status"
@@ -118,8 +120,8 @@ loadEvent();
                 </div>
                 <div class="kern-row">
                     <div
-                        class="kern-col"
                         v-if="event.attributedTo?.preferredUsername"
+                        class="kern-col"
                     >
                         <h2 class="kern-heading text-theme-primary">
                             <RouterLink
@@ -210,9 +212,7 @@ loadEvent();
                                 <Icon name="location_on" />
                                 <!--<div>{{ event?.physicalAddress?.description }}</div>-->
                                 <div>
-                                    <div
-                                        v-if="event?.physicalAddress?.street"
-                                    >
+                                    <div v-if="event?.physicalAddress?.street">
                                         {{ normalizeStreet(event?.physicalAddress?.street) }},
                                     </div>
                                     <div>
@@ -246,7 +246,9 @@ loadEvent();
                     <h3 class="kern-heading font-medium text-theme-primary mb-3 mt-6">Was?</h3>
                     <div
                         class="kern-text prose"
-                        v-html="stripHtml(event.description!) ? event.description : '<p>Keine Beschreibung vorhanden.</p>'"
+                        v-html="
+                            stripHtml(event.description!) ? event.description : '<p>Keine Beschreibung vorhanden.</p>'
+                        "
                     ></div>
                     <div class="mt-5">
                         <div class="flex justify-content-between gap-5">
@@ -265,7 +267,10 @@ loadEvent();
                             </div>
                             <div>
                                 <h3 class="kern-heading text-theme-primary my-3">Kategorie</h3>
-                                <Button variant="secondary" @click="selectCategoryAndRedirect(event.category)">
+                                <Button
+                                    variant="secondary"
+                                    @click="selectCategoryAndRedirect(event.category)"
+                                >
                                     {{ getCategoryText(event.category) }}
                                 </Button>
                             </div>
@@ -317,7 +322,7 @@ loadEvent();
                     <!-- Bild anzeigen oder Default -->
                     <div>
                         <img
-                            :src="event.picture ? event.picture.url : '/default_card.png'"
+                            :src="getCardImageUrl(event)"
                             alt="Event Bild"
                             class="w-full"
                         />
@@ -363,7 +368,7 @@ loadEvent();
                             name="share"
                             style="transform: scale(1.5)"
                         />
-                        Veranstaltung teilen
+                        {{ showEventPage.eventShareTitle }}
                     </h3>
                     <EventShare
                         :event="event"
@@ -372,9 +377,7 @@ loadEvent();
                 </div>
             </div>
             <Divider class="my-8" />
-            <h3 class="kern-heading text-theme-primary font-medium mb-2">
-                Ähnliche Veranstaltungen
-            </h3>
+            <h3 class="kern-heading text-theme-primary font-medium mb-2">Ähnliche Veranstaltungen</h3>
             <div class="cards-template">
                 <div
                     v-for="relatedEvent in event.relatedEvents"
@@ -387,7 +390,7 @@ loadEvent();
                 </div>
             </div>
             <h3 class="kern-heading text-theme-primary font-medium mt-7 mb-2">
-                Weitere Veranstaltungen aus dem Kalender Amt Süderbrarup
+                Weitere Veranstaltungen aus dem Kalender {{ instanceInformation.operatedBy }}
             </h3>
             <div class="cards-template">
                 <div

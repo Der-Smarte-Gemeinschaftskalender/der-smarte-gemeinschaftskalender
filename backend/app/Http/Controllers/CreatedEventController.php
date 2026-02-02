@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use rdx\graphqlquery\Query;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Services\ApprovalRequestService;
 use Throwable;
 
 class CreatedEventController extends Controller implements HasMiddleware
@@ -125,6 +126,30 @@ class CreatedEventController extends Controller implements HasMiddleware
 
     public function update(CreatedEvent $createdEvent, Request $request): JsonResponse
     {
+        // Strict mode: create approval request instead of event
+        if (config('dsg.strict_mode')) {
+
+            // Add the created event ID to the request for the approval system
+            $request->merge([ '_created_event_id' => $createdEvent->id ]);
+            
+            $approvalRequestService = new ApprovalRequestService();
+            $result = $approvalRequestService->createApprovalRequest($request, 'CreatedEvent', 'update', $createdEvent->id);
+
+            if ($result['success']) {
+                return response()->json([
+                    'createdEvent' => [
+                        'message' => $result['message'],
+                        'approval_request_id' => $result['approval_request_id'],
+                    ]
+                ], 202);
+            } else {
+                return response()->json([
+                    'error' => $result['error'],
+                    'details' => $result['details'] ?? null,
+                ], 500);
+            }
+        }
+
         $mclient = Mobilizon::getInstance();
 
         $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'));
@@ -211,9 +236,50 @@ class CreatedEventController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function delete(int $createdEvent): JsonResponse
+    public function delete(CreatedEvent $createdEvent, Request $request = null): JsonResponse
     {
-        $createdEvent = CreatedEvent::find($createdEvent);
+        // Strict mode: create approval request instead of event
+        if (config('dsg.strict_mode')) {
+            if (!$request) {
+                $request = request();
+            }
+
+            // Append created event data to the request for display purposes 
+            $eventDisplayData = $createdEvent->single_event 
+                ?? $createdEvent->series_event 
+                ?? $createdEvent->uploaded_event 
+                ?? $createdEvent->imported_event;
+
+            $fullEventData = array_merge(
+                $eventDisplayData->toArray(), 
+                [
+                    'start' => $createdEvent->start,
+                    'time' => $createdEvent->time,
+                    'duration' => $createdEvent->duration,
+                ]
+            );    
+            
+            $request->merge($fullEventData);
+            
+            $approvalRequestService = new ApprovalRequestService();
+            $result = $approvalRequestService->createApprovalRequest($request, 'CreatedEvent', 'delete', $createdEvent->id);
+
+            if ($result['success']) {
+                return response()->json([
+                    'createdEvent' => [
+                        'message' => $result['message'],
+                        'approval_request_id' => $result['approval_request_id'],
+                    ]
+                ], 202);
+            } else {
+                return response()->json([
+                    'error' => $result['error'],
+                    'details' => $result['details'] ?? null,
+                ], 500);
+            }
+        }
+
+        $createdEvent = CreatedEvent::find($createdEvent->id);
         $mclient = Mobilizon::getInstance();
         $mresponse = $mclient->deleteEvent($createdEvent->mobilizon_id);
         if ($mclient->hasError($mresponse)) {

@@ -54,8 +54,7 @@ const saveToClipboard = (text: string) => {
         Die zentrale Verwaltung Ihrer Instanz erfolgt über Mobilizon. Mobilizon ist die zugrunde liegende
         Open-Source-Plattform, auf der der Smarte Gemeinschaftskalender basiert. Dort können Sie alle instanzweiten
         Einstellungen und Funktionen administrieren. Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/Instanz/#instanz-verwalten" />
-        .
+        <LinkToDocs path="Terminverwaltung/Instanz/#instanz-verwalten" />.
     </p>
 
     <section class="mb-6 flex justify-content-center w-full">

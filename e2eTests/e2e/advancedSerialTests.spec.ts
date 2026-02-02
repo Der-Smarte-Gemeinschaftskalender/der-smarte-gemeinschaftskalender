@@ -137,6 +137,8 @@ test("serial termin use as template", async ({ page }) => {
   await page.waitForLoadState("networkidle");
 
   await page.getByText("Serientermine").first().click();
+  await page.getByText("Serientermine").first().click();
+  await page.waitForLoadState("networkidle");
 
   await expect(page).toHaveURL(/.*\/app\/series-events$/);
 

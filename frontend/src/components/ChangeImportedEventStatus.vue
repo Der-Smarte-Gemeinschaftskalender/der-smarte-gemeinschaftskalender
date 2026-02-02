@@ -30,8 +30,8 @@ const props = defineProps<Props>();
 </script>
 <template>
     <Button
-        variant="primary"
         v-if="currentStatus === 'active'"
+        variant="primary"
         icon-left="link"
         @click="
             showDialog = true;
@@ -54,7 +54,7 @@ const props = defineProps<Props>();
     <ConfirmDialog
         v-model="showDialog"
         title="Status ändern"
+        :confirm-text="newStatus === 'active' ? 'Aktivieren' : 'Deaktivieren'"
         @confirm="changeStatus"
-        :confirmText="newStatus === 'active' ? 'Aktivieren' : 'Deaktivieren'"
     />
 </template>

@@ -67,7 +67,7 @@ const onSubmit = handleSubmit(async (values) => {
             group_id: organisation.value?.id,
         });
 
-        if (!!data.errors) {
+        if (data.errors) {
             showErrorMessage.value = true;
             errorMessageContent.value =
                 data.errors[0]?.message || 'Benutzer konnte nicht gefunden oder eingeladen werden.';
@@ -172,8 +172,7 @@ loadOrganisation();
         <LinkToDocs
             path="Terminverwaltung/Organisation/"
             fragment="mitglieder-verwalten"
-        />
-        .
+        />.
     </p>
 
     <h2 class="kern-heading text-theme-primary my-6 pb-0">Mitglieder der Organisation</h2>
@@ -202,8 +201,7 @@ loadOrganisation();
         <LinkToDocs
             path="Terminverwaltung/Organisation/"
             fragment="neue-mitglieder-einladen"
-        />
-        .
+        />.
     </p>
     <form
         novalidate
@@ -246,8 +244,8 @@ loadOrganisation();
         <ConfirmDialog
             v-model="showLeaveGroupConfirm"
             title="Wills du diese Organisation wirklich verlassen?"
+            confirm-text="Verlassen"
             @confirm="leaveGroup"
-            confirmText="Verlassen"
         />
         <Divider class="my-6" />
 
@@ -260,14 +258,13 @@ loadOrganisation();
                 <LinkToDocs
                     path="Terminverwaltung/Organisation/"
                     fragment="organisation-verlassen"
-                />
-                .
+                />.
             </p>
 
             <div class="flex justify-content-center">
                 <Button
-                    @click="showLeaveGroupConfirm = true"
                     icon-left="logout"
+                    @click="showLeaveGroupConfirm = true"
                 >
                     Gruppe verlassen
                 </Button>

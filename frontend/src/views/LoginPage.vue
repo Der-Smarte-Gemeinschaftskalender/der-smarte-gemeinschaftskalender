@@ -8,6 +8,7 @@ import { setOrganisationData } from '@/composables/OrganisationComposable';
 import { useRouter, useRoute } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
 
 import Card from '@/components/KERN/Card.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
@@ -130,10 +131,16 @@ if (checkLogin()) {
                         </Button>
                     </form>
                 </Fieldset>
-                <div class="text-center mt-3">
+                <div class="mt-3 text-sm">
                     <RouterLink :to="{ name: 'register' }">Noch kein Konto? Jetzt registrieren!</RouterLink>
                 </div>
-                <div class="text-center mt-2">
+                <div
+                    v-if="isStrictModeEnabled" 
+                    class="mt-2 text-sm"
+                >
+                    <RouterLink :to="{ name: 'registerWithProfileAndOrganisation' }">Neues Konto mit Organisation anlegen!</RouterLink>
+                </div>
+                <div class="mt-2 text-sm">
                     <RouterLink :to="{ name: 'forgotPassword' }">Passwort vergessen?</RouterLink>
                 </div>
             </Card>

@@ -6,6 +6,7 @@ import { dsgApi } from '@/lib/dsgApi';
 import { handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { buildSuggestions } from '@/composables/EventCreateFormComposable';
 import {
     mobilizon_category_options,
@@ -42,6 +43,7 @@ import {
     type CreatedEventRequest,
     type CreatedEventDetails,
     CreatedEventFormSchema,
+    CreatedEventUpdateResponseSchema,
 } from '@/types/events/CreatedEvents';
 import { type AddressForm, type MobilizonFields, addressDefaults } from '@/types/Mobilizon';
 
@@ -62,6 +64,7 @@ const isMapLoading = computed(() => mapRef.value?.isLoading ?? false);
 const mapSuggestions = computed(() => buildSuggestions(mapRef.value?.suggestions ?? []));
 
 const errorMessageContent = ref<string>('');
+const showApprovalRequestSuccessMessage = ref<boolean>(false);
 
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm<CreatedEventForm>({
     validationSchema: toTypedSchema(CreatedEventFormSchema),
@@ -105,12 +108,18 @@ const onSubmit = handleSubmit(async (values: CreatedEventForm) => {
             headers: { 'Content-Type': 'multipart/form-data' },
             values: preparedValues,
             resDataKey: 'createdEvent',
-            //schema: CreatedEventSchema,
+            schema: CreatedEventUpdateResponseSchema,
         });
 
-        await router.push({ name: 'public.event', params: { uuid: data.mobilizon_uuid } });
+        if (isStrictModeEnabled) {
+            showApprovalRequestSuccessMessage.value = true;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            await router.push({ name: 'public.event', params: { uuid: data.mobilizon_uuid } });
+        }
     } catch (error: any) {
-        errorMessageContent.value = error;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        errorMessageContent.value = error ?? 'Beim Speichern der Änderungen ist ein Fehler aufgetreten.';
     } finally {
         isSubmitting.value = false;
     }
@@ -224,9 +233,22 @@ loadCreatedEvent();
         <LinkToDocs
             path="Terminverwaltung/Einzeltermine/"
             fragment="kalender-integrieren-ical-url-anbinden"
-        />
-        .
+        />.
     </p>
+    <Alert
+        v-if="errorMessageContent.length"
+        class="mb-4"
+        title="Fehler"
+        :content="errorMessageContent"
+        severity="danger"
+    />
+    <Alert
+        v-else-if="showApprovalRequestSuccessMessage"
+        class="mb-4"
+        title="Änderungsanfrage gesendet"
+        content="Ihre Änderungen wurden erfolgreich zur Genehmigung eingereicht."
+        severity="info"
+    />
     <template v-if="loading">
         <Loader />
     </template>
@@ -256,7 +278,7 @@ loadCreatedEvent();
                                 :event-id="createdEvent.id"
                                 :status="value"
                                 :mobilizon-id="createdEvent.mobilizon_id"
-                                @statusChanged="loadCreatedEvent"
+                                @status-changed="loadCreatedEvent"
                             />
                         </span>
                     </div>
@@ -269,13 +291,6 @@ loadCreatedEvent();
         novalidate
         @submit.prevent="onSubmit"
     >
-        <Alert
-            v-if="errorMessageContent.length"
-            title="Fehler"
-            :content="errorMessageContent"
-            severity="danger"
-        />
-
         <Fieldset>
             <div class="flex flex-column gap-5">
                 <InputText
@@ -299,8 +314,8 @@ loadCreatedEvent();
                     :errors="submitCount === 0 ? undefined : errors.description"
                 />
                 <InputDate
-                    name="start"
                     v-model="start"
+                    name="start"
                     label="Startdatum"
                     :errors="submitCount === 0 ? undefined : errors.start"
                 />
@@ -336,9 +351,9 @@ loadCreatedEvent();
                         />
 
                         <InputUrl
+                            v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            v-model="externalParticipationUrl"
                             label="Externe Anmeldeseite (URL)"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
@@ -359,8 +374,7 @@ loadCreatedEvent();
                                 <LinkToDocs
                                     path="Terminverwaltung/Einzeltermine/"
                                     fragment="beitrittsoptionen"
-                                />
-                                .
+                                />.
                             </p>
                         </Alert>
                     </div>
@@ -380,11 +394,11 @@ loadCreatedEvent();
                 />
                 <InputText
                     v-model="rawAddress"
-                    @input="updateAddress(rawAddress)"
                     name="physicalAddress"
                     label="Adresse (optional)"
                     :list="mapSuggestions"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
+                    @input="updateAddress(rawAddress)"
                 />
             </div>
         </Fieldset>
@@ -408,6 +422,7 @@ loadCreatedEvent();
     <div class="text-center pt-3">
         <DeleteCreatedEvent
             v-if="createdEvent?.id"
+            v-model:error-message-content="errorMessageContent"
             :event-id="createdEvent.id"
         />
     </div>

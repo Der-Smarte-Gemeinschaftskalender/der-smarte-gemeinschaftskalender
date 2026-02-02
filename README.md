@@ -38,6 +38,8 @@ npx playwright install
 
 ### Tests ausführen
 
+Beim Ausführen der Tests kann es zu Fehlern kommen, wenn mehr als ein Worker benutzt wird. 
+
 #### Alle Tests ausführen
 ```bash
 npx playwright test --workers=1

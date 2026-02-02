@@ -55,7 +55,7 @@ const columns = [
         <b>Hinweis:</b>
         Die Kalenderdateien Funktion eignet sich, um mehrere Termine einmalig gesammelt aus einem externen
         Kalenderprogramm zu übernehmen. Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/iCal-Dateien/" />
+        <LinkToDocs path="Terminverwaltung/iCal-Dateien/" />.
     </p>
     <Table
         :api="{

@@ -11,61 +11,78 @@ import Divider from './KERN/cosmetics/Divider.vue';
 import ChangeCurrentOrganisation from './ChangeCurrentOrganisation.vue';
 import router from '@/router/router';
 import { current_organisation, user_organisations } from '@/composables/OrganisationComposable';
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
+import { allowedEventCreationsMethods } from '@/lib/instanceConfig';
 
 const route = useRoute();
 
-const navigationItems = computed(() => [
-    { title: 'Dashboard', name: 'dashboard', icon: 'home' },
-    {
-        title: 'Einzeltermine',
-        name: 'singleEvents.index',
-        icon: 'calendar_month',
-        disabled: !user_organisations.value?.length,
-    },
-    {
-        title: 'Serientermine',
-        name: 'seriesEvents.index',
-        icon: 'autorenew',
-        disabled: !user_organisations.value?.length,
-    },
-    {
-        title: 'Kalenderdateien',
-        name: 'uploadedEvents.index',
-        icon: 'drive-folder-upload',
-        disabled: !user_organisations.value?.length,
-    },
-    {
-        title: 'Kalenderintegrationen',
-        name: 'importedEvents.index',
-        icon: 'link',
-        disabled: !user_organisations.value?.length,
-    },
-    {
-        title: 'Werbemittel',
-        name: 'materialGenerator.organisation',
-        params: { preferredUsername: current_organisation.value?.preferredUsername },
-        icon: 'wall_art',
-        disabled: !user_organisations.value?.length,
-    },
-    {
-        title: 'Markenkit',
-        name: 'brandkit',
-        icon: 'home_repair_service',
-        disabled: !user_organisations.value?.length,
-    },
-]);
+const navigationItems = computed(() => {
+    const mainNavigationItems = [{ title: 'Dashboard', name: 'dashboard', icon: 'home' }];
+    if (allowedEventCreationsMethods.singleEvent) {
+        mainNavigationItems.push({
+            title: 'Einzeltermine',
+            name: 'singleEvents.index',
+            icon: 'calendar_month',
+            disabled: !user_organisations.value?.length,
+        });
+    }
+    if (allowedEventCreationsMethods.seriesEvent) {
+        mainNavigationItems.push({
+            title: 'Serientermine',
+            name: 'seriesEvents.index',
+            icon: 'autorenew',
+            disabled: !user_organisations.value?.length,
+        });
+    }
+    if (allowedEventCreationsMethods.importedEvent) {
+        mainNavigationItems.push({
+            title: 'Kalenderdateien',
+            name: 'uploadedEvents.index',
+            icon: 'drive-folder-upload',
+            disabled: !user_organisations.value?.length,
+        });
+    }
+    if (allowedEventCreationsMethods.uploadedEvent) {
+        mainNavigationItems.push({
+            title: 'Kalenderintegrationen',
+            name: 'importedEvents.index',
+            icon: 'link',
+            disabled: !user_organisations.value?.length,
+        });
+    }
+    return [
+        ...mainNavigationItems,
+        {
+            title: 'Werbemittel',
+            name: 'materialGenerator.organisation',
+            params: { preferredUsername: current_organisation.value?.preferredUsername },
+            icon: 'wall_art',
+            disabled: !user_organisations.value?.length,
+        },
+        {
+            title: 'Markenkit',
+            name: 'brandkit',
+            icon: 'home_repair_service',
+            disabled: !user_organisations.value?.length,
+        },
+    ];
+});
 
-let profileNavigationItems = [
+const profileNavigationItems = [
     { title: 'Meine Organisationen', name: 'app.myOrganisations', icon: 'checklist', disabled: !user.value?.person },
     { title: 'Profil bearbeiten', name: 'app.profile', icon: 'edit' },
 ];
 let adminNavigationItems: { title: string; name: string; icon: string }[] = [];
 if (user.value.type === 'admin') {
     adminNavigationItems = [
-        { title: 'Organisationsanfragen', name: 'admin.requestedOrganisations', icon: 'checklist' },
+        { title: 'Organisationsanfragen', name: 'admin.organisations.requests', icon: 'checklist' },
         { title: 'Nutzer*innen verwalten', name: 'admin.index', icon: 'person' },
         { title: 'Instanz verwalten', name: 'admin.instance', icon: 'edit' },
     ];
+
+    if (isStrictModeEnabled) {
+        adminNavigationItems.splice(1, 0, { title: 'Terminanfragen', name: 'admin.events.requests', icon: 'event_available' });
+    }
 }
 
 const selectOption = async (option: any) => {
@@ -87,8 +104,8 @@ const selected = (name: string) => {
         <div class="pl-2">
             <h4 class="kern-heading text-theme-primary font-medium p-0 mb-2 mt-3">
                 <Icon
-                    name="person"
                     v-if="user?.person?.preferredUsername"
+                    name="person"
                 />
                 {{ user?.person?.preferredUsername }}
             </h4>

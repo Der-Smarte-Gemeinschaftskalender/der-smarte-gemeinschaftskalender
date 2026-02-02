@@ -156,19 +156,19 @@ findOrganisationOptions().then((options) => {
             <Fieldset class="mb-8">
                 <section class="flex flex-column md:flex-row justify-content-between gap-6">
                     <InputSelect
+                        v-model="intervall"
                         class="w-full"
                         name="intervall"
                         label="Intervall"
                         :options="intervall_notification_options"
-                        v-model="intervall"
                         :errors="submitCount === 0 ? undefined : errors.intervall"
                     />
                     <InputSelect
+                        v-model="category"
                         class="w-full"
                         name="category"
                         label="Kategorien"
                         :options="mobilizon_category_options_all"
-                        v-model="category"
                         :errors="submitCount === 0 ? undefined : errors.category"
                     />
                 </section>
@@ -178,11 +178,11 @@ findOrganisationOptions().then((options) => {
                 <section class="">
                     <div class="flex flex-column-reverse md:flex-row justify-content-between gap-6 mb-4 md:mb-0">
                         <InputRadios
+                            v-model="eventType"
                             class="w-full mb-5"
                             name="event-types"
                             label="Welche Veranstaltungen sollen angezeigt werden?"
                             :radios="events"
-                            v-model="eventType"
                             :errors="submitCount === 0 ? undefined : errors.eventType"
                         ></InputRadios>
 
@@ -208,6 +208,7 @@ findOrganisationOptions().then((options) => {
 
                     <div>
                         <InputSelect
+                            v-model="organisation"
                             class="md:col-5"
                             :class="{
                                 flex: eventType === EventType.INTERNAL,
@@ -216,7 +217,6 @@ findOrganisationOptions().then((options) => {
                             name="organisation"
                             label="Organisationen"
                             :options="organisationOptions"
-                            v-model="organisation"
                             :errors="submitCount === 0 ? undefined : errors.organisation"
                             :disabled="!organisationOptions.length"
                         />
@@ -226,11 +226,11 @@ findOrganisationOptions().then((options) => {
                             :class="{ flex: eventType === EventType.GLOBAL, hidden: eventType !== EventType.GLOBAL }"
                         >
                             <InputLocation
-                                name="location"
-                                label="Postleitzahl"
                                 ref="locationSearchRef"
                                 v-model:address="postal_code"
                                 v-model:radius="radius"
+                                name="location"
+                                label="Postleitzahl"
                                 :postal-code-only="true"
                                 :errors="submitCount === 0 ? undefined : errors.postal_code || errors.radius"
                             />
@@ -249,11 +249,11 @@ findOrganisationOptions().then((options) => {
                 <Divider class="w-full my-6" />
 
                 <InputText
+                    v-model="email"
                     class="md:col-5"
                     name="email"
                     label="E-Mail-Adresse"
                     placeholder="Ihre E-Mail-Adresse"
-                    v-model="email"
                     :errors="submitCount === 0 ? undefined : errors.email"
                 />
                 <InputCheckbox

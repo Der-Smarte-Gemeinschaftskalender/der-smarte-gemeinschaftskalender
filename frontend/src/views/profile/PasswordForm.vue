@@ -43,8 +43,8 @@ const resetPassword = handleSubmit(async (values) => {
 <template>
     <form
         novalidate
-        @submit.prevent="resetPassword"
         class="mt-6"
+        @submit.prevent="resetPassword"
     >
         <h3 class="kern-heading text-theme-primary mb-3">Passwort ändern</h3>
         <Fieldset>
@@ -62,10 +62,10 @@ const resetPassword = handleSubmit(async (values) => {
             />
             <div class="flex flex-column gap-5">
                 <InputPassword
+                    v-model="current_password"
                     name="current_password"
                     type="password"
                     class="col-12 md:col-6 md:pr-4"
-                    v-model="current_password"
                     label="Aktuelles Passwort"
                     required
                     :errors="submitCount === 0 ? undefined : errors.current_password"
@@ -73,20 +73,20 @@ const resetPassword = handleSubmit(async (values) => {
 
                 <div class="flex flex-column md:flex-row gap-6">
                     <InputPassword
+                        v-model="new_password"
                         name="new_password"
                         type="password"
                         class="w-full"
-                        v-model="new_password"
                         label="Neues Passwort"
                         required
                         :errors="submitCount === 0 ? undefined : errors.new_password"
                     />
 
                     <InputPassword
+                        v-model="new_password_confirm"
                         name="new_password_confirm"
                         type="password"
                         class="w-full"
-                        v-model="new_password_confirm"
                         label="Neues Passwort bestätigen"
                         required
                         :errors="submitCount === 0 ? undefined : errors.new_password_confirm"

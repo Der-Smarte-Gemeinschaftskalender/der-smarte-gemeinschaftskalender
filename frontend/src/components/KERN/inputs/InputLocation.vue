@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, nextTick, onMounted } from 'vue';
 
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
@@ -13,16 +13,22 @@ interface Props {
     label?: string;
     postalCodeOnly?: boolean;
     inputTextClass?: string;
+    searchInitially?: boolean;
 }
 
 const props = defineProps<Props>();
 
+const addressInput = ref<InstanceType<typeof InputText> | null>(null);    
 const address = defineModel<string | undefined>('address');
 const radius = defineModel<number>('radius', { default: 5 });
 const addressForm = ref<AddressForm | null>(null);
 const coordinates = ref<{ lat: number; lon: number } | null>(null);
-const geoHash = ref<string | null>(null);
+const geoHash = ref<string>('');
 const list = ref<string[]>([]);
+const triggered = ref<boolean>(false);
+const fetching = ref<boolean>(false);
+const success = ref<boolean>(false);
+    
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 enum Radius {
@@ -87,13 +93,37 @@ watch(address, async (newAddress) => {
     if (!newAddress || newAddress.length < 3) {
         addressForm.value = null;
         coordinates.value = null;
-        geoHash.value = null;
+        geoHash.value = '';
+        list.value = [];
         return;
     }
 
     if (debounceTimeout) clearTimeout(debounceTimeout);
 
+    triggered.value = true;
+    success.value = false;
+
     debounceTimeout = setTimeout(async () => {
+       searchAddress(newAddress);
+    }, 1000);
+});
+
+onMounted(() => {
+    if (props.searchInitially) searchAddress(address.value || '', false);
+});
+
+defineExpose({
+    addressForm,
+    coordinates,
+    radius,
+    geoHash,
+    triggered
+});
+
+const searchAddress = async (newAddress: string, showSuccess: boolean = true) => {
+     const focusedElement = document.activeElement;
+        fetching.value = true;
+
         try {
             const results = await extendedSearchAddress(newAddress, 'de', 'ADMINISTRATIVE');
             if (results.length > 0 && results[0]?.geom) {
@@ -103,57 +133,80 @@ watch(address, async (newAddress) => {
 
                 coordinates.value = { lat: parseFloat(lat), lon: parseFloat(lon) };
                 geoHash.value = encodeGeoHash(parseFloat(lat), parseFloat(lon));
+                
+                success.value = showSuccess && results.length === 1;
             }
-
+            
             list.value = buildSuggestions(results, props.postalCodeOnly);
+        
         } catch (err) {
             console.error('Failed to geocode postal code:', err);
             addressForm.value = null;
+        
+        } finally {
+            fetching.value = false;
+            triggered.value = false;
+            
+            await nextTick();
+            
+            if (focusedElement === addressInput.value?.$el.querySelector('input')) {
+                addressInput.value?.$el.querySelector('input')?.focus();
+            }
         }
-    }, 1000);
-});
-
-defineExpose({
-    addressForm,
-    coordinates,
-    geoHash,
-});
+}
 </script>
 
 <template>
     <div class="flex flex-column">
         <p
-            class="kern-fieldset__legend mb-3"
             v-if="label"
+            class="kern-fieldset__legend mb-3"
         >
             {{ label }}
         </p>
         <div class="flex align-items-center">
             <div class="icon-wrapper w-5rem h-3rem flex align-items-center justify-content-center bg-theme-primary">
                 <Icon
+                    v-if="!success && !triggered"
                     name="location_on"
                     color="white"
-                    class="flex align-items-center"
+                    class="flex align-items-center hidden"
                     aria-hidden="true"
+                />
+                <Icon
+                    v-else-if="success && !triggered"
+                    name="check"
+                    color="white"
+                    class="flex align-items-center opacity-80"
+                    aria-label="Adresse gefunden"
+                />
+                <Icon
+                    v-else
+                    name="sync"
+                    color="white"
+                    class="loader flex align-items-center opacity-80"
+                    aria-label="Lade Adresse"
                 />
             </div>
 
             <InputText
+                ref="addressInput"
+                v-model="address"
+                name="address"
                 class="address-input w-full"
                 :class="props.inputTextClass"
+                placeholder="Ort oder Adresse"
+                aria-label="Ort oder Adresse"
                 input-class="outline-none border-none"
-                name="address"
-                v-model="address"
                 :list="list"
-                placeholder="Postleitzahl"
-                aria-label="Postleitzahl"
+                :disabled="fetching"
             />
             <InputSelect
+                v-model="radius"
                 aria-label="Umkreis"
                 class="radius-select kern-form-input__select-wrapper w-fit bg-theme-primary text-white outline-none radius-select"
                 name="radius"
                 :options="radiusOptions"
-                v-model="radius"
             />
         </div>
     </div>
@@ -194,5 +247,18 @@ input:hover {
 
 .radius-select:hover {
     border-bottom: none !important;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader {
+    animation: loading 2s linear infinite;
 }
 </style>

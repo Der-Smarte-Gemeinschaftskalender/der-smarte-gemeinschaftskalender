@@ -21,8 +21,9 @@ import Button from '@/components/KERN/Button.vue';
 import Header from '@/components/Header.vue';
 import QRCodeVue3 from 'qrcode-vue3';
 import { createFullEventUrl, createFullUrl } from '@/lib/shareInformation';
+import { instanceInformation } from '@/lib/instanceConfig';
 
-const instanceName = import.meta.env.VITE_INSTANCE_NAME;
+const instanceName = instanceInformation.name;
 
 const route = useRoute();
 
@@ -42,7 +43,7 @@ const event = computed(() => {
 const loadEvents = async () => {
     loading.value = true;
     try {
-        if (!!preferredUsername.value) {
+        if (preferredUsername.value) {
             const result = await findOrganisation(
                 preferredUsername.value,
                 {
@@ -126,8 +127,8 @@ loadEvents();
             class="py-3 px-2 md:px-3 mx-2 lg:mx-4 xl:mx-6 infomonitor"
         >
             <div
-                class="main-infomonitor-content"
                 v-if="!!event"
+                class="main-infomonitor-content"
             >
                 <div class="kern-row">
                     <div class="kern-col">
@@ -302,8 +303,8 @@ loadEvents();
                                     :value="createFullEventUrl(event.uuid)"
                                     :width="250"
                                     :height="250"
-                                    :imageOptions="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
-                                    :dotsOptions="{ type: 'square' }"
+                                    :image-options="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
+                                    :dots-options="{ type: 'square' }"
                                 ></QRCodeVue3>
                             </div>
                             <p>{{ createFullEventUrl(event.uuid) }}</p>
@@ -313,8 +314,8 @@ loadEvents();
             </div>
             <div class="flex align-items-center mt-4">
                 <Progress
-                    class="w-full"
                     id="event-progress"
+                    class="w-full"
                     :value="currentEventShowtime"
                     :max="showEventInSeconds * progressUpdatesPerSecond"
                 />
@@ -322,8 +323,8 @@ loadEvents();
         </div>
     </div>
     <div
-        class="flex justify-content-center"
         v-else
+        class="flex justify-content-center"
     >
         <Loader />
     </div>

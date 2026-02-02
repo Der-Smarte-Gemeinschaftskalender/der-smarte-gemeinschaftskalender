@@ -47,39 +47,38 @@ findOrganisationOptions(true).then((options) => {
         <p class="mt-4 kern-text">
             <b>Hinweis:</b>
             Weitere Informationen finden Sie im
-            <LinkToDocs path="Entwicklungsbereich/Kalender%20einbinden/" />
-            .
+            <LinkToDocs path="Entwicklungsbereich/Kalender%20einbinden/" />.
         </p>
         <Fieldset class="mb-4">
             <section class="flex justify-content-between">
                 <InputSelect
+                    v-model="organisation"
                     class="col-5"
                     name="organisation"
                     label="Organisationen"
                     :options="organisationOptions"
-                    v-model="organisation"
                     :disabled="!organisationOptions.length"
                 />
                 <InputSelect
+                    v-model="category"
                     class="col-5"
                     name="category"
                     label="Kategorien"
                     :options="mobilizon_category_options_all"
-                    v-model="category"
                     :disabled="organisation !== 'ALL'"
                 />
             </section>
         </Fieldset>
         <InputTextarea
+            v-model="scriptOutput"
             label="Einbindung JS Script"
             name="scriptOutput"
-            v-model="scriptOutput"
         />
         <InputTextarea
+            v-model="scriptOutputHTML"
             class="mt-4"
             label="Ausgabe Einbindung (HTML)"
             name="scriptOutputhtml"
-            v-model="scriptOutputHTML"
         />
     </div>
 </template>

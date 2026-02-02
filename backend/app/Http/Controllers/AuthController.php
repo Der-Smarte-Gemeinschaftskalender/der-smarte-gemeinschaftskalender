@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\SendConfirmEmail;
+
 use App\Models\Mobilizon;
+use App\Models\OrganisationStatus;
 use App\Models\User;
 use DB;
+use App\Http\Controllers\OrganisationController;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use App\Mail\SendConfirmEmail;
+use App\Mail\SendRequestOrganisationCreationEmail;
 use Mail;
+use Log;
+use Exception;
 
 class AuthController extends Controller
 {
@@ -60,11 +65,9 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        if (!$valideInputs) {
-            return response()->json(['error' => 'Validation failed'], 422);
-        }
-        if (User::where('email', $request->input('email'))->exists()) {
-            return response()->json(['error' => 'Email already exists'], 409);
+        // Don't differentiate between email already exists for security reasons
+        if (!$valideInputs || User::where('email', $request->input('email'))->exists()) {
+            return response()->json(['error' => 'Nutzervalidierung fehlgeschlagen'], 422);
         }
 
         $mclient = Mobilizon::getInstance(true);
@@ -77,7 +80,7 @@ class AuthController extends Controller
 
         $user = new User();
         $user->email = $request->input('email');
-        $user->password = $request->input('password');
+        $user->password = Hash::make($request->input('password'));
         $user->mobilizon_email = $request->input('email');
         $user->mobilizon_password = $mobilizon_password;
         $user->email_verification_token = Str::uuid()->toString();
@@ -96,6 +99,179 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'user' => $user
+        ]);
+    }
+
+    public function registerWithProfileAndOrganisation(Request $request): JsonResponse
+    {
+        if (!config('dsg.strict_mode')) {
+            return response()->json(['error' => 'Nur in striktem Modus verfügbar'], 403);
+        }
+
+        $validatedUserData = $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $validatedProfileData = $request->validate([
+            'name' => 'required|string|max:255',
+            'preferredUsername' => 'required|string|max:255',
+        ]);
+
+        $validatedOrganisationData = $request->validate([
+            'organisation_name' => 'required|string|max:255',
+            'organisation_preferredUsername' => 'required|string|max:255',
+            'organisation_summary' => 'nullable|string',
+        ]);
+
+        // Don't differentiate between email already exists for security reasons
+        if (!$validatedUserData || User::where('email', $request->input('email'))->exists()) {
+            return response()->json(['error' => 'Nutzervalidierung fehlgeschlagen'], 422);
+        }
+
+        if (!$validatedProfileData) {
+            return response()->json(['error' => 'Profilvalidierung fehlgeschlagen'], 422);
+        }
+
+        if (!$validatedOrganisationData) {
+            return response()->json(['error' => 'Organisationsvalidierung fehlgeschlagen'], 422);
+        }
+
+        if ($validatedOrganisationData['organisation_preferredUsername'] === $validatedProfileData['preferredUsername']) {
+            return response()->json(['error' => 'Der Organisations-Benutzername darf nicht mit dem Profil-Benutzernamen übereinstimmen'], 422);
+        }
+
+        $adminMclient = Mobilizon::getInstanceAdmin();
+
+        $existingGroups = $adminMclient->adminGetAllGroupsArray();
+        foreach ($existingGroups as $group) {
+            if ($group['preferredUsername'] === $validatedOrganisationData['organisation_preferredUsername']) {
+                return response()->json(['error' => 'Organisations-Benutzername bereits vorhanden'], 422);
+            }
+        }
+
+        $userWithSameUsernameExists = (bool) $adminMclient->findProfileByPreferredUsername($validatedOrganisationData['organisation_preferredUsername']);
+        if ($userWithSameUsernameExists) {
+            return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits von einem Benutzer verwendet wird.'], 422);
+        }
+
+        // Step 1: Create User (Mobilizon + local)
+        $mobilizon_password = Str::random(32);
+        $createdMobilizonUser = $adminMclient->createUser($request->input('email'), $mobilizon_password);
+
+        if (isset($createdMobilizonUser['errors'])) {
+            return response()->json(['error' => $createdMobilizonUser['errors'][0]['message'][0]], 500);
+        }
+
+        $user = new User();
+        $user->email = $request->input('email');
+        $user->password = $request->input('password');
+        $user->mobilizon_email = $request->input('email');
+        $user->mobilizon_password = $mobilizon_password;
+        $user->email_verification_token = Str::uuid()->toString();
+        $user->mobilizon_user_id = $createdMobilizonUser['data']['createUser']['id'];
+        $user->admin_note = 'Automatisch erstellter Nutzer mit Profil und Organisationsanfrage';
+        $user->save();
+
+        // Step 2.1: Activate the user in Mobilizon
+        $activateResponse = $adminMclient->adminUpdateUser([
+            'id' => $user->mobilizon_user_id,
+            'confirmed' => true
+        ]);
+
+        if ($adminMclient->hasError($activateResponse)) {
+            $user->delete();
+            $adminMclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
+            return response()->json(['error' => 'User validation failed'], 500);
+        } else {
+            $user->is_active = true;
+            $user->save();
+        }
+
+        // Step 2.2: Get new Mobilizon Client instance for the user
+        $mclient = Mobilizon::getInstance(false, $user, true);
+
+        if (!$mclient->user) {
+            Log::error('User mobilizon login failed for user ID ' . $user->id);
+            $user->delete();
+            $mclient->deletePerson($user->mobilizon_profile_id);
+            $mclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
+            return response()->json(['error' => 'User mobilizon login failed'], 500);
+        }
+
+        // Step 2.3: Create Profile
+        $profileResponse = $mclient->registerPerson([
+            'name' => $validatedProfileData['name'],
+            'preferred_username' => $validatedProfileData['preferredUsername']
+        ]);
+
+        if (isset($profileResponse['errors'])) {
+            $user->delete();
+            $mclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
+            return response()->json(['error' => 'Profilerstellung fehlgeschlagen: ' . $profileResponse['errors'][0]['message'][0]], 500);
+        } else {
+            $user->mobilizon_name = $profileResponse['data']['createPerson']['name'];
+            $user->mobilizon_preferred_username = $profileResponse['data']['createPerson']['preferredUsername'];
+            $user->mobilizon_profile_id = $profileResponse['data']['createPerson']['id'];
+            $user->save();
+        }
+
+        // Step 2.4: Reload Mobilizon client to load person
+        $mclient = Mobilizon::getInstance(false, $user, true);
+
+        if (!$mclient->person) {
+            $user->delete();
+            $mclient->deletePerson($user->mobilizon_profile_id);
+            $mclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
+            Log::error('Mobilizon person not loaded after creation', [
+                'user_id' => $user->id,
+                'mobilizon_user_id' => $user->mobilizon_user_id,
+            ]);
+
+            return response()->json([
+                'error' => 'Mobilizon person not available after creation'
+            ], 500);
+        }
+
+        // Step 4: Send Emails
+        try {
+            Mail::to($user->email)
+                ->send(new SendConfirmEmail($user->email_verification_token));
+        } catch (Exception $e) {
+            Log::error('Error sending confirmation email: ' . $e->getMessage());
+        }
+
+        try {
+            $adminUsers = User::where('type', 'admin')->get();
+            foreach ($adminUsers as $adminUser) {
+                Mail::to($adminUser->email)
+                    ->send(new SendRequestOrganisationCreationEmail($validatedOrganisationData['organisation_name']));
+            }
+        } catch (Exception $e) {
+            Log::error('Error sending organisation request email: ' . $e->getMessage());
+        }
+
+        // Step 5: Create Organisation Status + Approval Request (should be done by admin later)
+        $organisationCreateRequest = new Request([
+            'name' => $validatedOrganisationData['organisation_name'],
+            'preferredUsername' => $validatedOrganisationData['organisation_preferredUsername'],
+            'summary' => $validatedOrganisationData['organisation_summary'] ?? '',
+        ]);
+
+        // Important: set the user!
+        $organisationCreateRequest->setUserResolver(function () use ($user) {
+            return $user;
+        });
+
+        $organisationController = new OrganisationController();
+        $organisationResponse = $organisationController->requestOrganisationCreation($organisationCreateRequest);
+
+        $token = auth()->login($user);
+
+        return response()->json([
+            'access_token' => $token,
+            'user' => $user,
+            'person' => $mclient->person
         ]);
     }
 
@@ -134,13 +310,16 @@ class AuthController extends Controller
 
         $mclient = Mobilizon::getInstance(false, $systemAdmin);
 
-        $mresponse = $mclient->adminUpdateUser([
-            'id' => $user->mobilizon_user_id,
-            'confirmed' => true
-        ]);
+        if (!$user->is_active) {
+            $mresponse = $mclient->adminUpdateUser([
+                'id' => $user->mobilizon_user_id,
+                'confirmed' => true
+            ]);
 
-        if ($mclient->hasError($mresponse)) {
-            return response()->json(['error' => 'User validation failed'], 500);
+            if ($mclient->hasError($mresponse)) {
+                Log::error('Mobilizon user activation failed for user ID ' . $user->id, ['response' => $mresponse]);
+                return response()->json(['error' => 'User validation failed'], 500);
+            }
         }
 
         $user->email_verified_at = now();
@@ -193,11 +372,11 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? response()->json(['message' => 'Passwort erfolgreich zurückgesetzt'])
             : response()->json([
-                    'error' =>  'Fehler beim Zurücksetzen des Passworts',
-                    'status' => $status,
-                    'rp_record_email' => $record->email,
-                    'rp_record_token' => $record->token
-                ], 500);
+                'error' =>  'Fehler beim Zurücksetzen des Passworts',
+                'status' => $status,
+                'rp_record_email' => $record->email,
+                'rp_record_token' => $record->token
+            ], 500);
     }
 
     /**

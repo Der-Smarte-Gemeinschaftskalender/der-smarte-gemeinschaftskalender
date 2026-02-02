@@ -14,8 +14,8 @@ withDefaults(defineProps<Props>(), {
 </script>
 <template>
     <Dialog
-        title="Bestätigen"
         v-model="model"
+        title="Bestätigen"
         :show-content="!!contentText"
     >
         {{ contentText }}

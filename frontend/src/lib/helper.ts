@@ -1,9 +1,10 @@
-import dayjs from "@/lib/dayjs";
+import dayjs from '@/lib/dayjs';
 
-import { mobilizon_event_language_options, mobilizon_main_category_options } from "@/lib/const";
+import { mobilizon_event_language_options, mobilizon_main_category_options } from '@/lib/const';
 
-import type { AddressForm } from "@/types/Mobilizon";
-import { type Option, MobilizonCategory } from "@/types/General";
+import type { AddressForm } from '@/types/Mobilizon';
+import { type IEvent, type Option, MobilizonCategory } from '@/types/General';
+import { defaultEventImageBasedOnCategory } from './instanceConfig';
 
 // App
 /**
@@ -12,7 +13,7 @@ import { type Option, MobilizonCategory } from "@/types/General";
  * @return { string } - The formatted date string.
  */
 export const formatDateTime = (value: dayjs.ConfigType): dayjs.ConfigType => {
-    return dayjs(value).format("DD.MM.YYYY") || value;
+    return dayjs(value).format('DD.MM.YYYY') || value;
 };
 
 /**
@@ -21,7 +22,7 @@ export const formatDateTime = (value: dayjs.ConfigType): dayjs.ConfigType => {
  * @return { string } - The formatted date string.
  */
 export const formatInputDate = (value: dayjs.ConfigType = new Date()): string => {
-    return dayjs(value).format("YYYY-MM-DD");
+    return dayjs(value).format('YYYY-MM-DD');
 };
 
 /**
@@ -31,9 +32,7 @@ export const formatInputDate = (value: dayjs.ConfigType = new Date()): string =>
  * @return { string } - The formatted time string.
  */
 export const formatInputTime = (value: dayjs.ConfigType = new Date(), tz: boolean = false): string => {
-    return tz
-        ? dayjs(value).format("HH:mm Z")
-        : dayjs(value).format("HH:mm");
+    return tz ? dayjs(value).format('HH:mm Z') : dayjs(value).format('HH:mm');
 };
 
 // Public
@@ -44,7 +43,7 @@ export const formatInputTime = (value: dayjs.ConfigType = new Date(), tz: boolea
  */
 export const formatOnMonthDayTime = (date: dayjs.ConfigType): string => {
     return dayjs(date).format('dd. DD. MMM – HH:mm [Uhr]');
-}
+};
 
 /**
  * Formats a date in the format "Mo., 01.01.2023".
@@ -53,7 +52,7 @@ export const formatOnMonthDayTime = (date: dayjs.ConfigType): string => {
  */
 export const formatOnDate = (date: dayjs.ConfigType): string => {
     return dayjs(date).format('dd. DD.MM.YYYY');
-}
+};
 
 /**
  * Formats a date in the format "12:00 Uhr".
@@ -62,7 +61,7 @@ export const formatOnDate = (date: dayjs.ConfigType): string => {
  */
 export const formatOnTime = (date: dayjs.ConfigType): string => {
     return dayjs(date).format('HH:mm [Uhr]');
-}
+};
 
 /**
  * Formats a date and time in the format "01.01.2023 12:00 Uhr".
@@ -71,7 +70,25 @@ export const formatOnTime = (date: dayjs.ConfigType): string => {
  */
 export const formatOnDateTime = (date: dayjs.ConfigType): string => {
     return dayjs(date).format('DD.MM.YYYY - HH:mm [Uhr]');
-}
+};
+
+/**
+ * Formats a date to show only hour and minute in "01 h 23 min" format.
+ * @param date - The date to format "12:34"
+ * @returns
+ */
+export const formatHourMinute = (date: string): string => {
+    const [hour, minute] = date.split(':');
+    let result = '';
+
+    if (!hour || !minute) return 'Invalid date';
+    if (hour === '00' && minute === '00') return '0 min';
+
+    if (parseInt(hour) > 0) result += `${hour} h `;
+
+    result += `${minute} min`;
+    return result.trim();
+};
 
 /**
  * Truncates a string to a specified length and adds an ellipsis if it exceeds that length.
@@ -81,7 +98,7 @@ export const formatOnDateTime = (date: dayjs.ConfigType): string => {
  */
 export const truncate = (str: string, n: number): string => {
     return str.length > n ? str.slice(0, n - 1) + '...' : str;
-}
+};
 
 /**
  * Builds a formatted address string from an AddressForm object.
@@ -91,24 +108,24 @@ export const truncate = (str: string, n: number): string => {
 export const buildAddress = (address: AddressForm | null): string => {
     return [
         address?.street ? normalizeStreet(address.street) : null,
-        address?.postalCode && address?.locality
-            ? `${address.postalCode} ${address.locality}`
-            : address?.locality,
-    ].filter(part => part).join(',\n').trim();
+        address?.postalCode && address?.locality ? `${address.postalCode} ${address.locality}` : address?.locality,
+    ]
+        .filter((part) => part)
+        .join(',\n')
+        .trim();
 };
-
 
 export const normalizeStreet = (street: string): string => {
     if (!street?.trim()) return '';
 
-    const match = street.match(/^\s*(\d+(?:\s*[-–]\s*\d+)?[a-zA-Z]?)\s+(.+)/) as [string, string, string]|undefined;
+    const match = street.match(/^\s*(\d+(?:\s*[-–]\s*\d+)?[a-zA-Z]?)\s+(.+)/) as [string, string, string] | undefined;
     if (match) {
         const [_, number, name] = match;
         return `${name.trim()} ${number.trim()}`;
     }
 
     return street.trim();
-}
+};
 
 /**
  * Returns the main category for a given subcategory.
@@ -119,21 +136,21 @@ export const getMainCategoryFromSubCategory = (category: string): Option | undef
     return mobilizon_main_category_options.find((option) => {
         return option.sub_categories?.includes(category as MobilizonCategory);
     });
-}
+};
 
 /**
  * Checks if a value is a valid positive number.
  * @param { Number | number | string | undefined } value - The value to check.
  * @return { boolean } - Returns true if the value is a valid positive number, otherwise false.
  */
-export const isValidPositivNumber = (value: Number | number | string | undefined): boolean => {
+export const isValidPositivNumber = (value: number | number | string | undefined): boolean => {
     if (value === undefined || value === null) return false;
     if (typeof value === 'number') return value >= 0;
     if (value instanceof Number) return value.valueOf() >= 0;
 
     const parsedValue = parseFloat(value);
     return !isNaN(parsedValue) && parsedValue >= 0;
-}
+};
 
 /**
  * Reconstruct options for a select input from an array of options.
@@ -141,12 +158,12 @@ export const isValidPositivNumber = (value: Number | number | string | undefined
  * @return { Array<{label: string, value: any}> } - The reconstructed array of options.
  */
 
-export const reconstructOptions = (options: Array<Option>): Array<{ label: string, value: any }> => {
-    return options.map(option => ({
+export const reconstructOptions = (options: Array<Option>): Array<{ label: string; value: any }> => {
+    return options.map((option) => ({
         label: option.text,
-        value: option.value
+        value: option.value,
     }));
-}
+};
 
 export const formatCoordinates = (coordinates: string): [number, number] | null => {
     if (!coordinates) {
@@ -170,8 +187,8 @@ export const formattedLanguage = (languageCode: string) => {
     return language ? language.text : 'deutsch';
 };
 
-export const getBeginsEndsOn = (searchBegin: string): { beginsOn: dayjs.Dayjs, endsOn: dayjs.Dayjs | null } => {
-    let beginsOn: dayjs.Dayjs = dayjs()
+export const getBeginsEndsOn = (searchBegin: string): { beginsOn: dayjs.Dayjs; endsOn: dayjs.Dayjs | null } => {
+    let beginsOn: dayjs.Dayjs = dayjs();
     let endsOn: dayjs.Dayjs | null = null;
     switch (searchBegin) {
         case 'all':
@@ -221,4 +238,23 @@ export const stripHtml = (input: string) => {
         .replace(/<[^>]*>/g, '')
         .replace(/&nbsp;/g, ' ')
         .trim();
-}
+};
+
+export const copyContent = () => {
+    const copyText = document.getElementById('copyToClipboardInput') as HTMLInputElement;
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+};
+
+export const getCardImageUrl = (event: IEvent) => {
+    if (event.picture) {
+        return event.picture.url;
+    } else if (defaultEventImageBasedOnCategory) {
+        return `/material_generator/event_categories/${event.category.toUpperCase()}.jpg`;
+    } else {
+        return '/default_card.png';
+    }
+};
+
+export const isMobile: boolean = window.innerWidth <= 992;

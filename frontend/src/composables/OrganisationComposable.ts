@@ -24,7 +24,7 @@ export const setOrganisationData = async (newUserOrganisation: MobilizonGroup | 
         last_groups_sync.value = new Date().toISOString();
     }
 
-    if (!!newUserOrganisation) current_organisation.value = newUserOrganisation;
+    if (newUserOrganisation) current_organisation.value = newUserOrganisation;
     else if (!current_organisation.value) {
         current_organisation.value = !user_organisations.value?.length
             ? null

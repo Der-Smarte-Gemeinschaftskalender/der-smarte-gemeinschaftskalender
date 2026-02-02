@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { formatOnMonthDayTime } from '@/lib/helper';
+import { formatOnMonthDayTime, getCardImageUrl } from '@/lib/helper';
 
 import Card from './KERN/Card.vue';
 import Button from './KERN/Button.vue';
@@ -16,7 +16,8 @@ defineProps<Props>();
 <template>
     <Card
         :title="event.title"
-        :image-src="!!event.picture ? event.picture.url : '/default_card.png'"
+        :image-src="getCardImageUrl(event)"
+        :image-alt="''"
         :to="{ name: 'public.event', params: { uuid: event.uuid } }"
     >
         <div class="flex gap-2 align-items-start">
@@ -24,8 +25,8 @@ defineProps<Props>();
             {{ formatOnMonthDayTime(event.beginsOn) }}
         </div>
         <div
-            class="flex gap-2 align-items-start"
             v-if="event?.attributedTo?.name"
+            class="flex gap-2 align-items-start"
         >
             <Icon name="person" />
             {{ event?.attributedTo?.name }}

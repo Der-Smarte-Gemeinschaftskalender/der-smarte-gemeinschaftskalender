@@ -47,8 +47,7 @@ class SeriesEventController extends Controller implements HasMiddleware
             'data' => $data->items(),
             'total' => $data->total(),
             'page' => $page,
-            'pageSize' => $pageSize,
-
+            'pageSize' => $pageSize
         ]);
     }
 
@@ -63,6 +62,7 @@ class SeriesEventController extends Controller implements HasMiddleware
 
     public function create(Request $request): JsonResponse
     {
+
         $intervall = Intervall::toIso($request->get('intervall'));
         $mclient = Mobilizon::getInstance();
 

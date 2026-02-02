@@ -86,9 +86,9 @@ defineExpose({
         }"
     >
         <div
-            @click="closeOverlay"
             class="h-full p-1 relative bg-white overflow-y-scroll"
             :style="{ maxWidth: overlayMaxWidth }"
+            @click="closeOverlay"
         >
             <Button
                 class="absolute close-button top-0 right-0 mt-2 mr-2 border-none bg-transparent outline-none"

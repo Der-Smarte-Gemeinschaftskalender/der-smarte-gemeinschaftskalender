@@ -4,7 +4,6 @@ import { findMobilizonStatistics, findOrganisation } from '@/lib/mobilizonClient
 import { getEventsStatistics } from '@/lib/dsgClient';
 import { loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import { user_organisations } from '@/composables/OrganisationComposable';
-import { user } from '@/composables/UserComposoable';
 import { useRouter } from 'vue-router';
 import type { MobilizonStatistics, EventsStatistics, Option } from '@/types/General';
 import { current_organisation } from '@/composables/OrganisationComposable';
@@ -13,6 +12,7 @@ import Card from '@/components/KERN/Card.vue';
 import EventCard from '@/components/EventCard.vue';
 
 import LinkToDocs from '@/components/LinkToDocs.vue';
+import { allowedEventCreationsMethods } from '@/lib/instanceConfig';
 
 const router = useRouter();
 
@@ -108,9 +108,6 @@ const loadStatistics = async () => {
 };
 loadStatistics();
 loadOrganisations();
-if (!user.value.person) {
-    router.push('/app/profile/register-person');
-}
 </script>
 <template>
     <h1 class="kern-heading text-theme-primary">
@@ -135,8 +132,7 @@ if (!user.value.person) {
     <p class="kern-text mt-2">
         <b>Hinweis:</b>
         Eine Schritt-für-Schritt-Anleitung zur Terminverwaltung finden Sie im
-        <LinkToDocs path="" />
-        .
+        <LinkToDocs path="" />.
     </p>
 
     <div v-if="!loading">
@@ -175,7 +171,10 @@ if (!user.value.person) {
         </h2>
         <div class="flex flex-wrap mt-4 gap-4 pr-3">
             <div class="">
-                <RouterLink :to="{ name: 'singleEvents.create' }">
+                <RouterLink
+                    v-if="allowedEventCreationsMethods.singleEvent"
+                    :to="{ name: 'singleEvents.create' }"
+                >
                     <Button
                         title="Einzeltermin anlegen"
                         aria-label="Einzeltermin anlegen"
@@ -188,7 +187,10 @@ if (!user.value.person) {
                 </RouterLink>
             </div>
             <div class="">
-                <RouterLink :to="{ name: 'seriesEvents.create' }">
+                <RouterLink
+                    v-if="allowedEventCreationsMethods.seriesEvent"
+                    :to="{ name: 'seriesEvents.create' }"
+                >
                     <Button
                         title="Serientermin anlegen"
                         aria-label="Serientermin anlegen"
@@ -201,7 +203,10 @@ if (!user.value.person) {
                 </RouterLink>
             </div>
             <div class="">
-                <RouterLink :to="{ name: 'uploadedEvents.create' }">
+                <RouterLink
+                    v-if="allowedEventCreationsMethods.uploadedEvent"
+                    :to="{ name: 'uploadedEvents.create' }"
+                >
                     <Button
                         title="Kalenderdatei hochladen"
                         aria-label="Kalenderdatei hochladen"
@@ -214,7 +219,10 @@ if (!user.value.person) {
                 </RouterLink>
             </div>
             <div class="">
-                <RouterLink :to="{ name: 'importedEvents.create' }">
+                <RouterLink
+                    v-if="allowedEventCreationsMethods.importedEvent"
+                    :to="{ name: 'importedEvents.create' }"
+                >
                     <Button
                         title="Kalenderintegration anlegen"
                         aria-label="Kalenderintegration anlegen"
@@ -229,16 +237,16 @@ if (!user.value.person) {
         </div>
     </div>
     <div
-        class="mt-6"
         v-if="!loadingOrganisation && current_organisation"
+        class="mt-6"
     >
         <h2 class="kern-heading text-theme-primary mt-6">
             Bevorstehende Veranstaltungen
             <template v-if="current_organisation">- {{ current_organisation.name }}</template>
         </h2>
         <div
-            class="cards-template"
             v-if="organisation?.organizedEvents?.elements?.length"
+            class="cards-template"
         >
             <div
                 v-for="event in organisation.organizedEvents.elements"

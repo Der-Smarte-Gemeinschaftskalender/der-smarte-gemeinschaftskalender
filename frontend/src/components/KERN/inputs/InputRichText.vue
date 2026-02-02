@@ -90,79 +90,79 @@ onBeforeUnmount(() => {
             >
                 <Icon
                     name="bold"
-                    @click="editor?.chain().focus().toggleBold().run()"
                     :disabled="!editor?.can().chain().focus().toggleBold().run()"
                     :class="{ 'is-active': editor?.isActive('bold') }"
                     class="cursor-pointer border-r-1"
+                    @click="editor?.chain().focus().toggleBold().run()"
                 />
                 <Icon
                     name="italic"
-                    @click="editor?.chain().focus().toggleItalic().run()"
                     :disabled="!editor?.can().chain().focus().toggleItalic().run()"
                     :class="{ 'is-active': editor?.isActive('italic') }"
+                    @click="editor?.chain().focus().toggleItalic().run()"
                 />
                 <Icon
                     name="underline"
-                    @click="editor?.chain().focus().toggleUnderline().run()"
                     :disabled="!editor?.can().chain().focus().toggleUnderline().run()"
                     :class="{ 'is-active': editor?.isActive('underline') }"
+                    @click="editor?.chain().focus().toggleUnderline().run()"
                 />
                 <Icon
                     name="strike"
-                    @click="editor?.chain().focus().toggleStrike().run()"
                     :disabled="!editor?.can().chain().focus().toggleStrike().run()"
                     :class="{ 'is-active': editor?.isActive('strike') }"
+                    @click="editor?.chain().focus().toggleStrike().run()"
                 />
                 <Icon
                     name="h1"
-                    @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
                     :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }"
+                    @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
                 />
                 <Icon
                     name="h2"
-                    @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
                     :class="{ 'is-active': editor?.isActive('heading', { level: 2 }) }"
+                    @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
                 />
                 <Icon
                     :name="'h3'"
-                    @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
                     :class="{ 'is-active': editor?.isActive('heading', { level: 3 }) }"
+                    @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
                 />
                 <Icon
                     name="bullet_list"
-                    @click="editor?.chain().focus().toggleBulletList().run()"
                     :class="{ 'is-active': editor?.isActive('bulletList') }"
+                    @click="editor?.chain().focus().toggleBulletList().run()"
                 />
                 <Icon
                     name="ordered_list"
-                    @click="editor?.chain().focus().toggleOrderedList().run()"
                     :class="{ 'is-active': editor?.isActive('orderedList') }"
+                    @click="editor?.chain().focus().toggleOrderedList().run()"
                 />
                 <Icon
                     name="blockquote"
-                    @click="editor?.chain().focus().toggleBlockquote().run()"
                     :class="{ 'is-active': editor?.isActive('blockquote') }"
+                    @click="editor?.chain().focus().toggleBlockquote().run()"
                 />
                 <Icon
                     name="link"
-                    @click="addLink()"
                     :class="{ 'is-active': editor?.isActive('link') }"
+                    @click="addLink()"
                 />
                 <Icon
                     name="link_off"
-                    @click="removeLink()"
                     :disabled="!editor?.isActive('link')"
+                    @click="removeLink()"
                 />
 
                 <Icon
                     name="undo"
-                    @click="editor?.chain().focus().undo().run()"
                     :disabled="!editor?.can().chain().focus().undo().run()"
+                    @click="editor?.chain().focus().undo().run()"
                 />
                 <Icon
                     name="redo"
-                    @click="editor?.chain().focus().redo().run()"
                     :disabled="!editor?.can().chain().focus().redo().run()"
+                    @click="editor?.chain().focus().redo().run()"
                 />
             </section>
             <EditorContent

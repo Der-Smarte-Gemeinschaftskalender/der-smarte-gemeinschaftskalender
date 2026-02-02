@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 import dayjs from '@/lib/dayjs';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 
-import { getBeginsEndsOn } from '@/lib/helper';
 import { searchEvents } from '@/lib/mobilizonClient';
 import { mobilizon_category_options, mobilizon_event_status, mobilizon_event_language_options } from '@/lib/const';
 
 import Card from '@/components/KERN/Card.vue';
 import EventCardHorizontal from '@/components/EventCardHorizontal.vue';
+import EventsMap from '@/components/EventsMap.vue';
 import KernAccordion from '@/components/KERN/Accordion.vue';
 import InputRadio from '@/components/KERN/inputs/InputRadio.vue';
 import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
@@ -21,124 +21,139 @@ import Overlayable from '@/components/Overlayable.vue';
 import ShareLinks from '@/components/ShareLinks.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
+import { searchPage, searchDefaults } from '@/lib/instanceConfig';
 
 import { type Accordion } from '@/types/KERN';
 
 const route = useRoute();
 const router = useRouter();
 
+const maxResultsPerPage = 25;
+
 const searchTerm = ref((route.query.tag as string) || localStorage.getItem('searchTerm') || '');
-const searchTarget = ref(localStorage.getItem('searchTarget') || import.meta.env.VITE_SEARCH_TARGET);
+const searchTarget = ref(localStorage.getItem('searchTarget') || searchDefaults.target);
+
 const searchBegin = ref(localStorage.getItem('searchBegin') || 'all');
+
+const searchBeginsEndsOn = computed(() => {
+    const timeRanges: Record<string, { beginsOn: any; endsOn: any }> = {
+        all: { beginsOn: dayjs().startOf('day'), endsOn: null },
+        today: { beginsOn: dayjs().startOf('day'), endsOn: dayjs().endOf('day') },
+        tomorrow: { beginsOn: dayjs().add(1, 'day').startOf('day'), endsOn: dayjs().add(1, 'day').endOf('day') },
+        thisWeek: { beginsOn: dayjs().startOf('week'), endsOn: dayjs().endOf('week') },
+        thisWeekend: { beginsOn: dayjs().day(5).startOf('day'), endsOn: dayjs().endOf('week') },
+        nextWeek: { beginsOn: dayjs().add(1, 'week').startOf('week'), endsOn: dayjs().add(1, 'week').endOf('week') },
+        thisMonth: { beginsOn: dayjs().startOf('month'), endsOn: dayjs().endOf('month') },
+        nextMonth: {
+            beginsOn: dayjs().add(1, 'month').startOf('month'),
+            endsOn: dayjs().add(1, 'month').endOf('month'),
+        },
+    };
+    return timeRanges[searchBegin.value] || timeRanges['all'];
+});
+
 const searchCategory = ref<string[]>(
     (route.query.category as string) || JSON.parse(localStorage.getItem('searchCategory') || '[]') || []
 );
 const searchStatus = ref<string[]>(JSON.parse(localStorage.getItem('searchStatus') || '["CONFIRMED"]'));
 const searchLanguage = ref<string[]>(JSON.parse(localStorage.getItem('searchLanguage') || '[]'));
 
-const searchAddress = ref(
-    (route.query.address as string) || localStorage.getItem('searchAddress') !== null
-        ? localStorage.getItem('searchAddress')
-        : import.meta.env.VITE_SEARCH_LOCATION_ADDRESS || ''
-);
-const searchRadius = ref((route.query.radius as string) || parseInt(localStorage.getItem('searchRadius') || '10', 10));
-
 const locationSearchRef = ref<InstanceType<typeof InputLocation> | null>(null);
-const locationSearchGeoHash = computed(
-    () =>
-        (searchAddress.value != '' ? import.meta.env.VITE_SEARCH_LOCATION_GEO_HASH : null) ||
-        locationSearchRef.value?.geoHash
+const useDefaultLocationAddress = ref(
+    localStorage.getItem('searchAddress') === null ||
+        localStorage.getItem('searchAddress') === searchDefaults.locationAddress
 );
-const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
-const loading = ref(false);
 
-const searchBeginsEndsOn = computed(() => {
-    let beginsOn, endsOn;
-    switch (searchBegin.value) {
-        case 'all':
-            beginsOn = dayjs().startOf('day');
-            endsOn = null;
-            break;
-        case 'today':
-            beginsOn = dayjs().startOf('day');
-            endsOn = dayjs().endOf('day');
-            break;
-        case 'tomorrow':
-            beginsOn = dayjs().add(1, 'day').startOf('day');
-            endsOn = dayjs().add(1, 'day').endOf('day');
-            break;
-        case 'thisWeek':
-            beginsOn = dayjs().startOf('week');
-            endsOn = dayjs().endOf('week');
-            break;
-        case 'thisWeekend':
-            beginsOn = dayjs().day(5).startOf('day');
-            endsOn = dayjs().endOf('week');
-            break;
-        case 'nextWeek':
-            beginsOn = dayjs().add(1, 'week').startOf('week');
-            endsOn = dayjs().add(1, 'week').endOf('week');
-            break;
-        case 'thisMonth':
-            beginsOn = dayjs().startOf('month');
-            endsOn = dayjs().endOf('month');
-            break;
-        case 'nextMonth':
-            beginsOn = dayjs().add(1, 'month').startOf('month');
-            endsOn = dayjs().add(1, 'month').endOf('month');
-            break;
+const searchAddress = ref(
+    (route.query.address as string) ??
+        (useDefaultLocationAddress.value ? searchDefaults.locationAddress : localStorage.getItem('searchAddress') || '')
+);
+
+const searchRadius = ref(
+    parseInt(route.query.radius as string) ||
+        (localStorage.getItem('searchRadius')
+            ? parseInt(localStorage.getItem('searchRadius') as string)
+            : searchDefaults.searchRadius || 10)
+);
+
+const searchGeoHash = ref('');
+
+const getLocationGeoHash = (): string => {
+    // 1. If user has entered a new location via the input field
+    if (locationSearchRef.value?.geoHash !== undefined) {
+        useDefaultLocationAddress.value = false;
+        return locationSearchRef.value!.geoHash;
     }
-    return { beginsOn, endsOn };
-});
 
-const maxResultsPerPage = 25;
+    // 2. If using a saved non-default address
+    if (!useDefaultLocationAddress.value) {
+        return localStorage.getItem('locationSearchGeoHash') ?? searchDefaults.locationGeoHash ?? '';
+    }
+
+    // 3. Default location geohash
+    return searchDefaults.locationGeoHash || '';
+};
 
 const events = ref([]);
 const totalEvents = ref(0);
 const currentPage = ref(route.query.page ? parseInt(route.query.page as string, 10) : 1);
+
 const totalPages = computed(() => Math.ceil(totalEvents.value / maxResultsPerPage));
+
 const visiblePages = computed(() => {
     const total = totalPages.value;
     const current = currentPage.value;
     const delta = 1;
     const pages: number[] = [];
-
     const start = Math.max(1, current - delta);
     const end = Math.min(total, current + delta);
-
     for (let i = start; i <= end; i++) pages.push(i);
     return pages;
 });
 
+const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
+const loading = ref(false);
+const isMapExpanded = ref(false);
+
 const searchAccordions: Accordion[] = [
-    {
-        header: 'Instanz',
-    },
-    {
-        header: 'Zeitraum',
-        open: true,
-    },
-    {
-        header: 'Kategorien',
-    },
-    {
-        header: 'Status der Veranstaltung',
-    },
-    {
-        header: 'Sprachen',
-    },
+    { header: 'Instanz' },
+    { header: 'Zeitraum', open: true },
+    { header: 'Kategorien' },
+    { header: 'Status der Veranstaltung' },
+    { header: 'Sprachen' },
 ];
 
-const loadSearchEvents = async (loadChangePage: boolean = true) => {
+const saveSearchState = (locationGeoHash: string) => {
+    localStorage.setItem('searchTerm', searchTerm.value);
+    localStorage.setItem('searchAddress', searchAddress.value);
+    localStorage.setItem('locationSearchGeoHash', locationGeoHash);
+    localStorage.setItem('searchTarget', searchTarget.value);
+    localStorage.setItem('searchBegin', searchBegin.value);
+    localStorage.setItem('searchCategory', JSON.stringify(searchCategory.value));
+    localStorage.setItem('searchStatus', JSON.stringify(searchStatus.value));
+    localStorage.setItem('searchLanguage', JSON.stringify(searchLanguage.value));
+};
+
+const clearLocationSearch = () => {
+    locationSearchRef.value = null;
+    localStorage.removeItem('locationSearchGeoHash');
+};
+
+const loadSearchEvents = async (resetPageNumber: boolean = true) => {
     try {
-        if (loadChangePage) {
-            changePage(1, false);
+        if (resetPageNumber) {
+            changePage(1);
         }
+
         loading.value = true;
-        let beginsOn, endsOn;
-        const { beginsOn: newBeginsOn, endsOn: newEndsOn } = getBeginsEndsOn(searchBegin.value);
-        beginsOn = newBeginsOn;
-        endsOn = newEndsOn;
+
+        const { beginsOn, endsOn } = searchBeginsEndsOn.value;
+        searchGeoHash.value = getLocationGeoHash();
+
+        // Clear location data ONLY if address is explicitly the default
+        if (searchAddress.value === searchDefaults.locationAddress || !searchAddress.value) {
+            clearLocationSearch();
+        }
 
         const result = await searchEvents(
             currentPage.value,
@@ -150,40 +165,23 @@ const loadSearchEvents = async (loadChangePage: boolean = true) => {
             searchCategory.value,
             searchStatus.value,
             searchLanguage.value,
-            locationSearchGeoHash.value,
+            searchGeoHash.value,
             searchRadius.value
         );
 
         overlayable.value?.closeOverlay();
         events.value = result.searchEvents.elements;
         totalEvents.value = result.searchEvents.total;
-        localStorage.setItem('searchTerm', searchTerm.value);
-        localStorage.setItem('searchAddress', searchAddress.value);
-        localStorage.setItem('searchTarget', searchTarget.value);
-        localStorage.setItem('searchBegin', searchBegin.value);
-        localStorage.setItem('searchCategory', JSON.stringify(searchCategory.value));
-        localStorage.setItem('searchStatus', JSON.stringify(searchStatus.value));
-        localStorage.setItem('searchLanguage', JSON.stringify(searchLanguage.value));
+
+        saveSearchState(searchGeoHash.value);
     } catch (error) {
         console.error('Error loading events:', error);
+    } finally {
+        loading.value = false;
     }
-
-    loading.value = false;
 };
 
-const resetSearch = () => {
-    searchAddress.value = import.meta.env.VITE_SEARCH_LOCATION_ADDRESS;
-    searchRadius.value = 10;
-    searchTarget.value = import.meta.env.VITE_SEARCH_TARGET;
-    searchTerm.value = '';
-    searchBegin.value = 'all';
-    searchCategory.value = [];
-    searchStatus.value = ['CONFIRMED'];
-    searchLanguage.value = [];
-    loadSearchEvents();
-};
-
-const changePage = (newPage: number, callLoadSearchEvents: boolean = true) => {
+const changePage = (newPage: number) => {
     currentPage.value = newPage;
     router.push({
         query: {
@@ -191,20 +189,46 @@ const changePage = (newPage: number, callLoadSearchEvents: boolean = true) => {
             page: newPage.toString(),
         },
     });
-    if (callLoadSearchEvents) {
-        loadSearchEvents(false);
-    }
 };
 
-loadSearchEvents(false);
+watch(searchRadius, (newRadius) => {
+    localStorage.setItem('searchRadius', newRadius.toString());
+});
+
+const resetSearch = () => {
+    searchTerm.value = '';
+    searchTarget.value = searchDefaults.target;
+    searchBegin.value = 'all';
+    searchCategory.value = [];
+    searchStatus.value = ['CONFIRMED'];
+    searchLanguage.value = [];
+    searchAddress.value = searchDefaults.locationAddress;
+    searchRadius.value = searchDefaults.searchRadius;
+
+    searchGeoHash.value = searchDefaults.locationGeoHash || '';
+    useDefaultLocationAddress.value = true;
+    clearLocationSearch();
+    loadSearchEvents();
+};
+
+if (route.query.page) loadSearchEvents(false);
+else changePage(1);
 </script>
 <template>
     <Teleport to="#headerslot">
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6">
             <h1 class="kern-heading text-theme-primary">Veranstaltungen finden</h1>
-            <h2 class="kern-heading text-theme-primary font-semilight">
-                Öffentliche Termine von Vereinen, Organisationen & der Gemeinde
+            <h2
+                v-if="searchPage.description && searchPage.description !== ''"
+                class="kern-heading font-semilight text-theme-primary"
+            >
+                {{ searchPage.description }}
             </h2>
+            <p
+                v-if="searchPage.descriptionHtml && searchPage.descriptionHtml !== ''"
+                class="kern-text"
+                v-html="searchPage.descriptionHtml"
+            ></p>
         </div>
     </Teleport>
     <div class="block md:flex justify-content-between lg:gap-6 w-full">
@@ -219,10 +243,11 @@ loadSearchEvents(false);
                 body-class="px-0 w-full"
             >
                 <Button
-                    @click="loadSearchEvents()"
                     class="lg:hidden ml-auto"
                     variant="secondary"
                     icon-left="search"
+                    :disabled="locationSearchRef?.triggered"
+                    @click="loadSearchEvents()"
                 >
                     Suchen
                 </Button>
@@ -357,31 +382,34 @@ loadSearchEvents(false);
                     <div class="flex flex-column md:flex-row align-items-center gap-4 pt-4 md:pt-1">
                         <InputText
                             v-model="searchTerm"
-                            placeholder="Schlagwort, Veranstaltungstitel, Organisation,..."
+                            placeholder="Schlagwort, Veranstaltungstitel..."
                             name="searchTerm"
                             class="col"
+                            aria-label="Suchbegriff: Schlagwort, Veranstaltungstitel"
                         />
 
                         <InputLocation
                             ref="locationSearchRef"
                             v-model:address="searchAddress"
                             v-model:radius="searchRadius"
+                            :search-initially="true"
                             class="mb-5 w-full md:w-auto"
                         />
                     </div>
                     <div class="flex gap-3">
                         <Button
-                            @click="overlayable?.openOverlay()"
                             variant="secondary"
                             icon-left="tune"
                             class="lg:hidden"
+                            @click="overlayable?.openOverlay()"
                         >
                             Filter
                         </Button>
                         <Button
-                            @click="loadSearchEvents()"
                             variant="secondary"
                             icon-left="search"
+                            :disabled="locationSearchRef?.triggered"
+                            @click="loadSearchEvents()"
                         >
                             Suchen
                         </Button>
@@ -398,10 +426,10 @@ loadSearchEvents(false);
                             </h4>
                             <p>Versuchen Sie es mit einem anderen Suchbegriff oder passen Sie die Filter an.</p>
                             <Button
-                                @click="resetSearch()"
                                 variant="secondary"
                                 icon-left="autorenew"
                                 class="mt-4"
+                                @click="resetSearch()"
                             >
                                 Suchfilter zurücksetzen
                             </Button>
@@ -423,7 +451,7 @@ loadSearchEvents(false);
                                 <ShareLinks
                                     v-if="events.length"
                                     :type="'eventList'"
-                                    :eventList="events"
+                                    :event-list="events"
                                     link-to-url="/search"
                                 >
                                     <RouterLink
@@ -436,12 +464,13 @@ loadSearchEvents(false);
                                                 searchCategory,
                                                 searchStatus,
                                                 searchLanguage,
-                                                locationSearchGeoHash,
+                                                locationSearchGeoHash: '', //TODOlocationSearchGeoHash: getLocationGeoHash(),
                                                 searchRadius,
                                                 beginsOn: searchBeginsEndsOn.beginsOn?.toISOString(),
                                                 endsOn: searchBeginsEndsOn.endsOn?.toISOString(),
                                             },
                                         }"
+                                        aria-label="Zur Infomonitor Anzeige der Organisation"
                                     >
                                         <Icon
                                             name="info"
@@ -453,6 +482,24 @@ loadSearchEvents(false);
                             </div>
                         </div>
                     </div>
+
+                    <!-- Map Accordion -->
+                    <details
+                        class="kern-accordion mb-5"
+                        :open="isMapExpanded"
+                        @toggle="isMapExpanded = ($event.target as HTMLDetailsElement).open"
+                    >
+                        <summary class="kern-accordion__header">
+                            <span class="flex gap-2 align-items-center">Karte</span>
+                        </summary>
+                        <section class="kern-accordion__content">
+                            <EventsMap
+                                v-if="isMapExpanded"
+                                :events="events"
+                            />
+                        </section>
+                    </details>
+
                     <div class="w-full">
                         <template v-for="event in events">
                             <EventCardHorizontal
@@ -473,16 +520,16 @@ loadSearchEvents(false);
                                 :hide-text-on-mobile="true"
                                 :disabled="currentPage === 1"
                                 icon-left="keyboard-double-arrow-left"
-                                @click="changePage(currentPage - 1)"
                                 class="px-2 sm:px-3 mx-1 hidden sm:flex"
+                                @click="changePage(currentPage - 1)"
                             >
                                 Zurück
                             </Button>
                             <Button
                                 v-if="visiblePages[0]! > 1"
                                 variant="secondary"
-                                @click="changePage(1)"
                                 class="px-2 sm:px-3"
+                                @click="changePage(1)"
                             >
                                 1
                             </Button>
@@ -496,9 +543,9 @@ loadSearchEvents(false);
                             <Button
                                 v-for="page in visiblePages"
                                 :key="page"
-                                @click="changePage(page)"
                                 :variant="page === currentPage ? 'primary' : 'secondary'"
                                 class="px-2 sm:px-3"
+                                @click="changePage(page)"
                             >
                                 {{ page }}
                             </Button>
@@ -522,8 +569,8 @@ loadSearchEvents(false);
                                 :hide-text-on-mobile="true"
                                 :disabled="currentPage === totalPages"
                                 icon-right="keyboard-double-arrow-right"
-                                @click="changePage(currentPage + 1)"
                                 class="px-2 sm:px-3 mx-1 hidden sm:flex"
+                                @click="changePage(currentPage + 1)"
                             >
                                 Weiter
                             </Button>

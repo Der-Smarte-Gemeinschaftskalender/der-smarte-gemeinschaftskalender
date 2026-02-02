@@ -247,8 +247,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
 
 <template>
     <section
-        class="upload-section"
         v-if="!uploadedEvents.length"
+        class="upload-section"
     >
         <div class="mb-1">
             <h1 class="kern-heading text-theme-primary">Kalenderdatei hochladen</h1>
@@ -262,8 +262,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <LinkToDocs
                 path="Terminverwaltung/iCal-Dateien/"
                 fragment="ical-datei-hochladen"
-            />
-            .
+            />.
         </p>
         <form
             novalidate
@@ -289,11 +288,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <div class="flex flex-column md:flex-row gap-6">
                     <div class="w-full">
                         <InputFile
-                            @change="onFileChange"
                             name="file"
                             label="iCal-Datei hochladen"
                             :accept="['text/calendar', 'application/ics']"
                             :errors="submitCount === 0 ? undefined : errors.uploaded_file"
+                            @change="onFileChange"
                         />
                     </div>
                     <div class="md:col-6 px-0 mt-2">
@@ -311,8 +310,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                 <LinkToDocs
                                     path="Terminverwaltung/iCal-Dateien/"
                                     fragment="ical-datei-hochladen"
-                                />
-                                .
+                                />.
                             </p>
                         </Alert>
                     </div>
@@ -347,9 +345,9 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             />
 
                             <InputUrl
+                                v-model="externalParticipationUrl"
                                 :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                                 name="externalParticipationUrl"
-                                v-model="externalParticipationUrl"
                                 label="Externe Anmeldeseite (URL)"
                                 :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                             />
@@ -370,8 +368,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                     <LinkToDocs
                                         path="Terminverwaltung/Einzeltermine/"
                                         fragment="beitrittsoptionen"
-                                    />
-                                    .
+                                    />.
                                 </p>
                             </Alert>
                         </div>
@@ -399,11 +396,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     />
                     <InputText
                         v-model="rawAddress"
-                        @input="updateAddress(rawAddress)"
                         name="physicalAddress"
                         label="Adresse (optional)"
                         :list="mapSuggestions"
                         :errors="submitCount === 0 ? undefined : errors.physicalAddress"
+                        @input="updateAddress(rawAddress)"
                     />
                 </div>
             </Fieldset>
@@ -430,8 +427,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
     </section>
 
     <section
-        class="preview-section"
         v-else
+        class="preview-section"
     >
         <div class="mb-1">
             <h2 class="kern-heading">iCal-Datei: Veranstaltungen</h2>
@@ -444,8 +441,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <LinkToDocs
                 path="Terminverwaltung/iCal-Dateien/"
                 fragment="ical-datei-hochladen"
-            />
-            .
+            />.
         </p>
 
         <template v-if="newUploadedEvents.length">
@@ -490,8 +486,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <LinkToDocs
                     path="Terminverwaltung/iCal-Dateien/"
                     fragment="bereits-vorhandene-termine"
-                />
-                .
+                />.
             </p>
 
             <Table

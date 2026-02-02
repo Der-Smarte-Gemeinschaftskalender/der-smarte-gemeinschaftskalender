@@ -32,7 +32,7 @@ watch(hours, () => {
     }
 
     // Parse and clamp to max `hoursMax`
-    let h = parseInt(hours.value);
+    const h = parseInt(hours.value);
     if (hours.value.length && (isNaN(h) || h > hoursMax)) {
         hours.value = hoursMax.toString();
     }
@@ -54,7 +54,7 @@ watch(minutes, () => {
     }
 
     // Parse and clamp to max 59
-    let m = parseInt(minutes.value);
+    const m = parseInt(minutes.value);
     if (minutes.value.length && (isNaN(m) || m > 59)) minutes.value = '59';
 
     // Rebuild model without modifying hours
@@ -87,18 +87,19 @@ onMounted(() => externalModify(model.value));
   <FormInputLabel :id="name" :label="label" :errors="errors">
     <div class="flex gap-2 align-items-center w-full">
       <input
-         :class="[
+         v-model="hours"
+          :class="[
             'kern-form-input__input kern-col',
             { 'kern-form-input__input--error': !!errors },
             inputsClass
           ]"
           type="text"
           placeholder="hh"
-          v-model="hours"
           :aria-describedby="errors ? `${ props.name }-error` : undefined"
       />
       <span class="text-gray-500 text-center">:</span>
       <input
+          v-model="minutes"
           :class="[
             'kern-form-input__input kern-col',
             { 'kern-form-input__input--error': !!errors },
@@ -106,7 +107,6 @@ onMounted(() => externalModify(model.value));
           ]"
           type="text"
           placeholder="mm"
-          v-model="minutes"
           :aria-describedby="errors ? `${ props.name }-error` : undefined"
       />
     </div>

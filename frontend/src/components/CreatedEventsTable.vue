@@ -11,7 +11,7 @@ interface Props {
 
 const { showCreatedAt = false } = defineProps<Props>();
 
-let columns = [
+const columns = [
     { name: 'ID', key: 'id' },
     { name: 'Datum', key: 'start', format: (value: string) => formatDateTime(value) },
     { name: 'Uhrzeit', key: 'time' },

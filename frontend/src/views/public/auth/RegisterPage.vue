@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import zod from '@/lib/zod';
 import { ref } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { checkLogin } from '@/composables/UserComposoable';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { ZodType } from 'zod';
-import zod from '@/lib/zod';
+
 import Card from '@/components/KERN/Card.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputEmail from '@/components/KERN/inputs/InputEmail.vue';
@@ -27,43 +27,45 @@ interface RegisterForm {
     accept_terms: boolean;
 }
 const validationSchema = toTypedSchema(
-    zod.object({
-        email: zod
-            .string({
-               required_error: 'Die E-Mail-Adresse ist erforderlich.',
-            })
-            .nonempty('Die E-Mail-Adresse ist erforderlich.')
-            .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
-        password: zod
-            .string({
-                required_error: 'Das Passwort ist erforderlich.',
-            })
-            .nonempty('Das Passwort ist erforderlich.')
-            .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
-            .trim(),
-        password_confirmation: zod
-            .string({
-                required_error: 'Die Passwortbestätigung ist erforderlich.',
-            })
-            .nonempty('Das Passwort ist erforderlich.')
-            .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
-            .trim()
-            .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
-        accept_terms: zod
-            .boolean()
-            .refine((val) => val, {
-                message: 'Die Nutzungsbedingungen müssen akzeptiert werden.',
-            })
-            .default(false),
-    }).superRefine(({ password, password_confirmation }, ctx) => {
-        if (password !== password_confirmation) {
-            ctx.addIssue({
-                path: ['password_confirmation'],
-                code: zod.ZodIssueCode.custom,
-                message: 'Die Passwörter stimmen nicht überein.',
-            });
-        }
-    })
+    zod
+        .object({
+            email: zod
+                .string({
+                    required_error: 'Die E-Mail-Adresse ist erforderlich.',
+                })
+                .nonempty('Die E-Mail-Adresse ist erforderlich.')
+                .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+            password: zod
+                .string({
+                    required_error: 'Das Passwort ist erforderlich.',
+                })
+                .nonempty('Das Passwort ist erforderlich.')
+                .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+                .trim(),
+            password_confirmation: zod
+                .string({
+                    required_error: 'Die Passwortbestätigung ist erforderlich.',
+                })
+                .nonempty('Das Passwort ist erforderlich.')
+                .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+                .trim()
+                .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
+            accept_terms: zod
+                .boolean()
+                .refine((val) => val, {
+                    message: 'Die Nutzungsbedingungen und die Datenschutzerklärung müssen akzeptiert werden.',
+                })
+                .default(false),
+        })
+        .superRefine(({ password, password_confirmation }, ctx) => {
+            if (password !== password_confirmation) {
+                ctx.addIssue({
+                    path: ['password_confirmation'],
+                    code: zod.ZodIssueCode.custom,
+                    message: 'Die Passwörter stimmen nicht überein.',
+                });
+            }
+        })
 );
 
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
@@ -72,8 +74,8 @@ const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
         email: import.meta.env.VITE_LOGIN_EMAIL || '',
         password: import.meta.env.VITE_LOGIN_PASSWORD || '',
         password_confirmation: import.meta.env.VITE_LOGIN_PASSWORD || '',
-        accept_terms: false
-    }
+        accept_terms: false,
+    },
 });
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
@@ -116,8 +118,8 @@ if (checkLogin()) {
                     />
                     <form
                         novalidate
-                        @submit.prevent="onSubmit"
                         class="flex flex-column gap-2"
+                        @submit.prevent="onSubmit"
                     >
                         <InputEmail
                             v-model="email"
@@ -151,6 +153,13 @@ if (checkLogin()) {
                                     class="terms-link"
                                 >
                                     Nutzungsbedingungen
+                                </RouterLink>
+                                und
+                                <RouterLink
+                                    :to="{ name: 'public.privacy' }"
+                                    class="terms-link"
+                                >
+                                    Datenschutzerklärung
                                 </RouterLink>
                                 gelesen und akzeptiere sie.
                             </template>

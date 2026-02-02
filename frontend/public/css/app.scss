@@ -659,3 +659,7 @@ $breakpoints: (
         }
     }
 }
+
+.kern-form-input__select option{
+    background: unset !important;
+}

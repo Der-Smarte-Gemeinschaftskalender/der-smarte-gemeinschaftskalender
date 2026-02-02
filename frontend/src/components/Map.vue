@@ -35,9 +35,10 @@ const suggestions = ref<AddressForm[]>([]);
 const isLoading = ref(false);
 
 // custom icon
-let myIcon = L.icon({
+const myIcon = L.icon({
     iconUrl: '/marker-icon.png',
     shadowUrl: '/marker-shadow.png',
+    iconAnchor: [13, 40],
 });
 
 function initMap(element: HTMLElement) {

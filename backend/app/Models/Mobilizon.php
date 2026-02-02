@@ -72,6 +72,15 @@ class Mobilizon
                 self::$instance->getPersonId();
             } else {
                 $login = self::$instance->login($user);
+                
+                if (self::$instance->hasError($login)) {
+                    Log::error('Mobilizon Login fehlgeschlagen für Benutzer ID ' . $user->id, [
+                        'response' => $login
+                    ]);
+
+                    return self::$instance;
+                }
+   
                 $newAccessToken = $login['data']['login']['accessToken'];
                 self::$instance->setAccessToken($newAccessToken, $user);
                 self::$instance->getUserId();
@@ -183,6 +192,7 @@ class Mobilizon
         $query = Query::mutation("CreateGroup");
         $query->field("createGroup")->attributes($group);
         $query->createGroup->fields(['id', 'name', 'preferredUsername']);
+
         if ($this->debug) var_dump($query->build());
 
         return $this->requestWithoutMedia($query->build());
@@ -447,6 +457,31 @@ class Mobilizon
 
         return $this->requestWithoutMedia($query->build());
     }
+
+public function findProfileByPreferredUsername(
+    string $preferredUsername,
+    bool $local = true
+): int {
+    $query = Query::query('ListProfiles');
+
+    $query->field('persons')
+        ->attributes([
+            'preferredUsername' => $preferredUsername,
+            'local' => $local,
+            'page' => 1,
+            'limit' => 1,
+        ]);
+
+    $query->persons->fields(['total']);
+
+    if ($this->debug) {
+        var_dump($query->build());
+    }
+
+    $response = $this->requestWithoutMedia($query->build());
+    return (int) ($response['data']['persons']['total'] ?? 0);
+}
+
 
     public function hasError($response)
     {

@@ -67,7 +67,7 @@ watch(model, (newFile) => {
                 :errors="errors"
                 :multiple="false"
                 :accept="props.accept || ['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
-                @fileChange="onFileChange"
+                @file-change="onFileChange"
                 @click="clearModel"
             />
             <!--

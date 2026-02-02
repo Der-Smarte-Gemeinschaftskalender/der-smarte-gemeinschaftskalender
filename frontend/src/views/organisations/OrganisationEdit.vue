@@ -21,10 +21,12 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 import { ZodType } from 'zod';
 import { addressDefaults, type AddressForm, AddressFormSchema } from '@/types/Mobilizon';
 import type { AxiosError } from '@/lib/dsgApi';
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
 
 interface EditOrganisationForm {
     name: string;
     summary: string;
+    preferred_username?: string;
     id?: number | string;
     avatar?: any;
 }
@@ -68,20 +70,12 @@ const onSubmit = handleSubmit(async (values) => {
     showSuccessMessage.value = false;
     showErrorMessage.value = false;
     try {
-        console.log(values);
-        console.log({
-            avatar: {
-                media: {
-                    file: values.avatar,
-                    name: values.avatar?.name || '',
-                },
-            },
-        });
         await dsgApi.post(
             'organisations/group',
             <EditOrganisationForm>{
                 id: groupId.value,
                 ...values,
+                preferredUsername: preferredUsername,
                 avatar: values.avatar
                     ? {
                           media: {
@@ -94,9 +88,11 @@ const onSubmit = handleSubmit(async (values) => {
             },
             { headers: { 'Content-Type': 'multipart/form-data' } }
         );
+
         showSuccessMessage.value = true;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error: any | AxiosError) {
-        console.error(error);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         showErrorMessage.value = true;
         errorMessageContent.value =
             error?.response?.data?.error ||
@@ -104,7 +100,7 @@ const onSubmit = handleSubmit(async (values) => {
     }
 });
 const loadOrganisation = async () => {
-    if (!groupId) {
+    if (!preferredUsername) {
         showErrorMessage.value = true;
         errorMessageContent.value = 'Organisation konnte nicht geladen werden.';
         return;
@@ -152,8 +148,7 @@ loadOrganisation();
         <LinkToDocs
             path="Terminverwaltung/Organisation/"
             fragment="organisation-bearbeiten"
-        />
-        .
+        />.
     </p>
 
     <form
@@ -165,6 +160,17 @@ loadOrganisation();
             title="Fehler"
             :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
             severity="danger"
+        />
+        <Alert
+            v-else-if="showSuccessMessage"
+            class="mb-4"
+            title="Gespeichert"
+            :content="
+                !isStrictModeEnabled
+                    ? 'Die Änderungen wurden erfolgreich gespeichert.'
+                    : 'Ihre Änderungen wurden gespeichert und werden von den Administrator*innen der Instanz überprüft.'
+            "
+            :severity="!isStrictModeEnabled ? 'success' : 'info'"
         />
 
         <Fieldset>
@@ -183,7 +189,7 @@ loadOrganisation();
                 />
                 <InputRichText
                     v-model="summary"
-                    label="Beschreibung (optional)"
+                    label="Beschreibung"
                     name="summary"
                     :errors="submitCount === 0 ? undefined : errors.summary"
                     rows="10"
@@ -198,11 +204,11 @@ loadOrganisation();
                 />
                 <InputText
                     v-model="rawAddress"
-                    @input="updateAddress(rawAddress)"
                     name="physicalAddress"
                     label="Adresse (optional)"
                     :list="mapSuggestions"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
+                    @input="updateAddress(rawAddress)"
                 />
             </div>
         </Fieldset>
@@ -211,12 +217,6 @@ loadOrganisation();
             :search-value="rawAddress"
             :physical-address="physicalAddress"
             class="my-5"
-        />
-        <Alert
-            v-if="showSuccessMessage"
-            title="Gespeichert"
-            :content="'Die Änderungen wurden erfolgreich gespeichert.'"
-            severity="success"
         />
         <div class="flex justify-content-center">
             <Button

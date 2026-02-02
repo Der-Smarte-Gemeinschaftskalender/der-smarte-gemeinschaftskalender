@@ -2,7 +2,6 @@
 import { createTextSingleEvent, createTextEventList, createFullEventUrl, createFullUrl } from '@/lib/shareInformation';
 import type { IEventDetailed } from '@/types/General';
 
-
 interface PropsBase {
     type: 'singleEvent' | 'eventList';
     linkToUrl?: string;
@@ -22,7 +21,6 @@ interface EventListProps extends PropsBase {
 
 type Props = SingleEventProps | EventListProps;
 
-
 const { type, event, eventList, linkToUrl } = defineProps<Props>();
 const fullUrl: string = type === 'singleEvent' ? createFullEventUrl(event!.uuid) : createFullUrl(linkToUrl);
 const text: string =
@@ -34,18 +32,21 @@ const title: string = type === 'singleEvent' ? event.title : 'Veranstaltungsübe
 const fullEncodedText: string = encodeURIComponent(text);
 
 const copyContent = () => {
-    let copyText = document.getElementById('copyToClipboardInput') as HTMLInputElement;
+    const copyText = document.getElementById('copyToClipboardInput') as HTMLInputElement;
     copyText.select();
     copyText.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(copyText.value);
 };
 </script>
 <template>
-    <div class="flex flex-row-reverse flex-wrap gap-1" style="min-height: 51px;">
+    <div
+        class="flex flex-row-reverse flex-wrap gap-1"
+        style="min-height: 51px"
+    >
         <slot />
         <a
             class="cursor-pointer"
-            aria-details="Kopieren"
+            aria-label="Kopieren"
             title="Kopieren"
             @click="copyContent()"
         >
@@ -53,15 +54,27 @@ const copyContent = () => {
                 name="content-copy"
                 class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
             />-->
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-2rem h-2rem sm:w-3rem sm:h-3rem">
+            <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
+            >
                 <title>Kopieren</title>
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5875 17.4125C7.97917 17.8042 8.45 18 9 18H18C18.55 18 19.0208 17.8042 19.4125 17.4125C19.8042 17.0208 20 16.55 20 16V4C20 3.45 19.8042 2.97917 19.4125 2.5875C19.0208 2.19583 18.55 2 18 2H9C8.45 2 7.97917 2.19583 7.5875 2.5875C7.19583 2.97917 7 3.45 7 4V16C7 16.55 7.19583 17.0208 7.5875 17.4125ZM3.5875 21.4125C3.97917 21.8042 4.45 22 5 22H15C15.2833 22 15.5208 21.9042 15.7125 21.7125C15.9042 21.5208 16 21.2833 16 21C16 20.7167 15.9042 20.4792 15.7125 20.2875C15.5208 20.0958 15.2833 20 15 20H5V7C5 6.71667 4.90417 6.47917 4.7125 6.2875C4.52083 6.09583 4.28333 6 4 6C3.71667 6 3.47917 6.09583 3.2875 6.2875C3.09583 6.47917 3 6.71667 3 7V20C3 20.55 3.19583 21.0208 3.5875 21.4125Z" fill="#171A2B"/>
+                <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M7.5875 17.4125C7.97917 17.8042 8.45 18 9 18H18C18.55 18 19.0208 17.8042 19.4125 17.4125C19.8042 17.0208 20 16.55 20 16V4C20 3.45 19.8042 2.97917 19.4125 2.5875C19.0208 2.19583 18.55 2 18 2H9C8.45 2 7.97917 2.19583 7.5875 2.5875C7.19583 2.97917 7 3.45 7 4V16C7 16.55 7.19583 17.0208 7.5875 17.4125ZM3.5875 21.4125C3.97917 21.8042 4.45 22 5 22H15C15.2833 22 15.5208 21.9042 15.7125 21.7125C15.9042 21.5208 16 21.2833 16 21C16 20.7167 15.9042 20.4792 15.7125 20.2875C15.5208 20.0958 15.2833 20 15 20H5V7C5 6.71667 4.90417 6.47917 4.7125 6.2875C4.52083 6.09583 4.28333 6 4 6C3.71667 6 3.47917 6.09583 3.2875 6.2875C3.09583 6.47917 3 6.71667 3 7V20C3 20.55 3.19583 21.0208 3.5875 21.4125Z"
+                    fill="#171A2B"
+                />
             </svg>
             <textarea
+                id="copyToClipboardInput"
                 type="text"
                 :value="text"
                 style="display: none"
-                id="copyToClipboardInput"
                 aria-details="Kopieren"
             />
         </a>
@@ -77,7 +90,6 @@ const copyContent = () => {
                 aria-hidden="true"
                 role="img"
             >
-
                 <svg
                     fill="currentColor"
                     class="material-design-icon__svg w-2rem h-2rem sm:w-3rem sm:h-3rem"
@@ -196,7 +208,7 @@ const copyContent = () => {
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 216.4144 232.00976"
                     class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
-                    style="scale: .85"
+                    style="scale: 0.85"
                 >
                     <title>Mastodon</title>
                     <path

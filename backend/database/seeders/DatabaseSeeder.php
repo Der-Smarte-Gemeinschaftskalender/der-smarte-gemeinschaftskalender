@@ -29,9 +29,9 @@ class DatabaseSeeder extends Seeder
             'type' => 'admin',
             'is_active' => 1,
             'email_verified_at' => now(),
-            'mobilizon_email' => env('LOCAL_DEV_MOBILIZON_ADMIN_EMAIL'),
-            'mobilizon_password' => env('LOCAL_DEV_MOBILIZON_ADMIN_PASSWORD'),
-            'mobilizon_user_id' => env('LOCAL_DEV_MOBILIZON_ADMIN_USER_ID'),
+            'mobilizon_email' => env('APP_MOBILIZON_EMAIL'),
+            'mobilizon_password' => env('APP_MOBILIZON_PASSWORD'),
+            'mobilizon_user_id' => env('APP_MOBILIZON_ADMIN_USER_ID'),
             'mobilizon_name' => 'Instanz Admin',
             'mobilizon_preferred_username' => 'instanzadmin',
         ]);

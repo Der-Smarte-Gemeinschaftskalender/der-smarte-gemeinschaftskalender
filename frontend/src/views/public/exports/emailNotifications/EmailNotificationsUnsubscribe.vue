@@ -61,8 +61,8 @@ const unsubscribe = async (disallow: boolean = false) => {
     </Teleport>
 
     <Dialog
-        title="Alle E-Mail-Benachrichtigungen abbestellen"
         v-model="showDisallowDialog"
+        title="Alle E-Mail-Benachrichtigungen abbestellen"
     >
         <p class="mb-4">
             Sind Sie sicher, dass Sie alle E-Mail-Benachrichtigungen für immer abbestellen möchten? Sie erhalten keine E-Mail-Benachrichtigungen mehr von dieser Plattform.
@@ -99,9 +99,9 @@ const unsubscribe = async (disallow: boolean = false) => {
                     <Button
                         class="w-full max-w-30rem"
                         variant="primary"
-                        @click="unsubscribe()"
                         label="Abbestellen"
                         :disabled="!!showUnsubscribeSuccess"
+                        @click="unsubscribe()"
                     />
                 </div>
             </div>
@@ -113,9 +113,9 @@ const unsubscribe = async (disallow: boolean = false) => {
                     <Button
                         class="mt-2 w-full max-w-30rem"
                         variant="secondary"
-                        @click="showDisallowDialog = true;"
                         label="Für immer abbestellen"
                         :disabled="!!showUnsubscribeSuccess"
+                        @click="showDisallowDialog = true;"
                     />
                 </div>
             </div>

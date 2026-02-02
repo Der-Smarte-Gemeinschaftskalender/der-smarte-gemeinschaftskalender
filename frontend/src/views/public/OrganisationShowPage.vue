@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { findOrganisation } from '@/lib/mobilizonClient';
-import {formatCoordinates, normalizeStreet, stripHtml} from '@/lib/helper';
+import { formatCoordinates, normalizeStreet, stripHtml } from '@/lib/helper';
 
 import EventCard from '@/components/EventCard.vue';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
@@ -11,7 +11,6 @@ import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import NavigatePhysicalAddress from '@/components/NavigatePhysicalAddress.vue';
 import ShareLinks from '@/components/ShareLinks.vue';
 import Map from '@/components/Map.vue';
-
 
 const route = useRoute();
 const router = useRouter();
@@ -79,8 +78,12 @@ loadOrganisations();
                 <div class="lg:col-6 p-0">
                     <h2 class="kern-heading font-semilight text-theme-primary mb-4">Über die Organisation</h2>
                     <p
-                        v-html="stripHtml(organisation.summary) ? organisation.summary : 'Es wurde keine Beschreibung angegeben.'"
                         class="kern-text prose"
+                        v-html="
+                            stripHtml(organisation.summary)
+                                ? organisation.summary
+                                : 'Es wurde keine Beschreibung angegeben.'
+                        "
                     ></p>
                     <h3 class="kern-heading font-semilight text-theme-primary mb-3 mt-6">Adresse</h3>
                     <template v-if="organisation?.physicalAddress">
@@ -123,9 +126,9 @@ loadOrganisations();
                     <Button
                         v-if="organisation?.organizedEvents?.elements?.length"
                         icon-left="download"
-                        @click="downloadIcsEvent"
                         class="mt-4"
                         variant="secondary"
+                        @click="downloadIcsEvent"
                     >
                         Bevorstehende Veranstaltungen zum Kalender hinzufügen
                     </Button>
@@ -144,7 +147,7 @@ loadOrganisations();
                             <ShareLinks
                                 v-if="organisation?.organizedEvents?.elements.length"
                                 :type="'eventList'"
-                                :eventList="organisation?.organizedEvents?.elements"
+                                :event-list="organisation?.organizedEvents?.elements"
                                 :link-to-url="`/organisation/${organisation.preferredUsername}`"
                             >
                                 <RouterLink
@@ -152,6 +155,7 @@ loadOrganisations();
                                         name: 'public.infomonitor',
                                         query: { preferredUsername: organisation.preferredUsername },
                                     }"
+                                    aria-label="Zur Infomonitor Anzeige der Organisation"
                                 >
                                     <Icon
                                         name="info"
@@ -184,4 +188,3 @@ loadOrganisations();
         <Loader />
     </template>
 </template>
-

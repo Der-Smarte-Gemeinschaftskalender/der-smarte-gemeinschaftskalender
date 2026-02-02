@@ -34,14 +34,15 @@ import type { RemoveKeys } from '@/types/Generics';
 import { addressDefaults, type AddressForm } from '@/types/Mobilizon';
 import {
     type SeriesEvent,
+    SeriesEventSchema,
     type SeriesEventForm,
     SeriesEventFormSchema,
-    SeriesEventSchema,
-    SeriesEventsDefaults,
+    SeriesEventsDefaults
 } from '@/types/events/SeriesEvents';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import InputTags from '@/components/InputTags.vue';
+import { createEventDefaults } from '@/lib/instanceConfig';
 
 const route = useRoute();
 const router = useRouter();
@@ -75,6 +76,11 @@ const { value: intervall } = useField<string>('intervall');
 const { value: onlineAddress } = useField<string>('onlineAddress');
 const { value: physicalAddress } = useField<AddressForm>('physicalAddress');
 const { value: externalParticipationUrl } = useField<string | undefined>('externalParticipationUrl');
+
+// Set default values, if configured
+if (createEventDefaults.category) {
+    category.value = createEventDefaults.category;
+}
 
 const onSubmit = handleSubmit(async (values: SeriesEventForm) => {
     const preparedValues: RemoveKeys<SeriesEvent, 'id'> = prepareEventsValues<
@@ -169,8 +175,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <LinkToDocs
             path="Terminverwaltung/Serientermine/"
             fragment="serientermin-erstellen"
-        />
-        .
+        />.
     </p>
     <form
         novalidate
@@ -198,8 +203,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 :errors="submitCount === 0 ? undefined : errors.picture"
             />
             <InputRichText
-                class="mt-3"
                 v-model="description"
+                class="mt-3"
                 label="Beschreibung"
                 name="description"
                 :errors="submitCount === 0 ? undefined : errors.description"
@@ -210,8 +215,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     <div class="kern-row mb-2">
                         <div class="kern-col">
                             <InputDate
-                                name="start"
                                 v-model="start"
+                                name="start"
                                 label="Startdatum"
                                 :errors="submitCount === 0 ? undefined : errors.start"
                             />
@@ -271,8 +276,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             <LinkToDocs
                                 path="Terminverwaltung/Serientermine/"
                                 fragment="zeitraum-und-intervall-festlegen"
-                            />
-                            .
+                            />.
                         </p>
                     </Alert>
                 </div>
@@ -308,9 +312,9 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         />
 
                         <InputUrl
+                            v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            v-model="externalParticipationUrl"
                             label="Externe Anmeldeseite (URL)"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
@@ -331,8 +335,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                 <LinkToDocs
                                     path="Terminverwaltung/Einzeltermine/"
                                     fragment="beitrittsoptionen"
-                                />
-                                .
+                                />.
                             </p>
                         </Alert>
                     </div>
@@ -359,11 +362,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 />
                 <InputText
                     v-model="rawAddress"
-                    @input="updateAddress(rawAddress)"
                     name="physicalAddress"
                     label="Adresse (optional)"
                     :list="mapSuggestions"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
+                    @input="updateAddress(rawAddress)"
                 />
             </div>
         </Fieldset>

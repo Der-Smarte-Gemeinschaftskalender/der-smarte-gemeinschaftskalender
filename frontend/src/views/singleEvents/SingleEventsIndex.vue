@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useRoute } from 'vue-router';   
 import { formatDateTime } from '@/lib/helper';
 import { current_organisation } from '@/composables/OrganisationComposable';
 
@@ -10,10 +11,12 @@ import type { CreatedEvent } from '@/types/events/CreatedEvents';
 import ButtonLegend from '@/components/ButtonLegend.vue';
 
 import type { Column } from "@/types/General";
+import Alert from '@/components/KERN/Alert.vue';
 
 
 type Row = { created_event: CreatedEvent };
 
+const route = useRoute();
 
 const columns: Array<Column> = [
     {
@@ -67,6 +70,12 @@ const columns: Array<Column> = [
         Weitere Informationen finden Sie im
         <LinkToDocs path="Terminverwaltung/Einzeltermine/" />.
     </p>
+    <Alert
+        v-if="route.query.requestSent === 'true'"
+        title="Anfrage gesendet"
+        content="Ihre Terminanfrage wurde gesendet. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde."
+        severity="info"
+    />
     <Table
         :api="{
             url: '/single-events',

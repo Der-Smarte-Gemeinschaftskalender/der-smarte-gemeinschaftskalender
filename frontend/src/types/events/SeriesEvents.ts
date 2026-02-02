@@ -1,13 +1,18 @@
 import zod from "@/lib/zod";
 import dayjs from "@/lib/dayjs";
 import { formatInputDate, stripHtml } from "@/lib/helper";
-import { DefaultEventFormSchema, DefaultEventSchema } from "./DefaultEvents.ts";
+import {
+    ApprovalRequestResponseSchema,
+    DefaultEventFormSchema,
+    DefaultEventSchema,
+} from "./DefaultEvents.ts";
 import {
     intervall_options,
     mobilizon_category_options,
     mobilizon_event_join_options,
     mobilizon_event_language_options, mobilizon_event_status
 } from "@/lib/const";
+import { isStrictModeEnabled } from "@/lib/instanceConfig";
 
 export const SeriesEventsDefaults = {
     name: '',
@@ -79,6 +84,12 @@ export const SeriesEventSchema = DefaultEventSchema.extend({
 });
 
 export type SeriesEvent = zod.infer<typeof SeriesEventSchema>;
+
+export const SeriesEventCreateResponseSchema = isStrictModeEnabled
+    ? ApprovalRequestResponseSchema
+    : SeriesEventSchema;
+
+export type SeriesEventCreateResponse = zod.infer<typeof SeriesEventCreateResponseSchema>;
 
 
 export const SeriesEventFormSchema = DefaultEventFormSchema.extend({

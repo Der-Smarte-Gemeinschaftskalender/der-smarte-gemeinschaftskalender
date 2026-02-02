@@ -17,9 +17,10 @@
 
 - name: Clone a private Git repository
   git:
-    repo: "git@github.com:Der-Smarte-Gemeinschaftskalender/der-smarte-gemeinschaftskalender.git"
+    repo: "git@github.com:Der-Smarte-Gemeinschaftskalender/legacy-der-smarte-gemeinschaftskalender.git"
     dest: "/opt/der-smarte-gemeinschaftskalender"
     version: main
+    force: yes
   when: build_on_server | bool 
 
 - name: env frontend config
@@ -29,6 +30,98 @@
     owner: root
     group: root
     mode: '0644'
+
+- name: Set inventory name fact
+  set_fact:
+    inventory_name: "{{ inventory_file | basename | regex_replace('\\.yml$', '') }}"
+
+- name: Copy custom logo if exists
+  copy:
+    src: "{{ inventory_name }}/logo.png"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/public/logo.png"
+    owner: root
+    group: root
+    mode: '0644'
+  ignore_errors: true
+
+- name: Copy custom landing page image if exists
+  copy:
+    src: "{{ inventory_name }}/notifications.png"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/public/notifications.png"
+    owner: root
+    group: root
+    mode: '0644'
+  ignore_errors: true
+ 
+
+- name: Copy custom default_card if exists
+  copy:
+    src: "{{ inventory_name }}/default_card.png"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/public/default_card.png"
+    owner: root
+    group: root
+    mode: '0644'
+  ignore_errors: true
+
+- name: Copy custom favicons folder if exists
+  copy:
+    src: "{{ inventory_name }}/favicons/"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/public/favicons/"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  ignore_errors: true
+
+- name: Copy custom material generator folder if exists
+  copy:
+    src: "{{ inventory_name }}/material_generator/"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/public/material_generator/"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  ignore_errors: true
+
+- name: Copy custom categoryOptions.ts if exists
+  copy:
+    src: "{{ inventory_name }}/categoryOptions.ts"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/src/lib/categoryOptions.ts"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  ignore_errors: true
+
+- name: Copy custom instanceConfig.ts if exists
+  copy:
+    src: "{{ inventory_name }}/instanceConfig.ts"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/src/lib/instanceConfig.ts"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  ignore_errors: true
+
+- name: Copy custom app.scss if exists
+  copy:
+    src: "{{ inventory_name }}/app.scss"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/public/css/app.scss"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  ignore_errors: true
+
+- name: Copy index.html if exists
+  copy:
+    src: "{{ inventory_name }}/index.html"
+    dest: "/opt/der-smarte-gemeinschaftskalender/frontend/index.html"
+    owner: root
+    group: root
+    mode: '0644'
+    directory_mode: '0755'
+  ignore_errors: true
 
 - name: env backend config
   template:

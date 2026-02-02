@@ -33,12 +33,12 @@ defineProps<Props>();
           class="kern-form-check"
       >
         <input
+            :id="`${name}-${radio.value}`"
+            v-model="model"
             class="kern-form-check__radio"
             type="radio"
-            :id="`${name}-${radio.value}`"
             :name="name"
             :value="radio.value"
-            v-model="model"
         />
         <label
             class="kern-form-check__label"

@@ -5,16 +5,19 @@ import { useRouter } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { dsgApi } from '@/lib/dsgApi';
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
+import { stripHtml } from '@/lib/helper';
 
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputEmail.vue';
-import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
+import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
 import type { ZodType } from 'zod';
 import type { AxiosError } from 'axios';
+
 
 const router = useRouter();
 const showErrorMessage = ref(false);
@@ -46,7 +49,7 @@ const validationSchema = toTypedSchema(
             .string({
                 required_error: 'Die Beschreibung der Organisation ist erforderlich.',
             })
-            .nonempty('Die Beschreibung der Organisation darf nicht leer sein.'),
+            .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' })
     }) satisfies ZodType<RequestOrganisationForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
@@ -64,9 +67,11 @@ const onSubmit = handleSubmit(async (values) => {
 
         await router.push({
             name: 'app.myOrganisations',
+            query: isStrictModeEnabled ? { requestSent: 'true' } : {},
         });
     } catch (error: any | AxiosError) {
         showErrorMessage.value = true;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         errorMessageContent.value = error?.response?.data?.error || 'Es ist ein Fehler aufgetreten.';
     }
 });
@@ -77,7 +82,7 @@ const convertToUsername = (name: string): string => {
         .replace(/ +/g, '_')
         .replace(/_+/g, '_');
 
-    let lastChar = username.slice(-1);
+    const lastChar = username.slice(-1);
 
     if (lastChar === '_') {
         username = username.substring(0, username.length - 1);
@@ -98,8 +103,7 @@ watch(name, async (newName) => {
         <LinkToDocs
             path="Terminverwaltung/Organisation/"
             fragment="organisation-erstellen-zugang-fur-veranstalter-innen"
-        />
-        .
+        />.
     </p>
     <form
         novalidate
@@ -107,6 +111,7 @@ watch(name, async (newName) => {
     >
         <Alert
             v-if="showErrorMessage"
+            class="mb-4"
             title="Fehler"
             :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
             severity="danger"
@@ -158,14 +163,13 @@ watch(name, async (newName) => {
                                 <LinkToDocs
                                     path="Terminverwaltung/Organisation/"
                                     fragment="schritt-2-formular-zur-organisationserstellung"
-                                />
-                                .
+                                />.
                             </p>
                         </Alert>
                     </div>
                 </div>
 
-                <InputTextarea
+                <InputRichText
                     v-model="summary"
                     label="Beschreibung (für die öffentliche Organisationsseite)"
                     name="summary"

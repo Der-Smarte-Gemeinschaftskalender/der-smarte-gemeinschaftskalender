@@ -98,8 +98,8 @@ export const handleSubmitCallback = async (url: string, {
     catch (error: any | AxiosError) {
         console.error('Error in handleSubmitCallback:', error);
 
-        throw axiosErrorHandler(error) && error?.response?.data?.message
-            ? error.response.data.message
+        throw axiosErrorHandler(error)
+            ? (error?.response?.data?.message ?? error?.response?.data?.error ?? 'Ein Fehler ist aufgetreten.')
             : 'Ein Fehler ist aufgetreten.';
     }
 }

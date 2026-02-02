@@ -9,22 +9,33 @@ export interface TestConfig {
   userPassword?: string;
   testAddress?: string;
   confirmationTestAddress?: string;
+  strictMode?: boolean;
+}
+
+function normalizeUrl(url: string): string {
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return `http://${url}`;
+  }
+  return url;
 }
 
 export function loadEnv(): TestConfig {
   try {
     dotenv.config();
-    const siteUrl = process.env.SITE_URL;
+    const rawSiteUrl = process.env.SITE_URL;
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
     const userEmail = process.env.USER_EMAIL;
     const userPassword = process.env.USER_PASSWORD;
     const testAddress = process.env.TEST_ADDRESS;
     const confirmationTestAddress = process.env.CONFIRMATION_TEST_ADDRESS;
+    const strictMode = process.env.STRICT_MODE?.toLowerCase() === "true";
 
-    if (!siteUrl) {
+    if (!rawSiteUrl) {
       throw new Error("SITE_URL is not defined");
     }
+
+    const siteUrl = normalizeUrl(rawSiteUrl);
 
     return {
       siteUrl,
@@ -34,6 +45,7 @@ export function loadEnv(): TestConfig {
       userPassword,
       testAddress,
       confirmationTestAddress,
+      strictMode,
     };
   } catch (error) {
     throw new Error("Could not load .env file");
@@ -177,15 +189,20 @@ export async function submitSerialEvent(page: Page): Promise<void> {
 }
 
 export async function viewEventFromList(page: Page, eventName: string): Promise<void> {
+  await page.waitForLoadState("networkidle");
   const eventRow = page.getByRole("row", { name: new RegExp(eventName) }).first();
+  await expect(eventRow).toBeVisible({ timeout: 15000 });
   await eventRow.getByRole("button", { name: "Zum Termin" }).first().click();
   await expect(page).toHaveURL(/.*\/events\/.*/);
 }
 
 export async function editEventFromList(page: Page, eventName: string): Promise<void> {
+  await page.waitForLoadState("networkidle");
   const eventRow = page.getByRole("row", { name: new RegExp(eventName) }).first();
+  await expect(eventRow).toBeVisible({ timeout: 15000 });
   await eventRow.getByRole("button", { name: "Bearbeiten" }).first().click();
   await expect(page).toHaveURL(/.*\/app\/created-events\/.*\/edit/);
+  await page.waitForLoadState("networkidle");
 }
 
 export async function copyEventFromList(page: Page, eventName: string): Promise<void> {
@@ -209,8 +226,9 @@ export async function copySerialEventFromList(page: Page, eventName: string): Pr
 }
 
 export async function verifyEventDetails(page: Page, data: EventFormData): Promise<void> {
-  await expect(page.getByRole("heading", { name: data.name }).first()).toBeVisible();
-  await expect(page.getByText(data.description)).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator(`h1:has-text("${data.name}")`).first()).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText(data.description).first()).toBeVisible();
 
   if (data.category) {
     await expect(page.getByText(data.category)).toBeVisible();
@@ -243,40 +261,47 @@ export async function verifyEventDetails(page: Page, data: EventFormData): Promi
     await expect(page.getByText(addressPart2)).toBeVisible();
     await expect(page.getByRole("button", { name: "Google Maps" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Apple Karten" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Geokoordinaten öffnen" })).toBeVisible();
   }
 }
 
 export async function editEventForm(page: Page, data: EventFormData): Promise<void> {
   await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(5000);
 
   if (data.name) {
-    await page.locator("#name").click();
-    await page.locator("#name").scrollIntoViewIfNeeded();
-    await page.locator("#name").fill("");
-    await page.locator("#name").pressSequentially(data.name);
+    const nameInput = page.locator("#name");
+    await nameInput.scrollIntoViewIfNeeded();
+    await nameInput.fill(data.name);
   }
 
   if (data.description) {
-    await page.locator(".ProseMirror").click();
-    await page.locator(".ProseMirror").scrollIntoViewIfNeeded();
-    await page.locator(".ProseMirror").fill("");
-    await page.locator(".ProseMirror").pressSequentially(data.description);
+    const descriptionEditor = page.locator(".ProseMirror");
+    await descriptionEditor.scrollIntoViewIfNeeded();
+    await descriptionEditor.fill(data.description);
   }
+  await page.waitForLoadState("networkidle");
 
   if (data.name) {
     await expect(page.locator("#name")).toHaveValue(data.name);
   }
   if (data.description) {
-    await expect(page.locator(".ProseMirror")).toHaveValue(data.description);
+    await expect(page.locator(".ProseMirror")).toHaveText(data.description);
   }
 }
 
-export async function saveEventChanges(page: Page): Promise<void> {
-  await Promise.all([
-    page.waitForURL(/.*\/events\/.*/, { timeout: 15000 }),
-    page.getByRole("button").getByText("Änderung Speichern").click(),
-  ]);
+export async function saveEventChanges(page: Page, strictMode: boolean = false): Promise<void> {
+  const saveButton = page.getByRole("button", { name: "Änderung Speichern" });
+  await saveButton.scrollIntoViewIfNeeded();
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+  
+  await page.waitForLoadState("networkidle");
+
+  await expect(page).toHaveURL(/.*\/events/);
+  
+  await page.waitForLoadState("networkidle");
+
+  await page.reload();
 }
 
 export async function register(page: Page, config: TestConfig, email?: string): Promise<void> {

@@ -32,9 +32,9 @@ import type { RemoveKeys } from '@/types/Generics';
 import { addressDefaults, type AddressForm } from '@/types/Mobilizon';
 import {
     type ImportedEvent,
-    type ImportedEventForm,
-    ImportedEventFormSchema,
     ImportedEventSchema,
+    type ImportedEventForm,
+    ImportedEventFormSchema
 } from '@/types/events/ImportedEvents';
 
 const errorMessageContent = ref<string>('');
@@ -109,8 +109,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <LinkToDocs
             path="Terminverwaltung/Kalenderintegration/"
             fragment="kalender-integrieren-ical-url-anbinden"
-        />
-        .
+        />.
     </p>
     <form
         novalidate
@@ -124,8 +123,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 severity="danger"
             />
             <InputRichText
-                class="mt-3"
                 v-model="description"
+                class="mt-3"
                 label="Beschreibung (optional)"
                 name="description"
                 :errors="submitCount === 0 ? undefined : errors.description"
@@ -156,8 +155,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             <LinkToDocs
                                 path="Terminverwaltung/Kalenderintegration/"
                                 fragment="kalender-integrieren-ical-url-anbinden"
-                            />
-                            .
+                            />.
                         </p>
                     </Alert>
                 </div>
@@ -193,9 +191,9 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         />
 
                         <InputUrl
+                            v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            v-model="externalParticipationUrl"
                             label="Externe Anmeldeseite (URL)"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
@@ -216,8 +214,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                 <LinkToDocs
                                     path="Terminverwaltung/Einzeltermine/"
                                     fragment="beitrittsoptionen"
-                                />
-                                .
+                                />.
                             </p>
                         </Alert>
                     </div>
@@ -245,11 +242,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             </div>
             <InputText
                 v-model="rawAddress"
-                @input="updateAddress(rawAddress)"
                 name="physicalAddress"
                 label="Adresse (optional)"
                 :list="mapSuggestions"
                 :errors="submitCount === 0 ? undefined : errors.physicalAddress"
+                @input="updateAddress(rawAddress)"
             />
         </Fieldset>
         <Map

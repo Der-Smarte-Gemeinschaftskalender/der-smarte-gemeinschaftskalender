@@ -85,18 +85,18 @@ const onSubmit = handleSubmit(async (values) => {
                 <div class="flex flex-column align-items-center md:flex-row gap-5 md:gap-6">
                     <div class="w-full">
                         <InputText
+                            v-model="mobilizon_name"
                             name="mobilizon_name"
                             class="w-full"
-                            v-model="mobilizon_name"
                             label="Name"
                             :errors="submitCount === 0 ? undefined : errors.mobilizon_name"
                         />
                     </div>
                     <div class="col-12 md:col-6 px-0">
                         <InputText
+                            v-model="preferredUsername"
                             name="mobilizon_preferred_username"
                             class="w-full"
-                            v-model="preferredUsername"
                             label="Benutzername"
                             :disabled="true"
                         />
@@ -106,8 +106,8 @@ const onSubmit = handleSubmit(async (values) => {
                 <div class="flex flex-column md:flex-row gap-6">
                     <div class="w-full">
                         <InputEmail
-                            name="email"
                             v-model="email"
+                            name="email"
                             label="E-Mail Adresse"
                             required
                             :errors="submitCount === 0 ? undefined : errors.email"

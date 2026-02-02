@@ -23,9 +23,10 @@ import Overlayable from '@/components/Overlayable.vue';
 import { type Accordion } from '@/types/KERN';
 import { type IEvent, MobilizonCategory } from '@/types/General';
 import type { CalendarOptions, EventInput, EventSourceFuncArg } from '@fullcalendar/core';
+import { searchDefaults } from '@/lib/instanceConfig';
 
 const searchCategory = ref<string[]>([]);
-const searchTarget = ref(localStorage.getItem('searchTarget') || import.meta.env.VITE_SEARCH_TARGET);
+const searchTarget = ref(localStorage.getItem('searchTarget') || searchDefaults.target);
 const searchTerm = ref('');
 const searchMainCategory = ref<string[]>(JSON.parse(localStorage.getItem('searchMainCategory') || '[]'));
 const searchStatus = ref<string[]>(JSON.parse(localStorage.getItem('searchStatus') || '["CONFIRMED"]'));
@@ -158,12 +159,12 @@ watch(searchTerm, async (newSearchTerm) => {
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6 flex justify-content-between align-items-center">
             <h1 class="kern-heading text-theme-primary">Kalender</h1>
             <Button
-                @click="overlayable?.openOverlay()"
                 variant="secondary"
                 icon-left="tune"
                 class="xl:hidden w-min"
                 aria-label="Filter"
                 title="Filter"
+                @click="overlayable?.openOverlay()"
             >
                 Filter
             </Button>
@@ -190,7 +191,7 @@ watch(searchTerm, async (newSearchTerm) => {
                             <div class="search kern-fieldset__content">
                                 <InputText
                                     v-model="searchTerm"
-                                    placeholder="Schlagwort, Veranstaltungstitel, Organisation,..."
+                                    placeholder="Schlagwort, Veranstaltungstitel..."
                                     name="searchTerm"
                                 />
                             </div>
@@ -269,12 +270,12 @@ watch(searchTerm, async (newSearchTerm) => {
         </Overlayable>
         <div class="calendar-wrapper flex-grow-1 flex flex-column">
             <FullCalendar
-                class="calendar"
-                ref="fullCalendar"
-                :options="calendarOptions"
                 v-if="!loading"
+                ref="fullCalendar"
+                class="calendar"
+                :options="calendarOptions"
             >
-                <template v-slot:eventContent="arg">
+                <template #eventContent="arg">
                     <div
                         class="fc-content kern-text kern-text--small"
                         :title="arg.event.title"
@@ -311,8 +312,8 @@ watch(searchTerm, async (newSearchTerm) => {
 
 <style lang="scss">
 .search.kern-fieldset__content * {
-  box-sizing: border-box;
-  max-width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 /* ===== FullCalendar Buttons ===== */

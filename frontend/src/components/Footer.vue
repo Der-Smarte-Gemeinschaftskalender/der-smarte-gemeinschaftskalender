@@ -1,22 +1,24 @@
 <script setup lang="ts">
-const logoUrl = import.meta.env.VITE_APP_LOGO_PATH || '/logo.png';
-const instanceName = import.meta.env.VITE_INSTANCE_NAME;
-const operatedBY = import.meta.env.VITE_OPERATED_BY;
+const logoUrl = '/logo.png';
+import { instanceInformation, mainFooter } from '@/lib/instanceConfig';
+
+const { name: instanceName, operatedBy } = instanceInformation;
+const { disclaimerText } = mainFooter;
 </script>
 
 <template>
-    <footer class="flex flex-column align-items-center py-8 gap-4 kern-text">
+    <footer class="flex flex-column align-items-center py-8 gap-4 kern-text main-footer">
         <div class="top-border"></div>
         <div class="">
             <img
                 class="kern-logo w-16rem h-auto"
                 :src="logoUrl"
-                alt="TAViAS Logo"
+                :alt="instanceName + ' Logo'"
             />
         </div>
 
         <!-- Text with links -->
-        <p class="text-center mb-4 px-3 leading-relaxed max-w-3xl col-11 lg:col-10 xl:col-8">
+        <div class="text-center mb-4 px-3 leading-relaxed max-w-3xl col-11 lg:col-10 xl:col-8">
             <span v-if="instanceName">{{ instanceName }}</span>
             ist eine Instanz des
             <a
@@ -26,7 +28,7 @@ const operatedBY = import.meta.env.VITE_OPERATED_BY;
             >
                 Smarten Gemeinschaftskalenders
             </a>
-            , betrieben vom Amt Süderbrarup.
+            , betrieben vom {{ operatedBy }}.
             <br />
             Der Kalender basiert auf
             <a
@@ -45,7 +47,21 @@ const operatedBY = import.meta.env.VITE_OPERATED_BY;
                 54 Grad Software GmbH
             </a>
             betreut.
-        </p>
+            <div>
+                Seine Entwicklung wurde im
+                <a
+                    href="https://gitlab.opencode.de/sh/digitalhub-sh/landesprogramm-offene-innovationen"
+                    target="_blank"
+                >
+                    Landesprogramm Offene Innovation in Schleswig-Holstein
+                </a>
+                mitfinanziert.
+            </div>
+            <div
+                v-if="disclaimerText"
+                v-html="disclaimerText"
+            ></div>
+        </div>
         <section class="links flex flex-wrap justify-content-center gap-2 col-11 xl:col-10">
             <a
                 href="https://der-smarte-gemeinschaftskalender.de/"

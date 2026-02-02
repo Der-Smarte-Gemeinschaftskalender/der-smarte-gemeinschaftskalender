@@ -4,6 +4,8 @@ import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import Button from '@/components/KERN/Button.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
+import { instanceInformation } from '@/lib/instanceConfig';
+
 </script>
 <template>
     <Teleport to="#headerslot">
@@ -16,7 +18,7 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
     </Teleport>
     <div>
         <p class="kern-text kern-text--large text-theme-primary mb-6">
-            Dies ist ein kostenloser Service vom Amt Süderbrarup und lässt sich jederzeit unkompliziert abbestellen oder
+            Dies ist ein kostenloser Service vom {{ instanceInformation.operatedBy }} und lässt sich jederzeit unkompliziert abbestellen oder
             anpassen.
         </p>
         <div
@@ -57,17 +59,17 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
                         </p>
                     </template>
                     <p
+                        v-else
                         class="kern-text"
                         style="white-space: pre-line"
-                        v-else
                     >
                         {{ exportItem.description }}
                     </p>
                 </div>
             </div>
             <Divider
-                class="mt-6 mb-8"
                 v-if="index !== exportList.length - 1"
+                class="mt-6 mb-8"
             />
         </div>
     </div>

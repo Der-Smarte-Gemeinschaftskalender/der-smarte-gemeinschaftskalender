@@ -20,6 +20,7 @@ import { loadImage } from '@/lib/dsgClient';
 import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import { createTextEventList, createTextSingleEvent } from '@/lib/shareInformation';
+import { materialGeneratorDefaults } from '@/lib/instanceConfig';
 
 interface InfoBox {
     infoBoxStartX: number;
@@ -295,6 +296,7 @@ const displayCanvaData = async (withoutClear: boolean = false) => {
             beginsOn: singleEventData.value.beginsOn,
             physicalAddress: singleEventData.value?.physicalAddress,
             organisation: singleEventData.value.attributedTo,
+            uuid: singleEventData.value.uuid,
         });
         organisationAvatar.value = await loadImage('organisations/avatar', {
             imageUrl: organisationAvatarUrl.value,
@@ -309,7 +311,7 @@ const infoBoxWidth = computed<number>(() => selectedDimensionInfoBox.value?.info
 const infoBoxLength = computed<number>(() => selectedDimensionInfoBox.value?.infoBoxLength ?? 0);
 const defaultTextSize = 30;
 const selectedFont = ref<string>('Arial');
-const underlineColor = ref<string>('#7dcce8');
+const underlineColor = ref<string>(materialGeneratorDefaults.underlineColor || '#7dcce8');
 const selectedTextColor = ref<string>('#111111');
 
 const eventListInfo = (events: Event[]) => {
@@ -340,18 +342,18 @@ const eventListInfo = (events: Event[]) => {
 
 const eventInfo = (event) => {
     let newStartY: number = infoBoxStartY.value + 32;
-    let startX: number = infoBoxStartX.value + 56;
+    const startX: number = infoBoxStartX.value + 56;
 
     newStartY += 50 + 64;
     const textSizeHeadline: number = 62;
     canvasText(breakString(event.title, 23)[0], startX, newStartY, 'normal', textSizeHeadline);
 
     newStartY += defaultTextSize + 45;
-    if (!!breakString(event.title, 23)[1]?.length) {
+    if (breakString(event.title, 23)[1]?.length) {
         canvasText(breakString(event.title, 23)[1], startX, newStartY, 'normal', textSizeHeadline);
     }
     newStartY += defaultTextSize + 45;
-    if (!!breakString(event.title, 23)[2].length) {
+    if (breakString(event.title, 23)[2].length) {
         canvasText(breakString(event.title, 23)[2], startX, newStartY, 'normal', textSizeHeadline);
     }
     newStartY = infoBoxStartY.value + 384;
@@ -398,7 +400,7 @@ const eventListSingleEventText = (event: Event, startY: number, startX: number, 
     canvasText(breakString(event.title, 30)[0], startX, newStartY);
 
     newStartY += defaultTextSize;
-    if (!!breakString(event.title, 25)[1].length) {
+    if (breakString(event.title, 25)[1].length) {
         canvasText(breakString(event.title, 30)[1], startX, newStartY);
     }
 
@@ -586,8 +588,8 @@ watch(toDate, async (newValue) => {
             <span v-else>– Ankündigung einer einzelnen Veranstaltung</span>
         </h2>
         <p
-            class="mt-3 mb-5"
             v-if="materialType === 'eventList'"
+            class="mt-3 mb-5"
         >
             <b>Hinweis:</b>
             Gestalten Sie Übersichten für anstehende Veranstaltungen im Design Ihrer Organisation. Nutzen Sie dafür auch
@@ -596,12 +598,11 @@ watch(toDate, async (newValue) => {
             <LinkToDocs
                 path="Werbemittelgenerator/"
                 fragment="bedienung-des-werbemittelgenerators"
-            />
-            .
+            />.
         </p>
         <p
-            class="mt-3 mb-5"
             v-else
+            class="mt-3 mb-5"
         >
             <b>Hinweis:</b>
             Gestalten Sie Ankündigungen für einzelne Veranstaltungen im Design Ihrer Organisation. Nutzen Sie dafür auch
@@ -610,16 +611,15 @@ watch(toDate, async (newValue) => {
             <LinkToDocs
                 path="Werbemittelgenerator/"
                 fragment="werbemittelgenerator-fur-ankundigungen-einzelner-veranstaltungen"
-            />
-            .
+            />.
         </p>
     </div>
     <div class="flex justify-content-end mb-3">
         <Button
-            class="mt-3"
-            @click="downloadCanvas(canvas, downloadFileName)"
-            icon-left="download"
             v-if="selectedDimensionData?.preview === 'canvas'"
+            class="mt-3"
+            icon-left="download"
+            @click="downloadCanvas(canvas, downloadFileName)"
         >
             Design herunterladen
         </Button>
@@ -628,25 +628,25 @@ watch(toDate, async (newValue) => {
         <div class="kern-col-xl-5">
             <h2 class="kern-heading text-theme-primary">Einstellungen</h2>
             <InputSelect
+                v-model="selectedDimension"
                 label="Format"
                 name="dimensionOptions"
                 :options="dimensionOptions"
-                v-model="selectedDimension"
             />
             <template v-if="materialType === 'eventList'">
                 <h3 class="kern-heading text-theme-primary">Zeitraum</h3>
                 <div class="kern-row">
                     <div class="kern-col">
                         <InputDate
-                            name="fromDate"
                             v-model="fromDate"
+                            name="fromDate"
                             label="Startdatum"
                         />
                     </div>
                     <div class="kern-col">
                         <InputDate
-                            name="toDate"
                             v-model="toDate"
+                            name="toDate"
                             label="Enddatum"
                         />
                     </div>
@@ -691,44 +691,44 @@ watch(toDate, async (newValue) => {
                     <h3 class="kern-heading text-theme-primary mt-5">Überschrift (optional)</h3>
 
                     <InputText
+                        v-model="headlineText"
                         label="Text Überschrift"
                         name="headlineText"
-                        v-model="headlineText"
                     />
 
                     <InputSelect
+                        v-model="selectedFontHeadline"
                         label="Schriftart"
                         name="selectedFontHeadline"
                         :options="fontSelectionOptions"
-                        v-model="selectedFontHeadline"
                     />
 
                     <InputColor
+                        v-model="selectedTextColorHeadline"
                         class="mt-3"
                         name="selectedTextColorHeadline"
                         label="Textfarbe"
-                        v-model="selectedTextColorHeadline"
                     />
                 </template>
                 <h3 class="kern-heading text-theme-primary mt-5">Veranstaltung</h3>
 
                 <InputColor
+                    v-model="underlineColor"
                     class="mt-3"
                     name="underlineColor"
                     label="Farbe der Trennlinien"
-                    v-model="underlineColor"
                 />
                 <InputColor
+                    v-model="selectedTextColor"
                     class="mt-3"
                     name="selectedTextColor"
                     label="Textfarbe"
-                    v-model="selectedTextColor"
                 />
                 <InputSelect
+                    v-model="selectedFont"
                     label="Schriftart"
                     name="selectedFont"
                     :options="fontSelectionOptions"
-                    v-model="selectedFont"
                 />
             </template>
         </div>
@@ -736,23 +736,23 @@ watch(toDate, async (newValue) => {
         <div class="kern-col ml-auto">
             <h2 class="kern-heading text-theme-primary">Vorschau</h2>
             <Alert
-                title="Fehler"
                 v-if="showError"
+                title="Fehler"
                 severity="danger"
                 :content="errorMessage || 'Es ist ein Fehler aufgetreten.'"
             />
             <div class="flex justify-content-start">
                 <div
-                    style=""
                     v-show="!loading"
+                    style=""
                 >
                     <div
                         v-if="selectedDimensionData.preview === 'canvas'"
                         style="width: 100%"
                     >
                         <canvas
-                            ref="canvas1"
                             id="canvas1"
+                            ref="canvas1"
                             :width="canvasWidth"
                             :height="canvasHeight"
                             style="width: 100%"
@@ -791,15 +791,15 @@ watch(toDate, async (newValue) => {
     </div>
     <img
         v-for="{ name, path } in defaultBackgroundImagePaths"
+        :id="'backgroundImage_' + name"
         style="display: none"
         :src="path"
-        :id="'backgroundImage_' + name"
     />
     <img
         v-if="eventMainCategory"
+        :id="'backgroundImage_default_event_main_category'"
         style="display: none"
         :src="`/material_generator/event_main_category/${selectedDimension}/${eventMainCategory}.png`"
-        :id="'backgroundImage_default_event_main_category'"
     />
 </template>
 <style scoped>

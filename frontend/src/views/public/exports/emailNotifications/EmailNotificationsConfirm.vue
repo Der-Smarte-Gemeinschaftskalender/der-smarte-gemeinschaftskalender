@@ -76,8 +76,8 @@ const disallowEmail = async () => {
             <b>E-Mails hier ablehnen.</b>
         </p>
         <Alert
-            class="my-3"
             v-if="errorMessageContent"
+            class="my-3"
             title="Fehler"
             :content="errorMessageContent"
             severity="danger"

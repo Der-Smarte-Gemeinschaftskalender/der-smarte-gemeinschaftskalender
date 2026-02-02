@@ -1,0 +1,27 @@
+all:
+  hosts:
+    test-ssp:
+      ansible_host: 192.168.1.1
+      ansible_user: root
+      ansible_ssh_common_args: "-o ForwardAgent=yes"
+      domain: example.com
+      domain_mobilizon: "mobilizon.example.com"
+      build_on_server: true
+      certbot_email: "hello@example.com"
+      admin_mail: "hello@example.com"
+      admin_password: "12345678"
+      db_connection: "pgsql"
+      db_host: "postgres"
+      db_port: 5432
+      db_database: "laravel"
+      db_username: "laravel"
+      db_password: "8masdn8t1f9f"
+      mail_mailer: smtp
+      mail_host: smtp.example.org
+      mail_port: 587
+      mail_username: mailbot@example.com
+      mail_password: "U12345678"
+      mail_encryption: tls
+      mail_from_address: "mailbot@example.com"
+      app_name: "tavias.de – Der Smarte Gemeinschaftskalender"
+      strict_mode: false

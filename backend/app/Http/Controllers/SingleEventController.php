@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use App\Services\ApprovalRequestService;
 use Log;
 use Throwable;
 
@@ -64,6 +65,27 @@ class SingleEventController extends Controller implements HasMiddleware
 
     public function store(Request $request): JsonResponse
     {
+        // Strict mode: create approval request instead of event
+        if (config('dsg.strict_mode')) {
+            $approvalRequestService = new ApprovalRequestService();
+            $result = $approvalRequestService->createApprovalRequest($request, 'SingleEvent', 'store');
+
+            if ($result['success']) {
+                return response()->json([
+                    'singleEvent' => [
+                        'message' => $result['message'],
+                        'approval_request_id' => $result['approval_request_id'],
+                    ]
+                ], 202);
+            } else {
+                return response()->json([
+                    'error' => $result['error'],
+                    'details' => $result['details'] ?? null,
+                ], 500);
+            }
+        }
+
+        // Standard mode: create event directly
         $mobilizonFields = $request->input('mobilizon_fields');
         $mobilizonFields['description'] = $mobilizonFields['description'] ?? '';
 

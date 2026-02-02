@@ -6,6 +6,7 @@ import Button from '@/components/KERN/Button.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
 import type { Column } from '@/types/General';
+import { dsgApi } from '@/lib/dsgApi';
 
 const columns: Array<Column> = [
     {
@@ -47,6 +48,26 @@ const columns: Array<Column> = [
         align: 'right',
     },
 ];
+
+const exportUserEmails = async () => {
+    try {
+        const response = await dsgApi.get<Blob>('/admin/export/users', {
+            responseType: 'blob',
+        });
+
+        const data = response.data;
+
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'user_emails.csv');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    } catch (error) {
+        console.error('Es ist zu einem Fehler beim Exportieren der Nutzer-E-Mails gekommen.');
+    }
+};
 </script>
 <template>
     <div class="flex align-items-center justify-content-between mb-1 gap-2">
@@ -71,9 +92,19 @@ const columns: Array<Column> = [
         <LinkToDocs
             path="Terminverwaltung/Instanz/"
             fragment="nutzer-innen-verwalten"
-        />
-        .
+        />.
     </p>
+    <div class="flex justify-content-end">
+        <Button
+            @click="exportUserEmails"
+            icon-left="download"
+            icon-size="lg"
+            variant="secondary"
+            class="mb-4"
+        >
+            Export der E-Mail-Adressen aktiver Nutzer
+        </Button>
+    </div>
     <Table
         :api="{
             url: '/admin',

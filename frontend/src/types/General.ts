@@ -135,6 +135,9 @@ export interface IEvent {
     } | null;
     beginsOn: string;
     endsOn: string;
+    physicalAddress: {
+        geom: string;
+    } | null;
     __typename: string;
 }
 

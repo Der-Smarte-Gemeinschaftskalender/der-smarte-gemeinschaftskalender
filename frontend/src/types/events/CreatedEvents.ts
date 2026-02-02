@@ -1,6 +1,7 @@
 import zod from "@/lib/zod";
-import { DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
+import { ApprovalRequestResponseSchema, DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
 import { stripHtml } from "@/lib/helper";
+import { isStrictModeEnabled } from "@/lib/instanceConfig";
 
 export const CreatedEventSchema = zod.object({
     id: zod
@@ -120,3 +121,9 @@ export const CreatedEventFormSchema = DefaultEventFormSchema.extend({
 });
 
 export type CreatedEventForm = zod.infer<typeof CreatedEventFormSchema> & Record<string, any>;
+
+export const CreatedEventUpdateResponseSchema = isStrictModeEnabled
+    ? ApprovalRequestResponseSchema
+    : CreatedEventDetailsSchema;
+
+export type CreatedEventUpdateResponse = zod.infer<typeof CreatedEventUpdateResponseSchema>;

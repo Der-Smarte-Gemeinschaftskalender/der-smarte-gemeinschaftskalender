@@ -12,6 +12,7 @@ use RRule\RRule;
 use Illuminate\Http\JsonResponse;
 use rdx\graphqlquery\Query;
 use Throwable;
+use Log;
 
 class IcalEventService
 {

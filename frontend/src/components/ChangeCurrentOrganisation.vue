@@ -55,10 +55,10 @@ setOrganisationOptions();
 <template>
     <InputSelect
         v-if="user_organisations?.length"
+        v-model="selectedOption"
         class="p-0"
         name="organisation"
         :options="options"
         :clean="true"
-        v-model="selectedOption"
     />
 </template>

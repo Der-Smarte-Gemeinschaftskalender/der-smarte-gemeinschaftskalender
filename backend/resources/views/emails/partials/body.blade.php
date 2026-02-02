@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Mail-Adresse bestätigen</title>
+    <title>{{ $title ?? 'E-Mail-Adresse bestätigen' }}</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;

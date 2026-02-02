@@ -135,7 +135,6 @@ test("single termin with editing", async ({ page }) => {
 
   await editEventForm(page, secondEditData);
   await saveEventChanges(page);
-  await page.reload();
   await verifyEventDetails(page, secondEditData);
 });
 
@@ -215,7 +214,7 @@ test("single termin use as template", async ({ page }) => {
   await expect(page.locator("#name")).toHaveValue(eventName);
   await page.locator("#name").fill(`${eventName} - kopie`);
 
-  await expect(page.locator(".ProseMirror")).toHaveValue(eventData.description);
+  await expect(page.locator(".ProseMirror")).toHaveText(eventData.description);
   await page.locator(".ProseMirror").fill(`${eventData.description} - kopie`);
 
   await submitSingleEvent(page);

@@ -51,7 +51,7 @@ const loadImportedEvent = async () => {
             },
             {
                 name: 'Status',
-                value: !!importedEvent.value.is_active ? 'Aktiv' : 'Inaktiv',
+                value: importedEvent.value.is_active ? 'Aktiv' : 'Inaktiv',
             },
             {
                 name: 'Synchronisiert',
@@ -84,7 +84,7 @@ loadImportedEvent();
             <ChangeImportedEventStatus
                 :current-status="importedEvent.is_active ? 'active' : 'inactive'"
                 :imported-event-id="importedEvent.id"
-                @statusChanged="loadImportedEvent()"
+                @status-changed="loadImportedEvent()"
             />
         </template>
     </div>
@@ -94,12 +94,12 @@ loadImportedEvent();
             <DescriptionList :data="importedEventListData">
                 <template #description>
                     <p
+                        class="kern-text prose"
                         v-html="
                             stripHtml(importedEvent?.mobilizon_fields?.description)
                                 ? importedEvent?.mobilizon_fields?.description
                                 : 'Es wurde keine Beschreibung angegeben.'
                         "
-                        class="kern-text prose"
                     ></p>
                 </template>
             </DescriptionList>

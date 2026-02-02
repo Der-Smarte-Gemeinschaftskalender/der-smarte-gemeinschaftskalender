@@ -47,6 +47,7 @@ const onSubmit = handleSubmit(async (values) => {
             ...values,
         });
         setUserPersonData(data.data);
+        await new Promise((r) => setTimeout(r, 1000));
         router.push('/app');
     } catch (error) {
         showErrorMessage.value = true;
@@ -62,7 +63,7 @@ const convertToUsername = (name: string): string => {
         .replace(/ +/g, '_')
         .replace(/_+/g, '_');
 
-    let lastChar = username.slice(-1);
+    const lastChar = username.slice(-1);
 
     if (lastChar === '_') {
         username = username.substring(0, username.length - 1);
@@ -74,15 +75,19 @@ watch(name, async (newName, oldName) => {
 });
 </script>
 <template>
-    <h2 class="kern-heading text-theme-primary">Benutzer einrichten</h2>
+    <h1 class="kern-heading text-theme-primary">Ihr persönliches Profil einrichten</h1>
     <p class="mt-1 mb-6">
         <b>Hinweis:</b>
-        Weitere Informationen finden Sie im
+        Nutzen Sie zur Profileinrichtung Ihre persönlichen Daten. Verwenden Sie nicht den Organisationsnamen. Ihr
+        persönliches Profil wird benötigt, um die Erstellung einer Organisation anzufragen. Eine Organisation kann von
+        mehreren Einzelnutzer*innen verwaltet werden.
+        <br />
+        <br />
+        Weitere Informationen zur Profileinrichtung finden Sie im
         <LinkToDocs
             path="Terminverwaltung/Organisation"
             fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
-        />
-        .
+        />.
     </p>
     <Divider class="mt-4 mb-4" />
     <form
@@ -98,44 +103,59 @@ watch(name, async (newName, oldName) => {
 
         <Fieldset>
             <div class="flex flex-column gap-5">
-                <div class="kern-row">
-                    <div class="kern-col-xl-6">
+                <div class="flex flex-column md:flex-row gap-6flex flex-column md:flex-row gap-6">
+                    <div class="w-full">
                         <InputText
                             v-model="name"
                             label="Name"
                             name="name"
+                            placeholder="Vorname Nachname"
                             :errors="submitCount === 0 ? undefined : errors.name"
                         />
                     </div>
-                    <div class="kern-col-xl-6">
+                    <div class="md:col-7 px-0 mt-2">
                         <Alert
                             title="Information"
                             severity="info"
                         >
-                            <p>Ihr vollständiger Name kann später geändert werden.</p>
+                            <p>
+                                Geben Sie möglichst Ihren Name an (z. B.: Vorname Nachname). Ihr Name wird im Profil
+                                angezeigt. Dieser kann später geändert werden.
+                            </p>
                         </Alert>
                     </div>
                 </div>
                 <Divider />
-                <div class="kern-row">
-                    <div class="kern-col-xl-6">
+                <div class="flex flex-column md:flex-row gap-6flex flex-column md:flex-row gap-6">
+                    <div class="w-full">
                         <InputText
                             v-model="preferredUsername"
-                            label="Benutzername"
+                            label="Persönlicher Benutzername"
                             name="preferredUsername"
+                            placeholder="vorname_nachname"
                             :errors="submitCount === 0 ? undefined : errors.preferredUsername"
                         />
                     </div>
 
-                    <div class="kern-col-xl-6">
+                    <div class="md:col-7 px-0 mt-2">
                         <Alert
                             title="Information"
                             severity="info"
                         >
-                            Ihr eindeutiger Benutzername wird benötigt, um Sie zu Organisationen einzuladen. Dieser kann
-                            später
-                            <b>nicht mehr geändert</b>
-                            werden. Bitte wählen Sie sorgfältig.
+                            <p class="mb-5">
+                                Bitte geben Sie eine Kombination aus Ihrem Vor- und Nachnamen
+                                <b>Vor- und Nachnamen</b>
+                                an (z. B. beate_beispiel) oder Ihrem Rufnamen an.
+                            </p>
+
+                            <p class="pt-2">
+                                Verwenden Sie
+                                <b>keinen Organisationsnamen</b>
+                                , da dieser Benutzername immer Ihrem persönlichen Profil zugeordnet ist. Der
+                                Benutzername wird benötigt, um Sie zu Organisationen einzuladen, und kann später
+                                <b>nicht mehr geändert werden</b>
+                                . Bitte wählen Sie ihn sorgfältig.
+                            </p>
                         </Alert>
                     </div>
                 </div>

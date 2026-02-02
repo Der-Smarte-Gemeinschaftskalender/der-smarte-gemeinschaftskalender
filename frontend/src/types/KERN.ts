@@ -3,6 +3,9 @@ export interface DescriptionListData {
     name: string;
     value: any;
     slot?: boolean;
+    type?: 'tags' | 'prose' | 'link';
+    local_url?: string;
+    formatAsHtml?: boolean;
 }
 
 export interface Accordion {

@@ -1,7 +1,17 @@
 import zod from "@/lib/zod";
 import { MobilizonFieldsFormSchema, MobilizonFieldsSchema } from "@/types/Mobilizon";
 
+export const ApprovalRequestResponseSchema = zod.object({
+    message: zod.string(),
+    approval_request_id: zod.number(),
+});
+
+export type ApprovalRequestResponse = zod.infer<typeof ApprovalRequestResponseSchema>;
+
 export const DefaultEventSchema = zod.object({
+    organisation_preferred_username: zod
+        .string()
+        .optional(),
     mobilizon_group_id: zod
         .number()
         .or(zod.string())

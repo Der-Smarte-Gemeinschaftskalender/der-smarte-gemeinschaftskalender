@@ -24,7 +24,7 @@ const listLegendItems = [
                     <Icon :name="item.icon" class="" />
                     <span class="mx-2">=</span>
                     <span class="">{{ item.text }}</span>
-                    <span class="mx-4 hidden sm:inline" v-if="index != listLegendItems.length - 1">|</span>
+                    <span v-if="index != listLegendItems.length - 1" class="mx-4 hidden sm:inline">|</span>
                 </span>
             </template>
         </div>

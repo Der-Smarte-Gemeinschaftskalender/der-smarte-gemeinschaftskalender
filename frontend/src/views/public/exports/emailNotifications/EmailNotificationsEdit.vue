@@ -231,8 +231,8 @@ const submitForm = handleSubmit(async (values) => {
     </Teleport>
 
     <Dialog
-        title="Alle E-Mail-Benachrichtigungen abbestellen"
         v-model="showDisallowDialog"
+        title="Alle E-Mail-Benachrichtigungen abbestellen"
     >
         <p class="mb-4">Sind Sie sicher, dass Sie alle E-Mail-Benachrichtigungen für immer abbestellen möchten?</p>
         <Button
@@ -280,19 +280,19 @@ const submitForm = handleSubmit(async (values) => {
                     <Fieldset class="mb-8">
                         <section class="flex flex-column md:flex-row justify-content-between gap-6">
                             <InputSelect
+                                v-model="intervall"
                                 class="w-full"
                                 name="intervall"
                                 label="Intervall"
                                 :options="intervall_notification_options"
-                                v-model="intervall"
                                 :errors="submitCount === 0 ? undefined : errors.intervall"
                             />
                             <InputSelect
+                                v-model="category"
                                 class="w-full"
                                 name="category"
                                 label="Kategorien"
                                 :options="mobilizon_category_options_all"
-                                v-model="category"
                                 :errors="submitCount === 0 ? undefined : errors.category"
                             />
                         </section>
@@ -302,11 +302,11 @@ const submitForm = handleSubmit(async (values) => {
                         <section>
                             <div class="flex flex-column-reverse md:flex-row justify-content-between gap-6">
                                 <InputRadios
+                                    v-model="eventType"
                                     class="w-full mb-5"
                                     name="event-types"
                                     label="Welche Veranstaltungen sollen angezeigt werden?"
                                     :radios="events"
-                                    v-model="eventType"
                                     :errors="submitCount === 0 ? undefined : errors.eventType"
                                 />
                                 <div class="w-full">
@@ -329,6 +329,7 @@ const submitForm = handleSubmit(async (values) => {
 
                             <div>
                                 <InputSelect
+                                    v-model="organisation"
                                     class="md:col-5"
                                     :class="{
                                         flex: eventType === EventType.INTERNAL,
@@ -337,7 +338,6 @@ const submitForm = handleSubmit(async (values) => {
                                     name="organisation"
                                     label="Organisationen"
                                     :options="organisationOptions"
-                                    v-model="organisation"
                                     :errors="submitCount === 0 ? undefined : errors.organisation"
                                     :disabled="!organisationOptions.length"
                                 />
@@ -350,11 +350,11 @@ const submitForm = handleSubmit(async (values) => {
                                     }"
                                 >
                                     <InputLocation
-                                        name="location"
-                                        label="Postleitzahl"
                                         ref="locationSearchRef"
                                         v-model:address="postal_code"
                                         v-model:radius="radius"
+                                        name="location"
+                                        label="Postleitzahl"
                                         :postal-code-only="true"
                                         :errors="submitCount === 0 ? undefined : errors.postal_code || errors.radius"
                                     />
@@ -397,9 +397,9 @@ const submitForm = handleSubmit(async (values) => {
                         <Button
                             class="mt-2 w-full max-w-30rem"
                             variant="primary"
-                            @click="unsubscribe()"
                             label="Abbestellen"
                             :disabled="isSubmitting"
+                            @click="unsubscribe()"
                         />
                     </div>
                 </div>
@@ -415,9 +415,9 @@ const submitForm = handleSubmit(async (values) => {
                         <Button
                             class="mt-2 w-full max-w-30rem"
                             variant="secondary"
-                            @click="showDisallowDialog = true"
                             label="Für immer abbestellen"
                             :disabled="isSubmitting"
+                            @click="showDisallowDialog = true"
                         />
                     </div>
                 </div>

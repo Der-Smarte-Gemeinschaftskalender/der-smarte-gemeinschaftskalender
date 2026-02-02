@@ -6,7 +6,7 @@ import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSingleEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { formatInputDate, reconstructOptions } from '@/lib/helper';
-
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import {
     mobilizon_category_options,
@@ -37,8 +37,9 @@ import {
     type SingleEventRequest,
     type SingleEventForm,
     SingleEventFormSchema,
-    SingleEventResponseSchema,
+    SingleEventCreateResponseSchema,
 } from '@/types/events/SingleEvents';
+import { createEventDefaults } from '@/lib/instanceConfig';
 
 const route = useRoute();
 const router = useRouter();
@@ -70,6 +71,11 @@ const { value: onlineAddress } = useField<string>('onlineAddress');
 const { value: physicalAddress } = useField<AddressForm>('physicalAddress');
 const { value: externalParticipationUrl } = useField<string | undefined>('externalParticipationUrl');
 
+// Set default values, if configured
+if (createEventDefaults.category) {
+    category.value = createEventDefaults.category;
+}
+
 const onSubmit = handleSubmit(async (values) => {
     const preparedValues: SingleEventRequest = prepareEventsValues<SingleEventForm, SingleEventRequest>(values, [
         'name',
@@ -86,10 +92,13 @@ const onSubmit = handleSubmit(async (values) => {
             headers: { 'Content-Type': 'multipart/form-data' },
             values: preparedValues,
             resDataKey: 'singleEvent',
-            schema: SingleEventResponseSchema,
+            schema: SingleEventCreateResponseSchema,
         });
 
-        await router.push({ name: 'singleEvents.index' });
+        await router.push({
+            name: 'singleEvents.index',
+            query: isStrictModeEnabled ? { requestSent: 'true' } : {},
+        });
     } catch (error: any) {
         errorMessageContent.value = error;
     } finally {
@@ -161,8 +170,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <LinkToDocs
             path="Terminverwaltung/Einzeltermine/"
             fragment="einzeltermine-erstellen"
-        />
-        .
+        />.
     </p>
     <form
         novalidate
@@ -198,8 +206,8 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 />
                 <Divider class="my-5" />
                 <InputDate
-                    name="start"
                     v-model="start"
+                    name="start"
                     label="Startdatum"
                     :errors="submitCount === 0 ? undefined : errors.start"
                 />
@@ -245,9 +253,9 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         />
 
                         <InputUrl
+                            v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            v-model="externalParticipationUrl"
                             label="Externe Anmeldeseite (URL)"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
@@ -268,7 +276,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                 <LinkToDocs
                                     path="Terminverwaltung/Einzeltermine/"
                                     fragment="beitrittsoptionen"
-                                />
+                                />.
                             </p>
                         </Alert>
                     </div>
@@ -296,11 +304,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 />
                 <InputText
                     v-model="rawAddress"
-                    @input="updateAddress(rawAddress)"
                     name="physicalAddress"
                     label="Adresse (optional)"
                     :list="mapSuggestions"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
+                    @input="updateAddress(rawAddress)"
                 />
             </div>
         </Fieldset>

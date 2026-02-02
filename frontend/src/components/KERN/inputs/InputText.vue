@@ -49,11 +49,10 @@ window.addEventListener('click', (event) => {
         :disabled="$attrs.disabled as boolean ?? false"
     >
         <input
-            autocomplete="off"
             :id="name"
-            :name="name"
             v-model="model"
-            @focus="showList = true"
+            autocomplete="off"
+            :name="name"
             class="kern-form-input__input w-full"
             :class="(!!errors ? 'kern-form-input__input--error ' : '') + inputClass"
             type="text"
@@ -61,6 +60,7 @@ window.addEventListener('click', (event) => {
             :aria-describedby="errors ? `${name}-error` : undefined"
             :disabled="$attrs.disabled as boolean ?? false"
             :aria-label="ariaLabel"
+            @focus="showList = true"
         />
         <ul
             v-if="list && list.length > 0"
@@ -71,8 +71,8 @@ window.addEventListener('click', (event) => {
             <li
                 v-for="item in list"
                 :key="item"
-                @click="selectOption(item)"
                 class="cursor-pointer p-2 flex align-items-center"
+                @click="selectOption(item)"
             >
                 {{ item }}
             </li>

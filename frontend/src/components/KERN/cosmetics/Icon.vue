@@ -66,7 +66,10 @@ type IconName =
     | 'blockquote'
     | 'undo'
     | 'redo'
-    | 'underline';
+    | 'underline'
+    | 'event_available'
+    | 'sync';
+
 
 type ColorName = 'black' | 'white';
 
@@ -112,6 +115,8 @@ const isMaterialIcons = (name: string): boolean => {
         'undo', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:undo:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=undo&icon.size=24&icon.color=%23000000
         'redo', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:redo:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=redo&icon.size=24&icon.color=%23000000
         'underline', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_underlined:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=underline&icon.size=24&icon.color=%23000000
+        'event_available', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:event_available:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=event&icon.size=24&icon.color=%231f1f1f
+        'sync', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:sync:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=sync&icon.size=24&icon.color=%23000000
     ].includes(name);
 };
 

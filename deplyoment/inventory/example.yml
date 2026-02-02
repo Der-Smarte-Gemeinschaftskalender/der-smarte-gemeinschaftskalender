@@ -23,10 +23,5 @@ all:
       mail_password: "U12345678"
       mail_encryption: tls
       mail_from_address: "mailbot@example.com"
-      app_name: "tavias.de – Der Smarte Gemeinschaftskalender"
-      frontend_instance_name: "TAViAS"
-      frontend_landing_page_description: "Termine, Angebote & Veranstaltungen im Amt Süderbrarup"
-      frontend_operated_by: "Amt Süderbrarup"
-      frontend_search_location_address: "24392 Süderbrarup, Schleswig-Holstein"
-      frontend_search_location_geo_hash: "u1wyy3xs"
-      frontend_search_target: "INTERNAL"
+      app_name: "termine.di.day"
+      strict_mode: false

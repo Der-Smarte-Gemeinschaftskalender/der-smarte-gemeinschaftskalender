@@ -3,7 +3,7 @@ import Card from './KERN/Card.vue';
 import Button from './KERN/Button.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
 import EventStatusBadge from './EventStatusBadge.vue';
-import { formatOnDate, formatOnTime, buildAddress, formatDateTime } from '@/lib/helper';
+import { formatOnDate, formatOnTime, buildAddress, formatDateTime, getCardImageUrl } from '@/lib/helper';
 
 import type { IEventDetailed } from '@/types/General';
 
@@ -15,10 +15,10 @@ defineProps<Props>();
 </script>
 <template>
     <Card
-        bodyClass="p-1 m-1 flex-direction-unset gap-unset kern-text w-full px-1 py-0"
+        body-class="p-1 m-1 flex-direction-unset gap-unset kern-text w-full px-1 py-0"
         class="p-1"
-        :image-src="event.picture?.url || '/default_card.png'"
-        :image-alt="event.title"
+        :image-src="getCardImageUrl(event)"
+        :image-alt="''"
         :image-class="'max-w-20rem p-2 my-auto'"
         :horizontal="true"
     >
@@ -29,8 +29,8 @@ defineProps<Props>();
                         <h4 class="kern-heading font-medium text-theme-primary">{{ event.title }}</h4>
                     </div>
                     <div
-                        class="kern-col-2"
                         v-if="event.status && event.status !== 'CONFIRMED'"
+                        class="kern-col-2"
                     >
                         <EventStatusBadge :status="event.status" />
                     </div>
@@ -67,8 +67,8 @@ defineProps<Props>();
                         </template>
                     </div>
                     <div
-                        class="kern-col-8 flex gap-2 align-items-start p-2"
                         v-if="event?.attributedTo?.name"
+                        class="kern-col-8 flex gap-2 align-items-start p-2"
                     >
                         <Icon name="person" />
                         {{ event?.attributedTo?.name }}

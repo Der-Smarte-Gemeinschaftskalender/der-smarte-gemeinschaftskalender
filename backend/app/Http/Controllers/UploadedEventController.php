@@ -92,6 +92,7 @@ class UploadedEventController extends Controller implements HasMiddleware
 
     public function upload(Request $request): JsonResponse
     {
+        Log::info('Received upload request for uploaded events.');
         if ($request->hasFile('uploaded_file')) {
             $request->validate([
                 'uploaded_file' => 'required|max:2048|mimes:ics|mimetypes:text/calendar' // 2MB needs to be adjusted later
@@ -109,6 +110,7 @@ class UploadedEventController extends Controller implements HasMiddleware
 
     public function accept_upload(Request $request): JsonResponse
     {
+
         $mclient = Mobilizon::getInstance();
         $events = IcalEventService::buildAcceptedEvents(
             $mclient,

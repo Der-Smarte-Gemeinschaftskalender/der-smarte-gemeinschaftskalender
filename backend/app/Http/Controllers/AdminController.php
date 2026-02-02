@@ -6,6 +6,7 @@ use App\Models\Mobilizon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\User;
 use Log;
 use rdx\graphqlquery\Query;
@@ -32,7 +33,8 @@ class AdminController extends Controller implements HasMiddleware
         $pageSize = max($pageSize, 1);
 
         $query = User::query()
-            ->where('id', '<>', auth()->user()->id);
+            ->where('id', '<>', auth()->user()->id)
+            ->orderBy('id', 'desc');
         $data = $query->paginate(
             $pageSize,
             ['id', 'mobilizon_name', 'mobilizon_preferred_username', 'email', 'type', 'is_active'],
@@ -45,6 +47,30 @@ class AdminController extends Controller implements HasMiddleware
             'total' => $data->total() - 1,
             'page' => $page,
             'pageSize' => $pageSize
+        ]);
+    }
+
+    public function export_user_emails(): StreamedResponse
+    {
+        return response()->streamDownload(function () {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['email']);
+
+            User::query()
+                ->where('id', '<>', auth()->id())
+                ->where('is_active', true)
+                ->orderBy('id')
+                ->select('email')
+                ->chunk(1000, function ($users) use ($file) {
+                    foreach ($users as $user) {
+                        fputcsv($file, [$user->email]);
+                    }
+                });
+
+            fclose($file);
+        }, 'validated-emails.csv', [
+            'Content-Type' => 'text/csv',
         ]);
     }
 
@@ -135,6 +161,17 @@ class AdminController extends Controller implements HasMiddleware
         if ($request->password) {
             $user->password = bcrypt($request->password);
         }
+
+        if ($user->is_active !== $request->is_active) {
+            $systemAdmin = User::find(1);
+            $adminClient = Mobilizon::getInstance(false, $systemAdmin, true);
+
+            $mresponse = $adminClient->adminUpdateUser([
+                'id' => $user->mobilizon_user_id,
+                'confirmed' => $request->is_active,
+            ]);
+        }
+
         $user->is_active = $request->is_active;
         $user->save();
 
@@ -173,17 +210,6 @@ class AdminController extends Controller implements HasMiddleware
             );
             return response()->json(['error' => 'Fehler beim Löschen des Benutzers'], 500);
         }
-    }
-
-    public function toggle_user(User $user): JsonResponse
-    {
-        $user->is_active = !$user->is_active;
-        $user->save();
-
-        return response()->json([
-            'message' => 'Nutzerstatus erfolgreich geändert',
-            'user' => $user
-        ]);
     }
 
     public function mobilizonAccessData(): JsonResponse

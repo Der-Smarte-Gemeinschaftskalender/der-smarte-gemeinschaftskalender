@@ -13,7 +13,7 @@ const mobilizonGroupIdModel = defineModel<number | undefined>('mobilizonGroupId'
 interface Props {
     status: EventStatus;
     eventId: number;
-    mobilizonId: Number;
+    mobilizonId: number;
     mobilizonGroupId?: any;
 }
 
@@ -50,12 +50,12 @@ const changeEventStatus = async () => {
     <ConfirmDialog
         v-model="showDialog"
         title="Status ändern"
+        :confirm-text="`Status auf ${statusText} ändern`"
         @confirm="changeEventStatus"
-        :confirmText="`Status auf ${statusText} ändern`"
     />
     <Button
-        @click="showDialog = true"
         :disabled="isSubmitting"
+        @click="showDialog = true"
     >
         {{ statusText }}
     </Button>
