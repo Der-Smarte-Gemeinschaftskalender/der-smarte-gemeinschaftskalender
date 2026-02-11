@@ -139,7 +139,7 @@ withDefaults(defineProps<Props>(), {
             ${disabled ? 'opacity: 0.5; pointer-events: none;' : ''}
         `"
         :src="`/icons/${name}.svg`"
-        :class="`kern-icon kern-icon--${size}`"
+        :class="`kern-icon kern-icon--${name} kern-icon--${size}`"
 
         aria-hidden="true"
         alt=""

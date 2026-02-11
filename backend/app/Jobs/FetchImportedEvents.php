@@ -68,7 +68,7 @@ class FetchImportedEvents implements ShouldQueue
                                     'language' => $importedEvent->mobilizon_fields['language'] ?? 'de',
                                     'visibility' => $importedEvent->mobilizon_fields['visibility'] ?? 'PUBLIC',
                                     'onlineAddress' => $e['url'] ?? $importedEvent->mobilizon_fields['onlineAddress'] ?? null,
-                                    'physicalAddress' => $importedEvent->mobilizon_fields['physicalAddress'] ?? null,
+                                    'physicalAddress' => $e['location'] ?? (isset($importedEvent->mobilizon_fields['physicalAddress']) ? $importedEvent->mobilizon_fields['physicalAddress']['description'] : null),
                                     'tags' => $importedEvent->mobilizon_fields['tags'],
                                 ]
                             ]);

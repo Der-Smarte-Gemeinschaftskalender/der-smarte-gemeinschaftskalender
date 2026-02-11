@@ -1,4 +1,4 @@
-export const isStrictModeEnabled = String(import.meta.env.VITE_DSG_STRICT_MODE ?? '').toLowerCase() === 'true';
+export const isStrictModeEnabled = String(import.meta.env?.VITE_DSG_STRICT_MODE ?? '').toLowerCase() === 'true';
 
 export const showPhysicalAddressRouting: Record<string, boolean> = {
     googleMaps: true,
@@ -33,15 +33,17 @@ export const landingPage: {
     numberOfUpcomingEvents: number;
     upcomingEventsMapTitle: string;
     upcomingEventsMapBeforeDateFromNowInDays: number | null;
+    showNotificationImageAlt: string;
 } = {
     heading: 'Veranstaltungen im Amt Süderbrarup',
     description: 'Termine, Angebote & Veranstaltungen im Amt Süderbrarup',
     descriptionHtml: ``,
     showNotification: false,
-    showCategories: false,
+    showCategories: true,
     numberOfUpcomingEvents: 11,
     upcomingEventsMapTitle: 'Karte – Termine der nächsten 30 Tage',
     upcomingEventsMapBeforeDateFromNowInDays: 30,
+    showNotificationImageAlt: '',
 };
 
 export const searchPage: { description: string; descriptionHtml: string } = {
@@ -92,10 +94,3 @@ export const eventsMap: { initialZoomLevel: number; defaultCenter: { lat: number
     initialZoomLevel: 5,
     defaultCenter: { lat: 50.948, lon: 10.2651 },
 };
-/*
-export const eventsMap: { initialZoomLevel: number; defaultCenter: { lat: number; lon: number } } = {
-    initialZoomLevel: 8,
-    defaultCenter: { lat: 54.18553758, lon: 9.82209589 },
-};
-
-*/

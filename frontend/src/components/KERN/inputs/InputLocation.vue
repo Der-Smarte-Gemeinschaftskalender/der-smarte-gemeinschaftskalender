@@ -164,7 +164,7 @@ const searchAddress = async (newAddress: string, showSuccess: boolean = true) =>
         >
             {{ label }}
         </p>
-        <div class="flex align-items-center">
+        <div class="flex align-items-center search-location-input-wrapper">
             <div class="icon-wrapper w-5rem h-3rem flex align-items-center justify-content-center bg-theme-primary">
                 <Icon
                     v-if="!success && !triggered"

@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router';
 import Icon from './KERN/cosmetics/Icon.vue';
 import Button from './KERN/Button.vue';
 import Overlayable from '@/components/Overlayable.vue';
-import { instanceInformation, mainHeader } from '@/lib/instanceConfig';
+import { instanceInformation, mainHeader, landingPage } from '@/lib/instanceConfig';
 
 interface Props {
     showNavigation?: boolean;
@@ -55,10 +55,9 @@ navigationItems = [
             button: false,
         },
         {
-            title: 'Intern',
+            title: 'Zum internen Bereich',
             icon: 'login',
             name: 'login',
-            button: true,
         },
     ],
 ];
@@ -77,7 +76,7 @@ watch(
     <header class="py-3 main-header">
         <div class="header-content">
             <div class="flex flex-column lg:flex-row gap-3 lg:gap-0">
-                <div
+                <nav
                     class="flex justify-content-between"
                     :class="{
                         'lg:w-fit flex-column lg:flex-row gap-4 lg:align-items-center': !showNavigation,
@@ -88,7 +87,7 @@ watch(
                         <img
                             class="logo-image"
                             :src="logoUrl"
-                            :alt="`Logo ${instanceName}`"
+                            :alt="`Zur Startseite vom ${instanceName}`"
                         />
                     </RouterLink>
                     <slot
@@ -125,7 +124,7 @@ watch(
                             @click="overlayable?.openOverlay()"
                         />
                     </div>
-                </div>
+                </nav>
                 <Overlayable
                     v-if="showNavigation"
                     ref="overlayable"
@@ -210,7 +209,7 @@ watch(
                 >
                     <img
                         src="/notifications.png"
-                        alt="Bild"
+                        :alt="landingPage.showNotificationImageAlt"
                         class="w-full h-auto"
                     />
                 </div>

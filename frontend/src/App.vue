@@ -6,11 +6,11 @@ import Header from '@/components/Header.vue';
     <template v-if="!!$route.meta.showWithoutLayout"><RouterView :key="$route.fullPath" /></template>
     <template v-else>
         <Header class="mb-3 md:mb-5 xl:mb-7" />
-        <div class="main">
+        <main class="main">
             <div class="flex justify-content-center">
                 <RouterView :key="$route.fullPath" />
             </div>
-        </div>
+        </main>
         <Footer class="mt-7" />
     </template>
 </template>

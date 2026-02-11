@@ -89,7 +89,10 @@ function initMap(element: HTMLElement) {
         zoomSnap: 0.25,
     }).setView([mapCenter.value.lat, mapCenter.value.lon], currentZoom.value);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const apiUrl = import.meta.env.VITE_DSG_API_URL || '';
+    const tileUrl = `${apiUrl}/tiles/{z}/{x}/{y}.png`;
+
+    L.tileLayer(tileUrl, {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(mapInstance);

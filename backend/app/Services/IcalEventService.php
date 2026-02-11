@@ -5,14 +5,13 @@ namespace App\Services;
 use App\Enums\Intervall;
 use App\Models\CreatedEvent;
 use App\Models\Mobilizon;
-use App\Models\SeriesEvent;
 use Carbon\Carbon;
 use ICal\ICal;
+use Illuminate\Support\Facades\Http;
 use RRule\RRule;
 use Illuminate\Http\JsonResponse;
 use rdx\graphqlquery\Query;
 use Throwable;
-use Log;
 
 class IcalEventService
 {
@@ -52,7 +51,7 @@ class IcalEventService
             }
 
             if (isset($eventMobilizonFields['physicalAddress'])) {
-                $events[$event['uid']]['physicalAddress'] = $eventMobilizonFields['physicalAddress'];
+                $events[$event['uid']]['physicalAddress'] = $mclient->searchAddress($eventMobilizonFields['physicalAddress']);
             }
 
             if ($eventMobilizonFields['joinOptions'] === 'EXTERNAL') {

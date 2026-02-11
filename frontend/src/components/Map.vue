@@ -37,7 +37,6 @@ const isLoading = ref(false);
 // custom icon
 const myIcon = L.icon({
     iconUrl: '/marker-icon.png',
-    iconAnchor: [13, 40],
     shadowUrl: '/marker-shadow.png',
     iconAnchor: [13, 40],
 });
@@ -45,7 +44,10 @@ const myIcon = L.icon({
 function initMap(element: HTMLElement) {
     const map = L.map(element).setView([lat.value, lon.value], props.zoom ?? 13);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const apiUrl = import.meta.env.VITE_DSG_API_URL || '';
+    const tileUrl = `${apiUrl}/tiles/{z}/{x}/{y}.png`;
+
+    L.tileLayer(tileUrl, {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(map);

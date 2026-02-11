@@ -8,7 +8,6 @@ import { dsgApi } from '@/lib/dsgApi';
 import { formatDateTime, formatInputTime, reconstructOptions } from '@/lib/helper';
 import { handleSubmitCallback, prepareEventsValues } from '@/lib/dsgClient';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
-import { searchAddress } from '@/lib/mobilizonClient';
 import {
     mobilizon_category_options,
     mobilizon_event_join_options,
@@ -32,7 +31,7 @@ import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import InputTags from '@/components/InputTags.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
-import { EventPlaceType, MobilizonEventJoinOptions, type Option } from '@/types/General';
+import { MobilizonEventJoinOptions, type Option } from '@/types/General';
 import {
     type UploadedEvent,
     type UploadedEventAcceptPayload,
@@ -45,6 +44,7 @@ import { type AddressForm, addressDefaults, mobilizonFieldsDefaults } from '@/ty
 
 const router = useRouter();
 const isSubmitting = ref<boolean>(false);
+const isUploading = ref<boolean>(false);    
 const errorMessageContent = ref<string>('');
 const mobilizionGroupOptions = ref<Option[]>([]);
 const rawAddress = ref<string>('');
@@ -134,12 +134,17 @@ const onFileChange = (event: Event) => {
 
 const accept = async () => {
     try {
-        await loadAddresses();
+        isUploading.value = true;
         await dsgApi.post('/uploaded-events/accept', prepareAcceptPayload());
         await router.push({ name: 'uploadedEvents.index' });
+
     } catch (error: any) {
         errorMessageContent.value = error || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
         console.error(error);
+
+    }
+    finally {
+        isUploading.value = false;
     }
 };
 
@@ -177,57 +182,11 @@ const prepareAcceptPayload = (): UploadedEventAcceptPayload => {
                 language: language.value,
                 visibility: mobilizonFieldsDefaults.visibility,
                 onlineAddress: event.url || onlineAddress.value, // this key gets removed in the backend if undefined
-                physicalAddress: event.location || physicalAddress.value, // this one as well
+                physicalAddress: event.location || physicalAddress.value?.description, // this one as well
                 tags: tags.value,
             },
         })),
     };
-};
-
-const loadAddresses = async () => {
-    try {
-        const filteredEvents = uploadedEvents.value.filter(
-            (event: UploadedEvent) => !event.already_exists && event.location
-        );
-
-        for (const event of filteredEvents) {
-            event.location = await getAddress(event.location as string);
-        }
-    } catch (error) {
-        return;
-    }
-};
-
-const getAddress = function (location: string | null): Promise<AddressForm | null> {
-    if (!location || location.trim().length === 0) return Promise.resolve(null);
-
-    return new Promise<AddressForm | null>((resolve, reject) => {
-        searchAddress(location)
-            .then((response) => {
-                if (!response || response.length === 0) {
-                    console.warn('No address found for location:', location);
-                    return resolve(null);
-                }
-
-                const bestMatch = response[0];
-                resolve({
-                    description: location.trim(),
-                    street: bestMatch.street?.trim() || '',
-                    postalCode: bestMatch.postalCode?.trim() || '',
-                    locality: bestMatch.locality?.trim() || '',
-                    region: bestMatch.region?.trim() || '',
-                    country: bestMatch.country?.trim() || '',
-                    geom: bestMatch.geom?.trim() || '',
-                    type: (bestMatch.type?.trim() || addressDefaults.type) as EventPlaceType,
-                    id: addressDefaults.id, // No ID in the response, using default
-                    timezone: bestMatch.timezone?.trim() || addressDefaults.timezone,
-                });
-            })
-            .catch((error) => {
-                console.error('Error fetching address:', error);
-                reject(error);
-            });
-    });
 };
 
 const updateAddress = (address: string) => {
@@ -271,8 +230,9 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <Alert
                 v-if="errorMessageContent.length"
                 title="Fehler"
-                :content="errorMessageContent"
+                class="mb-4"
                 severity="danger"
+                :content="errorMessageContent"
             />
 
             <Fieldset>
@@ -453,6 +413,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
 
             <Button
                 class="my-8"
+                :disabled="isUploading"
                 @click="accept"
             >
                 <span class="flex gap-2 align-items-center">
@@ -469,6 +430,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <Alert
                 title="Hinweis"
                 severity="info"
+                class="mb-4"
             >
                 <p>Es sind keine neuen Veranstaltungen vorhanden.</p>
                 <p>Alle Termine in dieser Datei sind schon hochgeladen wurden.</p>

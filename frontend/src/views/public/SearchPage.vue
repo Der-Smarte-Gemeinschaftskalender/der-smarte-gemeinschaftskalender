@@ -243,7 +243,7 @@ else changePage(1);
                 body-class="px-0 w-full"
             >
                 <Button
-                    class="lg:hidden ml-auto"
+                    class="secondary-search-button lg:hidden ml-auto"
                     variant="secondary"
                     icon-left="search"
                     :disabled="locationSearchRef?.triggered"
@@ -374,7 +374,7 @@ else changePage(1);
         </Overlayable>
         <div
             v-if="!loading"
-            class="w-full"
+            class="w-full content-area"
         >
             <div class="second-search-bar">
                 <!-- Zweite Suche -->
@@ -406,6 +406,7 @@ else changePage(1);
                             Filter
                         </Button>
                         <Button
+                            class="primary-search-button"
                             variant="secondary"
                             icon-left="search"
                             :disabled="locationSearchRef?.triggered"
@@ -504,11 +505,11 @@ else changePage(1);
                         <template v-for="event in events">
                             <EventCardHorizontal
                                 :event="event"
-                                class="mb-5 hidden md:flex lg:hidden xl:flex"
+                                class="event-card  mb-5 hidden md:flex lg:hidden xl:flex"
                             />
                             <EventCard
                                 :event="event"
-                                class="mb-5 flex md:hidden lg:flex xl:hidden"
+                                class="event-card mb-5 flex md:hidden lg:flex xl:hidden"
                             />
                         </template>
                     </div>

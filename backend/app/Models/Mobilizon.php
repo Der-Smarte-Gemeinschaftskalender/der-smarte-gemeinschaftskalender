@@ -528,6 +528,43 @@ public function findProfileByPreferredUsername(
         return $this->requestWithoutMedia($query->build());
     }
 
+    public function searchAddress(string $query, int $limit = 10): ?array
+    {
+        $gqlQuery = Query::query("SearchAddress");
+        $gqlQuery->field("searchAddress")
+            ->attributes(["query" => $query, "limit" => $limit])
+            ->fields([
+                'country',
+                'description',
+                'geom',
+                'id',
+                'locality',
+                'originId',
+                'postalCode',
+                'region',
+                'street',
+                'timezone',
+                'type',
+                'url'
+            ]);
+
+        if ($this->debug) var_dump($gqlQuery->build());
+
+        $response = $this->requestWithoutMedia($gqlQuery->build());
+
+        $data = $response['data']['searchAddress'] ?? null;
+
+        return $data && count($data) > 0 ? [
+            'description' => $data[0]['description'] ?? '',
+            'street' => $data[0]['street'] ?? '',
+            'postalCode' => $data[0]['postalCode'] ?? '',
+            'locality' => $data[0]['locality'] ?? '',
+            'region' => $data[0]['region'] ?? '',
+            'country' => $data[0]['country'] ?? '',
+            'geom' => $data[0]['geom'] ?? '',
+        ] : null;
+    }
+
     private function requestWithMedia(string $queryString, array $variables, UploadedFile $file): array
     {
         try {

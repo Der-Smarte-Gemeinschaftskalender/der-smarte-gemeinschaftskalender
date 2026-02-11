@@ -14,6 +14,7 @@ use App\Http\Controllers\MaterialGeneratorValueController;
 use App\Http\Controllers\OrganisationController;
 use App\Http\Controllers\SeriesEventController;
 use App\Http\Controllers\SingleEventController;
+use App\Http\Controllers\TileProxyController;
 use App\Http\Controllers\UserController;
 
 Route::middleware('api')->prefix('auth')->group(function () {
@@ -127,3 +128,6 @@ Route::prefix('organisations')->group(function () {
     Route::post('/leave', [OrganisationController::class, 'leaveOrganiation']);
     Route::get('/mobilizon-groups', [OrganisationController::class, 'loadMobilizonGroups']);
 });
+
+Route::get('/tiles/{z}/{x}/{y}.png', [TileProxyController::class, 'proxy'])
+    ->where(['z' => '[0-9]+', 'x' => '[0-9]+', 'y' => '[0-9]+']);
