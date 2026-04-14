@@ -6,7 +6,7 @@ import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { dsgApi } from '@/lib/dsgApi';
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
-import { stripHtml } from '@/lib/helper';
+import { stripHtml, convertToUsername, preferredUsernameSchema } from '@/lib/helper';
 
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputEmail.vue';
@@ -36,14 +36,7 @@ const validationSchema = toTypedSchema(
                 required_error: 'Der Name der Organisation ist erforderlich.',
             })
             .nonempty('Der Name der Organisation darf nicht leer sein.'),
-        preferredUsername: zod
-            .string({
-                required_error: 'Der Benutzername der Organisation ist erforderlich.',
-            })
-            .regex(/^[a-z][a-z0-9_]*$/, {
-                message:
-                    'Bitte einen gültigen Benutzernamen eingeben z.B.: Kleinbuchstaben ohne Umlaute, Zahlen oder Unterstrich.',
-            })
+        preferredUsername: preferredUsernameSchema
             .nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
         summary: zod
             .string({
@@ -75,20 +68,6 @@ const onSubmit = handleSubmit(async (values) => {
         errorMessageContent.value = error?.response?.data?.error || 'Es ist ein Fehler aufgetreten.';
     }
 });
-const convertToUsername = (name: string): string => {
-    let username = name
-        .toLowerCase()
-        .replace(/[^\w ]+/g, '')
-        .replace(/ +/g, '_')
-        .replace(/_+/g, '_');
-
-    const lastChar = username.slice(-1);
-
-    if (lastChar === '_') {
-        username = username.substring(0, username.length - 1);
-    }
-    return username;
-};
 watch(name, async (newName) => {
     preferredUsername.value = convertToUsername(newName);
 });

@@ -6,7 +6,7 @@ import { checkLogin, setUserData } from '@/composables/UserComposoable';
 import { useRouter } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { stripHtml } from '@/lib/helper';
+import { stripHtml, convertToUsername, preferredUsernameSchema } from '@/lib/helper';
 import { setOrganisationData } from '@/composables/OrganisationComposable';
 
 import Card from '@/components/KERN/Card.vue';
@@ -60,27 +60,15 @@ const validationSchema = toTypedSchema(
             }),
             // Profile
             name: zod.string().nonempty('Der Name ist erforderlich.'),
-            preferredUsername: zod
-                .string()
-                .nonempty('Der Benutzername ist erforderlich.')
-                .regex(/^[a-z][a-z0-9_]*$/, {
-                    message:
-                        'Bitte einen gültigen Benutzernamen eingeben z.B.: Kleinbuchstaben ohne Umlaute, Zahlen oder Unterstrich.',
-                }),
+            preferredUsername: preferredUsernameSchema
+                .nonempty('Der Benutzername ist erforderlich.'),
             // Organisation
             organisation_name: zod
                 .string({
                     required_error: 'Der Name der Organisation ist erforderlich.',
                 })
                 .nonempty('Der Name der Organisation darf nicht leer sein.'),
-            organisation_preferredUsername: zod
-                .string({
-                    required_error: 'Der Benutzername der Organisation ist erforderlich.',
-                })
-                .regex(/^[a-z][a-z0-9_]*$/, {
-                    message:
-                        'Bitte einen gültigen Benutzernamen eingeben z.B.: Kleinbuchstaben ohne Umlaute, Zahlen oder Unterstrich.',
-                })
+            organisation_preferredUsername: preferredUsernameSchema
                 .nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
             organisation_summary: zod
                 .string({
@@ -123,21 +111,6 @@ const { value: preferredUsername } = useField<string>('preferredUsername');
 const { value: organisation_name } = useField<string>('organisation_name');
 const { value: organisation_preferredUsername } = useField<string>('organisation_preferredUsername');
 const { value: organisation_summary } = useField<string>('organisation_summary');
-
-const convertToUsername = (inputName: string): string => {
-    let username = inputName
-        .toLowerCase()
-        .replace(/[^\w ]+/g, '')
-        .replace(/ +/g, '_')
-        .replace(/_+/g, '_');
-
-    const lastChar = username.slice(-1);
-
-    if (lastChar === '_') {
-        username = username.substring(0, username.length - 1);
-    }
-    return username;
-};
 
 watch(name, (newName) => {
     preferredUsername.value = convertToUsername(newName);

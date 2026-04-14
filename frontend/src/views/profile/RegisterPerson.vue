@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { ZodType } from 'zod';
+import { convertToUsername, preferredUsernameSchema } from '@/lib/helper';
 import zod from '@/lib/zod';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputEmail.vue';
@@ -26,13 +27,8 @@ interface RegisterPersonForm {
 const validationSchema = toTypedSchema(
     zod.object({
         name: zod.string().nonempty(),
-        preferredUsername: zod
-            .string()
-            .nonempty()
-            .regex(/^[a-z][a-z0-9_]*$/, {
-                message:
-                    'Bitte einen gültigen Benutzernamen eingeben z.B.: Kleinbuchstaben ohne Umlaute, Zahlen oder Unterstrich.',
-            }),
+        preferredUsername: preferredUsernameSchema
+            .nonempty(),
     }) satisfies ZodType<RegisterPersonForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
@@ -56,20 +52,6 @@ const onSubmit = handleSubmit(async (values) => {
             'Es ist ein Fehler aufgetreten. Bevor du deinen Benutzer weiter einrichten kannst, musst du erst deine E-Mail-Adresse bestätigen.';
     }
 });
-const convertToUsername = (name: string): string => {
-    let username = name
-        .toLowerCase()
-        .replace(/[^\w ]+/g, '')
-        .replace(/ +/g, '_')
-        .replace(/_+/g, '_');
-
-    const lastChar = username.slice(-1);
-
-    if (lastChar === '_') {
-        username = username.substring(0, username.length - 1);
-    }
-    return username;
-};
 watch(name, async (newName, oldName) => {
     preferredUsername.value = convertToUsername(newName);
 });

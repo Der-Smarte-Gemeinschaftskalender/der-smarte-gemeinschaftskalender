@@ -1,4 +1,5 @@
 import dayjs from '@/lib/dayjs';
+import zod from '@/lib/zod';
 
 import { mobilizon_event_language_options, mobilizon_main_category_options } from '@/lib/const';
 
@@ -258,3 +259,30 @@ export const getCardImageUrl = (event: IEvent) => {
 };
 
 export const isMobile: boolean = window.innerWidth <= 992;
+
+export const convertToUsername = (inputName: string): string => {
+    let username = inputName
+        .toLowerCase()
+        .replace(/[^\w ]+/g, '')
+        .replace(/ +/g, '_')
+        .replace(/_+/g, '_');
+
+    const lastChar = username.slice(-1);
+
+    if (lastChar === '_') {
+        username = username.substring(0, username.length - 1);
+    }
+    return username;
+};
+
+export const preferredUsernameSchema = zod
+    .string()
+    .regex(/^[a-z]/, {
+        message: 'Der Benutzername muss mit einem Kleinbuchstaben anfangen.',
+    })
+    .regex(/[a-z0-9]$/, {
+        message: 'Der Benutzername muss mit einem Kleinbuchstaben oder einer Zahl enden.',
+    })
+    .regex(/^[a-z][a-z0-9_]*$/, {
+        message: 'Bitte einen gültigen Benutzernamen eingeben. Erlaubt sind Kleinbuchstaben, Zahlen und Unterstrich',
+    });
