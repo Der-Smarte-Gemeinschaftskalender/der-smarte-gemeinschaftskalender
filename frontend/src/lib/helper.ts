@@ -1,4 +1,5 @@
 import dayjs from '@/lib/dayjs';
+import zod from '@/lib/zod';
 
 import { mobilizon_event_language_options, mobilizon_main_category_options } from '@/lib/const';
 
@@ -258,3 +259,40 @@ export const getCardImageUrl = (event: IEvent) => {
 };
 
 export const isMobile: boolean = window.innerWidth <= 992;
+
+export const convertToUsername = (inputName: string): string => {
+    let username = inputName
+        .toLowerCase()
+        .trim()
+        .replace(/ä/g, "ae")
+        .replace(/ö/g, "oe")
+        .replace(/ü/g, "ue")
+        .replace(/ß/g, "ss")
+        // Jegliches andere Zeichen zu Unterstrich ersetzen
+        .replace(/[^a-z0-9_]+/g, "_")
+        // Mehrere Unterstriche zu einem einzigen Unterstrich zusammenfassen
+        .replace(/_+/g, '_')
+        // Unterstriche am Anfang und Ende entfernen
+        .replace(/^_+|_+$/g, "");;
+
+    if (/^[0-9]/.test(username)) {
+        username = "u" + username;
+    }
+
+    return username;
+};
+
+export const preferredUsernameSchema = zod
+    .string()
+    .regex(/^[a-z]/, {
+        message: 'Der Benutzername muss mit einem Kleinbuchstaben anfangen.',
+    })
+    .regex(/[a-z0-9]$/, {
+        message: 'Der Benutzername muss mit einem Kleinbuchstaben oder einer Zahl enden.',
+    })
+    .regex(/^[a-z][a-z0-9_]*$/, {
+        message: 'Bitte einen gültigen Benutzernamen eingeben. Erlaubt sind Kleinbuchstaben, Zahlen und Unterstrich',
+    })
+    .regex(/^(?!.*__)/, {
+        message: 'Der Benutzername darf keine aufeinanderfolgenden Unterstriche enthalten.',
+    });
