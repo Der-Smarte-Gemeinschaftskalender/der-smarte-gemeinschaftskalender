@@ -5,9 +5,8 @@
 
 <div class="content">
     <h1>Ihre Genehmigungsanfrage wurde bearbeitet</h1>
-    <p>
-        Ihre Genehmigungsanfrage für {{ $requestTypeName }} wurde bearbeitet.
-    </p>
+
+   {!! $mailBody !!}
 
     <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <p style="margin: 0 0 10px 0;"><strong>Status:</strong> <span style="color: @if($status === 'approved') #2ecc71 @elseif($status === 'rejected') #e74c3c @else #95a5a6 @endif; font-weight: bold;">

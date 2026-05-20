@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Models\Mobilizon;
+use App\Models\MobilizonTag;
 use App\Jobs\FetchImportedEvents;
 use App\Models\ImportedEvent;
-use App\Models\MobilizonTag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Log;
 
 class ImportedEventController extends Controller implements HasMiddleware
 {
@@ -17,7 +18,7 @@ class ImportedEventController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('in_group', except: ['show', 'changeStatus'])
+            'in_group'
         ];
     }
 
@@ -63,11 +64,11 @@ class ImportedEventController extends Controller implements HasMiddleware
     {
 
         if (!$request->has('mobilizon_fields')) {
-            return response()->json(['error' => 'Mobilizon fields are required'], 400);
+            return response()->json(['error' => 'Ungültige Mobilizon-Felder'], 400);
         }
 
         if (!$request->has('url')) {
-            return response()->json(['error' => 'URL is required'], 400);
+            return response()->json(['error' => 'URL ist erforderlich'], 400);
         }
 
         $mobilizonFields = $request->input('mobilizon_fields');
@@ -89,6 +90,29 @@ class ImportedEventController extends Controller implements HasMiddleware
 
         return response()->json([
             'importedEvent' => $importedEvent
+        ]);
+    }
+
+    public function delete(ImportedEvent $importedEvent): JsonResponse
+    {
+        $mclient = Mobilizon::getInstance();
+        foreach ($importedEvent->created_events as $createdEvent) {
+            $mresponse = $mclient->deleteEvent($createdEvent->mobilizon_id);
+
+            if ($mclient->hasError($mresponse) && $mclient->getError($mresponse) !== 'Veranstaltung nicht gefunden') {
+                Log::error("Error deleting event with Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse));
+                return response()->json([
+                    'error' => "Fehler beim Löschen der Veranstaltung mit Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse)
+                ]);
+            }
+
+            $createdEvent->delete();
+        }
+
+        $importedEvent->delete();
+
+        return response()->json([
+            'message' => 'Erfolgreich gelöscht.'
         ]);
     }
 

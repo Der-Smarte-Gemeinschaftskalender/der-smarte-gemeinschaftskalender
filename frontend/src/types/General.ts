@@ -12,7 +12,7 @@ export interface Column {
     key: string;
     name: string;
     numeric?: boolean;
-    format?: (value: any, row: any) => any;
+    format?: (value?: any, row?: any) => any;
     align?: 'left' | 'center' | 'right';
 }
 
@@ -57,6 +57,14 @@ export enum MobilizonCategory {
     SPORTS = "SPORTS",
     THEATRE = "THEATRE",
     MEETING = "MEETING",
+}
+
+export enum MobilizonMainCategory {
+    ARTS_CULTURE = 'ARTS_CULTURE',
+    COMMUNITY_COMMITMENT = 'COMMUNITY_COMMITMENT',
+    FAMILY_LEISURE = 'FAMILY_LEISURE',
+    HEALTH_EXERCISE = 'HEALTH_EXERCISE',
+    ECONOMY_EDUCATION = 'ECONOMY_EDUCATION',
 }
 
 export const MobilizonCategoryAndAll = {
@@ -169,16 +177,16 @@ export interface IOrganisation {
     domain: string | null;
     members: {
         elements: Array<Member>;
-    }
+    };
     id: string;
     name: string;
     physicalAddress: AddressForm | null;
     preferredUsername: string;
     summary: string | null;
-    type: string
+    type: string;
     url: string;
     __typename: string;
-
+    is_featured?: boolean;
 }
 
 export interface EventTag {

@@ -122,10 +122,12 @@ const selected = (name: string) => {
             <ul>
                 <li
                     v-for="navigationItem in navigationItems"
+                    tabindex="0"
                     :key="navigationItem.name"
                     :class="{ selected: selected(navigationItem.name), disabled: !!navigationItem?.disabled }"
                     class="my-2 py-1 px-3 w-full select-none cursor-pointer"
                     @click="selectOption(navigationItem)"
+                    @keyup.enter="selectOption(navigationItem)"
                 >
                     <p class="flex align-items-center">
                         <Icon
@@ -144,9 +146,11 @@ const selected = (name: string) => {
                 <li
                     v-for="navigationItem in profileNavigationItems"
                     :key="navigationItem.name"
+                    tabindex="0"
                     :class="{ selected: selected(navigationItem.name), disabled: !!navigationItem?.disabled }"
                     class="my-3 py-1 px-3 w-full select-none cursor-pointer"
                     @click="selectOption(navigationItem)"
+                    @keyup.enter="selectOption(navigationItem)"
                 >
                     <p class="flex align-items-center">
                         <Icon
@@ -165,10 +169,12 @@ const selected = (name: string) => {
                 <ul>
                     <li
                         v-for="navigationItem in adminNavigationItems"
+                        tabindex="0"
                         :key="navigationItem.name"
                         :class="{ selected: selected(navigationItem.name) }"
                         class="my-3 py-1 px-3 w-full select-none cursor-pointer"
                         @click="selectOption(navigationItem)"
+                        @keyup.enter="selectOption(navigationItem)"
                     >
                         <p class="flex align-items-center">
                             <Icon

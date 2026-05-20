@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import Icon from './KERN/cosmetics/Icon.vue';
 import Button from './KERN/Button.vue';
 import Overlayable from '@/components/Overlayable.vue';
+import LanguageSwitch from '@/components/LanguageSwitch.vue';
 import { instanceInformation, mainHeader, landingPage } from '@/lib/instanceConfig';
 
 interface Props {
@@ -16,51 +18,72 @@ const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
 const instanceName = ref<string>(instanceInformation.name);
 
 const route = useRoute();
+const { t } = useI18n();
 
 const { showNavigation = true } = defineProps<Props>();
 
-let navigationItems = [
-    {
-        title: 'Veranstaltungen',
-        icon: 'list_alt',
-        name: 'public.search',
-        button: false,
-    },
-];
-if (mainHeader.showCalendarLink) {
-    navigationItems = [
-        ...navigationItems,
+const showLanguageSwitch = computed(() => {
+    const path = route.path?.toString() || '';
+    const germanOnlyPages = ['app', 'material-generator', 'login', 'register', 'forgot-password', 'reset-password', 'validate'];
+    return !germanOnlyPages.some(page => path.includes(page));
+});
+
+const navigationItems = computed(() => {
+    const items = [
         {
-            title: 'Kalender',
-            icon: 'calendar_month',
-            name: 'public.calendar',
+            title: t('public.header.events'),
+            icon: 'list_alt',
+            name: 'public.search',
             button: false,
         },
     ];
-}
 
-navigationItems = [
-    ...navigationItems,
-    ...[
+    if (mainHeader.value.showCalendarLink) {
+        items.push({
+            title: t('public.header.calendar'),
+            icon: 'calendar_month',
+            name: 'public.calendar',
+            button: false,
+        });
+    }
+
+    items.push(
         {
-            title: 'Organisationen',
+            title: t('public.header.organisations'),
             icon: 'account_balance',
             name: 'public.organisations',
             button: false,
         },
         {
-            title: mainHeader.externalLinkText,
-            icon: 'contact',
-            link: mainHeader.externalLinkUrl,
+            title: mainHeader.value.externalLinkText,
+            icon: 'open-in-new',
+            link: mainHeader.value.externalLinkUrl,
             button: false,
         },
+    );
+
+    if(!!mainHeader.value.externalLinkUrl2 && !!mainHeader.value.externalLinkText2){
+        items.push(
+            {
+                title: mainHeader.value.externalLinkText2,
+                icon: 'open-in-new',
+                link: mainHeader.value.externalLinkUrl2,
+                button: false,
+            },
+        );
+    }
+
+    items.push(
         {
-            title: 'Zum internen Bereich',
+            title: t('public.header.internalArea'),
             icon: 'login',
             name: 'login',
-        },
-    ],
-];
+            button: false,
+        }
+    );
+
+    return items;
+});
 
 const showNotificationImageInHeader = ref<boolean>(false);
 
@@ -83,13 +106,15 @@ watch(
                         'lg:w-fit': showNavigation,
                     }"
                 >
-                    <RouterLink :to="{ name: 'landingpage' }">
-                        <img
-                            class="logo-image"
-                            :src="logoUrl"
-                            :alt="`Zur Startseite vom ${instanceName}`"
-                        />
-                    </RouterLink>
+                    <div class="flex align-items-center gap-3">
+                        <RouterLink :to="{ name: 'landingpage' }">
+                            <img
+                                class="logo-image"
+                                :src="logoUrl"
+                                :alt="t('public.header.homeAlt', { name: instanceName })"
+                            />
+                        </RouterLink>
+                    </div>
                     <slot
                         name="after-logo"
                         class="text-right"
@@ -118,11 +143,12 @@ watch(
                             class="text-sm min-h-0 p-2 sm:hidden"
                             :body-class="'py-0'"
                             :icon-left="'list'"
-                            aria-label="Menü"
-                            title="Menü"
+                            :aria-label="t('public.header.menu')"
+                            :title="t('public.header.menu')"
                             variant="secondary"
                             @click="overlayable?.openOverlay()"
                         />
+                        <LanguageSwitch v-if="showLanguageSwitch" />
                     </div>
                 </nav>
                 <Overlayable
@@ -153,7 +179,7 @@ watch(
                         >
                             <span
                                 v-if="!navigationItem.button"
-                                class="flex align-items-center align-content-center w-max"
+                                class="flex align-items-center align-content-center w-max text-theme-primary"
                             >
                                 <Icon
                                     :name="navigationItem.icon"
@@ -176,7 +202,7 @@ watch(
                             :href="navigationItem.link"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="my-2 py-1 w-min align-items-center align-content-center underline text-theme-primary font-medium sm:px-3"
+                            class="my-2 py-1 w-min align-items-center align-content-center underline text-theme-primary font-medium sm:px-3 text-theme-primary"
                             @click="overlayable?.closeOverlay()"
                         >
                             <span class="flex align-items-center align-content-center w-max">
@@ -188,6 +214,10 @@ watch(
                             </span>
                         </a>
                     </template>
+                    <LanguageSwitch
+                        v-if="showLanguageSwitch"
+                        class="my-2 sm:px-3 hidden lg:block"
+                    />
                 </Overlayable>
             </div>
             <div class="flex gap-8 w-full align-items-center">
@@ -260,6 +290,9 @@ header {
 }
 
 .main-navigation {
+    a:visited {
+        color: var(--theme-primary);
+    }
     .router-link-active {
         text-decoration: none !important;
     }

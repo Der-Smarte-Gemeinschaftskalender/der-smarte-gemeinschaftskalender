@@ -8,27 +8,44 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Http\Controllers\EmailTemplateController;
+use App\Enums\EmailTemplateType;
 
 class SendApprovalRequestHandledEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $requestTypeName;
+    public string $mailBody;
+    public string $mailSubject;
     public string $status;
     public ?string $comment;
 
     public function __construct(ApprovalRequest $approvalRequest)
     {
-        $this->requestTypeName = $this->getRequestTypeName($approvalRequest->requestable_type, $approvalRequest->request_type);
-        $this->status = $approvalRequest->status;
+        
+        $templateController = new EmailTemplateController();
+        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::APPROVAL_REQUEST_HANDLED);
+        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::APPROVAL_REQUEST_HANDLED);
+
         $this->comment = $approvalRequest->admin_comment;
+        $this->status = $approvalRequest->status;
+
+        $requestTypeName = $this->getRequestTypeName($approvalRequest->requestable_type, $approvalRequest->request_type);
+        $handledStatus = $this->status === 'approved' ? 'genehmigt' : 'abgelehnt';
+        $variables = [
+            ':appName' => config('app.name', 'Der Smarte Gemeinschaftskalender'),
+            ':requestTypeName' => $requestTypeName,
+            ':handledStatus' => $handledStatus,
+        ];
+        
+        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
+        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
     }
 
     public function envelope(): Envelope
     {
-        $statusText = $this->status === 'approved' ? 'genehmigt' : 'abgelehnt';
         return new Envelope(
-            subject: 'Ihre Genehmigungsanfrage wurde ' . $statusText,
+            subject: $this->mailSubject,
         );
     }
 
@@ -36,6 +53,11 @@ class SendApprovalRequestHandledEmail extends Mailable
     {
         return new Content(
             view: 'emails.approvalRequestHandledUserMail',
+            with: [
+                'mailBody' => $this->mailBody,
+                'status' => $this->status,
+                'comment' => $this->comment,
+            ]
         );
     }
 

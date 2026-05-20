@@ -27,8 +27,7 @@ interface RegisterPersonForm {
 const validationSchema = toTypedSchema(
     zod.object({
         name: zod.string().nonempty(),
-        preferredUsername: preferredUsernameSchema
-            .nonempty(),
+        preferredUsername: preferredUsernameSchema.nonempty(),
     }) satisfies ZodType<RegisterPersonForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
@@ -52,26 +51,27 @@ const onSubmit = handleSubmit(async (values) => {
             'Es ist ein Fehler aufgetreten. Bevor du deinen Benutzer weiter einrichten kannst, musst du erst deine E-Mail-Adresse bestätigen.';
     }
 });
+
 watch(name, async (newName, oldName) => {
     preferredUsername.value = convertToUsername(newName);
 });
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Ihr persönliches Profil einrichten</h1>
-    <p class="mt-1 mb-6">
+    <h1 class="kern-heading text-theme-primary mb-4">Ihr persönliches Profil einrichten</h1>
+    <p class="mb-3">
         <b>Hinweis:</b>
         Nutzen Sie zur Profileinrichtung Ihre persönlichen Daten. Verwenden Sie nicht den Organisationsnamen. Ihr
         persönliches Profil wird benötigt, um die Erstellung einer Organisation anzufragen. Eine Organisation kann von
         mehreren Einzelnutzer*innen verwaltet werden.
-        <br />
-        <br />
+    </p>
+    <p class="mb-6">
         Weitere Informationen zur Profileinrichtung finden Sie im
         <LinkToDocs
-            path="Terminverwaltung/Organisation"
+            path="Terminverwaltung/Organisation/"
             fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
         />.
     </p>
-    <Divider class="mt-4 mb-4" />
+    <Divider class="mb-6" />
     <form
         novalidate
         @submit.prevent="onSubmit"

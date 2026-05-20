@@ -188,13 +188,13 @@ onMounted(async () => {
 <template>
     <div>
         <h1 class="kern-heading text-theme-primary mb-4">Organisationsfreigabe – Detailansicht</h1>
-        <p class="kern-text mb-6">
+        <p class="mb-3">
             <b>Hinweis:</b>
             Als Administrator*in der Instanz können Sie hier angefragte Organisationen bzw. Änderungen genehmigen oder
             ablehnen. Organisationen und geänderte Informationen erscheinen erst nach Freigabe in der öffentlichen
             Kalenderansicht.
-            <br />
-            <br />
+        </p>
+        <p class="mb-6">
             Weitere Informationen finden Sie im
             <LinkToDocs
                 path="Terminverwaltung/Instanz/"

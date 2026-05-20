@@ -1,13 +1,15 @@
 <script lang="ts" setup>
-import { ref, watch, reactive } from 'vue';
+import { ref, watch, reactive, computed } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { useI18n } from 'vue-i18n';
 
 import { truncate, getMainCategoryFromSubCategory, formatOnTime } from '@/lib/helper';
 import { searchEvents } from '@/lib/mobilizonClient';
 import { mobilizon_main_category_options, mobilizon_event_status, mobilizon_event_language_options } from '@/lib/const';
 import deLocale from '@fullcalendar/core/locales/de';
+import enLocale from '@fullcalendar/core/locales/en-gb';
 
 import KernAccordion from '@/components/KERN/Accordion.vue';
 import InputRadio from '@/components/KERN/inputs/InputRadio.vue';
@@ -21,14 +23,16 @@ import Button from '@/components/KERN/Button.vue';
 import Overlayable from '@/components/Overlayable.vue';
 
 import { type Accordion } from '@/types/KERN';
-import { type IEvent, MobilizonCategory } from '@/types/General';
+import { type IEvent, MobilizonCategory, MobilizonMainCategory } from '@/types/General';
 import type { CalendarOptions, EventInput, EventSourceFuncArg } from '@fullcalendar/core';
 import { searchDefaults } from '@/lib/instanceConfig';
+
+const { t, locale } = useI18n();
 
 const searchCategory = ref<string[]>([]);
 const searchTarget = ref(localStorage.getItem('searchTarget') || searchDefaults.target);
 const searchTerm = ref('');
-const searchMainCategory = ref<string[]>(JSON.parse(localStorage.getItem('searchMainCategory') || '[]'));
+const searchMainCategory = ref<MobilizonMainCategory[]>(JSON.parse(localStorage.getItem('searchMainCategory') || '[]'));
 const searchStatus = ref<string[]>(JSON.parse(localStorage.getItem('searchStatus') || '["CONFIRMED"]'));
 const searchLanguage = ref<string[]>(JSON.parse(localStorage.getItem('searchLanguage') || '[]'));
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -38,29 +42,39 @@ const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
 const fullCalendar = ref<InstanceType<typeof FullCalendar> | null>(null);
 let calApi = null;
 
-const searchAccordions: Accordion[] = [
+const searchAccordions = computed<Accordion[]>(() => [
     {
-        header: 'Suchbegriff',
+        header: t('public.calendar.searchTerm'),
         open: true,
     },
     {
-        header: 'Kategorien',
+        header: t('public.calendar.categories'),
         open: true,
     },
     {
-        header: 'Instanz',
+        header: t('public.calendar.instance'),
     },
     {
-        header: 'Status der Veranstaltung',
+        header: t('public.calendar.eventStatus'),
     },
     {
-        header: 'Sprachen',
+        header: t('public.calendar.languages'),
     },
-];
+]);
+
+const isMobile = window.innerWidth < 768;
 
 const calendarOptions = reactive<CalendarOptions>({
     plugins: [dayGridPlugin, interactionPlugin],
-    initialView: 'dayGridWeek',
+    initialView: isMobile ? 'dayGrid1Day' : 'dayGridWeek',
+    height: isMobile ? 'auto' : undefined,
+    views: {
+        dayGrid1Day: {
+            type: 'dayGrid',
+            duration: { days: 1 },
+            buttonText: t('public.calendar.twoDays'),
+        },
+    },
     events: async (
         fetchInfo: EventSourceFuncArg,
         successCallback: (events: EventInput[]) => void,
@@ -77,10 +91,6 @@ const calendarOptions = reactive<CalendarOptions>({
             searchStatus.value,
             searchLanguage.value
         );
-        localStorage.setItem('searchTarget', searchTarget.value);
-        localStorage.setItem('searchMainCategory', JSON.stringify(searchMainCategory.value));
-        localStorage.setItem('searchStatus', JSON.stringify(searchStatus.value));
-        localStorage.setItem('searchLanguage', JSON.stringify(searchLanguage.value));
 
         if (!result) {
             failureCallback(new Error('failed to fetch calendar events'));
@@ -97,6 +107,7 @@ const calendarOptions = reactive<CalendarOptions>({
                     end: event.endsOn,
                     startStr: event.beginsOn,
                     endStr: event.endsOn,
+                    allDay: true,
                     url: `/events/${event.uuid}`,
                     extendedProps: {
                         event: event,
@@ -107,7 +118,7 @@ const calendarOptions = reactive<CalendarOptions>({
         );
     },
     nextDayThreshold: '09:00:00',
-    dayMaxEventRows: 10,
+    dayMaxEventRows: isMobile ? false : 10,
     moreLinkContent: (arg: { num: number; text: string }) => {
         return '+' + arg.num.toString();
     },
@@ -115,16 +126,16 @@ const calendarOptions = reactive<CalendarOptions>({
     headerToolbar: {
         left: 'prev,next,today',
         center: 'title',
-        right: 'dayGridWeek,dayGridMonth',
+        right: 'dayGrid1Day,dayGridWeek,dayGridMonth',
     },
     firstDay: 1,
-    locale: deLocale,
+    locale: locale.value === 'en' ? enLocale : deLocale,
     buttonText: {
-        today: 'Heute',
-        month: 'Monat',
-        week: 'Woche',
-        day: 'Tag',
-        list: 'Liste',
+        today: t('public.calendar.today'),
+        month: t('public.calendar.month'),
+        week: t('public.calendar.week'),
+        day: t('public.calendar.day'),
+        list: t('public.calendar.list'),
     },
 });
 
@@ -135,38 +146,53 @@ const fullCalendarRefetchEvents = () => {
     calApi.refetchEvents();
 };
 
-watch(searchMainCategory, (newSearchMainCategory: MobilizonCategory[]) => {
-    searchCategory.value = newSearchMainCategory
+const getSubCategoriesForMainCategory = (): MobilizonCategory[] => {
+    searchCategory.value = searchMainCategory.value
         .map((category) => {
-            return mobilizon_main_category_options.find((option) => option.value === category)?.sub_categories || [];
+            return mobilizon_main_category_options.value.find((option) => option.value === category)?.sub_categories || [];
         })
         .flat();
+};
+
+watch(searchMainCategory, (_: MobilizonMainCategory[]) => {
+    getSubCategoriesForMainCategory();
     fullCalendarRefetchEvents();
 });
 
 watch(searchTarget, fullCalendarRefetchEvents);
 watch(searchStatus, fullCalendarRefetchEvents);
 watch(searchLanguage, fullCalendarRefetchEvents);
-watch(searchTerm, async (newSearchTerm) => {
+watch(searchTerm, async () => {
     if (debounceTimeout) clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(async () => {
         fullCalendarRefetchEvents();
     }, 1000);
 });
+
+watch(locale, (newLocale) => {
+    if (!fullCalendar?.value) return;
+    
+    nextTick(() => {
+        fullCalendarRefetchEvents();
+    });
+});
+
+getSubCategoriesForMainCategory();
+
 </script>
 <template>
     <Teleport to="#headerslot">
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6 flex justify-content-between align-items-center">
-            <h1 class="kern-heading text-theme-primary">Kalender</h1>
+            <h1 class="kern-heading text-theme-primary">{{ $t('public.calendar.title') }}</h1>
             <Button
                 variant="secondary"
                 icon-left="tune"
                 class="xl:hidden w-min"
-                aria-label="Filter"
-                title="Filter"
+                :aria-label="$t('public.calendar.filter')"
+                :title="$t('public.calendar.filter')"
                 @click="overlayable?.openOverlay()"
             >
-                Filter
+                {{ $t('public.calendar.filter') }}
             </Button>
         </div>
     </Teleport>
@@ -191,7 +217,7 @@ watch(searchTerm, async (newSearchTerm) => {
                             <div class="search kern-fieldset__content">
                                 <InputText
                                     v-model="searchTerm"
-                                    placeholder="Schlagwort, Veranstaltungstitel..."
+                                    :placeholder="$t('public.calendar.searchPlaceholder')"
                                     name="searchTerm"
                                 />
                             </div>
@@ -224,13 +250,13 @@ watch(searchTerm, async (newSearchTerm) => {
                             <div class="kern-fieldset__content">
                                 <InputRadio
                                     v-model="searchTarget"
-                                    label="Dieser Kalender"
+                                    :label="$t('public.calendar.thisCalendar')"
                                     name="INTERNAL"
                                     value="INTERNAL"
                                 />
                                 <InputRadio
                                     v-model="searchTarget"
-                                    label="Gesamtes Kalendernetzwerk"
+                                    :label="$t('public.calendar.entireNetwork')"
                                     name="GLOBAL"
                                     value="GLOBAL"
                                 />
@@ -281,23 +307,25 @@ watch(searchTerm, async (newSearchTerm) => {
                         :title="arg.event.title"
                         :style="{ backgroundColor: arg.event.extendedProps?.mainCategoryColor, color: 'white' }"
                     >
-                        <span class="kern-text--bold">
-                            {{ arg.event.title }}
-                        </span>
-                        <br />
-
-                        <Icon
-                            name="person"
-                            color="white"
-                        />
-                        {{ arg.event.extendedProps.event?.attributedTo?.name }}
-                        <br />
-
-                        <Icon
-                            name="schedule"
-                            color="white"
-                        />
-                        {{ formatOnTime(arg.event.extendedProps?.event?.beginsOn) }}
+                        <div class="mb-1">
+                            <span class="kern-text--bold">
+                                {{ arg.event.title }}
+                            </span>
+                        </div>
+                        <div class="mb-1">
+                            <Icon
+                                name="person"
+                                color="white"
+                            />
+                            {{ arg.event.extendedProps.event?.attributedTo?.name }}
+                        </div>
+                        <div>
+                            <Icon
+                                name="schedule"
+                                color="white"
+                            />
+                            {{ formatOnTime(arg.event.extendedProps?.event?.beginsOn) }}
+                        </div>
                     </div>
                 </template>
             </FullCalendar>
@@ -339,7 +367,15 @@ watch(searchTerm, async (newSearchTerm) => {
 /* ===== Header Styling ===== */
 .fc-col-header-cell {
     background-color: var(--kern-theme-color) !important;
-    color: white !important;
+
+    a {
+        text-decoration: none;
+        color: white !important;
+    }
+
+    &.fc-day-today a {
+        color: var(--kern-theme-color) !important;
+    }
 }
 
 /* ===== Scrollable Grid ===== */
@@ -355,7 +391,7 @@ watch(searchTerm, async (newSearchTerm) => {
 }
 
 /* ===== Day & Event Styling ===== */
-.fc-day .fc-content {
+.fc-content {
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -368,8 +404,7 @@ watch(searchTerm, async (newSearchTerm) => {
 }
 
 .fc-day .fc-event,
-.fc-day .fc-event-main,
-.fc-day .fc-daygrid-event-harness {
+.fc-day .fc-event-main {
     width: calc(100% - 0.125rem);
     margin-right: 0;
     overflow: hidden;
@@ -381,24 +416,8 @@ watch(searchTerm, async (newSearchTerm) => {
     width: 100%;
 }
 
-.fc-day .fc-event:hover,
-.fc-day .fc-event-main:hover,
-.fc-day .fc-daygrid-event-harness:hover {
-    width: auto;
-    min-width: calc(100% - 0.125rem);
-    overflow: visible;
-    z-index: 10;
-}
-
-.fc-event-main:hover {
-    width: auto;
-    min-width: calc(100% - 0.125rem);
-}
-
-.fc-day .fc-content:hover {
-    width: auto;
-    min-width: calc(100% - 0.125rem);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+.fc-content:hover {
+    opacity: 0.9;
 }
 
 .fc-day .fc-h-event {
@@ -464,9 +483,14 @@ watch(searchTerm, async (newSearchTerm) => {
     }
 }
 
-@media screen and (max-width: 450px) {
+@media screen and (max-width: 767px) {
     .fc-view-harness {
-        min-height: 50vh !important;
+        min-height: unset !important;
+        overflow-x: hidden;
+    }
+    .fc-view-harness .fc-scrollgrid {
+        min-width: unset !important;
+        min-height: unset !important;
     }
     .fc-header-toolbar {
         width: 100% !important;

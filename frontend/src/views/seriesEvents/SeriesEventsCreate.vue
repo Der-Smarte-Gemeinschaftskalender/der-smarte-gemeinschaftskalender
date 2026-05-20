@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import zod from '@/lib/zod';
 
+import { dsgApi } from '@/lib/dsgApi';
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
@@ -8,6 +9,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { findSeriesEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import { formatInputDate, reconstructOptions } from '@/lib/helper';
+import { createEventDefaults, seriesEventsHolidaysFilter, seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig';
 import {
     intervall_options,
     mobilizon_category_options,
@@ -15,6 +17,13 @@ import {
     mobilizon_event_language_options,
     mobilizon_event_status,
 } from '@/lib/const';
+import {
+    type SeriesEvent,
+    SeriesEventSchema,
+    type SeriesEventForm,
+    SeriesEventFormSchema,
+    SeriesEventsDefaults
+} from '@/types/events/SeriesEvents';
 
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
@@ -23,26 +32,23 @@ import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
+import InputWeekDays from '@/components/KERN/inputs/InputWeekDays.vue';
+import InputMonthOccurrence from '@/components/KERN/inputs/InputMonthOccurrence.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import InputUrl from '@/components/KERN/inputs/InputUrl.vue';
 import Map from '@/components/Map.vue';
 import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 
-import { MobilizonEventJoinOptions, type Option } from '@/types/General';
+import { Intervall, MobilizonEventJoinOptions, type Option } from '@/types/General';
 import type { RemoveKeys } from '@/types/Generics';
 import { addressDefaults, type AddressForm } from '@/types/Mobilizon';
-import {
-    type SeriesEvent,
-    SeriesEventSchema,
-    type SeriesEventForm,
-    SeriesEventFormSchema,
-    SeriesEventsDefaults
-} from '@/types/events/SeriesEvents';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import InputTags from '@/components/InputTags.vue';
-import { createEventDefaults } from '@/lib/instanceConfig';
+import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
+import HolidaysSelect, { HolidaysPayload } from '@/components/HolidaysSelect.vue';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -76,6 +82,19 @@ const { value: intervall } = useField<string>('intervall');
 const { value: onlineAddress } = useField<string>('onlineAddress');
 const { value: physicalAddress } = useField<AddressForm>('physicalAddress');
 const { value: externalParticipationUrl } = useField<string | undefined>('externalParticipationUrl');
+const { value: holidays_check } = useField<boolean>('holidays_check');
+const { value: school_holidays_check } = useField<boolean>('school_holidays_check');
+const { value: holidays_state } = useField<string>('holidays_state');
+const { value: weekly_day } = useField<number>('weekly_day');
+const { value: monthly_weeks } = useField<number[]>('monthly_weeks');
+const { value: monthly_week_day } = useField<number>('monthly_week_day');
+const { value: monthly_use_start_date_as_default } = useField<boolean>('monthly_use_start_date_as_default');
+
+const holidaysYearToFetch = ref<number>(start.value ? new Date(start.value).getFullYear() : new Date().getFullYear());
+const holidays = ref<HolidaysPayload>({
+    holiday: [],
+    school_holiday: [],
+});
 
 // Set default values, if configured
 if (createEventDefaults.category) {
@@ -86,7 +105,7 @@ const onSubmit = handleSubmit(async (values: SeriesEventForm) => {
     const preparedValues: RemoveKeys<SeriesEvent, 'id'> = prepareEventsValues<
         SeriesEventForm,
         RemoveKeys<SeriesEvent, 'id'>
-    >(values, ['name', 'start', 'end', 'time', 'intervall', 'duration', 'user_id']);
+    >(values, ['name', 'start', 'end', 'time', 'intervall', 'duration', 'user_id', 'holidays_check', 'school_holidays_check', 'holidays_state', 'weekly_day', 'monthly_weeks', 'monthly_week_day', 'monthly_use_start_date_as_default']);
 
     try {
         isSubmitting.value = true;
@@ -102,6 +121,7 @@ const onSubmit = handleSubmit(async (values: SeriesEventForm) => {
         await router.push({ name: 'seriesEvents.show', params: { id: data.id } });
     } catch (error: any) {
         errorMessageContent.value = error;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
         isSubmitting.value = false;
     }
@@ -136,6 +156,13 @@ const createFromTemplate = async () => {
         status.value = seriesEvent.mobilizon_fields.status;
         onlineAddress.value = seriesEvent.mobilizon_fields.onlineAddress || '';
         physicalAddress.value = seriesEvent.mobilizon_fields.physicalAddress || addressDefaults;
+        holidays_check.value = seriesEvent.holidays_check ?? holidays_check.value;
+        school_holidays_check.value = seriesEvent.school_holidays_check ?? school_holidays_check.value;
+        holidays_state.value = seriesEvent.holidays_state ?? holidays_state.value;
+        weekly_day.value = seriesEvent.weekly_day ?? weekly_day.value;
+        monthly_weeks.value = seriesEvent.monthly_weeks ?? monthly_weeks.value;
+        monthly_week_day.value = seriesEvent.monthly_week_day ?? monthly_week_day.value;
+        monthly_use_start_date_as_default.value = seriesEvent.monthly_use_start_date_as_default ?? monthly_use_start_date_as_default.value;
 
         if (seriesEvent.mobilizon_fields.physicalAddress) {
             rawAddress.value = buildSuggestions([physicalAddress.value])[0];
@@ -158,10 +185,45 @@ const updateAddress = (address: string) => {
     };
 };
 
+const loadHolidays = async () => {
+    if (!seriesEventsHolidaysFilter.enabled) return;
+
+    try {
+        const { data } = await dsgApi.get('/series-events/holidays/', {
+            params: {
+                holidays_check: holidays_check.value,
+                school_holidays_check: school_holidays_check.value,
+                state: holidays_state.value,
+                year: holidaysYearToFetch.value,
+            },
+        });
+
+        holidays.value = data.holidays ?? data;
+    } catch (error) {
+        console.error('Error loading holidays:', error);
+    }
+};
+
+watch([holidays_check, school_holidays_check, holidays_state, holidaysYearToFetch], loadHolidays, { immediate: true });
 watch(joinOptions, (newValue) => {
     if (newValue !== MobilizonEventJoinOptions.EXTERNAL) externalParticipationUrl.value = undefined;
     else if (!externalParticipationUrl.value) externalParticipationUrl.value = '';
 });
+
+let holidaysDebounceTimeout: number | undefined; 
+watch(
+    () => start.value,
+    (newStart) => {
+        clearTimeout(holidaysDebounceTimeout);
+        holidaysDebounceTimeout = window.setTimeout(() => {
+            const newStartYear = newStart ? new Date(newStart).getFullYear() : new Date().getFullYear();
+
+            if (newStartYear !== holidaysYearToFetch.value) {
+                holidaysYearToFetch.value = newStartYear;
+            }
+        }, 500);
+    }
+);
 
 createFromTemplate();
 loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
@@ -183,6 +245,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
     >
         <Alert
             v-if="errorMessageContent.length"
+            class="mb-4"
             title="Fehler"
             :content="errorMessageContent"
             severity="danger"
@@ -232,6 +295,14 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         </div>
                     </div>
                     <div class="my-5 kern-row">
+                        <HolidaysSelect
+                            v-if="seriesEventsHolidaysFilter.enabled"
+                            v-model:holidaysCheck="holidays_check"
+                            v-model:schoolHolidaysCheck="school_holidays_check"
+                            v-model:state="holidays_state"
+                            :holidays="holidays"
+                            :errors="submitCount === 0 ? undefined : errors.start"
+                        />
                         <InputTime
                             v-model="time"
                             label="Beginn (Uhrzeit)"
@@ -261,8 +332,36 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             :errors="submitCount === 0 ? undefined : errors.intervall"
                         />
                     </div>
+                    <div 
+                        v-if="intervall === Intervall.WEEKLY && seriesEventsDaysControlsEnabled"
+                        class="my-5"
+                    >
+                        <InputWeekDays
+                            v-model="weekly_day"
+                            label="Wochentag"
+                            name="weekDays"
+                        />
+                    </div>                   
+                    <div 
+                        v-if="intervall === Intervall.MONTHLY && seriesEventsDaysControlsEnabled"
+                        class="my-5"
+                    >
+                        <InputMonthOccurrence
+                            v-model:weeks="monthly_weeks"
+                            v-model:week-day="monthly_week_day"
+                            :disabled="monthly_use_start_date_as_default"
+                            name-weeks="monthly_weeks"
+                            name-week-day="monthly_week_day"
+                            class="mb-4"
+                        />
+                        <InputCheckbox
+                            v-model="monthly_use_start_date_as_default"
+                            label="Tag des Monats aus dem Startdatum übernehmen"
+                            name="monthly_use_start_date_as_default"
+                        />
+                    </div>                                    
                 </div>
-                <div class="md:col-6 lg:col-12 xl:col-6 px-0 mt-2">
+                <div class="md:col-5 lg:col-12 xl:col-5 px-0 mt-2">
                     <Alert
                         title="Information"
                         severity="info"

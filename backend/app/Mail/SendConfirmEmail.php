@@ -11,12 +11,16 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Http\Controllers\EmailTemplateController;
+use App\Enums\EmailTemplateType;
 
 class SendConfirmEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public string $verificationToken;
+    public string $mailBody;
+    public string $mailSubject;
 
     /**
      * Create a new message instance.
@@ -24,6 +28,16 @@ class SendConfirmEmail extends Mailable
     public function __construct($verificationToken)
     {
         $this->verificationToken = $verificationToken;
+
+        $templateController = new EmailTemplateController();
+        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::VALIDATION);
+        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::VALIDATION);
+
+        $variables = [
+            ':appName' => config('app.name', 'Der Smarte Gemeinschaftskalender'),
+        ];
+        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
+        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
     }
 
     /**
@@ -32,7 +46,7 @@ class SendConfirmEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bestätigen Sie Ihre E-Mail-Adresse, um Ihr Konto zu aktivieren',
+            subject: $this->mailSubject,
         );
     }
 
@@ -43,6 +57,10 @@ class SendConfirmEmail extends Mailable
     {
         return new Content(
             view: 'emails.confirmEmailMail',
+            with: [
+                'mailBody' => $this->mailBody,
+                'verificationToken' => $this->verificationToken,
+            ],
         );
     }
 

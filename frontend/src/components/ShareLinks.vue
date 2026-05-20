@@ -75,7 +75,7 @@ const copyContent = () => {
                 type="text"
                 :value="text"
                 style="display: none"
-                aria-details="Kopieren"
+                aria-label="Link zum Suchergebnis"
             />
         </a>
         <a

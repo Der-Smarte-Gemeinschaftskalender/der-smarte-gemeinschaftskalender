@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { findOrganisation, searchEvents } from '@/lib/mobilizonClient';
 import { useRoute } from 'vue-router';
-import dayjs from '@/lib/dayjs';
 import { computed, ref } from 'vue';
 import Progress from '@/components/KERN/cosmetics/Progress.vue';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
@@ -11,16 +10,15 @@ import {
     formatOnDate,
     formatOnDateTime,
     formatOnTime,
-    formatCoordinates,
     formattedLanguage,
     getBeginsEndsOn,
 } from '@/lib/helper';
-import { type IEvent, type IEventDetailed, MobilizonCategory, MobilizonEventJoinOptions } from '@/types/General';
-import { mobilizon_event_language_options, mobilizon_category_options } from '@/lib/const';
+import { MobilizonCategory, MobilizonEventJoinOptions } from '@/types/General';
+import { mobilizon_category_options } from '@/lib/const';
 import Button from '@/components/KERN/Button.vue';
 import Header from '@/components/Header.vue';
 import QRCodeVue3 from 'qrcode-vue3';
-import { createFullEventUrl, createFullUrl } from '@/lib/shareInformation';
+import { createFullEventUrl } from '@/lib/shareInformation';
 import { instanceInformation } from '@/lib/instanceConfig';
 
 const instanceName = instanceInformation.name;
@@ -120,7 +118,7 @@ loadEvents();
             v-if="!events.length"
             class="flex justify-content-center"
         >
-            <p class="kern-text">Keine Veranstaltung mit diesen Suchkriterien gefunden.</p>
+            <p class="kern-text">{{ $t('public.infoMonitor.noEventsForCriteria') }}</p>
         </div>
         <div
             v-else
@@ -147,7 +145,7 @@ loadEvents();
                             </h2>
                             <div class="kern-row">
                                 <div class="kern-col pl-0">
-                                    <h3 class="kern-heading font-medium text-theme-primary my-3">Wann?</h3>
+                                    <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.when') }}</h3>
                                     <section v-if="formatOnDate(event?.beginsOn) === formatOnDate(event?.endsOn)">
                                         <div class="kern-text flex gap-2 align-items-start">
                                             <Icon name="calendar_month" />
@@ -156,25 +154,25 @@ loadEvents();
                                         <div class="kern-text flex gap-2 align-items-start">
                                             <Icon name="schedule" />
                                             {{ formatOnTime(event?.beginsOn) }}
-                                            bis
+                                            {{ $t('public.event.until') }}
                                             {{ formatOnTime(event?.endsOn) }}
                                         </div>
                                     </section>
                                     <section v-else>
                                         <div class="kern-text flex gap-2 align-items-start">
                                             <Icon name="calendar_month" />
-                                            Start:
+                                            {{ $t('public.event.start') }}:
                                             {{ formatOnDateTime(event?.beginsOn) }}
                                         </div>
                                         <div class="kern-text flex gap-2 align-items-start">
                                             <Icon name="none" />
-                                            Ende:
+                                            {{ $t('public.event.end') }}:
                                             {{ formatOnDateTime(event?.endsOn) }}
                                         </div>
                                     </section>
                                 </div>
                                 <div class="kern-col">
-                                    <h3 class="kern-heading font-medium text-theme-primary my-3">Wo?</h3>
+                                    <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.where') }}</h3>
                                     <div
                                         v-if="event?.physicalAddress"
                                         class="kern-text flex gap-2 align-items-start"
@@ -205,12 +203,12 @@ loadEvents();
                                         v-if="!event?.physicalAddress && !event?.onlineAddress"
                                         class="kern-text flex gap-2 align-items-start"
                                     >
-                                        Keine Adresse angegeben
+                                        {{ $t('public.event.noAddress') }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <h3 class="kern-heading font-medium text-theme-primary my-3">Was?</h3>
+                        <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.what') }}</h3>
                         <div class="description-container">
                             <div
                                 class="kern-text pr-6"
@@ -219,20 +217,20 @@ loadEvents();
                         </div>
                         <div class="kern-row">
                             <div class="kern-col">
-                                <h3 class="kern-heading text-theme-primary my-2">Sprache</h3>
+                                <h3 class="kern-heading text-theme-primary my-2">{{ $t('public.event.language') }}</h3>
                                 <div class="kern-text py-2">
                                     <Icon name="language" />
                                     {{ formattedLanguage(event.language) }}
                                 </div>
                             </div>
                             <div class="kern-col">
-                                <h3 class="kern-heading text-theme-primary my-2">Status</h3>
+                                <h3 class="kern-heading text-theme-primary my-2">{{ $t('public.event.status') }}</h3>
                                 <div class="py-2">
                                     <EventStatusBadge :status="event.status" />
                                 </div>
                             </div>
                             <div class="kern-col">
-                                <h3 class="kern-heading text-theme-primary my-2">Kategorie</h3>
+                                <h3 class="kern-heading text-theme-primary my-2">{{ $t('public.event.category') }}</h3>
                                 <RouterLink :to="{ name: 'public.search', query: { category: event.category } }">
                                     <Button variant="secondary">
                                         {{
@@ -246,7 +244,7 @@ loadEvents();
                             </div>
                         </div>
                         <div v-if="event?.tags?.length">
-                            <h3 class="kern-heading text-theme-primary mb-3">Schlagwörter</h3>
+                            <h3 class="kern-heading text-theme-primary mb-3">{{ $t('public.event.tags') }}</h3>
                             <template
                                 v-for="tag in event.tags"
                                 :key="tag"
@@ -263,7 +261,7 @@ loadEvents();
                     <div class="kern-col">
                         <div class="mb-4">
                             <template v-if="event.joinOptions === MobilizonEventJoinOptions.EXTERNAL">
-                                <h3 class="kern-heading font-medium text-theme-primary my-3">Externe Anmeldung</h3>
+                                <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.externalRegistration') }}</h3>
                             </template>
                         </div>
                         <div class="flex justify-content-center">
@@ -282,7 +280,7 @@ loadEvents();
                             v-if="!!event?.onlineAddress"
                             class="kern-text"
                         >
-                            <h3 class="kern-heading text-theme-primary mb-3 mt-3">Webseite</h3>
+                            <h3 class="kern-heading text-theme-primary mb-3 mt-3">{{ $t('public.event.website') }}</h3>
                             <Icon
                                 name="link"
                                 class="mr-2"
@@ -296,7 +294,7 @@ loadEvents();
                         </div>
                         <div class="kern-row mt-5 text-center">
                             <h3 class="kern-heading font-medium text-theme-primary my-1 mt-6 text-center">
-                                Alle Infos zum Event
+                                {{ $t('public.infoMonitor.allEventInfo') }}
                             </h3>
                             <div class="flex justify-content-center mb-4">
                                 <QRCodeVue3

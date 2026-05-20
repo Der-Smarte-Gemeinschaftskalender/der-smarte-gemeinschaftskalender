@@ -5,12 +5,10 @@ import { findOrganisationOptions } from '@/lib/mobilizonClient';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputTextarea from '@/components/KERN/inputs/InputTextarea.vue';
-import Alert from '@/components/KERN/Alert.vue';
 
 import { MobilizonCategoryAndAll, type Option } from '@/types/General';
 import { mobilizon_category_options_all } from '@/lib/const';
 
-import { type MobilizonGroup } from '@/types/Mobilizon';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
 const organisationOptions = ref<Option[]>([]);
@@ -19,10 +17,10 @@ const category = ref<MobilizonCategoryAndAll>(MobilizonCategoryAndAll.ALL);
 const organisation = ref<string>(null);
 
 const scriptOutput = computed<string>(() => {
-    return `\<script src="${import.meta.env.VITE_APP_URL}/fetchEvents.js"  data-organisation-username="${organisation.value}" data-category="${category.value}" data-limit="5" id="dsg-event-script" data-dsg-url="${import.meta.env.VITE_APP_URL}"\>\<\/script\>`;
+    return `<script src="${import.meta.env.VITE_APP_URL}/fetchEvents.js"  data-organisation-username="${organisation.value}" data-category="${category.value}" data-limit="5" id="dsg-event-script" data-dsg-url="${import.meta.env.VITE_APP_URL}"></` + 'script>';
 });
 const scriptOutputHTML = computed<string>(() => {
-    return `\<ul id="dsg-event-list"></ul>`;
+    return `<ul id="dsg-event-list"></ul>`;
 });
 
 watch(organisation, (newOrganisationUsername) => {
@@ -39,14 +37,14 @@ findOrganisationOptions(true).then((options) => {
 <template>
     <div>
         <h2 class="kern-heading font-medium p-0 mb-2 text-theme-primary">
-            Kalender auf Ihrer Webseite einbinden (Script)
+            {{ $t('public.exports.script.title') }}
         </h2>
         <h4 class="kern-heading font-medium p-0 text-theme-primary">
-            Sie können den Veranstaltungskalender einfach auf Ihrer eigenen Webseite einbinden
+            {{ $t('public.exports.script.pageSubtitle') }}
         </h4>
         <p class="mt-4 kern-text">
-            <b>Hinweis:</b>
-            Weitere Informationen finden Sie im
+            <b>{{ $t('public.exports.script.noticeLabel') }}</b>
+            {{ $t('public.exports.script.noticePrefix') }}
             <LinkToDocs path="Entwicklungsbereich/Kalender%20einbinden/" />.
         </p>
         <Fieldset class="mb-4">
@@ -55,7 +53,7 @@ findOrganisationOptions(true).then((options) => {
                     v-model="organisation"
                     class="col-5"
                     name="organisation"
-                    label="Organisationen"
+                    :label="$t('public.exports.script.organisationLabel')"
                     :options="organisationOptions"
                     :disabled="!organisationOptions.length"
                 />
@@ -63,7 +61,7 @@ findOrganisationOptions(true).then((options) => {
                     v-model="category"
                     class="col-5"
                     name="category"
-                    label="Kategorien"
+                    :label="$t('public.exports.script.categoryLabel')"
                     :options="mobilizon_category_options_all"
                     :disabled="organisation !== 'ALL'"
                 />
@@ -71,13 +69,13 @@ findOrganisationOptions(true).then((options) => {
         </Fieldset>
         <InputTextarea
             v-model="scriptOutput"
-            label="Einbindung JS Script"
+            :label="$t('public.exports.script.jsEmbedLabel')"
             name="scriptOutput"
         />
         <InputTextarea
             v-model="scriptOutputHTML"
             class="mt-4"
-            label="Ausgabe Einbindung (HTML)"
+            :label="$t('public.exports.script.htmlEmbedLabel')"
             name="scriptOutputhtml"
         />
     </div>

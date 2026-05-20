@@ -37,6 +37,11 @@ class SendApprovalRequestEmail extends Mailable
     {
         return new Content(
             view: 'emails.adminApprovalRequestMail',
+            with: [
+                'approvalRequest' => $this->approvalRequest,
+                'requestTypeName' => $this->requestTypeName,
+                'approvalUrl' => $this->approvalUrl,
+            ]
         );
     }
 

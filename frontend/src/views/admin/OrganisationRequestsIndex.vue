@@ -19,8 +19,8 @@ const organisationRequests = ref<any[]>([]);
 
 const getActionName = (actionType: string) => {
     const actionMap: Record<string, string> = {
-        'updateGroup': 'Bearbeiten',
-        'changeOrganisationStatus': 'Erstellen',
+        updateGroup: 'Bearbeiten',
+        changeOrganisationStatus: 'Erstellen',
     };
     return actionMap[actionType] || actionType;
 };
@@ -67,12 +67,10 @@ const fetchOrganisationRequests = async () => {
     showErrorMessage.value = false;
     try {
         const response = await dsgApi.get<any[]>('/approval-requests/organisations', {
-            params: { status: 'pending' }
+            params: { status: 'pending' },
         });
-        
-        organisationRequests.value = response.data || [];
-        console.log('Fetched organisation requests:', organisationRequests.value);
 
+        organisationRequests.value = response.data || [];
     } catch (error: any) {
         console.error('Error fetching organisation requests:', error);
         showErrorMessage.value = true;
@@ -89,47 +87,55 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="flex align-items-center justify-content-between mb-1">
-        <h1 class="kern-heading text-theme-primary">Ausstehende Organisationsanfragen</h1>
-    </div>
-    
+    <h1 class="kern-heading text-theme-primary mb-4">Ausstehende Organisationsanfragen</h1>
+
     <Alert
         v-if="showErrorMessage"
         title="Fehler"
         severity="danger"
-        class="mb-4" 
-        >
+        class="mb-4"
+    >
         {{ errorMessageContent }}
     </Alert>
 
-    <p class="mb-4">
-        <span class="block mb-3">
+    <p class="mb-3">
+        <span class="block">
             <b>Hinweis:</b>
-            Werden Organisationen erstellt oder Organisationsinformationen bearbeitet, 
-            ist vor der Veröffentlichung eine Freigabe durch die Instanzadministration erforderlich. 
-            Über den Button „Ansehen“ in der Tabelle können Sie die angegebenen Informationen zur Organisation prüfen 
-            und die Organisationserstellung bzw. Änderungen genehmigen oder ablehnen. Erst nach erfolgter Freigabe sind Organisationen und Änderungen öffentlich sichtbar.
-            <br /><br />
-            Weitere Informationen finden Sie im <LinkToDocs
+            Werden Organisationen erstellt oder Organisationsinformationen bearbeitet, ist vor der Veröffentlichung eine
+            Freigabe durch die Instanzadministration erforderlich. Über den Button „Ansehen“ in der Tabelle können Sie
+            die angegebenen Informationen zur Organisation prüfen und die Organisationserstellung bzw. Änderungen
+            genehmigen oder ablehnen. Erst nach erfolgter Freigabe sind Organisationen und Änderungen öffentlich
+            sichtbar.
+        </span>
+    </p>
+    <p class="mb-6">
+        <span>
+            Weitere Informationen finden Sie im
+            <LinkToDocs
                 path="Terminverwaltung/Instanz/"
                 fragment="organisationsfreigabe-–-strict-mode"
-            />. 
+            />.
         </span>
     </p>
 
-    <Loader v-if="loading" class="mt-6" />
-    
+    <Loader
+        v-if="loading"
+        class="mt-6"
+    />
+
     <div v-else>
-        <Table v-if="organisationRequests.length > 0" :columns="columns" :data="organisationRequests" class="mb-2">
+        <Table
+            v-if="organisationRequests.length > 0"
+            :columns="columns"
+            :data="organisationRequests"
+            class="mb-2"
+        >
             <template #created_by="{ row }">
-                <div>
-                    {{ row.created_by.mobilizon_name }} (@{{ row.created_by.mobilizon_preferred_username }})
-                </div>
+                <div>{{ row.created_by.mobilizon_name }} (@{{ row.created_by.mobilizon_preferred_username }})</div>
                 <p class="text-sm text-theme-secondary">
                     {{ row.created_by.mobilizon_email }}
-                    
                 </p>
-                <p 
+                <p
                     v-if="!row.created_by.email_verified_at"
                     class="text-sm text-theme-secondary text-red-600"
                 >
@@ -137,9 +143,7 @@ onMounted(() => {
                 </p>
             </template>
             <template #aktionen="{ row }">
-                <RouterLink
-                    :to="{ name: 'admin.organisations.requests.show', params: { id: row.id } }"
-                >
+                <RouterLink :to="{ name: 'admin.organisations.requests.show', params: { id: row.id } }">
                     <Button
                         :icon-left="'visibility'"
                         title="Ansehen"
@@ -149,9 +153,9 @@ onMounted(() => {
                 </RouterLink>
             </template>
         </Table>
-        <Alert 
+        <Alert
             v-else
-            title="Keine ausstehenden Organisationsanfragen" 
+            title="Keine ausstehenden Organisationsanfragen"
             type="info"
         >
             Keine ausstehenden Organisationsanfragen vorhanden.

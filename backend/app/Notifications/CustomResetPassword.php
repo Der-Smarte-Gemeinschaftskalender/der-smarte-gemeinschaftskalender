@@ -2,8 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Enums\EmailTemplateType;
+use App\Http\Controllers\EmailTemplateController;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -12,6 +13,8 @@ class CustomResetPassword extends Notification
     use Queueable;
 
     public $token;
+    public string $mailBody;
+    public string $mailSubject;
 
     /**
      * Create a new notification instance.
@@ -19,7 +22,17 @@ class CustomResetPassword extends Notification
 
     public function __construct($token)
     {
+        $templateController = new EmailTemplateController();
+        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::PASSWORD_RESET);
+        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::PASSWORD_RESET);
+
         $this->token = $token;
+        $variables = [
+            ':appName' => config('app.name', 'Der Smarte Gemeinschaftskalender'),
+        ];
+        
+        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
+        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
     }
 
 
@@ -39,9 +52,10 @@ class CustomResetPassword extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Passwort zurücksetzen')
+            ->subject($this->mailSubject)
             ->view('emails.resetPasswordMail', [
                 'resetToken' => $this->token,
+                'mailBody' => $this->mailBody,
             ]);
     }
 

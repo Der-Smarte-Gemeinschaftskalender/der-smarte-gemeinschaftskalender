@@ -1,34 +1,36 @@
-import { ref } from "vue";
-import { jwtDecode, type JwtPayload } from "jwt-decode";
-import router from "@/router/router";
+import { ref } from 'vue';
+import { jwtDecode, type JwtPayload } from 'jwt-decode';
+import router from '@/router/router';
 
-export const user = ref(
-    localStorage.getItem("user") ? JSON.parse(<string>localStorage.getItem("user")) : null
+import type { FullUser, User } from '@/types/User';
+
+export const user = ref<FullUser | null>(
+    localStorage.getItem('user') ? JSON.parse(<string>localStorage.getItem('user')) : null
 );
 
-export const setUserData = (userData: object, access_token: string, person: object | null): void => {
+export const setUserData = (userData: User, access_token: string, person: object | null): void => {
     user.value = { ...userData, access_token, person };
-    localStorage.setItem("user", JSON.stringify(user.value));
+    localStorage.setItem('user', JSON.stringify(user.value));
 };
 
 export const setUserPersonData = (person: object | null): void => {
     user.value = { ...user.value, person };
-    localStorage.setItem("user", JSON.stringify(user.value));
+    localStorage.setItem('user', JSON.stringify(user.value));
 };
 
 export const updateProfileData = (profileData: { email: string }, person: object | null): void => {
     if (!user.value) return;
     user.value = { ...user.value, ...profileData, person };
-    localStorage.setItem("user", JSON.stringify(user.value));
-}
+    localStorage.setItem('user', JSON.stringify(user.value));
+};
 
 export const localLogout = (): void => {
     user.value = null;
-    localStorage.removeItem("user");
+    localStorage.removeItem('user');
 
-    localStorage.removeItem("current_organisation");
-    localStorage.removeItem("user_organisations");
-    localStorage.removeItem("last_groups_sync");
+    localStorage.removeItem('current_organisation');
+    localStorage.removeItem('user_organisations');
+    localStorage.removeItem('last_groups_sync');
     router.go(0); // Reload the page to reset the orga states
 };
 

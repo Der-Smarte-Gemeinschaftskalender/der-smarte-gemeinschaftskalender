@@ -1,19 +1,23 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { setOrganisationData } from '@/composables/OrganisationComposable';
 import { requested_organisation_status } from '@/lib/const';
 import { dsgApi } from '@/lib/dsgApi';
+import { user } from '@/composables/UserComposoable';
 
 import Button from '@/components/KERN/Button.vue';
 import Table from '@/components/KERN/Table.vue';
 import Alert from '@/components/KERN/Alert.vue';
+import LinkToDocs from '@/components/LinkToDocs.vue';
 
 import type { Column } from '@/types/General';
-
-import LinkToDocs from '@/components/LinkToDocs.vue';
+import type { IAlert } from '@/types/components/Alert';
 
 const router = useRouter();
 const route = useRoute();
+
+const message = ref<IAlert | null>(null);
 
 const columns: Array<Column> = [
     {
@@ -38,6 +42,15 @@ const columns: Array<Column> = [
         align: 'right',
     },
 ];
+
+if (user.value?.type === 'admin') {
+    columns.splice(1, 0, {
+        key: 'is_featured',
+        name: 'Empfohlen',
+        format: (col: any) => (col ? 'Ja' : 'Nein'),
+        align: 'center',
+    });
+}
 
 const columnsRequestedOrganisations: Array<Column> = [
     {
@@ -70,8 +83,14 @@ const rejectInvitation = async (membershipId: string) => {
         router.go(0);
     } catch (error) {
         console.error(error);
+        message.value = {
+            title: 'Fehler',
+            content: 'Die Einladung konnte nicht abgelehnt werden. Bitte versuchen Sie es später erneut.',
+            severity: 'danger',
+        };
     }
 };
+
 const acceptInvitation = async (membershipId: string) => {
     try {
         await dsgApi.post('organisations/acceptInvitation', {
@@ -82,10 +101,23 @@ const acceptInvitation = async (membershipId: string) => {
         router.go(0);
     } catch (error) {
         console.error(error);
+        message.value = {
+            title: 'Fehler',
+            content: 'Die Einladung konnte nicht angenommen werden. Bitte versuchen Sie es später erneut.',
+            severity: 'danger',
+        };
     }
 };
+
+
 </script>
 <template>
+    <Alert
+        v-if="message"
+        :title="message.title"
+        :content="message.content"
+        :severity="message.severity"
+    />
     <div class="flex align-items-center justify-content-between gap-2 mb-1">
         <h1 class="kern-heading text-theme-primary">Meine Organisationen</h1>
         <RouterLink :to="{ name: 'app.myOrganisations.request' }">
@@ -130,6 +162,7 @@ const acceptInvitation = async (membershipId: string) => {
                 v-if="row.role === 'ADMINISTRATOR' && row?.parent"
                 class="flex justify-content-end flex-wrap gap-2"
             >
+
                 <RouterLink
                     :to="{
                         name: 'app.organisation.edit',

@@ -1,14 +1,17 @@
 <script lang="ts" setup>
 import Footer from '@/components/Footer.vue';
 import Header from '@/components/Header.vue';
+import { useI18n } from 'vue-i18n';
+
+const { locale } = useI18n();
 </script>
 <template>
-    <template v-if="!!$route.meta.showWithoutLayout"><RouterView :key="$route.fullPath" /></template>
+    <template v-if="!!$route.meta.showWithoutLayout"><RouterView :key="$route.fullPath + locale" /></template>
     <template v-else>
         <Header class="mb-3 md:mb-5 xl:mb-7" />
         <main class="main">
             <div class="flex justify-content-center">
-                <RouterView :key="$route.fullPath" />
+                <RouterView :key="$route.fullPath + locale" />
             </div>
         </main>
         <Footer class="mt-7" />

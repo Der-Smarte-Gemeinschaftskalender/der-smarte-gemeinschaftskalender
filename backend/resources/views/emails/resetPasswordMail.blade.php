@@ -5,23 +5,14 @@
 <div class="content">
     <h2>Passwort zurücksetzen</h2>
 
-    <h4>
-        Sie haben eine Anfrage zum Zurücksetzen Ihres Passworts bei
-        <span class="highlight">{{ env('APP_NAME') }}</span>
-        gestellt.
-    </h4>
-
-    <h4>
-        Bitte klicken Sie auf den folgenden Button, um Ihr Passwort zurückzusetzen:
-    </h4>
+    {!! $mailBody !!}
 
     <a href="{{ env('APP_URL') }}/reset-password/{{ $resetToken }}"
         class="btn">Passwort zurücksetzen</a>
 
-    <h4>
+    <p>
         Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail bitte.
-    </h4>
-
+    </p>
 </div>
 
 @include('emails.partials.footer')

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 3370 827" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:10;">
+    <g transform="matrix(1,0,0,1,-10839.440625,-1326)">
+        <g id="Abgesagt" transform="matrix(9.494335,0,0,7.377763,10839.440625,1326)">
+            <rect x="0" y="0" width="354.866" height="111.975" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect x="0" y="0" width="354.866" height="111.975"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g id="Ebene-1" serif:id="Ebene 1" transform="matrix(0.877716,0,0,1.12952,-9.058033,-6.912665)">
+                    <g transform="matrix(1,0,0,1,1.62,-0.3)">
+                        <g transform="matrix(1.118379,0,0,0.831441,397.407011,13.0735)">
+                            <path d="M0,103.228L-333.615,103.228C-337.223,103.228 -340.149,100.303 -340.149,96.694L-340.149,6.534C-340.149,2.926 -337.223,0 -333.615,0L0,0C3.609,0 6.534,2.926 6.534,6.534L6.534,96.694C6.534,100.303 3.609,103.228 0,103.228Z" style="fill:rgb(255,255,255);fill-rule:nonzero;stroke:rgb(195,8,115);stroke-width:6.6px;"/>
+                        </g>
+                        <g transform="matrix(0.12,0,0,0.12,-1280.152884,-11.273499)">
+                            <g transform="matrix(400,0,0,400,13853.789062,706.015625)">
+                            </g>
+                            <text x="12425px" y="706.016px" text-anchor="middle" style="font-family:'Inter18pt-SemiBold', 'Inter 18pt';font-weight:600;font-size:400px;fill:rgb(195,8,115);">AKTUALISIERT</text>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

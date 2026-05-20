@@ -10,6 +10,15 @@ class OrganisationStatus extends Model
 {
     protected $table = 'organisation_status';
 
+    protected $fillable = [
+        'mobilizon_group_id',
+        'status',
+        'admin_note',
+        'requested_organisation_data',
+        'requested_by_user_id',
+        'is_featured'
+    ];
+
     /**
      * Get the attributes that should be cast.
      *

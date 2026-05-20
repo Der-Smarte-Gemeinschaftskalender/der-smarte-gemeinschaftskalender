@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { findNextEvents } from '@/lib/mobilizonClient';
+import { landingPage } from '@/lib/instanceConfig';
 
 import EventCard from './EventCard.vue';
-import Button from './KERN/Button.vue';
 
 import type { IEvent } from '@/types/General';
-import { landingPage } from '@/lib/instanceConfig';
 
 const events = ref<IEvent[]>([]);
 const totalEvents = ref<number>(0);
@@ -17,7 +16,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    maxEvents: landingPage.numberOfUpcomingEvents ?? 3,
+    maxEvents: landingPage.value.numberOfUpcomingEvents ?? 3,
     showLinkAllEventsButton: true,
 });
 
@@ -36,7 +35,7 @@ defineExpose({
 <template>
     <template v-if="events.length">
         <h3 class="kern-heading text-theme-primary mb-4">
-            <span>{{ totalEvents }} bevorstehende Veranstaltungen</span>
+            <span>{{ totalEvents }} {{ $t('public.event.upcomingEvents') }}</span>
         </h3>
         <div class="cards-template">
             <div
@@ -52,18 +51,16 @@ defineExpose({
                 v-if="showLinkAllEventsButton"
                 class="w-full flex align-items-center justify-content-center"
             >
-                <RouterLink :to="{ name: 'public.search' }">
-                    <Button
-                        icon-right="arrow-forward"
-                        class="align-self-start"
-                    >
-                        Alle Veranstaltungen anzeigen
-                    </Button>
+                <RouterLink
+                    class="text-lg flex align-items-center gap-2"
+                    :to="{ name: 'public.search' }"
+                > 
+                    {{ $t('public.event.showAllEvents') }} →
                 </RouterLink>
             </div>
         </div>
     </template>
     <template v-else>
-        <p class="text-theme-secondary">Keine bevorstehenden Veranstaltungen gefunden.</p>
+        <p class="text-theme-secondary">{{ $t('public.event.noUpcomingEvents') }}</p>
     </template>
 </template>

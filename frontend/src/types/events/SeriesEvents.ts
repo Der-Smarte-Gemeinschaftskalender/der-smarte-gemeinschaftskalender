@@ -1,18 +1,17 @@
-import zod from "@/lib/zod";
-import dayjs from "@/lib/dayjs";
-import { formatInputDate, stripHtml } from "@/lib/helper";
-import {
-    ApprovalRequestResponseSchema,
-    DefaultEventFormSchema,
-    DefaultEventSchema,
-} from "./DefaultEvents.ts";
+import zod from '@/lib/zod';
+import dayjs from '@/lib/dayjs';
+import { formatInputDate, stripHtml } from '@/lib/helper';
+import { DefaultEventFormSchema, DefaultEventSchema } from './DefaultEvents.ts';
+
 import {
     intervall_options,
     mobilizon_category_options,
     mobilizon_event_join_options,
-    mobilizon_event_language_options, mobilizon_event_status
-} from "@/lib/const";
-import { isStrictModeEnabled } from "@/lib/instanceConfig";
+    mobilizon_event_language_options,
+    mobilizon_event_status,
+} from '@/lib/const';
+import { seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig.ts';
+
 
 export const SeriesEventsDefaults = {
     name: '',
@@ -23,13 +22,20 @@ export const SeriesEventsDefaults = {
     mobilizon_group_id: 0,
     duration: '1:00',
     description: '',
-    category: mobilizon_category_options[0]!.value,
-    joinOptions: mobilizon_event_join_options[0]!.value,
-    language: mobilizon_event_language_options[0]!.value,
-    status: mobilizon_event_status[1]!.value,
+    category: mobilizon_category_options.value[0]!.value,
+    joinOptions: mobilizon_event_join_options.value[0]!.value,
+    language: mobilizon_event_language_options.value[0]!.value,
+    status: mobilizon_event_status.value[1]!.value,
     visibility: 'PUBLIC',
     onlineAddress: '',
     tags: <Array<string>>[],
+    weekly_day: new Date().getDay(),
+    monthly_weeks: [1],
+    monthly_week_day: new Date().getDay(),
+    monthly_use_start_date_as_default: !seriesEventsDaysControlsEnabled,
+    holidays_check: false,
+    school_holidays_check: false,
+    holidays_state: 'none',
 };
 
 
@@ -59,6 +65,37 @@ export const SeriesEventSchema = DefaultEventSchema.extend({
     user_id: zod
         .number()
         .optional(),
+    weekly_day: zod
+        .coerce
+        .number()
+        .min(0)
+        .max(6)
+        .optional(),
+    monthly_weeks: zod
+        .array(zod
+            .coerce
+            .number()
+            .refine((val) => val === -1 || (val >= 1 && val <= 4))
+        )
+        .optional(),
+    monthly_week_day: zod
+        .coerce
+        .number()
+        .min(0)
+        .max(6)
+        .optional(),
+    monthly_use_start_date_as_default: zod
+        .boolean()
+        .optional(),
+    holidays_check: zod
+        .boolean()
+        .optional(),
+    school_holidays_check: zod
+        .boolean()
+        .optional(),
+    holidays_state: zod
+        .string()
+        .optional(),
     created_events: zod.array(zod.object({
         id: zod
             .number()
@@ -85,11 +122,7 @@ export const SeriesEventSchema = DefaultEventSchema.extend({
 
 export type SeriesEvent = zod.infer<typeof SeriesEventSchema>;
 
-export const SeriesEventCreateResponseSchema = isStrictModeEnabled
-    ? ApprovalRequestResponseSchema
-    : SeriesEventSchema;
-
-export type SeriesEventCreateResponse = zod.infer<typeof SeriesEventCreateResponseSchema>;
+export type SeriesEventCreateResponse = zod.infer<typeof SeriesEventSchema>;
 
 
 export const SeriesEventFormSchema = DefaultEventFormSchema.extend({
@@ -129,6 +162,37 @@ export const SeriesEventFormSchema = DefaultEventFormSchema.extend({
         .regex(/^([0-9]{1,3}):[0-5][0-9]$/, {
             message: 'Bitte eine gültige Dauer im Format HHH:MM eingeben.'
         }),
+    weekly_day: zod
+        .coerce
+        .number()
+        .min(0)
+        .max(6)
+        .optional(),
+    monthly_weeks: zod
+        .array(zod
+            .coerce
+            .number()
+            .refine((val) => val === -1 || (val >= 1 && val <= 4))
+        )
+        .optional(),
+    monthly_week_day: zod
+        .coerce
+        .number()
+        .min(0)
+        .max(6)
+        .optional(),
+    monthly_use_start_date_as_default: zod
+        .boolean()
+        .optional(),
+    holidays_check: zod
+        .boolean()
+        .optional(),
+    school_holidays_check: zod
+        .boolean()
+        .optional(),
+    holidays_state: zod
+        .string()
+        .optional(), 
 }).superRefine((value, ctx) => {
     if (dayjs(value.start).isAfter(dayjs(value.end))) {
         ctx.addIssue({
@@ -140,7 +204,6 @@ export const SeriesEventFormSchema = DefaultEventFormSchema.extend({
 
     return true;
 });
-
 
 export type SeriesEventForm = zod.infer<typeof SeriesEventFormSchema>;
 

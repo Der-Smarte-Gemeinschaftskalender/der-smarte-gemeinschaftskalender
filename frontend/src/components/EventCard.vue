@@ -2,7 +2,6 @@
 import { formatOnMonthDayTime, getCardImageUrl } from '@/lib/helper';
 
 import Card from './KERN/Card.vue';
-import Button from './KERN/Button.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
 
 import type { IEvent } from '@/types/General';
@@ -31,19 +30,5 @@ defineProps<Props>();
             <Icon name="person" />
             {{ event?.attributedTo?.name }}
         </div>
-        <template #footer>
-            <RouterLink
-                v-if="event.uuid"
-                :to="{ name: 'public.event', params: { uuid: event.uuid } }"
-            >
-                <Button
-                    title="Veranstaltung ansehen"
-                    aria-label="Veranstaltung ansehen"
-                    icon-left="visibility"
-                >
-                    Ansehen
-                </Button>
-            </RouterLink>
-        </template>
     </Card>
 </template>

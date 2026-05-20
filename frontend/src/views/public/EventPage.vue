@@ -49,7 +49,7 @@ const loadEvent = async () => {
         const result = await findEvent(route.params.uuid as string);
 
         if (!result) {
-            await router.push({ name: 'public.notFound' });
+            await router.push({ name: 'public.notFound', replace: true });
             return;
         }
 
@@ -93,7 +93,7 @@ const selectCategoryAndRedirect = (category: MobilizonCategory) => {
 };
 
 const getCategoryText = (category: MobilizonCategory) => {
-    return mobilizon_category_options.find((option) => option.value === category)?.text || 'Unbekannt';
+    return mobilizon_category_options.value.find((option) => option.value === category)?.text || t('public.event.unknownCategory');
 };
 
 loadEvent();
@@ -152,14 +152,14 @@ loadEvent();
                                     icon-left="wall_art"
                                     class="mr-2"
                                 >
-                                    Werbemittel
+                                    {{ $t('public.event.promoMaterials') }}
                                 </Button>
                             </RouterLink>
                             <RouterLink :to="{ name: 'createdEvent.findEvent', params: { uuid: route.params.uuid } }">
                                 <Button
-                                    aria-label="Bearbeiten"
+                                    :aria-label="$t('common.edit')"
                                     class="px-1 mr-2"
-                                    title="Bearbeiten"
+                                    :title="$t('common.edit')"
                                 >
                                     <Icon
                                         name="edit"
@@ -177,7 +177,7 @@ loadEvent();
                 <div class="kern-col">
                     <div class="w-full flex sm:flex-row justify-content-between flex-column gap-5 flex-wrap">
                         <div>
-                            <h3 class="kern-heading font-medium text-theme-primary my-3">Wann?</h3>
+                            <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.when') }}</h3>
                             <section v-if="formatOnDate(event?.beginsOn) === formatOnDate(event?.endsOn)">
                                 <div class="kern-text flex gap-2 align-items-start">
                                     <Icon name="calendar_month" />
@@ -186,25 +186,25 @@ loadEvent();
                                 <div class="kern-text flex gap-2 align-items-start">
                                     <Icon name="schedule" />
                                     {{ formatOnTime(event?.beginsOn) }}
-                                    bis
+                                    {{ $t('public.event.until') }}
                                     {{ formatOnTime(event?.endsOn) }}
                                 </div>
                             </section>
                             <section v-else>
                                 <div class="kern-text flex gap-2 align-items-start">
                                     <Icon name="calendar_month" />
-                                    Start:
+                                    {{ $t('public.event.start') }}:
                                     {{ formatOnDateTime(event?.beginsOn) }}
                                 </div>
                                 <div class="kern-text flex gap-2 align-items-start">
                                     <Icon name="none" />
-                                    Ende:
+                                    {{ $t('public.event.end') }}:
                                     {{ formatOnDateTime(event?.endsOn) }}
                                 </div>
                             </section>
                         </div>
                         <div>
-                            <h3 class="kern-heading font-medium text-theme-primary my-3">Wo?</h3>
+                            <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.where') }}</h3>
                             <div
                                 v-if="event?.physicalAddress?.geom"
                                 class="kern-text flex gap-2 align-items-start"
@@ -239,34 +239,34 @@ loadEvent();
                                 class="kern-text flex gap-2 align-items-start"
                             >
                                 <!-- <Icon name="" /> -->
-                                Keine Adresse angegeben
+                                {{ $t('public.event.noAddress') }}
                             </div>
                         </div>
                     </div>
-                    <h3 class="kern-heading font-medium text-theme-primary mb-3 mt-6">Was?</h3>
+                    <h3 class="kern-heading font-medium text-theme-primary mb-3 mt-6">{{ $t('public.event.what') }}</h3>
                     <div
                         class="kern-text prose"
                         v-html="
-                            stripHtml(event.description!) ? event.description : '<p>Keine Beschreibung vorhanden.</p>'
+                            stripHtml(event.description!) ? event.description : `<p>${$t('public.event.noDescription')}</p>`
                         "
                     ></div>
                     <div class="mt-5">
                         <div class="flex justify-content-between gap-5">
                             <div>
-                                <h3 class="kern-heading text-theme-primary my-3">Sprache</h3>
+                                <h3 class="kern-heading text-theme-primary my-3">{{ $t('public.event.language') }}</h3>
                                 <div class="kern-text py-2">
                                     <Icon name="language" />
                                     {{ formattedLanguage(event.language) }}
                                 </div>
                             </div>
                             <div>
-                                <h3 class="kern-heading text-theme-primary my-3">Status</h3>
+                                <h3 class="kern-heading text-theme-primary my-3">{{ $t('public.event.status') }}</h3>
                                 <div class="py-2">
                                     <EventStatusBadge :status="event.status" />
                                 </div>
                             </div>
                             <div>
-                                <h3 class="kern-heading text-theme-primary my-3">Kategorie</h3>
+                                <h3 class="kern-heading text-theme-primary my-3">{{ $t('public.event.category') }}</h3>
                                 <Button
                                     variant="secondary"
                                     @click="selectCategoryAndRedirect(event.category)"
@@ -276,11 +276,10 @@ loadEvent();
                             </div>
                         </div>
                         <h3 class="kern-heading text-theme-primary mb-3 mt-6">
-                            Termin zum persönlichen Kalender hinzufügen
+                            {{ $t('public.event.addToCalendarTitle') }}
                         </h3>
                         <p class="kern-text mb-5">
-                            Sie können diesen Termin herunterladen und in Ihrem persönlichen Kalender speichern. Weitere
-                            Informationen finden Sie im
+                            {{ $t('public.event.addToCalendarDescription') }}
                             <LinkToDocs
                                 path="DSG%20Funktionen/"
                                 fragment="veranstaltungsdatei-exportieren"
@@ -290,10 +289,10 @@ loadEvent();
                             icon-left="download"
                             @click="downloadIcsEvent"
                         >
-                            Zum Kalender hinzufügen
+                            {{ $t('public.event.addToCalendarButton') }}
                         </Button>
                         <div v-if="event?.tags?.length">
-                            <h3 class="kern-heading text-theme-primary mb-3 mt-6">Schlagwörter</h3>
+                            <h3 class="kern-heading text-theme-primary mb-3 mt-6">{{ $t('public.event.tags') }}</h3>
                             <div class="flex flex-wrap gap-2">
                                 <template
                                     v-for="tag in event.tags"
@@ -310,12 +309,12 @@ loadEvent();
                 <div class="kern-col">
                     <div class="mb-4">
                         <template v-if="event.joinOptions === MobilizonEventJoinOptions.EXTERNAL">
-                            <h3 class="kern-heading font-medium text-theme-primary my-3">Externe Anmeldung</h3>
+                            <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.externalRegistration') }}</h3>
                             <a
                                 :href="event.externalParticipationUrl!"
                                 target="_blank"
                             >
-                                <Button icon-left="open-in-new">Jetzt anmelden</Button>
+                                <Button icon-left="open-in-new">{{ $t('public.event.registerNow') }}</Button>
                             </a>
                         </template>
                     </div>
@@ -323,7 +322,7 @@ loadEvent();
                     <div>
                         <img
                             :src="getCardImageUrl(event)"
-                            alt="Event Bild"
+                            :alt="$t('public.event.imageAlt')"
                             class="w-full"
                         />
                     </div>
@@ -332,7 +331,7 @@ loadEvent();
                             v-if="!!event.physicalAddress?.geom"
                             class="mb-3"
                         >
-                            <h3 class="kern-heading text-theme-primary mb-3 mt-5">Karte</h3>
+                            <h3 class="kern-heading text-theme-primary mb-3 mt-5">{{ $t('public.search.map') }}</h3>
                             <Map
                                 style="height: 300px"
                                 search-value=""
@@ -349,7 +348,7 @@ loadEvent();
                             v-if="!!event?.onlineAddress"
                             class="kern-text"
                         >
-                            <h3 class="kern-heading text-theme-primary my-3">Webseite</h3>
+                            <h3 class="kern-heading text-theme-primary my-3">{{ $t('public.event.website') }}</h3>
                             <!--<p>Du kannst online Teilnehmen!</p>-->
                             <Icon
                                 name="link"
@@ -377,7 +376,7 @@ loadEvent();
                 </div>
             </div>
             <Divider class="my-8" />
-            <h3 class="kern-heading text-theme-primary font-medium mb-2">Ähnliche Veranstaltungen</h3>
+            <h3 class="kern-heading text-theme-primary font-medium mb-2">{{ $t('public.event.relatedEvents') }}</h3>
             <div class="cards-template">
                 <div
                     v-for="relatedEvent in event.relatedEvents"
@@ -390,7 +389,7 @@ loadEvent();
                 </div>
             </div>
             <h3 class="kern-heading text-theme-primary font-medium mt-7 mb-2">
-                Weitere Veranstaltungen aus dem Kalender {{ instanceInformation.operatedBy }}
+                {{ $t('public.event.moreEventsFromCalendar', { operatedBy: instanceInformation.operatedBy }) }}
             </h3>
             <div class="cards-template">
                 <div
@@ -403,8 +402,11 @@ loadEvent();
                     />
                 </div>
                 <div class="flex align-items-center justify-content-center">
-                    <RouterLink :to="{ name: 'public.search' }">
-                        <Button icon-right="arrow-forward">Alle Veranstaltungen anzeigen</Button>
+                    <RouterLink
+                        class="text-lg flex align-items-center gap-2"
+                        :to="{ name: 'public.search' }"
+                    >
+                        {{ $t('public.event.showAllEvents') }} →
                     </RouterLink>
                 </div>
             </div>

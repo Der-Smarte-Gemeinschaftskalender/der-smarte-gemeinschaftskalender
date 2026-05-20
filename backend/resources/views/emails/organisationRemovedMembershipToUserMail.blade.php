@@ -5,9 +5,8 @@
 
 <div class="content">
     <h1>Moin</h1>
-    <p>
-        Sie wurden aus der folgenden Organisation "{{ $organisationName }}" entfernt.
-    </p>
+
+    {!! $mailBody !!}
 
     <a href="{{ $urlMyOrganisations }}" class="btn">Meine Organisationen ansehen</a>
 

@@ -22,7 +22,7 @@ class SingleEventController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('in_group', except: ['show'])
+            'in_group'
         ];
     }
 
@@ -56,7 +56,9 @@ class SingleEventController extends Controller implements HasMiddleware
     public function show(SingleEvent $singleEvent): JsonResponse
     {
         try {
-            return response()->json($singleEvent->load('created_event')->load('user'));
+            return response()->json([
+                'singleEvent' => $singleEvent->load('created_event')->load('user')
+            ]);
         } catch (Throwable $e) {
             Log::error("Error showing single event: " . $e->getMessage());
             return response()->json(['error' => 'Event not found'], 404);

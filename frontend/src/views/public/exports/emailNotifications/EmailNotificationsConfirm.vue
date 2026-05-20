@@ -1,23 +1,9 @@
 <script lang="ts" setup>
-import zod from '@/lib/zod';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useField, useForm } from 'vee-validate';
-import { axiosErrorHandler, dsgApi } from '@/lib/dsgApi';
-import { intervall_notification_options, mobilizon_category_options_all } from '@/lib/const';
-import { findOrganisationOptions } from '@/lib/mobilizonClient';
+import { dsgApi } from '@/lib/dsgApi';
 
-import Fieldset from '@/components/KERN/Fieldset.vue';
-import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
-import InputText from '@/components/KERN/inputs/InputText.vue';
-import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
-import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import Alert from '@/components/KERN/Alert.vue';
-
-import { Intervall, MobilizonCategoryAndAll, type Option } from '@/types/General';
-import { type MobilizonGroup } from '@/types/Mobilizon';
-import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import Button from '@/components/KERN/Button.vue';
 
 const route = useRoute();

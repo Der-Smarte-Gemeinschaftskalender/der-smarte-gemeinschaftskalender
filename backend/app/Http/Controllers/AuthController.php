@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use App\Mail\SendConfirmEmail;
-use App\Mail\SendRequestOrganisationCreationEmail;
 use Mail;
 use Log;
 use Exception;
@@ -35,7 +34,10 @@ class AuthController extends Controller
     public function login(): JsonResponse
     {
         $credentials = request(['email', 'password']);
-        $token = auth()->attempt($credentials);
+        $token = auth()->attempt([
+            'email' => strtolower($credentials['email']),
+            'password' => $credentials['password'],
+        ]);
 
         if (!$token) {
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -60,28 +62,28 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
-        $valideInputs = $request->validate([
+        $validInputs = $request->validate([
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
-
+        $email = strtolower($request->email);
         // Don't differentiate between email already exists for security reasons
-        if (!$valideInputs || User::where('email', $request->input('email'))->exists()) {
+        if (!$validInputs || User::where('email', $email)->exists()) {
             return response()->json(['error' => 'Nutzervalidierung fehlgeschlagen'], 422);
         }
 
         $mclient = Mobilizon::getInstance(true);
         $mobilizon_password = Str::random(32);
-        $createdMobilizonUser = $mclient->createUser($request->input('email'), $mobilizon_password);
+        $createdMobilizonUser = $mclient->createUser($email, $mobilizon_password);
 
         if (isset($createdMobilizonUser['errors'])) {
             return response()->json(['error' => $createdMobilizonUser['errors'][0]['message']], 500);
         }
 
         $user = new User();
-        $user->email = $request->input('email');
+        $user->email = $email;
         $user->password = Hash::make($request->input('password'));
-        $user->mobilizon_email = $request->input('email');
+        $user->mobilizon_email = $email;
         $user->mobilizon_password = $mobilizon_password;
         $user->email_verification_token = Str::uuid()->toString();
         $user->mobilizon_user_id = $createdMobilizonUser['data']['createUser']['id'];
@@ -124,8 +126,10 @@ class AuthController extends Controller
             'organisation_summary' => 'nullable|string',
         ]);
 
+        $email = strtolower($request->input('email'));
+
         // Don't differentiate between email already exists for security reasons
-        if (!$validatedUserData || User::where('email', $request->input('email'))->exists()) {
+        if (!$validatedUserData || User::where('email', $email)->exists()) {
             return response()->json(['error' => 'Nutzervalidierung fehlgeschlagen'], 422);
         }
 
@@ -157,16 +161,16 @@ class AuthController extends Controller
 
         // Step 1: Create User (Mobilizon + local)
         $mobilizon_password = Str::random(32);
-        $createdMobilizonUser = $adminMclient->createUser($request->input('email'), $mobilizon_password);
+        $createdMobilizonUser = $adminMclient->createUser($email, $mobilizon_password);
 
         if (isset($createdMobilizonUser['errors'])) {
             return response()->json(['error' => $createdMobilizonUser['errors'][0]['message'][0]], 500);
         }
 
         $user = new User();
-        $user->email = $request->input('email');
+        $user->email = $email;
         $user->password = $request->input('password');
-        $user->mobilizon_email = $request->input('email');
+        $user->mobilizon_email = $email;
         $user->mobilizon_password = $mobilizon_password;
         $user->email_verification_token = Str::uuid()->toString();
         $user->mobilizon_user_id = $createdMobilizonUser['data']['createUser']['id'];
@@ -241,16 +245,6 @@ class AuthController extends Controller
             Log::error('Error sending confirmation email: ' . $e->getMessage());
         }
 
-        try {
-            $adminUsers = User::where('type', 'admin')->get();
-            foreach ($adminUsers as $adminUser) {
-                Mail::to($adminUser->email)
-                    ->send(new SendRequestOrganisationCreationEmail($validatedOrganisationData['organisation_name']));
-            }
-        } catch (Exception $e) {
-            Log::error('Error sending organisation request email: ' . $e->getMessage());
-        }
-
         // Step 5: Create Organisation Status + Approval Request (should be done by admin later)
         $organisationCreateRequest = new Request([
             'name' => $validatedOrganisationData['organisation_name'],
@@ -281,16 +275,18 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
+        $email = strtolower($request->input('email'));
+
         if (!$validInputs) {
             return response()->json(['error' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein'], 422);
         }
 
-        if (!User::where('email', $request->input('email'))->exists()) {
+        if (!User::where('email', $email)->exists()) {
             return response()->json(['message' => 'Wenn diese E-Mail-Adresse in unserem System vorhanden ist, erhalten Sie eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts.']);
         }
 
         $status = Password::sendResetLink(
-            $request->only('email')
+            ['email' => $email]
         );
 
         return $status === Password::RESET_LINK_SENT

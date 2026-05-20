@@ -4,13 +4,7 @@
 @include('emails.partials.header')
 
 <div class="content">
-    <h1>Moin</h1>
-    <p>
-        Sie haben auf {{ env('APP_NAME') }} ein Konto registriert, das mit dieser E-Mail-Adresse verknüpft ist. Sie sind
-        nur einen Klick von der Aktivierung entfernt.
-
-        Wenn Sie dies nicht angefordert haben, ignorieren Sie diese E-Mail.
-    </p>
+    {!! $mailBody !!}
 
     <a href="{{ env('APP_URL') }}/validate/{{ $verificationToken }}" class="btn">E-Mail-Adresse bestätigen</a>
 

@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Enums\EmailTemplateType;
+use App\Http\Controllers\EmailTemplateController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,16 +14,28 @@ class SendOrganisationInviteToUserEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $organisationName;
     public string $urlMyOrganisations;
+    public string $mailBody;
+    public string $mailSubject;
 
     /**
      * Create a new message instance.
      */
     public function __construct($organisationName)
     {
-        $this->organisationName = $organisationName;
+        $templateController = new EmailTemplateController();
+        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::ORGANISATION_INVITATION);
+        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::ORGANISATION_INVITATION);
+
         $this->urlMyOrganisations = env('APP_URL') . '/app/organisation/my-organisations';
+
+        $variables = [
+            ':appName' => config('app.name'),
+            ':organisationName' => $organisationName,
+        ];
+        
+        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
+        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
     }
 
     /**
@@ -30,7 +44,7 @@ class SendOrganisationInviteToUserEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Einladung in Organisation: "' . $this->organisationName . '"',
+            subject: $this->mailSubject
         );
     }
 
@@ -41,6 +55,10 @@ class SendOrganisationInviteToUserEmail extends Mailable
     {
         return new Content(
             view: 'emails.organisationInviteToUserMail',
+            with: [
+                'mailBody' => $this->mailBody,
+                'urlMyOrganisations' => $this->urlMyOrganisations,
+            ],
         );
     }
 

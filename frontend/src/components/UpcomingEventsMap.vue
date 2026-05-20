@@ -8,10 +8,10 @@ import dayjs from '@/lib/dayjs';
 const upcomingEventsMap = ref([]);
 const loadEvents = async () => {
     let endsOn: Date | null = null;
-    if (!!landingPage.upcomingEventsMapBeforeDateFromNowInDays) {
-        endsOn = dayjs().add(landingPage.upcomingEventsMapBeforeDateFromNowInDays, 'day').toDate();
+    if (landingPage.value.upcomingEventsMapBeforeDateFromNowInDays) {
+        endsOn = dayjs().add(landingPage.value.upcomingEventsMapBeforeDateFromNowInDays, 'day').toDate();
     }
-    const nextEvents = await findNextEvents(200, new Date(), endsOn);
+    const nextEvents = await findNextEvents(500, new Date(), endsOn);
     upcomingEventsMap.value = nextEvents.elements;
 };
 loadEvents();

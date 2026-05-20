@@ -44,7 +44,7 @@ import { type AddressForm, addressDefaults, mobilizonFieldsDefaults } from '@/ty
 
 const router = useRouter();
 const isSubmitting = ref<boolean>(false);
-const isUploading = ref<boolean>(false);    
+const isUploading = ref<boolean>(false);
 const errorMessageContent = ref<string>('');
 const mobilizionGroupOptions = ref<Option[]>([]);
 const rawAddress = ref<string>('');
@@ -137,13 +137,10 @@ const accept = async () => {
         isUploading.value = true;
         await dsgApi.post('/uploaded-events/accept', prepareAcceptPayload());
         await router.push({ name: 'uploadedEvents.index' });
-
     } catch (error: any) {
         errorMessageContent.value = error || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
         console.error(error);
-
-    }
-    finally {
+    } finally {
         isUploading.value = false;
     }
 };
@@ -215,9 +212,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <p class="mb-6">
             <b>Hinweis:</b>
             Die Kalenderdateien Funktion Upload eignet sich, um mehrere Termine gesammelt aus einem externen
-            Kalenderprogramm zu
-            <br />
-            übernehmen. Weitere Informationen finden Sie im
+            Kalenderprogramm zu übernehmen. Weitere Informationen finden Sie im
             <LinkToDocs
                 path="Terminverwaltung/iCal-Dateien/"
                 fragment="ical-datei-hochladen"

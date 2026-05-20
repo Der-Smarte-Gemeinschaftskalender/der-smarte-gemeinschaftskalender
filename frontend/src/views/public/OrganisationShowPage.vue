@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { t } from 'i18next';
 import { findOrganisation } from '@/lib/mobilizonClient';
 import { formatCoordinates, normalizeStreet, stripHtml } from '@/lib/helper';
 
@@ -8,6 +10,7 @@ import EventCard from '@/components/EventCard.vue';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
 import Button from '@/components/KERN/Button.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
+import Card from '@/components/KERN/Card.vue';
 import NavigatePhysicalAddress from '@/components/NavigatePhysicalAddress.vue';
 import ShareLinks from '@/components/ShareLinks.vue';
 import Map from '@/components/Map.vue';
@@ -29,7 +32,7 @@ const loadOrganisations = async () => {
         organisation.value = result;
     } catch (error) {
         console.error('Error loading group:', error);
-        await router.push({ name: 'public.notFound' });
+        await router.push({ name: 'public.notFound', replace: true });
     } finally {
         loading.value = false;
     }
@@ -66,7 +69,7 @@ loadOrganisations();
                 >
                     <Button
                         icon-left="wall_art"
-                        label="Werbematerialien erstellen"
+                        :label="$t('public.organisation.promoMaterials')"
                         class="text-sm min-h-0 md:text-base px-2 md:px-3"
                         :body-class="'py-0-5rem md:py-1rem'"
                     />
@@ -76,16 +79,16 @@ loadOrganisations();
         <div class="w-full">
             <div class="flex flex-column lg:flex-row gap-6 justify-content-between">
                 <div class="lg:col-6 p-0">
-                    <h2 class="kern-heading font-semilight text-theme-primary mb-4">Über die Organisation</h2>
+                    <h2 class="kern-heading font-semilight text-theme-primary mb-4">{{ $t('public.organisation.aboutOrganisation') }}</h2>
                     <p
                         class="kern-text prose"
                         v-html="
                             stripHtml(organisation.summary)
                                 ? organisation.summary
-                                : 'Es wurde keine Beschreibung angegeben.'
+                                : $t('public.organisation.noDescriptionProvided')
                         "
                     ></p>
-                    <h3 class="kern-heading font-semilight text-theme-primary mb-3 mt-6">Adresse</h3>
+                    <h3 class="kern-heading font-semilight text-theme-primary mb-3 mt-6">{{ $t('public.organisation.address') }}</h3>
                     <template v-if="organisation?.physicalAddress">
                         <div class="kern-text flex gap-2 align-items-start">
                             <Icon name="location_on" />
@@ -102,13 +105,13 @@ loadOrganisations();
                         </div>
                     </template>
                     <template v-else>
-                        <p class="kern-text">Keine Adresse angegeben</p>
+                        <p class="kern-text">{{ $t('public.organisation.noAddressProvided') }}</p>
                     </template>
                 </div>
                 <div class="lg:col p-0 aspect-ratio-16-9">
                     <img
                         :src="organisation.avatar?.url ?? '/default_card.png'"
-                        :alt="organisation.avatar?.alt || 'Organisation Logo'"
+                        :alt="organisation.avatar?.alt || $t('public.organisation.logoAlt')"
                         class="ml-auto rounded-lg w-full object-cover mb-5"
                     />
                     <template v-if="organisation.physicalAddress?.geom">
@@ -130,18 +133,18 @@ loadOrganisations();
                         variant="secondary"
                         @click="downloadIcsEvent"
                     >
-                        Bevorstehende Veranstaltungen zum Kalender hinzufügen
+                        {{ $t('public.organisation.addUpcomingEventsToCalendar') }}
                     </Button>
                 </div>
             </div>
             <div v-if="organisation?.organizedEvents?.elements?.length">
                 <div class="kern-row mb-5">
                     <div class="kern-col-lg-6">
-                        <h3 class="kern-heading font-medium my-4 text-theme-primary">Bevorstehende Veranstaltungen</h3>
+                        <h3 class="kern-heading font-medium my-4 text-theme-primary">{{ $t('public.organisation.upcomingEvents') }}</h3>
                     </div>
                     <div class="kern-col-lg-6">
                         <div class="kern-text kern-text--bold text-theme-primary text-right mt-4">
-                            Veranstaltungen teilen
+                            {{ $t('public.organisation.shareEvents') }}
                         </div>
                         <div class="flex justify-content-end">
                             <ShareLinks
@@ -155,12 +158,12 @@ loadOrganisations();
                                         name: 'public.infomonitor',
                                         query: { preferredUsername: organisation.preferredUsername },
                                     }"
-                                    aria-label="Zur Infomonitor Anzeige der Organisation"
+                                    :aria-label="$t('public.organisation.navigateToInfoMonitor')"
                                 >
                                     <Icon
                                         name="info"
                                         class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
-                                        title="Infomonitor anzeige"
+                                        :title="$t('public.organisation.infoMonitorDisplay')"
                                     />
                                 </RouterLink>
                             </ShareLinks>
@@ -179,8 +182,21 @@ loadOrganisations();
                     </div>
                 </div>
             </div>
-            <div v-else>
-                <h3 class="kern-heading text-theme-primary mt-6 mb-4">Keine bevorstehenden Veranstaltungen</h3>
+            <div v-else class="mt-6">
+                <Card class="text-center py-6" body-class="w-full">
+                    <div class="flex flex-column align-items-center w-full gap-4">
+                        <Icon
+                            name="calendar_month"
+                            size="xl"
+                            class="text-gray-400"
+                        />
+                        <div>
+                            <h3 class="kern-heading text-theme-primary mb-2">
+                                {{ $t('public.organisation.noUpcomingEvents') }}
+                            </h3>
+                        </div>
+                    </div>
+                </Card>
             </div>
         </div>
     </template>

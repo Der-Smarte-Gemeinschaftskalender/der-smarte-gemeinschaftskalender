@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import { defineProps } from "vue";
+import type { IAlert } from "@/types/components/Alert";
 
-interface Props {
-  title: string;
-  content?: string;
-  severity?: "info" | "success" | "warning" | "danger";
-}
 
-defineProps<Props>();
+defineProps<IAlert>();
 </script>
 
 <template>

@@ -6,6 +6,7 @@ interface Props {
     label?: string;
     name: string;
     errors?: string;
+    bodyClass?: string;
 }
 
 const props = defineProps<Props>();
@@ -16,6 +17,7 @@ const props = defineProps<Props>();
         :label="label"
         :errors="errors"
         :input-type="'check'"
+        :class="bodyClass"
     >
         <input
             :id="name"

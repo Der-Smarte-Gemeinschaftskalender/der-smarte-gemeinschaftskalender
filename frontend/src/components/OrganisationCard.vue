@@ -2,10 +2,10 @@
 import { normalizeStreet } from '@/lib/helper';
 
 import Card from './KERN/Card.vue';
-import Button from './KERN/Button.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
 
 import type { IOrganisation } from '@/types/General';
+import Badge from './KERN/cosmetics/Badge.vue';
 
 interface Props {
     organisation: IOrganisation;
@@ -23,36 +23,38 @@ defineProps<Props>();
             params: { preferredUsername: organisation?.preferredUsername },
         }"
     >
-        <div
-            v-if="organisation?.physicalAddress"
-            class="flex gap-2 align-items-start"
+        <Badge
+            v-if="organisation?.is_featured"
+            label="Empfohlen"
+            variant="primary"
+            size="small"
+            class="mb-2 px-2"
+            body-class="pl-0"
         >
-            <Icon name="location_on" />
-            <div>
+            <div class="flex gap-1 align-items-center">
+                <Icon
+                    name="star_outline"
+                    size="sm"
+                />
+                Empfohlen
+            </div>
+        </Badge>
+        <div class="flex gap-2 align-items-center">
+            <Icon 
+                name="location_on"
+                class="mb-auto"     
+            />
+            <div v-if="organisation?.physicalAddress">
                 <div v-if="organisation?.physicalAddress?.street">
                     {{ normalizeStreet(organisation?.physicalAddress?.street) }},
                 </div>
-                <div v-if="organisation?.physicalAddress?.postalCode">
+                <span v-if="organisation?.physicalAddress?.postalCode">
                     {{ organisation?.physicalAddress?.postalCode }} {{ organisation?.physicalAddress?.locality }}
-                </div>
+                </span>
+            </div>
+            <div v-else>
+                {{ $t('public.organisation.noAddressProvided') }}
             </div>
         </div>
-        <template #footer>
-            <RouterLink
-                v-if="organisation.id"
-                :to="{
-                    name: 'public.organisations.show',
-                    params: { preferredUsername: organisation.preferredUsername },
-                }"
-            >
-                <Button
-                    title="Organisation ansehen"
-                    aria-label="Organisation ansehen"
-                    icon-left="visibility"
-                >
-                    Ansehen
-                </Button>
-            </RouterLink>
-        </template>
     </Card>
 </template>

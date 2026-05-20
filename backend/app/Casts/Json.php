@@ -15,7 +15,12 @@ class Json implements CastsAttributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): array
     {
-        return json_decode($value, true);
+        if ($value === null) {
+            return [];
+        }
+        
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
     }
 
     /**

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 
 type IconSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -61,6 +60,8 @@ type IconName =
     | 'h1'
     | 'h2'
     | 'h3'
+    | 'h4'
+    | 'h5'
     | 'bullet-list'
     | 'ordered-list'
     | 'blockquote'
@@ -68,10 +69,29 @@ type IconName =
     | 'redo'
     | 'underline'
     | 'event_available'
-    | 'sync';
+    | 'sync'
+    | 'image'
+    | 'hexagon'
+    | 'line'
+    | 'triangle'
+    | 'ellipse'
+    | 'stacked_email'
+    | 'align_horizontal_left'
+    | 'align_horizontal_center'
+    | 'align_horizontal_right'
+    | 'sort_by_alpha'
+    | 'arrow_upward'
+    | 'arrow_downward'
+    | 'star'
+    | 'star_outline'
+    | 'stamp'
+    | 'text_fields'
+    | 'keyboard_arrow_up'
+    | 'keyboard_arrow_down'
+    | 'keyboard_double_arrow_up'
+    | 'keyboard_double_arrow_down';
 
-
-type ColorName = 'black' | 'white';
+type ColorName = 'black' | 'white' | 'none';
 
 interface Props {
     name: IconName | string;
@@ -109,6 +129,8 @@ const isMaterialIcons = (name: string): boolean => {
         'h1', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h1:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h1&icon.size=24&icon.color=%23000000
         'h2', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h2:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h2&icon.size=24&icon.color=%23000000
         'h3', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h3:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h3&icon.size=24&icon.color=%23000000
+        'h4', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h4:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h4&icon.size=24&icon.color=%23000000
+        'h5', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_h5:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=h5&icon.size=24&icon.color=%23000000
         'bullet_list', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_list_bulleted:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=bullet&icon.size=24&icon.color=%23000000
         'ordered_list', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_list_numbered:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=ordere&icon.size=24&icon.color=%23000000
         'blockquote', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_quote:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=quote&icon.size=24&icon.color=%23000000
@@ -117,39 +139,82 @@ const isMaterialIcons = (name: string): boolean => {
         'underline', //https://fonts.google.com/icons?selected=Material+Symbols+Outlined:format_underlined:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=underline&icon.size=24&icon.color=%23000000
         'event_available', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:event_available:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=event&icon.size=24&icon.color=%231f1f1f
         'sync', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:sync:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=sync&icon.size=24&icon.color=%23000000
+        'image', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:image:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=image&icon.size=24&icon.color=%23000000
+        'hexagon', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:hexagon:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=hexagon&icon.size=24&icon.color=%23000000
+        'line', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:check_indeterminate_small:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=dash&icon.size=24&icon.color=%23000000
+        'triangle', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:change_history:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=triangle&icon.size=24&icon.color=%23000000
+        'circle', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:radio_button_unchecked:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=circle&icon.size=24&icon.color=%23000000
+        'square', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:check_box_outline_blank:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=square&icon.size=24&icon.color=%23000000
+        'ellipse', // custom
+        'stacked_email', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:stacked_email:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=email&icon.size=24&icon.color=%231f1f1f
+        'align_horizontal_left', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:align_horizontal_left:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=left&icon.size=24&icon.color=%23000000
+        'align_horizontal_center', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:align_horizontal_center:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=center&icon.size=24&icon.color=%23000000
+        'align_horizontal_right', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:align_horizontal_right:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=right&icon.size=24&icon.color=%23000000
+        'sort_by_alpha', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:sort_by_alpha:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=sort&icon.size=24&icon.color=%23000000
+        'arrow_upward', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:north:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=arrow+up&icon.size=24&icon.color=%23000000
+        'arrow_downward', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:south:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=arrow+d&icon.size=24&icon.color=%23000000
+        'star_outline', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:star:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=star&icon.size=24&icon.color=%23000000
+        'star', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:star:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=star&icon.size=24&icon.color=%23000000
+        'stamp', //  https://fonts.google.com/icons?selected=Material+Symbols+Outlined:approval:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=stamp&icon.size=24&icon.color=%23000000
+        'text_fields', // https://fonts.google.com/icons?selected=Material+Symbols+Outlined:text_fields:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=text&icon.size=24&icon.color=%23000000
+        'keyboard_arrow_up',
+        'keyboard_arrow_down',
+        'keyboard_double_arrow_up',
+        'keyboard_double_arrow_down',
     ].includes(name);
+};
+
+const getIconStyle = (color?: ColorName, disabled?: boolean) => {
+    const styles: Record<string, string> = {};
+
+    switch (color) {
+        case 'white':
+            styles.filter = 'brightness(0) invert(1)';
+            break;
+        case 'black':
+            styles.filter = 'brightness(0)';
+            break;
+        case 'none':
+        default:
+            styles.filter = 'none';
+    }
+  
+    if (disabled) {
+        styles.opacity = '0.5';
+        styles.pointerEvents = 'none';
+    }
+
+    return styles;
 };
 
 withDefaults(defineProps<Props>(), {
     size: 'md',
+    color: 'black',
 });
 </script>
 
 <template>
     <span
         v-if="isMaterialIcons(name)"
+        v-bind="$attrs"
         :class="`kern-icon kern-icon--${name} kern-icon--${size}`"
-        :style="`${color === 'white' ? 'filter: brightness(0) invert(1)' : ''}`"
+        :style="getIconStyle(color, disabled)"
         aria-hidden="true"
     />
     <img
         v-else
-        :style="`
-            ${color === 'white' ? 'filter: brightness(0) invert(1)' : ''}
-            ${disabled ? 'opacity: 0.5; pointer-events: none;' : ''}
-        `"
+        v-bind="$attrs"
+        :style="getIconStyle(color, disabled)"
         :src="`/icons/${name}.svg`"
         :class="`kern-icon kern-icon--${name} kern-icon--${size}`"
-
         aria-hidden="true"
         alt=""
     />
 </template>
 
 <style scoped lang="scss">
-
 img.kern-icon {
-  user-select: none;
-  background-color: transparent;
+    user-select: none;
+    background-color: transparent;
 }
 </style>

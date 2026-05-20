@@ -88,16 +88,17 @@ class AdminController extends Controller implements HasMiddleware
         ]);
 
         $type = $request->type;
+        $email = strtolower($request->email);
 
         $mobilizon_password = Str::random(32);
         $mclient = Mobilizon::getInstance(true);
-        $createdMobilizonUser = $mclient->createUser($request->email, $mobilizon_password);
+        $createdMobilizonUser = $mclient->createUser($email, $mobilizon_password);
 
         $user = new User();
-        $user->email = $request->email;
+        $user->email = $email;
         $user->type = $type;
         $user->password = bcrypt($request->password);
-        $user->mobilizon_email = $request->email;
+        $user->mobilizon_email = $email;
         $user->mobilizon_password = $mobilizon_password;
         $user->is_active = false;
         $user->mobilizon_user_id = $createdMobilizonUser['data']['createUser']['id'];
@@ -155,7 +156,7 @@ class AdminController extends Controller implements HasMiddleware
             'is_active' => 'required'
         ]);
 
-        $user->email = $request->email;
+        $user->email = strtolower($request->email);
         $user->type = $request->type;
 
         if ($request->password) {

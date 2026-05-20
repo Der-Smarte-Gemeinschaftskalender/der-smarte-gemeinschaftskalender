@@ -61,7 +61,7 @@ test("basic serial termin", async ({ page }) => {
   await fillEventForm(page, eventData);
   await submitSerialEvent(page);
   await viewSerialEventFromList(page, eventName);
-  await page.getByText("Ansehen").click();
+  await page.getByTitle('Ansehen').click();
   await verifyEventDetails(page, eventData);
 });
 

@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { Page, expect } from "@playwright/test";
 
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 export function generateTestICalFile(testIdentifier?: string): {
   eventName: string;
   eventStart: Date;

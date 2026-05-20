@@ -47,7 +47,7 @@ enum Intervall: string
         };
     }
 
-    public function fromIso(string $interval): string
+    public static function fromIso(string $interval): string
     {
         return match ($interval) {
             'P1W' => self::WEEKLY->value,

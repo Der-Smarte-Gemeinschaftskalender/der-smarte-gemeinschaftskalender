@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import { computed, ref, defineProps, watch, isRef, type Ref } from 'vue';
+import { computed, ref, watch, isRef, type Ref } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
+import { useRouter } from 'vue-router';
 
 import Button from '@/components/KERN/Button.vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 import type { Column } from '@/types/General';
 
@@ -13,11 +15,12 @@ interface Props {
     pageSize?: number;
     valuesMaxLength?: number;
     data?: Ref<Array<any>> | Array<any>;
-    deleteUrl?: string;
-    deleteFunction?: (value: any) => Promise<void>;
     api?: {
-        url: string;
+        url?: string;
         params?: Record<string, any>;
+        deleteUrl?: string;
+        deleteDialogTitle?: string;
+        deleteDialogDescription?: ((row: any) => string);
     };
 }
 
@@ -28,18 +31,32 @@ interface ResponseData {
 
 const props = defineProps<Props>();
 
+const router = useRouter();
 const pageSize = computed(() => props.pageSize ?? 10);
 const rawData = computed<Array<any>>(() => {
-    if (props.api) return [];
+    if (props.api?.url) return [];
     return isRef(props.data) ? props.data.value : (props.data ?? []);
 });
 
+const error = ref<string | null>(null);
 const displayData = ref<Array<any>>([]);
 const currentPage = ref(props.page ?? 1);
 const allPages = ref(1);
+const showDeleteConfirmDialog = ref(false);
+const pendingDeleteRow = ref<any>(null);
+
+const deleteDialogTitle = computed(() => props.api?.deleteDialogTitle ?? 'Veranstaltung Löschen');
+
+const deleteDialogDescription = computed<string>(() => {
+    return props.api?.deleteDialogDescription?.(pendingDeleteRow.value) || '';
+});
+
+const showDeleteDialog = ref(false);
+const pendingDeleteId = ref<number | null>(null);
+
 
 const loadData = async (): Promise<void> => {
-    const response = await dsgApi.get(
+    const response = await dsgApi.get<ResponseData>(
         buildQuery(<string>props.api!.url, {
             page: currentPage.value,
             pageSize: pageSize.value,
@@ -47,7 +64,7 @@ const loadData = async (): Promise<void> => {
         })
     );
 
-    const result: ResponseData = await response.data;
+    const result = response.data as ResponseData;
 
     allPages.value = Math.ceil(result.total / pageSize.value) || 1;
     displayData.value = result.data;
@@ -70,46 +87,95 @@ const handleArrayData = (): void => {
     displayData.value = (<Array<any>>rawData.value).slice(begin, end);
 };
 
-const deleteEntry = async (id: number) => {
-    if (!props.deleteUrl) {
+const deleteEntry = (row: any) => {
+    pendingDeleteRow.value = row;
+    showDeleteConfirmDialog.value = true;
+};
+
+const confirmDeleteEntry = async () => {
+    if (pendingDeleteRow.value === null) {
+        return;
+    }
+
+    if (!props.api?.deleteUrl) {
         console.warn('deleteUrl prop not provided');
         return;
     }
 
+    error.value = null;
+    
     try {
-        await dsgApi.delete(`${props.deleteUrl}/${id}`);
+        const response = await dsgApi.delete(`${props.api.deleteUrl}/${pendingDeleteRow.value.id}`, {
+            params: props.api.params,
+        });
 
-        displayData.value = displayData.value.filter((row) => row.id !== id);
+        if (response.status === 202) {
+            router.replace({
+                query: { requestSent: 'true' },
+            });
+
+            return;
+        }
+
+        displayData.value = displayData.value.filter((row) => row.id !== pendingDeleteRow.value.id);
 
         if (displayData.value.length === 0 && currentPage.value > 1) {
             currentPage.value--;
         }
 
-        if (props.api) await loadData();
-    } catch (error) {
-        console.error('Fehler beim internen Löschen:', error);
+        if (props.api?.url) await loadData();
+    } catch (deleteError: any) {
+        error.value = deleteError?.response?.data?.error || 'Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.';
+        console.error('Fehler beim Löschen:', deleteError);
+    } finally {
+        pendingDeleteRow.value = null;
     }
+};
+
+const executeDelete = async () => {
+    if (pendingDeleteId.value !== null) {
+        await deleteEntry(pendingDeleteId.value);
+    }
+    showDeleteDialog.value = false;
+    pendingDeleteId.value = null;
 };
 
 // Initialization part
 watch(
     () => props.data,
     () => {
-        if (props.api) loadData();
+        if (props.api?.url) loadData();
         else handleArrayData();
     }
 );
 
 watch(currentPage, () => {
-    if (props.api) loadData();
+    if (props.api?.url) loadData();
     else handleArrayData();
 });
 
-if (props.api) loadData();
+defineExpose({
+    refresh: () => {
+        if (props.api?.url) loadData();
+        else handleArrayData();
+    },
+    error
+});
+
+if (props.api?.url) loadData();
 else handleArrayData();
 </script>
 <template>
     <div class="kern-table--responsive w-full p-0">
+        <ConfirmDialog
+            v-model="showDeleteConfirmDialog"
+            :title="deleteDialogTitle"
+            :description="deleteDialogDescription"
+            :confirm-text="'Löschen'"
+            :cancel-text="'Abbrechen'"
+            @cancel="pendingDeleteRow = null"
+            @confirm="confirmDeleteEntry"
+        />
         <table
             class="kern-table kern-table--striped w-full"
             :columns="columns"
@@ -141,45 +207,46 @@ else handleArrayData();
                 </tr>
             </thead>
             <tbody class="kern-table__body">
-                <tr
-                    v-for="row in displayData"
-                    v-if="displayData.length"
-                    :key="row.key"
-                    class="kern-table__row"
-                >
-                    <template
-                        v-for="column in columns"
-                        :key="column.key"
+                <template v-if="displayData.length">
+                    <tr
+                        v-for="row in displayData"
+                        :key="row.key"
+                        class="kern-table__row"
                     >
-                        <td
-                            class="kern-table__cell vertical-align-middle px-2"
-                            :class="[
-                                { 'kern-table__cell--numeric': !!column.numeric },
-                                column.align ? `text-${column.align}` : 'text-left',
-                            ]"
+                        <template
+                            v-for="column in columns"
+                            :key="column.key"
                         >
-                            <slot
-                                :name="column.key"
-                                :column="column"
-                                :row="row"
-                                :delete-entry="deleteEntry"
+                            <td
+                                class="kern-table__cell vertical-align-middle px-2"
+                                :class="[
+                                    { 'kern-table__cell--numeric': !!column.numeric },
+                                    column.align ? `text-${column.align}` : 'text-left',
+                                ]"
                             >
-                                <template v-if="!column.format">
-                                    {{
-                                        typeof row[column?.key] === 'string' &&
-                                        props.valuesMaxLength &&
-                                        row[column?.key].length > props.valuesMaxLength
-                                            ? `${row[column?.key].slice(0, props.valuesMaxLength)}...`
-                                            : row[column?.key]
-                                    }}
-                                </template>
-                                <template v-else>
-                                    {{ column.format(row[column?.key], row) }}
-                                </template>
-                            </slot>
-                        </td>
-                    </template>
-                </tr>
+                                <slot
+                                    :name="column.key"
+                                    :column="column"
+                                    :row="row"
+                                    :delete-entry="deleteEntry"
+                                >
+                                    <template v-if="!column.format">
+                                        {{
+                                            typeof row[column?.key] === 'string' &&
+                                            props.valuesMaxLength &&
+                                            row[column?.key].length > props.valuesMaxLength
+                                                ? `${row[column?.key].slice(0, props.valuesMaxLength)}...`
+                                                : row[column?.key]
+                                        }}
+                                    </template>
+                                    <template v-else>
+                                        {{ column.format(row[column?.key], row) }}
+                                    </template>
+                                </slot>
+                            </td>
+                        </template>
+                    </tr>
+                </template>
                 <tr
                     v-else
                     class="kern-table__row relative"
@@ -239,6 +306,14 @@ else handleArrayData();
                 </tr>
             </tfoot>
         </table>
+
+
+        <ConfirmDialog
+            v-model="showDeleteDialog"
+            title="Möchten Sie wirklich diesen Eintrag löschen?"
+            confirm-text="Löschen"
+            @confirm="executeDelete"
+        />
     </div>
 </template>
 <style scoped lang="scss">

@@ -5,9 +5,8 @@
 
 <div class="content">
     <h1>Moin</h1>
-    <p>
-        Sie haben eine Einladung für die Organisation "{{ $organisationName }}" bekommen.
-    </p>
+
+    {!! $mailBody !!}
 
     <a href="{{ $urlMyOrganisations }}" class="btn">Einladung annehmen oder ablehnen</a>
 

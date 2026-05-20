@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Mail\SendOrganisationInviteToUserEmail;
 use App\Mail\SendOrganisationRemovedMembershipToUserEmail;
-use App\Mail\SendRequestOrganisationCreationEmail;
 use App\Models\Mobilizon;
 use App\Models\MobilizonTag;
 use App\Models\OrganisationStatus;
 use App\Models\User;
 use App\Models\ApprovalRequest;
+use App\Models\ImportedEvent;
 use Exception;
 use Http;
 use Illuminate\Http\JsonResponse;
@@ -28,8 +28,8 @@ class OrganisationController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            'auth',
-            new Middleware('is_admin', only: ['indexRequestedOrganisation', 'changeOrganisationStatus', 'indexOrganisation', 'showGroupById']),
+            new Middleware('auth', except: ['getOrganisationsWithFeaturedStatus']),
+            new Middleware('is_admin', only: ['indexRequestedOrganisation', 'changeOrganisationStatus', 'indexOrganisation', 'showGroupById', 'updateFeaturedStatus']),
         ];
     }
 
@@ -37,13 +37,23 @@ class OrganisationController extends Controller implements HasMiddleware
     {
         $mclient = Mobilizon::getInstance();
         $groups = $mclient->getGroups();
+        $userIsAdmin = auth()->user()->type === 'admin';
+
         $groupsArray = [];
         if (isset($groups['data']['loggedUser']['memberships']['elements'])) {
             foreach ($groups['data']['loggedUser']['memberships']['elements'] as $group) {
+                if ($userIsAdmin && isset($group['parent']['id'])) {
+                    $groupId = $group['parent']['id'];
+                    $orgStatus = OrganisationStatus::where('mobilizon_group_id', $groupId)->first();
+                    $group['is_featured'] = $orgStatus?->is_featured ?? false;
+                }
                 array_push($groupsArray, $group);
             }
         }
+        
         usort($groupsArray, fn($a, $b) => $b['role'] <=> $a['role']);
+        usort($groupsArray, fn($a, $b) => ($b['is_featured'] ?? false) <=> ($a['is_featured'] ?? false));
+
         return ['data' => $groupsArray];
     }
 
@@ -162,6 +172,12 @@ class OrganisationController extends Controller implements HasMiddleware
         $mclient = Mobilizon::getInstance();
         $preferredUsername = $request->input('preferred_username');
         $result = $mclient->getUserGroup($preferredUsername);
+        if ($request->user()->type === 'admin' && isset($result['id'])) {
+            $groupId = $result['id'];
+            $orgStatus = OrganisationStatus::where('mobilizon_group_id', $groupId)->first();
+            $result['is_featured'] = $orgStatus?->is_featured ?? false;
+        }
+
         return $result;
     }
 
@@ -278,37 +294,72 @@ class OrganisationController extends Controller implements HasMiddleware
         }
     }
 
-    public function removeMember(Request $request): array
+    public function removeMember(Request $request): JsonResponse
     {
         $memberShipId = $request->input('membership_id');
+        $groupId = $request->input('group_id');
+        $groupPreferredUsername = $request->input('group_preferred_username');
 
         $mclient = Mobilizon::getInstance();
-        $mresponse = $mclient->removeGroupMember($memberShipId);
+        $groupMembersResponse = $mclient->getUserGroup($groupPreferredUsername);
 
-        try {
-            if (!$mclient->hasError($mresponse)) {
-                $userId = $mresponse['data']['removeMember']['actor']['id'];
-                $user = User::where('mobilizon_profile_id', $userId)->first();
-                if ($user) {
-                    Mail::to($user->email)
-                        ->send(new SendOrganisationRemovedMembershipToUserEmail($mresponse['data']['removeMember']['parent']['name']));
-                }
-            }
-        } catch (Exception $e) {
-            Log::error('Error sending email inviting user to organisation: ' . $e->getMessage());
+        $mresponse = $mclient->removeGroupMember($memberShipId);
+        if ($mclient->hasError($mresponse)) {
+            return response()->json([
+                'error' => 'Fehler beim Entfernen des Mitglieds aus der Organisation',
+                'details' => $mresponse['errors'] ?? null,
+            ], 400);
         }
 
-        return $mresponse;
+        try {
+            $userId = $mresponse['data']['removeMember']['actor']['id'];
+            $user = User::where('mobilizon_profile_id', $userId)->first();
+
+            if ($user) {
+                if (!$mclient->hasError($groupMembersResponse)) {
+                    $this->migrateImportedEvents($user, $groupId, $groupMembersResponse['members']['elements'] ?? []);
+                }
+
+                Mail::to($user->email)
+                    ->send(new SendOrganisationRemovedMembershipToUserEmail($mresponse['data']['removeMember']['parent']['name']));    
+            }
+            
+        } catch (Exception $e) {
+            Log::error('Error sending email removing user from organisation: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Mitglied wurde zwar aus der Organisation entfernt, aber es gab ein Problem beim Senden der Benachrichtigungs-E-Mail.',
+                'details' => $e->getMessage(),
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Mitglied erfolgreich aus der Organisation entfernt',
+        ], 200);
     }
 
-    public function leaveOrganiation(Request $request): array
+    public function leaveOrganiation(Request $request): JsonResponse
     {
         $groupId = $request->input('group_id');
+        $groupPreferredUsername = $request->input('group_preferred_username');
 
         $mclient = Mobilizon::getInstance();
+        $groupMembersResponse = $mclient->getUserGroup($groupPreferredUsername);
+        
         $mresponse = $mclient->leaveGroupAsMember($groupId);
+        if ($mclient->hasError($mresponse)) {
+            return response()->json([
+                'error' => 'Fehler beim Verlassen der Organisation',
+                'details' => $mresponse['errors'] ?? null,
+            ], 400);
+        }
 
-        return $mresponse;
+        if (!$mclient->hasError($groupMembersResponse)) {
+            $this->migrateImportedEvents($request->user(), $groupId, $groupMembersResponse['members']['elements'] ?? []);
+        }
+        
+        return response()->json([
+            'message' => 'Erfolgreich aus der Organisation ausgetreten',
+        ], 200);
     }
 
     public function getOrganisationAvatar(Request $request): StreamedResponse|JsonResponse
@@ -374,5 +425,87 @@ class OrganisationController extends Controller implements HasMiddleware
         return response()->json([
             'groups' => $this->getMobilizonGroups()
         ], 200, [], JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * @param int $userId The ID of the user which was removed from the group
+     * @param int $groupId
+     * @param array $groupMembers The group members of the group the user was removed from
+     */
+    public function migrateImportedEvents(User $user, int $groupId, array $groupMembers = []): void
+    {
+        $importedEventsWithMissingUser = ImportedEvent::where('user_id', $user->id)
+            ->where('mobilizon_group_id', $groupId)
+            ->get();
+
+        if ($importedEventsWithMissingUser->isEmpty()) {
+            return;
+        }
+            
+        $otherMember = array_find($groupMembers, fn($member) => 
+                $member['actor']['id'] !== $user->mobilizon_profile_id 
+                && $member['role'] !== 'INVITED'
+        );
+
+        if (!$otherMember) {
+            Log::warning("No other member found in the group with ID {$groupId} to migrate the imported events to.");
+            return;
+        }
+
+        $otherMemberUserId = $otherMember['actor']['id'];
+        $userByMember = User::where('mobilizon_profile_id', $otherMemberUserId)->first();
+        if (!$userByMember) {
+            Log::warning("No user found in the database with mobilizon_profile_id {$otherMemberUserId} to migrate the imported events to.");
+            return;
+        }
+            
+        foreach ($importedEventsWithMissingUser as $importedEvent) {
+            $importedEvent->user_id = $userByMember->id;
+            $importedEvent->save();
+
+            $createdEvents = $importedEvent->created_events()->get();
+            foreach ($createdEvents as $createdEvent) {
+                $createdEvent->user_id = $userByMember->id;
+                $createdEvent->save();
+            }
+        }
+    }
+
+    public function updateFeaturedStatus(Request $request, $mobilizonGroupId): JsonResponse
+    {
+        $validated = $request->validate([
+            'is_featured' => 'required|boolean',
+        ]);
+
+        try {
+            $organisationStatus = OrganisationStatus::firstOrCreate(
+                ['mobilizon_group_id' => $mobilizonGroupId],
+                ['status' => 'ACTIVE']
+            );
+
+            $organisationStatus->is_featured = $validated['is_featured'];
+            $organisationStatus->save();
+
+            return response()->json([
+                'message' => 'Erfolgreich aktualisiert',
+                'organisation_status' => $organisationStatus
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Error updating featured status: ' . $e->getMessage());
+            return response()->json(['error' => 'Fehler beim Aktualisieren des empfohlenen Status'], 500);
+        }
+    }
+
+    public function getOrganisationsWithFeaturedStatus(): JsonResponse
+    {
+        $organisationStatuses = OrganisationStatus::where('status', 'ACTIVE')
+            ->whereNotNull('mobilizon_group_id')
+            ->where('is_featured', true)
+            ->get(['mobilizon_group_id', 'is_featured']);
+
+        return response()->json([
+            'organisation_statuses' => $organisationStatuses
+        ], 200);
     }
 }

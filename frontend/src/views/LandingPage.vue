@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { instanceInformation, landingPage, searchDefaults } from '@/lib/instanceConfig';
+import { isMobile } from '@/lib/helper';
 
 import Button from '@/components/KERN/Button.vue';
 import UpcomingEvents from '@/components/UpcomingEvents.vue';
@@ -8,9 +10,8 @@ import InputLocation from '@/components/KERN/inputs/InputLocation.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import LandingPageCategories from '@/components/LandingPageCategories.vue';
-import { instanceInformation, landingPage, searchDefaults } from '@/lib/instanceConfig';
 import UpcomingEventsMap from '@/components/UpcomingEventsMap.vue';
-import { isMobile } from '@/lib/helper';
+import Icon from '@/components/KERN/cosmetics/Icon.vue';
 
 const router = useRouter();
 const locationSearchRef = ref<InstanceType<typeof InputLocation> | null>(null);
@@ -46,28 +47,32 @@ const openSearch = () => {
                     v-html="landingPage.descriptionHtml"
                 ></p>
                 <template v-if="landingPage.showNotification">
-                    <RouterLink :to="{ name: 'public.exports.index' }">
-                        <Button
-                            icon-left="notifications"
-                            label="Benachrichtigungen abonnieren"
+                    <RouterLink
+                        class="text-lg flex align-items-center gap-2 w-fit"
+                        :to="{ name: 'public.exports.index' }"
+                    >
+                        <Icon
+                            name="notifications"
+                            color="black"
                         />
+                        {{ $t('public.landing.subscribeNotifications') }}
                     </RouterLink>
 
                     <p class="mt-4">
-                        <span>Bleiben Sie über Angebote in Ihrer Region informiert.</span>
+                        <span>{{ $t('public.landing.stayInformed') }}</span>
                     </p>
                 </template>
             </div>
         </Teleport>
 
         <div class="mb-6 mt-2">
-            <h3 class="kern-heading text-theme-primary">Veranstaltungen suchen</h3>
+            <h3 class="kern-heading text-theme-primary">{{ $t('public.landing.searchEvents') }}</h3>
 
             <div class="flex flex-column md:flex-row gap-4 align-content-start md:align-items-center">
                 <InputText
                     v-model="searchTerm"
-                    aria-label="Suchbegriff"
-                    placeholder="Schlagwort, Veranstaltungstitel..."
+                    :aria-label="$t('public.landing.searchTermLabel')"
+                    :placeholder="$t('public.landing.searchPlaceholder')"
                     name="searchTerm"
                     class="col"
                 />
@@ -87,7 +92,7 @@ const openSearch = () => {
                     :disabled="locationSearchRef?.triggered"
                     @click="openSearch()"
                 >
-                    Suchen
+                    {{ $t('public.landing.searchButton') }}
                 </Button>
             </div>
         </div>
@@ -112,22 +117,23 @@ const openSearch = () => {
             class="my-7"
         />
         <div v-if="landingPage.showNotification">
-            <h3 class="kern-heading text-theme-primary">Keine Veranstaltung mehr verpassen</h3>
+            <h3 class="kern-heading text-theme-primary">{{ $t('public.landing.neverMissEvent') }}</h3>
             <p class="mb-6">
-                <span class="inline-block mb-1">
-                    Bleibe informiert über neue
-                    <strong>Angebote und Veranstaltungen</strong>
-                    im {{ instanceInformation.name }}.
+                <span class="block mb-1">
+                    {{ $t('public.landing.stayInformedAboutNew') }}
+                    <strong>{{ $t('public.landing.offersAndEvents') }}</strong>
+                    {{ $t('public.landing.in') }} {{ instanceInformation.name }}.
                 </span>
-                <br />
-                <span>Ganz einfach anmelden – jederzeit abbestellbar.</span>
+
+                <span>{{ $t('public.landing.easySignup') }}</span>
             </p>
 
-            <RouterLink :to="{ name: 'public.exports.index' }">
-                <Button
-                    icon-left="notifications"
-                    label="Benachrichtigungen abonnieren"
-                />
+            <RouterLink
+                class="text-lg flex align-items-center gap-2 w-fit"
+                :to="{ name: 'public.exports.index' }"
+            >
+                <Icon name="notifications" />
+                {{ $t('public.landing.subscribeNotifications') }}
             </RouterLink>
         </div>
     </div>

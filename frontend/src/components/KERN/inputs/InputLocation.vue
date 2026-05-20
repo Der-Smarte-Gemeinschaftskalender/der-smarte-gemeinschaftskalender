@@ -18,7 +18,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const addressInput = ref<InstanceType<typeof InputText> | null>(null);    
+const addressInput = ref<InstanceType<typeof InputText> | null>(null);
 const address = defineModel<string | undefined>('address');
 const radius = defineModel<number>('radius', { default: 5 });
 const addressForm = ref<AddressForm | null>(null);
@@ -28,7 +28,9 @@ const list = ref<string[]>([]);
 const triggered = ref<boolean>(false);
 const fetching = ref<boolean>(false);
 const success = ref<boolean>(false);
-    
+const focused = ref<boolean>(false);
+const focusedElement = ref<EventTarget | null>(null);
+
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
 
 enum Radius {
@@ -104,7 +106,7 @@ watch(address, async (newAddress) => {
     success.value = false;
 
     debounceTimeout = setTimeout(async () => {
-       searchAddress(newAddress);
+        searchAddress(newAddress);
     }, 1000);
 });
 
@@ -117,43 +119,47 @@ defineExpose({
     coordinates,
     radius,
     geoHash,
-    triggered
+    triggered,
 });
 
 const searchAddress = async (newAddress: string, showSuccess: boolean = true) => {
-     const focusedElement = document.activeElement;
-        fetching.value = true;
+    const focusedElement = document.activeElement;
+    fetching.value = true;
 
-        try {
-            const results = await extendedSearchAddress(newAddress, 'de', 'ADMINISTRATIVE');
-            if (results.length > 0 && results[0]?.geom) {
-                addressForm.value = results[0];
-                const lat = results[0].geom.split(';')[1]!;
-                const lon = results[0].geom.split(';')[0]!;
+    try {
+        const results = await extendedSearchAddress(newAddress, 'de', 'ADMINISTRATIVE');
+        if (results.length > 0 && results[0]?.geom) {
+            addressForm.value = results[0];
+            const lat = results[0].geom.split(';')[1]!;
+            const lon = results[0].geom.split(';')[0]!;
 
-                coordinates.value = { lat: parseFloat(lat), lon: parseFloat(lon) };
-                geoHash.value = encodeGeoHash(parseFloat(lat), parseFloat(lon));
-                
-                success.value = showSuccess && results.length === 1;
-            }
-            
-            list.value = buildSuggestions(results, props.postalCodeOnly);
-        
-        } catch (err) {
-            console.error('Failed to geocode postal code:', err);
-            addressForm.value = null;
-        
-        } finally {
-            fetching.value = false;
-            triggered.value = false;
-            
-            await nextTick();
-            
-            if (focusedElement === addressInput.value?.$el.querySelector('input')) {
-                addressInput.value?.$el.querySelector('input')?.focus();
-            }
+            coordinates.value = { lat: parseFloat(lat), lon: parseFloat(lon) };
+            geoHash.value = encodeGeoHash(parseFloat(lat), parseFloat(lon));
+
+            success.value = showSuccess && results.length === 1;
         }
-}
+
+        list.value = buildSuggestions(results, props.postalCodeOnly);
+    } catch (err) {
+        console.error('Failed to geocode postal code:', err);
+        addressForm.value = null;
+    } finally {
+        fetching.value = false;
+        triggered.value = false;
+
+        await nextTick();
+
+        if (focusedElement === addressInput.value?.$el.querySelector('input')) {
+            addressInput.value?.$el.querySelector('input')?.focus();
+        }
+    }
+};
+
+const setFocus = (isFocused: boolean, event: FocusEvent) => {
+    focused.value = isFocused;
+
+    focusedElement.value = isFocused ? event.target : null;
+};
 </script>
 
 <template>
@@ -164,13 +170,19 @@ const searchAddress = async (newAddress: string, showSuccess: boolean = true) =>
         >
             {{ label }}
         </p>
-        <div class="flex align-items-center search-location-input-wrapper">
+        <div
+            class="flex align-items-center input-location-wrapper search-location-input-wrapper"
+            :class="{
+                focused: focused,
+            }"
+        >
             <div class="icon-wrapper w-5rem h-3rem flex align-items-center justify-content-center bg-theme-primary">
                 <Icon
                     v-if="!success && !triggered"
                     name="location_on"
                     color="white"
                     class="flex align-items-center hidden"
+                    aria-label="Ort suchen"
                     aria-hidden="true"
                 />
                 <Icon
@@ -196,57 +208,95 @@ const searchAddress = async (newAddress: string, showSuccess: boolean = true) =>
                 class="address-input w-full"
                 :class="props.inputTextClass"
                 placeholder="Ort oder Adresse"
-                aria-label="Ort oder Adresse"
+                aria-label="Ort oder Adresse suchen"
                 input-class="outline-none border-none"
                 :list="list"
                 :disabled="fetching"
+                @focus="setFocus(true, $event)"
+                @blur="setFocus(false, $event)"
             />
             <InputSelect
                 v-model="radius"
                 aria-label="Umkreis"
-                class="radius-select kern-form-input__select-wrapper w-fit bg-theme-primary text-white outline-none radius-select"
+                class="radius-select kern-form-input__select-wrapper w-fit bg-theme-primary text-white outline-none"
                 name="radius"
                 :options="radiusOptions"
+                :no-arrow="true"
+                @focus="setFocus(true, $event)"
+                @blur="setFocus(false, $event)"
             />
         </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
+.input-location-wrapper {
+    border-radius: 4px;
+}
+
+.input-location-wrapper.focused {
+    outline: 4px solid #171a2b;
+}
+
+.input-location-wrapper.focused .radius-select {
+    :deep(select) {
+        border-bottom: 0px !important;
+    }
+}
+
+.input-location-wrapper.focused .address-input {
+    :deep(input) {
+        border-bottom: 0px !important;
+    }
+}
+
 .address-input {
-    min-width: 6rem;
-}
-
-input[type='postal_code'] {
-    border-radius: 0 !important;
-}
-
-input:hover {
-    border-bottom: 2px !important;
+    :deep(input) {
+        min-width: 6rem !important;
+        border-radius: 0 !important;
+        border-bottom: 2px solid #171a2b !important;
+    }
 }
 
 .icon-wrapper {
-    //left borders
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
     border-top-left-radius: 4px !important;
     border-bottom-left-radius: 4px !important;
 }
 
 .radius-select {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
     border-top-right-radius: 4px !important;
     border-bottom-right-radius: 4px !important;
-}
 
-.radius-select:after {
-    position: absolute;
-    right: 1rem;
-    top: 55%;
-    content: ' ' !important;
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
-    background-color: white !important;
-}
+    :deep(select),
+    :deep(.kern-form-input__select-wrapper) {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+        border-bottom: 0 !important;
+    }
 
-.radius-select:hover {
-    border-bottom: none !important;
+    :deep(select:hover) {
+        background-color: #2b2c6aee !important;
+    }
+
+    :deep(select:focus) {
+        background-color: #2b2c6add !important;
+        border-bottom: 2px solid #171a2b !important;
+    }
+
+    &::after {
+        position: absolute;
+        right: 1rem;
+        top: 55%;
+        content: ' ' !important;
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
+        background-color: white !important;
+    }
 }
 
 @keyframes loading {

@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Enums\EmailTemplateType;
+use App\Http\Controllers\EmailTemplateController;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -12,16 +14,27 @@ class SendOrganisationRemovedMembershipToUserEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public string $organisationName;
     public string $urlMyOrganisations;
+    public string $mailBody;
+    public string $mailSubject;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($organisationName)
+    public function __construct(string $organisationName)
     {
-        $this->organisationName = $organisationName;
+        $templateController = new EmailTemplateController();
+        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::ORGANISATION_REMOVAL);
+        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::ORGANISATION_REMOVAL);
+
+        // Replace variables
         $this->urlMyOrganisations = env('APP_URL') . '/app/organisation/my-organisations';
+        $variables = [
+            ':appName' => config('app.name'),
+            ':organisationName' => $organisationName,
+        ];
+        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
+        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
     }
 
     /**
@@ -30,7 +43,7 @@ class SendOrganisationRemovedMembershipToUserEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Entfernung aus Organisation: "' . $this->organisationName . '"',
+            subject: $this->mailSubject,
         );
     }
 
@@ -41,6 +54,10 @@ class SendOrganisationRemovedMembershipToUserEmail extends Mailable
     {
         return new Content(
             view: 'emails.organisationRemovedMembershipToUserMail',
+            with: [
+                'mailBody' => $this->mailBody,
+                'urlMyOrganisations' => $this->urlMyOrganisations,
+            ],
         );
     }
 

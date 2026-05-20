@@ -18,6 +18,7 @@ import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
 
 import type { AxiosError } from "axios";
+import type { MobilizonUser } from '@/types/Mobilizon';
 
 const router = useRouter();
 const route = useRoute();
@@ -51,7 +52,7 @@ const { value: password } = useField<string>('password');
 
 const onSubmit = handleSubmit(async (values) => {
     try {
-        const { data } = await dsgApi.post('/auth/login', <LoginForm>{
+        const { data } = await dsgApi.post<MobilizonUser>('/auth/login', <LoginForm>{
             ...values,
         });
 

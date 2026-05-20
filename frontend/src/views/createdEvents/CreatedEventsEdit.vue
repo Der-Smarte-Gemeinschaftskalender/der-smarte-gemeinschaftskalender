@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watch, onBeforeMount } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { formatDateTime, formatInputDate, reconstructOptions } from '@/lib/helper';
 import { dsgApi } from '@/lib/dsgApi';
@@ -57,7 +57,8 @@ const loading = ref<boolean>(false);
 const createdEventData = ref<CreatedEventDetails | null>(null);
 const createdEventMetaData = ref<MobilizonFields | null>(null);
 const createdEventStatus = ref(null);
-const createdEventType = ref('');
+const parentEventType = ref('');
+const parentEventId = ref<any | null>(null);
 const rawAddress = ref<string>('');
 const mapRef = ref<InstanceType<typeof Map> | null>(null);
 const isMapLoading = computed(() => mapRef.value?.isLoading ?? false);
@@ -129,11 +130,16 @@ const loadCreatedEvent = async () => {
     loading.value = true;
 
     try {
-        const { data } = await dsgApi.get(`/created-events/${route.params.id}`);
+        const { data } = await dsgApi.get(`/created-events/${route.params.id}`, {
+            params: { 
+                event_id: route.params.id,
+            }
+        });
         createdEvent.value = data.createdEvent;
         createdEventData.value = data.mobilizon_fields;
         createdEventMetaData.value = data.createdEventMetaData;
-        createdEventType.value = data.eventType;
+        parentEventType.value = data.eventType;
+        parentEventId.value = data.event?.id ?? null;
 
         if (!createdEvent.value && !createdEventMetaData.value) {
             console.error('No valid created event type found');
@@ -153,7 +159,7 @@ const loadCreatedEvent = async () => {
             },
             {
                 name: 'Art des Termines',
-                value: getEventTypeLabel(createdEventType.value),
+                value: getEventTypeLabel(parentEventType.value),
             },
             {
                 name: 'Erstellt von',
@@ -209,10 +215,10 @@ const updateAddress = (address: string) => {
 
 const getEventTypeLabel = (eventType: string): string => {
     const types = {
-        series_event: 'Serientermin',
+        series_event: 'Einzeltermin aus Terminserie',
         single_event: 'Einzeltermin',
-        imported_event: 'Importierter Termin',
-        uploaded_event: 'Hochgeladener Termin',
+        imported_event: 'Einzeltermin aus Kalenderintegration',
+        uploaded_event: 'Einzeltermin aus Kalenderdatei',
     };
 
     return types[eventType as keyof typeof types] || 'Unbekannter Termin';
@@ -226,7 +232,7 @@ watch(joinOptions, (newValue) => {
 loadCreatedEvent();
 </script>
 <template>
-    <h2 class="kern-heading text-theme-primary">Einzeltermin bearbeiten</h2>
+    <h1 class="kern-heading text-theme-primary">Einzeltermin bearbeiten</h1>
     <p class="mt-1 mb-6">
         <b>Hinweis:</b>
         Weitere Informationen finden Sie im
@@ -408,22 +414,21 @@ loadCreatedEvent();
             :physical-address="physicalAddress"
             class="my-5"
         />
-        <div class="flex justify-content-center">
+        <div class="flex justify-content-center align-items-center gap-4 mt-6">
             <Button
                 :disabled="isSubmitting || isMapLoading"
-                class="mt-5"
                 type="submit"
             >
-                Änderung Speichern
+                Änderungen speichern
             </Button>
+
+            <DeleteCreatedEvent
+                v-if="createdEvent?.id"
+                v-model:error-message-content="errorMessageContent"
+                :event-id="createdEvent.id"
+                :parent-event-id="parentEventId"
+                :event-type="parentEventType"
+            />
         </div>
     </form>
-    <Divider class="mt-3" />
-    <div class="text-center pt-3">
-        <DeleteCreatedEvent
-            v-if="createdEvent?.id"
-            v-model:error-message-content="errorMessageContent"
-            :event-id="createdEvent.id"
-        />
-    </div>
 </template>

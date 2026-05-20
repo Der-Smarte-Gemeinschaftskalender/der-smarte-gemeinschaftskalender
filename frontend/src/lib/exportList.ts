@@ -2,28 +2,28 @@ export const exportList = [
     {
         link: {
             name: 'public.exports.email.create',
-            title: "E-Mail-Benachrichtigungen abonnieren",
+            titleKey: 'public.exports.email.buttonTitle',
             icon: 'mail',
         },
-        title: 'E-Mail-Benachrichtigungen',
-        description: 'Erhalten Sie regelmäßig E-Mail-Benachrichtigungen zu neuen Veranstaltungen in Ihrer Nähe. Wählen Sie selbst, wie oft Sie informiert werden, welche Themen und Organisationen Sie interessieren und für welchen Umkreis nach Veranstaltungen gesucht werden sollen. '
+        titleKey: 'public.exports.email.title',
+        descriptionKey: 'public.exports.email.description'
     },
     {
         link: {
             name: 'public.exports.script',
-            title: "Script einbinden",
+            titleKey: 'public.exports.script.buttonTitle',
             icon: 'open-in-new',
         },
-        title: 'Kalender auf Ihrer Webseite einbinden (Script)',
-        description: 'Sie können den Veranstaltungskalender einfach auf Ihrer eigenen Webseite einbinden – z-B. als Verein, Gemeinde oder Initiative. Dabei lässt sich einstellen, welche Veranstaltungen angezeigt werden sollen (z. B. nur eigene, nach Themen oder Umkreis gefiltert).\n\nDer eigebettete Kalender aktualisiert sich automatisch – keine doppelte Pflege notwendig.'
+        titleKey: 'public.exports.script.title',
+        descriptionKey: 'public.exports.script.description'
     },
     {
         link: {
             name: 'public.search',
-            title: "URL für Infotafeln generieren",
+            titleKey: 'public.exports.infoboards.buttonTitle',
             icon: 'info',
         },
-        title: 'Termine auf Infotafeln anzeigen',
+        titleKey: 'public.exports.infoboards.title',
         customDescription: 'informationBoards'
     }
 ]

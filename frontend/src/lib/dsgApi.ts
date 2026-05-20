@@ -15,8 +15,10 @@ checkAuthDsgApi();
 dsgApi.interceptors.response.use(
     (response) => response,
     (error) => {
+        const isAxios401 = axios.isAxiosError(error) && error.response?.status === 401;
+        const hasAuthHeader = Boolean(error?.config?.headers?.Authorization);
 
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (isAxios401 && hasAuthHeader) {
             localLogout();
         }
 

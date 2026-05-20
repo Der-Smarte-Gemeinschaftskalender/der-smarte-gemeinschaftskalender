@@ -1,15 +1,23 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { formatDateTime } from '@/lib/helper';
 import { current_organisation } from '@/composables/OrganisationComposable';
+import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
 import { intervall_keys } from '@/lib/const';
 
 import Table from '@/components/KERN/Table.vue';
 import Button from '@/components/KERN/Button.vue';
-import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import ButtonLegend from '@/components/ButtonLegend.vue';
+import Alert from '@/components/KERN/Alert.vue';
+import type { Column } from '@/types/General';
 
-const columns = [
+const tableRef = ref<InstanceType<typeof Table> | null>(null);
+const { alertMessage } = useEventIndexAlerts(tableRef, {
+    deletedMessage: 'Serientermin und alle zugehörigen Einzeltermine erfolgreich gelöscht.',
+});
+
+const columns: Array<Column> = [
     {
         key: 'name',
         name: 'Titel',
@@ -50,8 +58,25 @@ const columns = [
         align: 'right',
     },
 ];
+
+const seriesTableApi = {
+    url: '/series-events',
+    deleteUrl: '/series-events',
+    params: { mobilizon_group_id: current_organisation.value?.id },
+    deleteDialogTitle: 'Gesamten Serientermin löschen',
+    deleteDialogDescription: (row: any) =>
+        `Sie sind dabei, folgenden Serientermin zu löschen: ${row?.name ?? ''}.\n\n Alle darin enthaltenen Einzeltermine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf "Abgesagt" setzen, statt den Serientermin zu löschen.`,
+};
 </script>
 <template>
+    <Alert
+        v-if="alertMessage"
+        class="mb-4"
+        :severity="alertMessage.severity"
+        :title="alertMessage.title"
+        :content="alertMessage.content"
+    />
+
     <div class="flex align-items-center justify-content-between gap-2 mb-1">
         <h1 class="kern-heading text-theme-primary">Serientermine</h1>
         <RouterLink :to="{ name: 'seriesEvents.create' }">
@@ -74,37 +99,41 @@ const columns = [
         <LinkToDocs path="Terminverwaltung/Serientermine/" />.
     </p>
     <Table
-        :api="{
-            url: '/series-events',
-            params: { mobilizon_group_id: current_organisation?.id },
-        }"
+        ref="tableRef"
+        :api="seriesTableApi"
         :columns="columns"
     >
-        <template #aktionen="{ row }">
-            <div class="flex justify-content-end flex-wrap gap-2 min-w-10rem">
-                    <RouterLink
-                        v-if="row.id"
-                        :to="{ name: 'seriesEvents.create', query: { templateEventId: row.id } }"
-                    >
-                        <Button
-                            title="Kopieren"
-                            aria-label="Kopieren"
-                            :icon-left="'content-copy'"
-                        />
-                    </RouterLink>
-                    <RouterLink
-                        v-if="row.id"
-                        :to="{ name: 'seriesEvents.show', params: { id: row.id } }"
-                    >
-                        <Button
-                            :icon-left="'visibility'"
-                            title="Ansehen"
-                            aria-label="Ansehen"
-                        />
-
-                  </RouterLink>
+        <template #aktionen="{ row, deleteEntry }">
+            <div
+                v-if="row.id"
+                class="flex justify-content-end flex-wrap gap-2 min-w-10rem"
+            >
+                <RouterLink :to="{ name: 'seriesEvents.create', query: { templateEventId: row.id } }">
+                    <Button
+                        title="Duplizieren"
+                        aria-label="Duplizieren"
+                        icon-left="content-copy"
+                        icon-size="sm"
+                    />
+                </RouterLink>
+                <RouterLink :to="{ name: 'seriesEvents.show', params: { id: row.id } }">
+                    <Button
+                        :icon-left="'visibility'"
+                        title="Ansehen"
+                        aria-label="Ansehen"
+                        icon-size="sm"
+                    />
+                </RouterLink>
+                <Button
+                    variant="secondary"
+                    title="Löschen"
+                    aria-label="Löschen"
+                    icon-left="delete"
+                    icon-size="sm"
+                    @click="deleteEntry(row)"
+                />
             </div>
         </template>
     </Table>
-    <ButtonLegend />
+    <ButtonLegend class="mt-6" />
 </template>

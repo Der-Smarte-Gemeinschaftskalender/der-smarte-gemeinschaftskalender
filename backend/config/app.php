@@ -130,4 +130,5 @@ return [
     'mobilizon_password' => env('APP_MOBILIZON_PASSWORD', ''),
 
     'max_uploaded_event_occurrences' => (int) env('APP_MAX_UPLOADED_EVENT_OCCURRENCES', 1000),
+    'max_image_size_kb' => (int) env('APP_MAX_IMAGE_SIZE_KB', 2048),
 ];

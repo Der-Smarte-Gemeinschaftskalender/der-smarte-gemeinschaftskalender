@@ -1,5 +1,6 @@
-import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core'
+import { ApolloClient, createHttpLink, InMemoryCache, type FetchPolicy } from '@apollo/client/core'
 import { checkLogin } from '@/composables/UserComposoable'
+
 // HTTP connection to the API
 const httpLink = createHttpLink({
   // You should use an absolute URL here
@@ -7,12 +8,24 @@ const httpLink = createHttpLink({
 })
 
 // Cache implementation
-const cache = new InMemoryCache({
-  resultCaching: checkLogin() ? false : true
-})
+const cache = new InMemoryCache()
 
-// Create the apollo client
+export const getFetchPolicy = (): FetchPolicy => {
+  return checkLogin() ? 'network-only' : 'cache-first'
+}
+
 export const apolloClient = new ApolloClient({
   link: httpLink,
-  cache
+  cache,
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: 'cache-and-network',
+      nextFetchPolicy() {
+        return getFetchPolicy()
+      }
+    },
+    query: {
+      fetchPolicy: 'cache-first'
+    }
+  }
 })

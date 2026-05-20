@@ -60,16 +60,14 @@ const validationSchema = toTypedSchema(
             }),
             // Profile
             name: zod.string().nonempty('Der Name ist erforderlich.'),
-            preferredUsername: preferredUsernameSchema
-                .nonempty('Der Benutzername ist erforderlich.'),
+            preferredUsername: preferredUsernameSchema.nonempty('Der Benutzername ist erforderlich.'),
             // Organisation
             organisation_name: zod
                 .string({
                     required_error: 'Der Name der Organisation ist erforderlich.',
                 })
                 .nonempty('Der Name der Organisation darf nicht leer sein.'),
-            organisation_preferredUsername: preferredUsernameSchema
-                .nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
+            organisation_preferredUsername: preferredUsernameSchema.nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
             organisation_summary: zod
                 .string({
                     required_error: 'Die Beschreibung der Organisation ist erforderlich.',
@@ -240,7 +238,7 @@ if (checkLogin()) {
                                 <b>Hinweis:</b>
                                 Weitere Informationen finden Sie im
                                 <LinkToDocs
-                                    path="Terminverwaltung/Organisation"
+                                    path="Terminverwaltung/Organisation/"
                                     fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
                                 />.
                             </p>

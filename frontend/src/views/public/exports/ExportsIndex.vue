@@ -1,25 +1,28 @@
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
 import { exportList } from '@/lib/exportList';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import Button from '@/components/KERN/Button.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
+
 import { instanceInformation } from '@/lib/instanceConfig';
 
+
+const { t } = useI18n();
 </script>
 <template>
     <Teleport to="#headerslot">
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6">
-            <h1 class="kern-heading text-theme-primary">Benachrichtigungen abonnieren</h1>
+            <h1 class="kern-heading text-theme-primary">{{ $t('public.exports.title') }}</h1>
             <h2 class="kern-heading font-semilight text-theme-primary">
-                Bleiben Sie automatisch über anstehende Veranstaltungen informiert
+                {{ $t('public.exports.subtitle') }}
             </h2>
         </div>
     </Teleport>
     <div>
         <p class="kern-text kern-text--large text-theme-primary mb-6">
-            Dies ist ein kostenloser Service vom {{ instanceInformation.operatedBy }} und lässt sich jederzeit unkompliziert abbestellen oder
-            anpassen.
+            {{ $t('public.exports.introText', { operatedBy: instanceInformation.operatedBy }) }}
         </p>
         <div
             v-for="(exportItem, index) in exportList"
@@ -35,27 +38,36 @@ import { instanceInformation } from '@/lib/instanceConfig';
                             :icon-left="exportItem.link.icon"
                             class="w-full"
                         >
-                            {{ exportItem.link.title }}
+                            {{ $t(exportItem.link.titleKey) }}
                         </Button>
                     </RouterLink>
                 </div>
                 <div class="kern-col-md-8">
-                    <h3 class="kern-heading text-theme-primary">{{ exportItem.title }}</h3>
+                    <h3 class="kern-heading text-theme-primary">{{ $t(exportItem.titleKey) }}</h3>
                     <template v-if="exportItem.customDescription === 'informationBoards'">
+                        <p class="kern-text mb-4">{{ $t('public.exports.infoboards.intro') }}</p>
+                        <p class="kern-text mb-2">{{ $t('public.exports.infoboards.howItWorks') }}</p>
+                        <ol class="ml-5 mb-4 kern-text list-decimal">
+                            <li>
+                                {{ $t('public.exports.infoboards.step1Prefix') }} <b>{{ $t('public.exports.infoboards.step1Search') }}</b>
+                                {{ $t('public.exports.infoboards.step1Middle') }} <b>{{ $t('public.exports.infoboards.step1Filter') }}</b>
+                                {{ $t('public.exports.infoboards.step1Suffix') }}
+                            </li>
+                            <li>
+                                {{ $t('public.exports.infoboards.step2Prefix') }} 
+                                <Icon name="info" />
+                                {{ $t('public.exports.infoboards.step2Suffix') }}
+                            </li>
+                            <li>
+                                {{ $t('public.exports.infoboards.step3') }}
+                            </li>
+                        </ol>
+                        <p class="kern-text mb-4"><b>{{ $t('public.exports.infoboards.tipLabel') }}</b> {{ $t('public.exports.infoboards.tipText') }}</p>
+                        <p class="kern-text mb-4">
+                            {{ $t('public.exports.infoboards.description') }}
+                        </p>
                         <p class="kern-text">
-                            Zeigen Sie eine vorgefilterte Auswahl an Veranstaltungen automatisch und rotierend auf digitalen Infotafeln oder Bildschirmen an – z. B. in Rathäusern, Bürgerbüros oder Gemeinschaftshäusern.<br/><br/>
-                            So funktioniert es:
-                            <ol class="ml-5">
-                                <li>Öffnen Sie die <b>Veranstaltungssuche</b> und stellen Sie Ihren gewünschten <b>Filter</b> ein (z. B. Kategorien oder Zeiträume wie heute, morgen oder nächste Woche).</li>
-                                <li>Klicken Sie oben rechts auf das <Icon name="info"/> Info-Icon im Bereich "Suchergebnis teilen", um eine passende URL zu erzeugen.</li>
-                                <li>Kopieren Sie die URL und hinterlegen Sie diese direkt auf einer Infotafel oder einem Bildschirm.</li>
-                            </ol>
-                            <br/>
-                            <b>Tipp:</b> Sie können auch spezifisch für eine Organisation eine Infotafel-Ansicht erstellen – direkt über die öffentliche Seite der jeweiligen Organisation. Auch dort finden Sie ein Info-Icon.
-                            <br/><br/>
-                            Die Anzeige läuft automatisch durch und zeigt Ihre gefilterten Veranstaltungen fortlaufend im Wechsel an – immer aktuell und ohne zusätzliche Pflege.
-                            <br/><br/>
-                            Weitere Informationen finden Sie im <LinkToDocs path=""/>.
+                            {{ $t('public.exports.infoboards.moreInfoPrefix') }} <LinkToDocs path="" />.
                         </p>
                     </template>
                     <p
@@ -63,7 +75,7 @@ import { instanceInformation } from '@/lib/instanceConfig';
                         class="kern-text"
                         style="white-space: pre-line"
                     >
-                        {{ exportItem.description }}
+                        {{ $t(exportItem.descriptionKey) }}
                     </p>
                 </div>
             </div>

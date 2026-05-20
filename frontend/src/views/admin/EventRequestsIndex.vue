@@ -19,8 +19,8 @@ const eventRequests = ref<any[]>([]);
 
 const getEventTypeName = (requestableType: string) => {
     const typeMap: Record<string, string> = {
-        'CreatedEvent': 'Einzeltermin',
-        'SingleEvent': 'Einzeltermin',
+        CreatedEvent: 'Einzeltermin',
+        SingleEvent: 'Einzeltermin',
         //'SeriesEvent': 'Serientermin',
         //'UploadedEvent': 'Kalenderdatei',
         //'ImportedEvent': 'Importierter Termin',
@@ -30,10 +30,10 @@ const getEventTypeName = (requestableType: string) => {
 
 const getActionName = (actionType: string) => {
     const actionMap: Record<string, string> = {
-        'create': 'Erstellen',
-        'store': 'Erstellen',
-        'update': 'Bearbeiten',
-        'delete': 'Löschen',
+        create: 'Erstellen',
+        store: 'Erstellen',
+        update: 'Bearbeiten',
+        delete: 'Löschen',
         //'accept_upload': 'Hochladen',
     };
     return actionMap[actionType] || actionType;
@@ -90,13 +90,10 @@ const fetchEventRequests = async () => {
     showErrorMessage.value = false;
     try {
         const response = await dsgApi.get<any[]>('/approval-requests/events', {
-            params: { status: 'pending' }
+            params: { status: 'pending' },
         });
 
         eventRequests.value = response.data || [];
-        console.log('Fetched event requests:', eventRequests.value);
-        
-
     } catch (error: any) {
         console.error('Error fetching event requests:', error);
         showErrorMessage.value = true;
@@ -116,43 +113,54 @@ onMounted(() => {
     <div class="flex align-items-center justify-content-between mb-1">
         <h1 class="kern-heading text-theme-primary">Ausstehende Terminanfragen</h1>
     </div>
-    
+
     <Alert
         v-if="showErrorMessage"
         title="Fehler"
         severity="danger"
-        class="mb-4" 
-        >
+        class="mb-4"
+    >
         {{ errorMessageContent }}
     </Alert>
 
-    <p class="mb-4">
-        <span class="block mb-3">
+    <p class="mb-3">
+        <span class="block">
             <b>Hinweis:</b>
-            Werden Termine von Organisationen erstellt oder bearbeitet, ist vor der Veröffentlichung eine Freigabe durch die Instanzadministration erforderlich. 
-            Über den Button „Ansehen” in der Tabelle können Sie die von der Organisation angegebenen Informationen zum Termin prüfen und den Termin bzw. die Terminänderung genehmigen oder ablehnen. 
-            Nach erfolgter Freigabe erscheinen Termine und Änderungen in der öffentlichen Kalenderansicht.
-            <br /><br />
-            Weitere Informationen finden Sie im <LinkToDocs
+            Werden Termine von Organisationen erstellt oder bearbeitet, ist vor der Veröffentlichung eine Freigabe durch
+            die Instanzadministration erforderlich. Über den Button „Ansehen” in der Tabelle können Sie die von der
+            Organisation angegebenen Informationen zum Termin prüfen und den Termin bzw. die Terminänderung genehmigen
+            oder ablehnen. Nach erfolgter Freigabe erscheinen Termine und Änderungen in der öffentlichen
+            Kalenderansicht.
+        </span>
+    </p>
+    <p class="mb-6">
+        <span>
+            Weitere Informationen finden Sie im
+            <LinkToDocs
                 path="Terminverwaltung/Instanz/"
                 fragment="terminfreigabe-–-strict-mode"
-            />. 
+            />.
         </span>
     </p>
 
-    <Loader v-if="loading" class="mt-6" />
-    
+    <Loader
+        v-if="loading"
+        class="mt-6"
+    />
+
     <div v-else>
-        <Table v-if="eventRequests.length > 0" :columns="columns" :data="eventRequests" class="mb-2">
+        <Table
+            v-if="eventRequests.length > 0"
+            :columns="columns"
+            :data="eventRequests"
+            class="mb-2"
+        >
             <template #created_by="{ row }">
-                <div>
-                    {{ row.created_by.mobilizon_name }} ({{ row.created_by.mobilizon_preferred_username }})
-                </div>
+                <div>{{ row.created_by.mobilizon_name }} ({{ row.created_by.mobilizon_preferred_username }})</div>
                 <p class="text-sm text-theme-secondary">
                     {{ row.created_by.mobilizon_email }}
-                    
                 </p>
-                <p 
+                <p
                     v-if="!row.created_by.email_verified_at"
                     class="text-sm text-theme-secondary text-red-600"
                 >
@@ -160,9 +168,7 @@ onMounted(() => {
                 </p>
             </template>
             <template #aktionen="{ row }">
-                <RouterLink
-                    :to="{ name: 'admin.events.requests.show', params: { id: row.id } }"
-                >
+                <RouterLink :to="{ name: 'admin.events.requests.show', params: { id: row.id } }">
                     <Button
                         :icon-left="'visibility'"
                         title="Ansehen"
@@ -172,9 +178,9 @@ onMounted(() => {
                 </RouterLink>
             </template>
         </Table>
-        <Alert 
+        <Alert
             v-else
-            title="Keine ausstehenden Freigabeanfragen" 
+            title="Keine ausstehenden Freigabeanfragen"
             type="info"
         >
             Keine ausstehenden Freigabeanfragen vorhanden.

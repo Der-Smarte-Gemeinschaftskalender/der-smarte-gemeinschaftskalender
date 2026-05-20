@@ -26,7 +26,7 @@ class CreatedEventController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('in_group', except: ['show', 'fetchEventImage', 'getEventId', 'delete'])
+            new Middleware('in_group', except: ['fetchEventImage', 'getEventId'])
         ];
     }
 
@@ -127,7 +127,8 @@ class CreatedEventController extends Controller implements HasMiddleware
     public function update(CreatedEvent $createdEvent, Request $request): JsonResponse
     {
         // Strict mode: create approval request instead of event
-        if (config('dsg.strict_mode')) {
+        // Only apply strict mode for created events that belong to single events.
+        if (config('dsg.strict_mode') && $createdEvent->single_events_id) {
 
             // Add the created event ID to the request for the approval system
             $request->merge([ '_created_event_id' => $createdEvent->id ]);
@@ -239,16 +240,14 @@ class CreatedEventController extends Controller implements HasMiddleware
     public function delete(CreatedEvent $createdEvent, Request $request = null): JsonResponse
     {
         // Strict mode: create approval request instead of event
-        if (config('dsg.strict_mode')) {
+        // Only apply strict mode for created events that belong to single events.
+        if (config('dsg.strict_mode') && $createdEvent->single_events_id) {
             if (!$request) {
                 $request = request();
             }
 
             // Append created event data to the request for display purposes 
-            $eventDisplayData = $createdEvent->single_event 
-                ?? $createdEvent->series_event 
-                ?? $createdEvent->uploaded_event 
-                ?? $createdEvent->imported_event;
+            $eventDisplayData = $createdEvent->getRelatedEvent();
 
             $fullEventData = array_merge(
                 $eventDisplayData->toArray(), 
@@ -280,6 +279,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         }
 
         $createdEvent = CreatedEvent::find($createdEvent->id);
+        
         $mclient = Mobilizon::getInstance();
         $mresponse = $mclient->deleteEvent($createdEvent->mobilizon_id);
         if ($mclient->hasError($mresponse)) {
@@ -287,10 +287,13 @@ class CreatedEventController extends Controller implements HasMiddleware
                 'error' => $mclient->getError($mresponse)
             ], 400);
         }
-        $createdEvent->delete();
+
         if ($createdEvent->single_events_id) {
             $createdEvent->single_event->delete();
         }
+
+        $createdEvent->delete();
+
         return response()->json([
             'message' => 'Created event deleted successfully'
         ]);

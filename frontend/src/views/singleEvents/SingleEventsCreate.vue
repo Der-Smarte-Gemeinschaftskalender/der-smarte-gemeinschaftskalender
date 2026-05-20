@@ -8,6 +8,7 @@ import { findSingleEvent, handleSubmitCallback, loadCreatedEventImageByID, prepa
 import { formatInputDate, reconstructOptions } from '@/lib/helper';
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
+import { createEventDefaults } from '@/lib/instanceConfig';
 import {
     mobilizon_category_options,
     mobilizon_event_join_options,
@@ -39,7 +40,7 @@ import {
     SingleEventFormSchema,
     SingleEventCreateResponseSchema,
 } from '@/types/events/SingleEvents';
-import { createEventDefaults } from '@/lib/instanceConfig';
+
 
 const route = useRoute();
 const router = useRouter();

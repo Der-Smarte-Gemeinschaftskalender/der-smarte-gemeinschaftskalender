@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CreatedEventController;
+use App\Http\Controllers\EmailTemplateController;
 use App\Http\Controllers\ImportedEventController;
 use App\Http\Controllers\MaterialGeneratorValueController;
 use App\Http\Controllers\OrganisationController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\SeriesEventController;
 use App\Http\Controllers\SingleEventController;
 use App\Http\Controllers\TileProxyController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MaterialGeneratorTemplateController;
 
 Route::middleware('api')->prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
@@ -32,7 +34,9 @@ Route::middleware('api')->prefix('auth')->group(function () {
 Route::prefix('series-events')->group(function () {
     Route::get('/', [SeriesEventController::class, 'index']);
     Route::post('/', [SeriesEventController::class, 'create']);
-    Route::get('/{seriesEvent}', [SeriesEventController::class, 'show']);
+    Route::get('/{seriesEvent}', [SeriesEventController::class, 'show'])->where('seriesEvent', '[0-9]+');
+    Route::delete('/{seriesEvent}', [SeriesEventController::class, 'delete'])->where('seriesEvent', '[0-9]+');
+    Route::get('/holidays', [SeriesEventController::class, 'fetchStateHolidays']);
 });
 
 Route::prefix('uploaded-events')->group(function () {
@@ -42,6 +46,7 @@ Route::prefix('uploaded-events')->group(function () {
     Route::get('/create_url', [UploadedEventController::class, 'create_url'])->name('uploadEvents.create_url');
     Route::post('/upload', [UploadedEventController::class, 'upload'])->name('uploadEvents.try');
     Route::post('/accept', [UploadedEventController::class, 'accept_upload'])->name('uploadEvents.accept');
+    Route::delete('/{uploadedEvent}', [UploadedEventController::class, 'delete'])->name('uploadEvents.delete');
 });
 
 Route::prefix('imported-events')->group(function () {
@@ -49,6 +54,7 @@ Route::prefix('imported-events')->group(function () {
     Route::post('/', [ImportedEventController::class, 'store']);
     Route::get('/{importedEvent}', [ImportedEventController::class, 'show']);
     Route::post('/{importedEvent}/status', [ImportedEventController::class, 'changeStatus']);
+    Route::delete('/{importedEvent}', [ImportedEventController::class, 'delete']);
 });
 
 Route::prefix('single-events')->group(function () {
@@ -127,6 +133,23 @@ Route::prefix('organisations')->group(function () {
     Route::post('/removeMember', [OrganisationController::class, 'removeMember']);
     Route::post('/leave', [OrganisationController::class, 'leaveOrganiation']);
     Route::get('/mobilizon-groups', [OrganisationController::class, 'loadMobilizonGroups']);
+    Route::get('/with-featured', [OrganisationController::class, 'getOrganisationsWithFeaturedStatus']);
+    Route::put('/{mobilizonGroupId}/featured', [OrganisationController::class, 'updateFeaturedStatus']);
+    
+});
+
+Route::prefix('email-templates')->group(function () {
+    Route::get('/', [EmailTemplateController::class, 'index']);
+    Route::get('/{emailTemplate}', [EmailTemplateController::class, 'show']);
+    Route::patch('/{emailTemplate}', [EmailTemplateController::class, 'update']);
+});
+
+Route::prefix('material-generator-templates')->group(function () {
+    Route::get('/', [MaterialGeneratorTemplateController::class, 'index']);
+    Route::post('/', [MaterialGeneratorTemplateController::class, 'store']);
+    Route::get('/{materialGeneratorTemplate}', [MaterialGeneratorTemplateController::class, 'show']);
+    Route::put('/{materialGeneratorTemplate}', [MaterialGeneratorTemplateController::class, 'update']);
+    Route::delete('/{materialGeneratorTemplate}', [MaterialGeneratorTemplateController::class, 'destroy']);
 });
 
 Route::get('/tiles/{z}/{x}/{y}.png', [TileProxyController::class, 'proxy'])

@@ -22,7 +22,7 @@ import type { IOrganisation, Member } from '@/types/General';
 import type { AxiosError } from '@/lib/dsgApi';
 import type { ZodType } from 'zod';
 
-const showErrorMessage = ref<boolean>(false);
+const showErrorMessage = ref<boolean>(false);    
 const errorMessageContent = ref<string>('');
 const showSuccessMessage = ref<boolean>(false);
 const showLeaveGroupConfirm = ref<boolean>(false);
@@ -96,8 +96,12 @@ const loadOrganisation = async () => {
         });
 
         organisation.value = data || null;
-
         members.value = organisation.value?.members?.elements || [];
+
+        if (members.value.length === 0) {
+            showErrorMessage.value = true;
+            errorMessageContent.value = 'Sie sind kein Mitglied dieser Organisation.';
+        }
     } catch (error) {
         console.error('Error loading organisation:', error);
         showErrorMessage.value = true;
@@ -136,28 +140,36 @@ const removeMember = async (membershipId: string) => {
     try {
         await dsgApi.post('organisations/removeMember', {
             membership_id: membershipId,
+            group_id: organisation.value?.id,
+            group_preferred_username: organisation.value?.preferredUsername,
         });
         router.go(0);
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
+        showErrorMessage.value = true;
+        errorMessageContent.value =
+            error?.response?.data?.error ||
+            error?.response?.data?.errors?.[0]?.message ||
+            'Es ist ein Fehler aufgetreten.';
     }
 };
 
 const leaveGroup = async () => {
     try {
-        const { data } = await dsgApi.post('organisations/leave', {
+        await dsgApi.post('organisations/leave', {
             group_id: organisation.value?.id,
+            group_preferred_username: organisation.value?.preferredUsername,
         });
-        if (data.errors) {
-            showErrorMessageLeavingGroup.value = true;
-            errorMessageLeavingGroup.value = data.errors[0].message;
-        } else {
-            await setOrganisationData(null, true);
-            router.push({ name: 'app.myOrganisations' });
-        }
-    } catch (error) {
+
+        await setOrganisationData(null, true);
+        router.push({ name: 'app.myOrganisations' });
+    } catch (error: any) {
         console.error(error);
         showErrorMessageLeavingGroup.value = true;
+        errorMessageLeavingGroup.value =
+            error?.response?.data?.error ||
+            error?.response?.data?.errors?.[0]?.message ||
+            'Es ist ein Fehler aufgetreten.';
     }
 };
 
@@ -174,109 +186,111 @@ loadOrganisation();
             fragment="mitglieder-verwalten"
         />.
     </p>
+    <Alert
+        v-if="showErrorMessage"
+        title="Fehler"
+        :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
+        severity="danger"
+    />
 
-    <h2 class="kern-heading text-theme-primary my-6 pb-0">Mitglieder der Organisation</h2>
-    <Table
-        v-if="members.length > 0"
-        :data="members"
-        :columns="columns"
-        class="mb-6"
-    >
-        <template #aktionen="{ row }">
-            <Button
-                v-if="row.actor.preferredUsername !== user.person.preferredUsername"
-                icon-left="delete"
-                @click="removeMember(row.id)"
-            >
-                Löschen
-            </Button>
-        </template>
-    </Table>
-
-    <h2 class="kern-heading text-theme-primary">Neues Mitglied einladen</h2>
-    <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Das Mitglied, welches Sie zu Ihrer Organisation einladen wollen, muss bereits registriert sein. Nutzen Sie den
-        individuellen Benutzernamen und achten Sie auf die genaue Schreibweise. Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Organisation/"
-            fragment="neue-mitglieder-einladen"
-        />.
-    </p>
-    <form
-        novalidate
-        @submit.prevent="onSubmit"
-    >
-        <Alert
-            v-if="showErrorMessage"
-            title="Fehler"
-            :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
-            severity="danger"
-        />
-        <div class="flex flex-wrap gap-4 align-items-baseline">
-            <div class="col-12 sm:col-7 p-0">
-                <InputText
-                    v-model="invite_username"
-                    label="Benutzername"
-                    name="invite_username"
-                    :errors="submitCount === 0 ? undefined : errors.invite_username"
-                />
-            </div>
-            <div class="sm:col-4 p-0">
+    <template v-if="members.length > 0">
+        <h2 class="kern-heading text-theme-primary my-6 pb-0">Mitglieder der Organisation</h2>
+        <Table
+            v-if="members.length > 0"
+            :data="members"
+            :columns="columns"
+            class="mb-6"
+        >
+            <template #aktionen="{ row }">
                 <Button
-                    :disabled="isSubmitting"
-                    class="mt-5 min-w-max"
-                    type="submit"
-                    icon-left="mail"
+                    v-if="row.actor.preferredUsername !== user.person.preferredUsername"
+                    icon-left="delete"
+                    @click="removeMember(row.id)"
                 >
-                    Benutzer einladen
+                    Löschen
                 </Button>
+            </template>
+        </Table>
+
+        <h2 class="kern-heading text-theme-primary">Neues Mitglied einladen</h2>
+        <p class="mt-1 mb-6">
+            <b>Hinweis:</b>
+            Das Mitglied, welches Sie zu Ihrer Organisation einladen wollen, muss bereits registriert sein. Nutzen Sie den
+            individuellen Benutzernamen und achten Sie auf die genaue Schreibweise. Weitere Informationen finden Sie im
+            <LinkToDocs
+                path="Terminverwaltung/Organisation/"
+                fragment="neue-mitglieder-einladen"
+            />.
+        </p>
+        <form
+            novalidate
+            @submit.prevent="onSubmit"
+        >
+            <div class="flex flex-wrap gap-4 align-items-baseline">
+                <div class="col-12 sm:col-7 p-0">
+                    <InputText
+                        v-model="invite_username"
+                        label="Benutzername"
+                        name="invite_username"
+                        :errors="submitCount === 0 ? undefined : errors.invite_username"
+                    />
+                </div>
+                <div class="sm:col-4 p-0">
+                    <Button
+                        :disabled="isSubmitting"
+                        class="mt-5 min-w-max"
+                        type="submit"
+                        icon-left="mail"
+                    >
+                        Benutzer einladen
+                    </Button>
+                </div>
             </div>
-        </div>
 
-        <Alert
-            v-if="showSuccessMessage"
-            class="mt-2"
-            title="Gespeichert"
-            :content="'Benutzer wurde erfolgeich eingeladen.'"
-            severity="success"
-        />
-        <ConfirmDialog
-            v-model="showLeaveGroupConfirm"
-            title="Wills du diese Organisation wirklich verlassen?"
-            confirm-text="Verlassen"
-            @confirm="leaveGroup"
-        />
-        <Divider class="my-6" />
+            <Alert
+                v-if="showSuccessMessage"
+                class="mt-2"
+                title="Gespeichert"
+                :content="'Benutzer wurde erfolgeich eingeladen.'"
+                severity="success"
+            />
+            <ConfirmDialog
+                v-model="showLeaveGroupConfirm"
+                title="Wills du diese Organisation wirklich verlassen?"
+                confirm-text="Verlassen"
+                @confirm="leaveGroup"
+            />
+            <Divider class="my-6" />
 
-        <section>
-            <h2 class="kern-heading text-theme-primary">Organisation verlassen</h2>
-            <p class="mt-1 mb-6">
-                Hinweis: Die Organisation kann nicht verlassen werden, wenn Sie das einzige Mitglied sind. Um die
-                Organisation zu löschen, wenden Sie sich bitte an die Administrator*innen dieser Kalenderinstanz.
-                Weitere Informationen finden Sie im
-                <LinkToDocs
-                    path="Terminverwaltung/Organisation/"
-                    fragment="organisation-verlassen"
-                />.
-            </p>
+            <section>
+                <h2 class="kern-heading text-theme-primary">Organisation verlassen</h2>
+                <p class="mt-1 mb-6">
+                    Hinweis: Die Organisation kann nicht verlassen werden, wenn Sie das einzige Mitglied sind. Um die
+                    Organisation zu löschen, wenden Sie sich bitte an die Administrator*innen dieser Kalenderinstanz.
+                    Weitere Informationen finden Sie im
+                    <LinkToDocs
+                        path="Terminverwaltung/Organisation/"
+                        fragment="organisation-verlassen"
+                    />.
+                </p>
 
-            <div class="flex justify-content-center">
-                <Button
-                    icon-left="logout"
-                    @click="showLeaveGroupConfirm = true"
-                >
-                    Gruppe verlassen
-                </Button>
-            </div>
-        </section>
+                <div class="flex justify-content-center">
+                    <Button
+                        icon-left="logout"
+                        @click="showLeaveGroupConfirm = true"
+                    >
+                        Gruppe verlassen
+                    </Button>
+                </div>
+            </section>
 
-        <Alert
-            v-if="showErrorMessageLeavingGroup"
-            class="mt-2"
-            title="Gruppe konnte nicht verlassen werden"
-            :content="errorMessageLeavingGroup || 'Beim verlassen der Gruppe ist ein Fehler aufgetreten.'"
-            severity="danger"
-        />
-    </form>
+            <Alert
+                v-if="showErrorMessageLeavingGroup"
+                class="mt-2"
+                title="Gruppe konnte nicht verlassen werden"
+                :content="errorMessageLeavingGroup || 'Beim verlassen der Gruppe ist ein Fehler aufgetreten.'"
+                severity="danger"
+            />
+        </form>
+    </template>
 </template>

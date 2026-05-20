@@ -225,6 +225,57 @@ export async function copySerialEventFromList(page: Page, eventName: string): Pr
     await expect(page).toHaveURL(/.*\/app\/series-events\/create\?templateEventId=.*/);
 }
 
+export async function setupMonthlyTemplateControls(page: Page): Promise<boolean> {
+    await page.locator("select[name='intervall']").selectOption('MONTHLY');
+
+    const monthlyUseStartDateCheckbox = page.getByLabel('Tag des Monats aus dem Startdatum übernehmen');
+    const hasMonthlyControls = await monthlyUseStartDateCheckbox.isVisible();
+
+    if (!hasMonthlyControls) {
+        return false;
+    }
+
+    await expect(monthlyUseStartDateCheckbox).not.toBeChecked();
+    await page.getByLabel('3. (Dritte)').check();
+    await page.getByLabel('2. (Zweite)').check();
+    await page.getByLabel('1. (Erste)').uncheck();
+    await page.getByRole('button', { name: 'Dienstag' }).click();
+
+    return true;
+}
+
+export async function assertMonthlyTemplateControls(page: Page): Promise<void> {
+    const monthlyUseStartDateCheckbox = page.getByLabel('Tag des Monats aus dem Startdatum übernehmen');
+
+    await expect(page.locator("select[name='intervall']")).toHaveValue('MONTHLY');
+    await expect(monthlyUseStartDateCheckbox).not.toBeChecked();
+    await expect(page.getByLabel('3. (Dritte)')).toBeChecked();
+    await expect(page.getByLabel('2. (Zweite)')).toBeChecked();
+    await expect(page.getByLabel('1. (Erste)')).not.toBeChecked();
+    await expect(page.getByRole('button', { name: 'Dienstag' })).toHaveAttribute('aria-selected', 'true');
+}
+
+export async function setupWeeklyTemplateControls(page: Page): Promise<boolean> {
+    await page.locator("select[name='intervall']").selectOption('WEEKLY');
+
+    const weeklyDayButton = page.getByRole('button', { name: 'Dienstag' });
+    const hasWeeklyControls = await weeklyDayButton.isVisible();
+
+    if (!hasWeeklyControls) {
+        return false;
+    }
+
+    await weeklyDayButton.click();
+    await expect(weeklyDayButton).toHaveAttribute('aria-selected', 'true');
+
+    return true;
+}
+
+export async function assertWeeklyTemplateControls(page: Page): Promise<void> {
+    await expect(page.locator("select[name='intervall']")).toHaveValue('WEEKLY');
+    await expect(page.getByRole('button', { name: 'Dienstag' })).toHaveAttribute('aria-selected', 'true');
+}
+
 export async function verifyEventDetails(page: Page, data: EventFormData): Promise<void> {
     await page.waitForLoadState('networkidle');
     await expect(page.locator(`h1:has-text("${data.name}")`).first()).toBeVisible({ timeout: 10000 });
@@ -259,8 +310,7 @@ export async function verifyEventDetails(page: Page, data: EventFormData): Promi
         const addressPart2 = `${addressParts[2]} ${addressParts[3]}`;
         await expect(page.getByText(addressPart1)).toBeVisible();
         await expect(page.getByText(addressPart2)).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Google Maps' })).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Apple Karten' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Adresse kopieren' })).toBeVisible();
     }
 }
 
@@ -290,7 +340,7 @@ export async function editEventForm(page: Page, data: EventFormData): Promise<vo
 }
 
 export async function saveEventChanges(page: Page, strictMode: boolean = false): Promise<void> {
-    const saveButton = page.getByRole('button', { name: 'Änderung Speichern' });
+    const saveButton = page.getByRole('button', { name: 'Änderungen speichern' });
     await saveButton.scrollIntoViewIfNeeded();
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
@@ -317,7 +367,7 @@ export async function register(page: Page, config: TestConfig, email?: string): 
 
     await page.locator('#email').fill(testEmail);
     await page.getByLabel('Passwort').first().fill(testPassword);
-    await page.getByLabel('Passwort').nth(1).fill(testPassword);
+    await page.getByLabel('Passwort bestätigen').first().fill(testPassword);
     await page.locator('#accept_terms').check();
 
     await page.getByRole('button', { name: 'Jetzt registrieren' }).click();

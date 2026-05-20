@@ -1,5 +1,6 @@
 import dayjs from '@/lib/dayjs';
 import zod from '@/lib/zod';
+import { isDe } from '@/i18n';
 
 import { mobilizon_event_language_options, mobilizon_main_category_options } from '@/lib/const';
 
@@ -43,7 +44,8 @@ export const formatInputTime = (value: dayjs.ConfigType = new Date(), tz: boolea
  * @return { string } - The formatted date and time string.
  */
 export const formatOnMonthDayTime = (date: dayjs.ConfigType): string => {
-    return dayjs(date).format('dd. DD. MMM – HH:mm [Uhr]');
+    const uhr = isDe() ? ' [Uhr]' : '';
+    return dayjs(date).format(`dd. DD. MMM – HH:mm${uhr}`);
 };
 
 /**
@@ -61,7 +63,8 @@ export const formatOnDate = (date: dayjs.ConfigType): string => {
  * @return { string } - The formatted time string.
  */
 export const formatOnTime = (date: dayjs.ConfigType): string => {
-    return dayjs(date).format('HH:mm [Uhr]');
+    const uhr = isDe() ? ' [Uhr]' : '';
+    return dayjs(date).format(`HH:mm${uhr}`);
 };
 
 /**
@@ -70,7 +73,8 @@ export const formatOnTime = (date: dayjs.ConfigType): string => {
  * @return { string } - The formatted date and time string.
  */
 export const formatOnDateTime = (date: dayjs.ConfigType): string => {
-    return dayjs(date).format('DD.MM.YYYY - HH:mm [Uhr]');
+    const uhr = isDe() ? ' [Uhr]' : '';
+    return dayjs(date).format(`DD.MM.YYYY - HH:mm${uhr}`);
 };
 
 /**
@@ -134,7 +138,7 @@ export const normalizeStreet = (street: string): string => {
  * @return { Option | undefined } - The main category option if found, otherwise undefined.
  */
 export const getMainCategoryFromSubCategory = (category: string): Option | undefined => {
-    return mobilizon_main_category_options.find((option) => {
+    return mobilizon_main_category_options.value.find((option) => {
         return option.sub_categories?.includes(category as MobilizonCategory);
     });
 };
@@ -144,7 +148,7 @@ export const getMainCategoryFromSubCategory = (category: string): Option | undef
  * @param { Number | number | string | undefined } value - The value to check.
  * @return { boolean } - Returns true if the value is a valid positive number, otherwise false.
  */
-export const isValidPositivNumber = (value: number | number | string | undefined): boolean => {
+export const isValidPositivNumber = (value: Number | number | string | undefined): boolean => {
     if (value === undefined || value === null) return false;
     if (typeof value === 'number') return value >= 0;
     if (value instanceof Number) return value.valueOf() >= 0;
@@ -184,7 +188,7 @@ export const formatCoordinates = (coordinates: string): [number, number] | null 
 
 export const formattedLanguage = (languageCode: string) => {
     if (!languageCode) return '';
-    const language = mobilizon_event_language_options.find((lang) => lang.value === languageCode);
+    const language = mobilizon_event_language_options.value.find((lang) => lang.value === languageCode);
     return language ? language.text : 'deutsch';
 };
 
@@ -232,7 +236,7 @@ export const getBeginsEndsOn = (searchBegin: string): { beginsOn: dayjs.Dayjs; e
  * Strips HTML tags and non-breaking spaces from a string.
  * @param input
  */
-export const stripHtml = (input: string) => {
+export const stripHtml = (input: string | undefined) => {
     if (!input) return '';
 
     return input
@@ -264,19 +268,19 @@ export const convertToUsername = (inputName: string): string => {
     let username = inputName
         .toLowerCase()
         .trim()
-        .replace(/ä/g, "ae")
-        .replace(/ö/g, "oe")
-        .replace(/ü/g, "ue")
-        .replace(/ß/g, "ss")
+        .replace(/ä/g, 'ae')
+        .replace(/ö/g, 'oe')
+        .replace(/ü/g, 'ue')
+        .replace(/ß/g, 'ss')
         // Jegliches andere Zeichen zu Unterstrich ersetzen
-        .replace(/[^a-z0-9_]+/g, "_")
+        .replace(/[^a-z0-9_]+/g, '_')
         // Mehrere Unterstriche zu einem einzigen Unterstrich zusammenfassen
         .replace(/_+/g, '_')
         // Unterstriche am Anfang und Ende entfernen
-        .replace(/^_+|_+$/g, "");;
+        .replace(/^_+|_+$/g, '');
 
     if (/^[0-9]/.test(username)) {
-        username = "u" + username;
+        username = 'u' + username;
     }
 
     return username;

@@ -22,7 +22,7 @@ class ApprovalRequestService
     private const EVENT_CONTROLLER_MAP = [
         'CreatedEvent',
         'SingleEvent', 
-        //'SeriesEvent', 
+        //'SeriesEvent',
         //'UploadedEvent',
         //'ImportedEvent',
         'Organisation'

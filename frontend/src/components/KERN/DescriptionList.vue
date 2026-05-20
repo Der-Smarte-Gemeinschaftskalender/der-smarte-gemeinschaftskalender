@@ -33,6 +33,7 @@ defineProps<Props>();
                         </p>
                         <p v-else-if="row.type === 'tags'">
                             <Button
+                                v-if="row.value && Array.isArray(row.value) && row.value.length > 0"
                                 v-for="(tag, index) in row.value"
                                 :key="index"
                                 :label="tag"
@@ -40,6 +41,7 @@ defineProps<Props>();
                                 size="sm"
                                 class="mr-2 mb-2 pointer-events-none"
                             />
+                            <span v-else-if="typeof row.value === 'string'">{{ row.value }}</span>
                         </p>
                         <p 
                             v-else-if="row.type === 'prose'"

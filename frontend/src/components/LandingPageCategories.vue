@@ -2,22 +2,22 @@
 import { useRouter } from 'vue-router';
 import { mobilizon_main_category_options } from '@/lib/const';
 
-import Button from '@/components/KERN/Button.vue';
 import Card from '@/components/KERN/Card.vue';
 
 const router = useRouter();
 
-const navigateToCategorySearch = (categoryValue: string) => {
-    const subCategories = mobilizon_main_category_options.find((cat) => cat.value === categoryValue)?.sub_categories;
+const navigateToCategorySearch = (e: Event, categoryValue: string) => {
+    e?.preventDefault();
+    
+    const subCategories = mobilizon_main_category_options.value.find((cat) => cat.value === categoryValue)?.sub_categories;
     localStorage.setItem('searchCategory', JSON.stringify(subCategories));
-
     router.push({ name: 'public.search' });
 };
 </script>
 
 <template>
     <div>
-        <h3 class="kern-heading text-theme-primary mb-4 pt-0">Kategorien erkunden</h3>
+        <h3 class="kern-heading text-theme-primary mb-4 pt-0">{{ $t('public.landing.exploreCategories') }}</h3>
 
         <div class="cards-template">
             <div
@@ -27,16 +27,13 @@ const navigateToCategorySearch = (categoryValue: string) => {
                 <Card
                     :title="category.text"
                     :image-src="category.image"
-                    :callback-to="() => navigateToCategorySearch(category.value)"
+                    :to="{
+                        name: 'public.search',
+                        query: { category: category.value },
+                    }"
+                    :to-callback="(e: Event) => navigateToCategorySearch(e, category.value)"
+                    :image-alt="$t('public.landing.imageFor') + ' ' + category.text"
                 >
-                    <template #footer>
-                        <Button
-                            icon-right="arrow-forward"
-                            class="flex-grow-0"
-                            label="Mehr erfahren"
-                            @click="navigateToCategorySearch(category.value)"
-                        />
-                    </template>
                 </Card>
             </div>
         </div>

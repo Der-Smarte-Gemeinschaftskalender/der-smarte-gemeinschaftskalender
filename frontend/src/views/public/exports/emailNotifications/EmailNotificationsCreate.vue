@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import zod from '@/lib/zod';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useField, useForm } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
 import { axiosErrorHandler, dsgApi } from '@/lib/dsgApi';
 import { intervall_notification_options, mobilizon_category_options_all } from '@/lib/const';
 import { findOrganisationOptions } from '@/lib/mobilizonClient';
@@ -34,10 +35,12 @@ enum Radius {
     '250 km' = 250,
 }
 
-const events = [
-    { label: 'Nur Veranstaltungen aus diesem Kalender', value: 'INTERNAL' },
-    { label: 'Alle Veranstaltungen aus dem Netzwerk anzeigen', value: 'GLOBAL' },
-];
+const { t } = useI18n();
+
+const events = computed(() => [
+    { label: t('public.exports.email.create.eventsInternal'), value: 'INTERNAL' },
+    { label: t('public.exports.email.create.eventsGlobal'), value: 'GLOBAL' },
+]);
 
 const defaultField = {
     intervall: Intervall.WEEKLY,
@@ -58,7 +61,7 @@ const validationSchema = toTypedSchema(
             intervall: zod.nativeEnum(Intervall),
             category: zod.nativeEnum(MobilizonCategoryAndAll),
             eventType: zod.nativeEnum(EventType),
-            email: zod.string().email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+            email: zod.string().email(t('public.exports.email.create.validation.invalidEmail')),
             organisation: zod.string().optional(),
             postal_code: zod.string().optional(),
             radius: zod.nativeEnum(Radius).optional(),
@@ -66,7 +69,7 @@ const validationSchema = toTypedSchema(
                 .boolean()
                 .default(false)
                 .refine((val) => val === true, {
-                    message: 'Die Nutzungsbedingungen müssen akzeptiert werden.',
+                    message: t('public.exports.email.create.validation.termsRequired'),
                 }),
         })
         // This is a custom refinement to validate the form based on the event type
@@ -76,14 +79,14 @@ const validationSchema = toTypedSchema(
                     ctx.addIssue({
                         path: ['postal_code'],
                         code: zod.ZodIssueCode.custom,
-                        message: 'Bitte geben Sie eine gültige Postleitzahl ein',
+                        message: t('public.exports.email.create.validation.invalidPostalCode'),
                     });
                 }
                 if (data.radius === undefined || !Object.values(Radius).includes(data.radius)) {
                     ctx.addIssue({
                         path: ['radius'],
                         code: zod.ZodIssueCode.custom,
-                        message: 'Bitte wählen Sie einen gültigen Radius aus',
+                        message: t('public.exports.email.create.validation.invalidRadius'),
                     });
                 }
             }
@@ -112,7 +115,7 @@ const submitForm = handleSubmit(async (values) => {
     isSubmitting.value = true;
 
     try {
-        const data = await dsgApi.post('notifications', {
+        await dsgApi.post('notifications', {
             intervall: values.intervall,
             category: values.category,
             eventType: values.eventType,
@@ -124,12 +127,12 @@ const submitForm = handleSubmit(async (values) => {
         });
 
         showConfirmEmail.value = true;
-    } catch (error: any) {
-        console.error('Error submitting form:', error);
+    } catch (error: unknown) {
+        const apiError = error as { response?: { data?: { error?: string } } };
         errorMessageContent.value =
-            axiosErrorHandler(error) && error?.response?.data?.error
-                ? error.response.data.error
-                : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+            axiosErrorHandler(error) && apiError.response?.data?.error
+                ? apiError.response.data.error
+                : t('public.exports.email.create.submitError');
     } finally {
         isSubmitting.value = false;
     }
@@ -143,8 +146,8 @@ findOrganisationOptions().then((options) => {
 <template>
     <Teleport to="#headerslot">
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6">
-            <h1 class="kern-heading text-theme-primary">E-Mail-Benachrichtigungen abonnieren</h1>
-            <h2 class="kern-heading font-semilight text-theme-primary">Stellen Sie ihr persönliches Abo zusammen</h2>
+            <h1 class="kern-heading text-theme-primary">{{ t('public.exports.email.create.title') }}</h1>
+            <h2 class="kern-heading font-semilight text-theme-primary">{{ t('public.exports.email.create.subtitle') }}</h2>
         </div>
     </Teleport>
 
@@ -159,7 +162,7 @@ findOrganisationOptions().then((options) => {
                         v-model="intervall"
                         class="w-full"
                         name="intervall"
-                        label="Intervall"
+                        :label="t('public.exports.email.create.intervalLabel')"
                         :options="intervall_notification_options"
                         :errors="submitCount === 0 ? undefined : errors.intervall"
                     />
@@ -167,7 +170,7 @@ findOrganisationOptions().then((options) => {
                         v-model="category"
                         class="w-full"
                         name="category"
-                        label="Kategorien"
+                        :label="t('public.exports.email.create.categoriesLabel')"
                         :options="mobilizon_category_options_all"
                         :errors="submitCount === 0 ? undefined : errors.category"
                     />
@@ -181,26 +184,25 @@ findOrganisationOptions().then((options) => {
                             v-model="eventType"
                             class="w-full mb-5"
                             name="event-types"
-                            label="Welche Veranstaltungen sollen angezeigt werden?"
+                            :label="t('public.exports.email.create.eventTypeLabel')"
                             :radios="events"
                             :errors="submitCount === 0 ? undefined : errors.eventType"
                         ></InputRadios>
 
                         <div class="w-full">
                             <Alert
-                                title="Hinweis"
+                                :title="t('public.exports.email.create.noticeTitle')"
                                 type="info"
                             >
                                 <p v-if="eventType === EventType.GLOBAL">
-                                    <span>"Alle Veranstaltungen aus dem Netzwerk"</span>
+                                    <span>"{{ t('public.exports.email.create.alertGlobalTitle') }}" </span>
                                     <span>
-                                        bedeutet, dass Sie zusätzlich Termine aus anderen Gemeinden undOrganisationen
-                                        sehen, die einige Kalender betreiben.
+                                        {{ t('public.exports.email.create.alertGlobalText') }}
                                     </span>
                                 </p>
                                 <p v-else>
-                                    <span>"Nur Veranstaltungen aus diesem Kalender"</span>
-                                    <span>bedeutet, dass Sie nur Termine aus dieser Kalender Instanz sehen.</span>
+                                    <span>"{{ t('public.exports.email.create.alertInternalTitle') }}" </span>
+                                    <span>{{ t('public.exports.email.create.alertInternalText') }}</span>
                                 </p>
                             </Alert>
                         </div>
@@ -215,7 +217,7 @@ findOrganisationOptions().then((options) => {
                                 hidden: eventType !== EventType.INTERNAL,
                             }"
                             name="organisation"
-                            label="Organisationen"
+                            :label="t('public.exports.email.create.organisationsLabel')"
                             :options="organisationOptions"
                             :errors="submitCount === 0 ? undefined : errors.organisation"
                             :disabled="!organisationOptions.length"
@@ -230,7 +232,7 @@ findOrganisationOptions().then((options) => {
                                 v-model:address="postal_code"
                                 v-model:radius="radius"
                                 name="location"
-                                label="Postleitzahl"
+                                :label="t('public.exports.email.create.postalCodeLabel')"
                                 :postal-code-only="true"
                                 :errors="submitCount === 0 ? undefined : errors.postal_code || errors.radius"
                             />
@@ -252,29 +254,29 @@ findOrganisationOptions().then((options) => {
                     v-model="email"
                     class="md:col-5"
                     name="email"
-                    label="E-Mail-Adresse"
-                    placeholder="Ihre E-Mail-Adresse"
+                    :label="t('public.exports.email.create.emailLabel')"
+                    :placeholder="t('public.exports.email.create.emailPlaceholder')"
                     :errors="submitCount === 0 ? undefined : errors.email"
                 />
                 <InputCheckbox
                     v-model="accept_terms"
                     name="accept_terms"
-                    label="Nutzungsbedingungen"
+                    :label="t('public.exports.email.create.termsLabel')"
                     :errors="submitCount === 0 ? undefined : errors.accept_terms"
                 >
                     <template #label>
-                        Ich habe die
+                        {{ t('public.exports.email.create.termsIntro') }}
                         <RouterLink
                             :to="{ name: 'public.terms' }"
                             class="terms-link"
-                        >Nutzungsbedingungen</RouterLink>
-                        gelesen und akzeptiere sie.
+                        >{{ t('public.terms.title') }}</RouterLink>
+                        {{ t('public.exports.email.create.termsOutro') }}
                     </template>
                 </InputCheckbox>
             </Fieldset>
             <Alert
                 v-if="errorMessageContent"
-                title="Fehler"
+                :title="t('common.error')"
                 :content="errorMessageContent"
                 severity="danger"
                 class="my-2"
@@ -289,7 +291,7 @@ findOrganisationOptions().then((options) => {
                         name="mail"
                         color="white"
                     />
-                    E-Mail-Benachrichtigung jetzt abonnieren
+                    {{ t('public.exports.email.create.submitButton') }}
                 </span>
             </Button>
         </form>
@@ -297,22 +299,22 @@ findOrganisationOptions().then((options) => {
     <template v-else>
         <div>
             <h2 class="kern-heading font-medium p-0 mb-2 text-theme-primary">
-                Bitte bestätigen Sie Ihre E-Mail-Adresse
+                {{ t('public.exports.email.create.confirmTitle') }}
             </h2>
-            <p class="kern-text mt-6">Wir haben Ihnen eine E-Mail zur Bestätigung an {{ email }} gesendet.</p>
+            <p class="kern-text mt-6">{{ t('public.exports.email.create.confirmSent', { email }) }}</p>
             <p class="kern-text mb-6">
-                Bitte klicken Sie auf den Link in der E-Mail, um den Benachrichtigungsservice zu bestätigen.
+                {{ t('public.exports.email.create.confirmInstruction') }}
             </p>
             <Alert
-                title="Information"
+                :title="t('public.exports.email.create.infoTitle')"
                 severity="info"
                 class="w-min"
             >
                 <div class="kern-text alert-email-info">
-                    <div class="kern-text--bold">Wenn Sie keine E-Mail erhalten haben:</div>
+                    <div class="kern-text--bold">{{ t('public.exports.email.create.noEmailTitle') }}</div>
                     <ul class="ml-4 mt-2">
-                        <li>Prüfen Sie Ihren Spam-Ordner</li>
-                        <li>Warten Sie ein paar Minuten – es kann etwas dauern</li>
+                        <li>{{ t('public.exports.email.create.noEmailTipSpam') }}</li>
+                        <li>{{ t('public.exports.email.create.noEmailTipWait') }}</li>
                     </ul>
                 </div>
             </Alert>

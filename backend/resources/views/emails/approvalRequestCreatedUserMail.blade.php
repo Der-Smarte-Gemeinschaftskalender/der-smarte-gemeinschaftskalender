@@ -5,9 +5,8 @@
 
 <div class="content">
     <h1>Genehmigungsanfrage eingereicht</h1>
-    <p>
-        Ihre Anfrage für {{ $requestTypeName }} wurde erfolgreich eingereicht.
-    </p>
+
+    {!! $mailBody !!}
 
     <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <p style="margin: 0 0 10px 0;"><strong>Anfrageart:</strong> {{ $requestTypeName }}</p>

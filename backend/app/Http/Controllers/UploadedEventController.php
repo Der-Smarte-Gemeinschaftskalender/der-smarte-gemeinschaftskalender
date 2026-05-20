@@ -21,7 +21,7 @@ class UploadedEventController extends Controller implements HasMiddleware
     {
         return [
             'auth',
-            new Middleware('in_group', except: ['getMobilizonGroups', 'getMobilizonTags', 'show'])
+            new Middleware('in_group', except: ['getMobilizonGroups', 'getMobilizonTags'])
         ];
     }
 
@@ -104,20 +104,40 @@ class UploadedEventController extends Controller implements HasMiddleware
             ], 400);
         }
 
-        return IcalEventService::readEvents($ical_try);
+        return IcalEventService::readEvents($ical_try, (int) $request->get('mobilizon_group_id'));
     }
 
     public function accept_upload(Request $request): JsonResponse
     {
+        ini_set('max_execution_time', 120); 
 
         $mclient = Mobilizon::getInstance();
+
+        $requestMobilizonFields = (array) $request->get('mobilizon_fields', []);
+        $requestPhysicalAddress = $requestMobilizonFields['physicalAddress'] ?? null;
+        $fallbackPhysicalAddressDescription = is_array($requestPhysicalAddress)
+            ? ($requestPhysicalAddress['description'] ?? null)
+            : $requestPhysicalAddress;
+
+        $normalizedEvents = array_map(function ($event) use ($fallbackPhysicalAddressDescription) {
+            $eventMobilizonFields = $event['mobilizon_fields'] ?? [];
+
+            $eventMobilizonFields['physicalAddress'] = $fallbackPhysicalAddressDescription;
+
+            return array_merge($event, [
+                'location' => $event['location'] ?? null,
+                'mobilizon_fields' => $eventMobilizonFields,
+            ]);
+        }, $request->get('events', []));
+
         $events = IcalEventService::buildAcceptedEvents(
             $mclient,
-            $request->get('events'),
+            $normalizedEvents,
             $request->get('mobilizon_group_id')
         );
 
         if (count($events) <= 0) {
+            ini_set('max_execution_time', $normalTimeLimit);
             return response()->json([
                 'error' => 'No events selected or already created.'
             ], 400);
@@ -131,11 +151,10 @@ class UploadedEventController extends Controller implements HasMiddleware
         $uploadedEvent->mobilizon_fields    = $request->get('mobilizon_fields');
         $uploadedEvent->save();
 
-        foreach ($events as $uid => $event) {
-            if (CreatedEvent::where('ical_id', $uid)->exists()) {
-                continue;
-            }
+        $mobilizonFields = $request->get('mobilizon_fields');
+        $pictureResponse = null;
 
+        foreach ($events as $uid => $event) {
             $createdEvent                       = new CreatedEvent();
             $createdEvent->uploaded_events_id   = $uploadedEvent->id;
             $createdEvent->user_id              = $request->user()->id;
@@ -148,7 +167,7 @@ class UploadedEventController extends Controller implements HasMiddleware
             $createdEvent->duration = IcalEventService::calculateDuration($event['beginsOn'], $event['endsOn']);
             $createdEvent->save();
 
-            $mresponse = $mclient->createEvent($event, false);
+            $mresponse = $mclient->createEvent($event, isset($event['picture']['media']['file']));
             if ($mclient->hasError($mresponse)) {
                 Log::error("Error creating event for UID $uid: " . $mclient->getError($mresponse));
                 $createdEvent->delete();
@@ -157,15 +176,47 @@ class UploadedEventController extends Controller implements HasMiddleware
 
             $createdEvent->mobilizon_uuid = $mresponse['data']['createEvent']['uuid'];
             $createdEvent->mobilizon_id = $mresponse['data']['createEvent']['id'];
+
+            if (!$pictureResponse && isset($mresponse['data']['createEvent']['picture'])) {
+                $pictureResponse = $mresponse['data']['createEvent']['picture'];
+            }
+
             $createdEvent->save();
 
-            if (array_key_exists('tags', $uploadedEvent->mobilizon_fields) && is_array($uploadedEvent->mobilizon_fields['tags'])) {
-                MobilizonTag::saveTags($uploadedEvent->mobilizon_fields['tags'], (int)$request->input('mobilizon_group_id'));
+            if (array_key_exists('tags', $mobilizonFields) && is_array($mobilizonFields['tags'])) {
+                MobilizonTag::saveTags($mobilizonFields['tags'], (int)$request->input('mobilizon_group_id'));
             }
         }
 
+        $mobilizonFields['picture'] = $pictureResponse ?? null;
+        $uploadedEvent->mobilizon_fields = $mobilizonFields;
+        $uploadedEvent->save();
+
         return response()->json([
             'success' => 'Events created successfully.'
+        ]);
+    }
+
+    public function delete(UploadedEvent $uploadedEvent): JsonResponse
+    {
+        $mclient = Mobilizon::getInstance();
+        foreach ($uploadedEvent->created_events as $createdEvent) {
+            $mresponse = $mclient->deleteEvent($createdEvent->mobilizon_id);
+
+            if ($mclient->hasError($mresponse) && $mclient->getError($mresponse) !== 'Veranstaltung nicht gefunden') {
+                Log::error("Error deleting event with Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse));
+                return response()->json([
+                    'error' => "Fehler beim Löschen der Veranstaltung mit Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse)
+                ]);
+            }
+            
+            $createdEvent->delete();
+        }
+
+        $uploadedEvent->delete();
+
+        return response()->json([
+            'success' => 'Hochgeladene Datei und zugehörige Ereignisse wurden erfolgreich gelöscht.'
         ]);
     }
 

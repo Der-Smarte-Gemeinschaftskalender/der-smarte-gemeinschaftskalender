@@ -146,6 +146,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                     'approval_request' => $approvalRequest,
                 ]);
             } else {
+                Log::error('Error processing approval request: ' . $result['error'], ['details' => $result['details'] ?? null]);
                 return response()->json([
                     'error' => 'Fehler bei der Genehmigung der Anfrage',
                     'details' => $result['error']
@@ -233,9 +234,9 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                     case 'Organisation':
                         if  ($method === 'changeOrganisationStatus') {
                             //get organisation status from requestable id
-                            $orgnisationStatus = OrganisationStatus::find($approvalRequest->requestable_id);
+                            $organisationStatus = OrganisationStatus::find($approvalRequest->requestable_id);
 
-                            if (!$orgnisationStatus) {
+                            if (!$organisationStatus) {
                                 return [
                                     'success' => false, 
                                     'error' => 'Organisation nicht gefunden'
@@ -244,7 +245,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
 
                             $response = $controller->{$method}(
                                 $mockRequest,
-                                $orgnisationStatus
+                                $organisationStatus
                             );
                         }
                         else {
@@ -296,7 +297,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                     case 'SingleEvent':
                     //case 'SeriesEvent':
                     //case 'UploadedEvent':
-                    //case 'ImportedEvent':  
+                    //case 'ImportedEvent':
                         $response = $controller->{$method}($mockRequest);
                         $responseData = json_decode($response->getContent(), true);
                         break;

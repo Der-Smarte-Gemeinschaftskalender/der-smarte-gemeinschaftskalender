@@ -38,8 +38,11 @@ test("werbemittel generator test", async ({ page }) => {
   await expect(page).toHaveURL(/.*\/material-generator\/events\/.*/);
   await page.waitForLoadState("networkidle");
 
-  const downloadPromise = page.waitForEvent("download");
-  await page.getByText("Design herunterladen").click();
+  const downloadPromise = page.waitForEvent('download', { timeout: 10000 });
+
+  await page.waitForTimeout(3000);
+  await page.getByRole('button', { name: 'Herunterladen' }).first().click();
+  await page.waitForTimeout(1000);
   const download = await downloadPromise;
 
   if (!download) {
@@ -96,27 +99,36 @@ test("upload ical file", async ({ page }) => {
 test("navigate to events without login and verify Kunst category URL", async ({
   page,
 }) => {
-  const config = loadEnv();
+    const config = loadEnv();
 
-  await page.goto(config.siteUrl);
+    await page.goto(config.siteUrl);
 
-  await page.getByRole("link", { name: "Veranstaltungen" }).first().click();
-  await page.waitForLoadState("networkidle");
+    await page.getByRole('link', { name: 'Veranstaltungen' }).first().click();
+    await page.waitForLoadState('networkidle');
 
-  await page.getByRole("button", { name: "Ansehen" }).first().click();
+    // click the first card title link (element is hidden due to CSS, use JS click)
+    await page.waitForTimeout(2000);
+    await page
+        .locator('a.kern-card__title')
+        .first()
+        .evaluate((el) => (el as HTMLElement).click());
+    //await page.getByRole("button", { name: "Ansehen" }).first().click();
 
-  await page.waitForTimeout(1000);
+    await page.waitForTimeout(1000);
 
-  await page.waitForLoadState("networkidle");
+    await page.waitForLoadState('networkidle');
 
-  // either kunst or netzwerke
-  await page.getByText(/Kunst|Netzwerke/).first().click();
-  await page.waitForLoadState("networkidle");
+    // either kunst or netzwerke
+    await page
+        .getByText(/Kunst|Netzwerke/)
+        .first()
+        .click();
+    await page.waitForLoadState('networkidle');
 
-  await expect(page).toHaveURL(/.*\/search/);
-  await page.waitForLoadState("networkidle");
+    await expect(page).toHaveURL(/.*\/search/);
+    await page.waitForLoadState('networkidle');
 
-  const artsChecked = await page.locator('input[type="checkbox"][value="ARTS"]').isChecked();
-  const networkingChecked = await page.locator('input[type="checkbox"][value="NETWORKING"]').isChecked();
-  expect(artsChecked || networkingChecked).toBe(true);
+    const artsChecked = await page.locator('input[type="checkbox"][value="ARTS"]').isChecked();
+    const networkingChecked = await page.locator('input[type="checkbox"][value="NETWORKING"]').isChecked();
+    expect(artsChecked || networkingChecked).toBe(true);
 });

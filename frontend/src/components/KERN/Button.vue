@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import { defineProps, withDefaults } from 'vue';
-
 import Icon from './cosmetics/Icon.vue';
 
 interface Props {

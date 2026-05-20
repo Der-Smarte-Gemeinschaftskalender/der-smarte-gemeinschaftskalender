@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -13,6 +14,7 @@ import { isMobile } from '@/lib/helper';
 import { eventsMap } from '@/lib/instanceConfig';
 
 const router = useRouter();
+const { t } = useI18n();
 
 const props = withDefaults(
     defineProps<{
@@ -77,7 +79,7 @@ function createPopupContent(event: IEvent): string {
             <strong class="event-popup__title">${event.title}</strong>
             <div class="event-popup__date">${dateStr}</div>
             ${organizer ? `<div class="event-popup__organizer">${organizer}</div>` : ''}
-            <a href="${eventUrl}" class="event-popup__link">Ansehen →</a>
+            <a href="${eventUrl}" class="event-popup__link">${t('public.event.view')} →</a>
         </div>
     `;
 }
@@ -261,5 +263,15 @@ watch(
     background-color: rgba(var(--kern-color-primary-rgb, 0, 123, 255), 0.8);
     color: white;
     font-weight: bold;
+}
+
+/** Navigation */
+.leaflet-control-zoom-in:focus,
+.leaflet-control-zoom-out:focus {
+    position: relative;
+    z-index: 1;
+    outline: 0;
+    border-radius: .125rem;
+    box-shadow: 0 0 0 2px var(--kern-action-on-default), 0 0 0 4px var(--kern-action-focus-border-inside), 0 0 0 6px var(--kern-action-focus-border-outside);
 }
 </style>

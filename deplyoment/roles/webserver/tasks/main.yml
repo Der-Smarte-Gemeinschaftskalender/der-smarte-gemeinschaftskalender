@@ -54,6 +54,12 @@
   tags:
   - setup
 
+- name: Set inventory name fact
+  set_fact:
+    inventory_name: "{{ inventory_file | basename | regex_replace('\\.yml$', '') }}"
+  tags:
+  - setup
+
 - name: nginx config
   template:
     src: nginx-combined.conf
@@ -61,6 +67,17 @@
     owner: root
     group: root
     mode: '0644'
+  tags:
+  - setup
+
+- name: Override nginx config with custom nginx-combined.conf if exists
+  template:
+    src: "{{ playbook_dir }}/roles/dsgdev/files/{{ inventory_name }}/nginx-combined.conf"
+    dest: "/etc/nginx/sites-available/events.diday.org.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  ignore_errors: true
   tags:
   - setup
 

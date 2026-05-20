@@ -1,17 +1,16 @@
 <script lang="ts" setup>
-import { ref, onMounted, watch, nextTick } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 
 interface Props {
     label?: string;
     title?: string;
     subtitle?: string;
-    imageSrc?: string|undefined;
+    imageSrc?: string | undefined;
     imageAlt?: string;
     bodyClass?: string;
     imageClass?: string;
     horizontal?: boolean;
-    to?: { name: string; params?: Record<string, string | number>; query?: Record<string, string | number>  } | { path: string  };
-    callbackTo?: () => void;
+    to?: RouteLocationRaw;
 }
 
 defineProps<Props>();
@@ -23,7 +22,6 @@ const onImageError = (event: Event) => {
     const target = event.target as HTMLImageElement;
     if (target.src !== fallbackSrc) target.src = fallbackSrc;
 };
-
 </script>
 <template>
     <article
@@ -31,20 +29,30 @@ const onImageError = (event: Event) => {
         :class="{
             'flex-row': horizontal,
             'justify-between': horizontal,
-
         }"
     >
+        <RouterLink
+            v-if="imageSrc && to"
+            class="kern-card__media"
+            :class="[imageClass]"
+            :to="to"
+        >
+            <img
+                :src="imageSrc"
+                :alt="imageAlt"
+                class="cursor-pointer"
+                @error="onImageError"
+            />
+        </RouterLink>
         <div
-            v-if="imageSrc"
+            v-else-if="imageSrc"
             class="kern-card__media"
             :class="[imageClass]"
         >
             <img
                 :src="imageSrc"
                 :alt="imageAlt"
-                :class="`${to || callbackTo ? 'cursor-pointer' : ''}`"
                 @error="onImageError"
-                @click="to || callbackTo ? (to ? $router.push(to) : callbackTo && callbackTo()) : null"
             />
         </div>
         <div
@@ -61,12 +69,19 @@ const onImageError = (event: Event) => {
                 >
                     {{ label }}
                 </p>
-                <h4
-                    v-if="title"
-                    class="kern-card__title font-medium line-clamp-2 line-height-2 p-0"
+                <RouterLink
+                    v-if="title && to"
+                    class="kern-card__title text-2xl font-medium line-clamp-2 line-height-2 p-0 cursor-pointer"
+                    :to="to"
                 >
                     {{ title }}
-                </h4>
+                </RouterLink>
+                <h2
+                    v-else-if="title"
+                    class="kern-card__title text-2xl font-medium line-clamp-2 line-height-2 p-0"
+                >
+                    {{ title }}
+                </h2>
                 <h3
                     v-if="subtitle"
                     class="kern-card__subtitle"
@@ -82,7 +97,8 @@ const onImageError = (event: Event) => {
             </section>
             <footer
                 v-if="!!$slots.footer"
-                class="kern-card__footer">
+                class="kern-card__footer"
+            >
                 <slot name="footer" />
             </footer>
         </div>
@@ -90,15 +106,15 @@ const onImageError = (event: Event) => {
 </template>
 
 <style scoped lang="scss">
-    .kern-card__media {
-        background-color: #f4fdfb;
-        width: 100%;
-    }
+.kern-card__media {
+    background-color: #f4fdfb;
+    width: 100%;
+}
 
-    .kern-card__media img {
-        margin: 0 auto;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        object-fit: cover;
-    }
+.kern-card__media img {
+    margin: 0 auto;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
 </style>

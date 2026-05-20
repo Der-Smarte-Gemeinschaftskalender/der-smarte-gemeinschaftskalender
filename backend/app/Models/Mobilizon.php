@@ -493,6 +493,16 @@ public function findProfileByPreferredUsername(
         return $response['error'] ?? $response['errors'][0]['message'];
     }
 
+    private function isRateLimitError($response): bool
+    {   
+        if (!isset($response['error']) && !isset($response['errors'])) {
+            return false;
+        }
+
+        $errorMessage = $this->getError($response);
+        return $errorMessage && gettype($errorMessage) === 'string' && str_contains(strtolower($errorMessage), 'too many requests');
+    }
+
     public function updateGroup(array $group, bool $fileExists = false): array
     {
         if ($fileExists) {
@@ -528,8 +538,10 @@ public function findProfileByPreferredUsername(
         return $this->requestWithoutMedia($query->build());
     }
 
-    public function searchAddress(string $query, int $limit = 10): ?array
+    public function searchAddress(?string $query, int $limit = 10): ?array
     {
+        if (!$query) return null;
+        
         $gqlQuery = Query::query("SearchAddress");
         $gqlQuery->field("searchAddress")
             ->attributes(["query" => $query, "limit" => $limit])
@@ -567,37 +579,56 @@ public function findProfileByPreferredUsername(
 
     private function requestWithMedia(string $queryString, array $variables, UploadedFile $file): array
     {
-        try {
-            $response = $this->client->request("POST", "/api", [
-                'headers' => [
-                    "Authorization" => "bearer " . $this->accessToken,
-                    "Accept" => "application/json",
-                ],
-                'multipart' => [
-                    [
-                        'name' => 'query',
-                        'contents' => $queryString,
-                    ],
-                    [
-                        'name' => 'variables',
-                        'contents' => json_encode(['input' => $variables]),
-                    ],
-                    [
-                        'name' => 'image1',
-                        'contents' => fopen($file->getRealPath(), 'r'),
-                        'filename' => $file->getClientOriginalName(),
-                        'headers' => [
-                            'Content-Type' => $file->getMimeType() ?: 'application/octet-stream',
-                        ]
-                    ],
-                ],
-            ]);
+        $maxRetries = 2;
+        $retryCount = 0;
 
-            return json_decode((string)$response->getBody(), true);
-        } catch (Throwable $e) {
-            Log::error($e->getMessage());
-            return ['error' => $e->getMessage()];
+        while ($retryCount <= $maxRetries) {
+            try {
+                $response = $this->client->request("POST", "/api", [
+                    'headers' => [
+                        "Authorization" => "bearer " . $this->accessToken,
+                        "Accept" => "application/json",
+                    ],
+                    'multipart' => [
+                        [
+                            'name' => 'query',
+                            'contents' => $queryString,
+                        ],
+                        [
+                            'name' => 'variables',
+                            'contents' => json_encode(['input' => $variables]),
+                        ],
+                        [
+                            'name' => 'image1',
+                            'contents' => fopen($file->getRealPath(), 'r'),
+                            'filename' => $file->getClientOriginalName(),
+                            'headers' => [
+                                'Content-Type' => $file->getMimeType() ?: 'application/octet-stream',
+                            ]
+                        ],
+                    ],
+                ]);
+
+                $result = json_decode((string)$response->getBody(), true);
+                
+                if ($this->isRateLimitError($result)) {
+                    $retryCount++;
+                    if ($retryCount <= $maxRetries) {
+                        $waitTime = 20 * $retryCount; // 20, 40 seconds
+                        Log::warning("Rate limit hit in requestWithMedia, waiting {$waitTime}s before retry {$retryCount}/{$maxRetries}");
+                        sleep($waitTime);
+                        continue;
+                    }
+                }
+                
+                return json_decode((string)$response->getBody(), true);
+            } catch (Throwable $e) {
+                Log::error($e->getMessage());
+                return ['error' => $e->getMessage()];
+            }
         }
+        
+        return ['error' => 'Too many requests - max retries exceeded'];
     }
 
     private function requestWithoutMedia(string $queryString, $token = true): array
@@ -608,17 +639,36 @@ public function findProfileByPreferredUsername(
         ];
         if ($token) $headers["Authorization"] = "bearer " . $this->accessToken;
 
-        try {
-            $response = $this->client->request("POST", "/api", [
-                "http_errors" => false,
-                "headers" => $headers,
-                "body" => json_encode(["query" => $queryString])
-            ]);
+        $maxRetries = 2;
+        $retryCount = 0;
 
-            return json_decode((string)$response->getBody(), true);
-        } catch (Throwable $e) {
-            Log::error($e->getMessage());
-            return ['error' => $e->getMessage()];
+        while ($retryCount <= $maxRetries) {
+            try {
+                $response = $this->client->request("POST", "/api", [
+                    "http_errors" => false,
+                    "headers" => $headers,
+                    "body" => json_encode(["query" => $queryString])
+                ]);
+
+                $result = json_decode((string)$response->getBody(), true);
+                
+                if ($this->isRateLimitError($result)) {
+                    $retryCount++;
+                    if ($retryCount <= $maxRetries) {
+                        $waitTime = 20 * $retryCount; // 20, 40 seconds
+                        Log::warning("Rate limit hit in requestWithoutMedia, waiting {$waitTime}s before retry {$retryCount}/{$maxRetries}");
+                        sleep($waitTime);
+                        continue;
+                    }
+                }
+                
+                return json_decode((string)$response->getBody(), true);
+            } catch (Throwable $e) {
+                Log::error($e->getMessage());
+                return ['error' => $e->getMessage()];
+            }
         }
+        
+        return ['error' => 'Too many requests - max retries exceeded'];
     }
 }

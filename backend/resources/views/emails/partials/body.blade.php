@@ -14,6 +14,14 @@
             color: #3b3f44;
         }
 
+        blockquote {
+            border-left: 4px solid #a8abaf;
+            padding-left: 1rem;
+            color: #32353c;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -34,7 +42,7 @@
             display: inline-block;
             padding: 12px 20px;
             background-color: #2b2c6a;
-            color: #ffffff;
+            color: #ffffff !important;
             text-decoration: none;
             border-radius: 4px;
             margin: 15px 0;
@@ -71,13 +79,6 @@
         h2 {
             color: #2b2c6a;
             font-size: 24px;
-            margin: 0 0 15px 0;
-        }
-
-        h4 {
-            font-size: 14px;
-            font-weight: normal;
-            line-height: 1.5;
             margin: 0 0 15px 0;
         }
 

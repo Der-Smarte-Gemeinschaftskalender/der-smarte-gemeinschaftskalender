@@ -10,7 +10,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const text = props.text || mobilizon_event_status?.find((status) => status?.value === EventStatus[props?.status])?.text;
+const text = props.text || mobilizon_event_status.value.find((status) => status?.value === EventStatus[props?.status])?.text;
 let severity: "danger" | "info" | "success" | "warning" = 'info';
 
 if (props.status === EventStatus.CONFIRMED) {

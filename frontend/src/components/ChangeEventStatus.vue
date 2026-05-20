@@ -19,7 +19,7 @@ interface Props {
 
 const showDialog = ref<boolean>(false);
 const { status, eventId, mobilizonId } = defineProps<Props>();
-const statusText = mobilizon_event_status.find((statusOption) => statusOption.value === status)?.text;
+const statusText = mobilizon_event_status.value.find((statusOption) => statusOption.value === status)?.text;
 const emit = defineEmits(['statusChanged']);
 
 const isSubmitting = ref(false);

@@ -17,6 +17,13 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const emit = defineEmits<{
+    focus: [event: FocusEvent];
+    blur: [event: FocusEvent];
+    mouseover: [event: MouseEvent];
+    mouseout: [event: MouseEvent];
+}>();
+
 const list = computed(() => {
     // filter if list item is same as model
     if (props.list && model.value) {
@@ -31,11 +38,48 @@ const selectOption = (option: string) => {
     model.value = option;
 };
 
+const hoverEffect = (item: HTMLElement) => {
+    const items = document.querySelectorAll(`#${props.name} + ul li`);
+
+    items.forEach((el) => el.classList.remove('kern-form-input__input--active'));
+
+    item.classList.add('kern-form-input__input--active');
+};
+
 window.addEventListener('click', (event) => {
     if (props.list && props.list.length > 0) {
         const inputElement = document.getElementById(props.name)!;
-        if (event.target !== inputElement && !inputElement?.contains(event.target as Node)) {
-            showList.value = false;
+
+        showList.value = !(event.target !== inputElement && !inputElement?.contains(event.target as Node));
+    }
+});
+
+window.addEventListener('keydown', (event) => {
+    const inputElement = document.getElementById(props.name)!;
+
+    showList.value = !(event.key === 'Escape' && event.target === inputElement);
+
+    // arrow key navigation
+    if (showList.value && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+        event.preventDefault();
+        const items = document.querySelectorAll(`#${props.name} + ul li`);
+
+        if (items.length > 0) {
+            let index = Array.from(items).findIndex((item) =>
+                item.classList.contains('kern-form-input__input--active')
+            );
+
+            index = event.key === 'ArrowDown' ? (index + 1) % items.length : (index - 1 + items.length) % items.length;
+
+            items.forEach((item) => item.classList.remove('kern-form-input__input--active'));
+            items[index].classList.add('kern-form-input__input--active');
+        }
+    }
+
+    if (showList.value && event.key === 'Enter') {
+        const activeItem = document.querySelector(`#${props.name} + ul li.kern-form-input__input--active`);
+        if (activeItem) {
+            selectOption(activeItem.textContent || '');
         }
     }
 });
@@ -46,7 +90,7 @@ window.addEventListener('click', (event) => {
         :label="label"
         :errors="errors"
         class="relative"
-        :disabled="$attrs.disabled as boolean ?? false"
+        :disabled="($attrs.disabled as boolean) ?? false"
     >
         <input
             :id="name"
@@ -58,9 +102,15 @@ window.addEventListener('click', (event) => {
             type="text"
             :placeholder="placeholder"
             :aria-describedby="errors ? `${name}-error` : undefined"
-            :disabled="$attrs.disabled as boolean ?? false"
+            :disabled="($attrs.disabled as boolean) ?? false"
             :aria-label="ariaLabel"
-            @focus="showList = true"
+            @focus="
+                $emit('focus', $event);
+                showList = true;
+            "
+            @blur="$emit('blur', $event)"
+            @mouseover="$emit('mouseover', $event)"
+            @mouseout="$emit('mouseout', $event)"
         />
         <ul
             v-if="list && list.length > 0"
@@ -73,6 +123,7 @@ window.addEventListener('click', (event) => {
                 :key="item"
                 class="cursor-pointer p-2 flex align-items-center"
                 @click="selectOption(item)"
+                @mouseover="hoverEffect($event.currentTarget as HTMLElement)"
             >
                 {{ item }}
             </li>
@@ -99,7 +150,7 @@ ul {
         cursor: pointer;
         transition: background-color 0.2s ease;
 
-        &:hover {
+        &.kern-form-input__input--active {
             background-color: #f0f0f0;
         }
     }

@@ -48,9 +48,9 @@ const getEventTypeName = (requestableType: string) => {
     const typeMap: Record<string, string> = {
         CreatedEvent: 'Einzeltermin',
         SingleEvent: 'Einzeltermin',
-        //'SeriesEvent': 'Serientermin',
-        //'UploadedEvent': 'Kalenderdatei',
-        //'ImportedEvent': 'Importierter Termin',
+        //SeriesEvent: 'Serientermin',
+        //UploadedEvent: 'Kalenderdatei',
+        //ImportedEvent: 'Kalenderintegration',
     };
     return typeMap[requestableType] || requestableType;
 };
@@ -60,7 +60,6 @@ const getActionName = (actionType: string) => {
         create: 'Erstellen',
         store: 'Erstellen',
         update: 'Bearbeiten',
-        updateGroup: 'Bearbeiten',
         delete: 'Löschen',
         //'accept_upload': 'Hochladen',
     };
@@ -136,7 +135,7 @@ const fetchApprovalRequest = async () => {
             {
                 name: 'Kategorie',
                 value: approvalRequest.value.payload?.mobilizon_fields?.category
-                    ? mobilizon_category_options.find(
+                    ? mobilizon_category_options.value.find(
                           (option) => option.value === approvalRequest.value.payload.mobilizon_fields.category
                       )!.text
                     : 'Keine Kategorie',
@@ -159,10 +158,10 @@ const fetchApprovalRequest = async () => {
             {
                 name: 'Sprache',
                 value: approvalRequest.value.payload?.mobilizon_fields?.language
-                    ? mobilizon_event_language_options.find(
+                    ? mobilizon_event_language_options.value.find(
                           (option) => option.value === approvalRequest.value.payload.mobilizon_fields.language
                       )?.text
-                    : mobilizon_event_language_options[0].text,
+                    : mobilizon_event_language_options.value[0].text,
             },
             {
                 name: 'Webseite',
@@ -172,7 +171,7 @@ const fetchApprovalRequest = async () => {
             {
                 name: 'Status',
                 value:
-                    mobilizon_event_status.find(
+                    mobilizon_event_status.value.find(
                         (status) => status.value === approvalRequest.value.payload?.mobilizon_fields?.status
                     )?.text || 'Unbekannt',
             },
@@ -276,12 +275,12 @@ onMounted(async () => {
 <template>
     <div>
         <h1 class="kern-heading text-theme-primary mb-4">Terminfreigabe – Detailansicht</h1>
-        <p class="kern-text mb-6">
+        <p class="mb-3">
             <b>Hinweis:</b>
             Als Administrator*in der Instanz können Sie hier Terminanfragen von Organisationen genehmigen oder ablehnen.
             Termine erscheinen erst nach Freigabe in der öffentlichen Kalenderansicht.
-            <br />
-            <br />
+        </p>
+        <p class="mb-6">
             Weitere Informationen finden Sie im
             <LinkToDocs
                 path="Terminverwaltung/Instanz/"

@@ -20,7 +20,9 @@ loadAbout();
 </script>
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary">Impressum</h1>
+        <div class="mb-4">
+            <h1 class="kern-heading text-theme-primary">{{ $t('public.imprint.title') }}</h1>
+        </div>
         <div v-if="loading">
             <Loader />
         </div>
@@ -30,13 +32,13 @@ loadAbout();
         >
             <div v-html="about.longDescription"></div>
             <div class="mt-4">
-                <b>Kontaktmöglichkeit:</b>
+                <b>{{ $t('public.imprint.contact') }}:</b>
                 {{ about.contact }}
             </div>
             <div class="mt-4">
-                <b>Registrierungen ist:</b>
-                <span v-if="about.registrationsOpen">offen</span>
-                <span v-else>geschlossen</span>
+                <b>{{ $t('public.imprint.registrations') }}:</b>
+                <span v-if="about.registrationsOpen">{{ $t('public.imprint.registrationsOpen') }}</span>
+                <span v-else>{{ $t('public.imprint.registrationsClosed') }}</span>
             </div>
         </div>
     </div>

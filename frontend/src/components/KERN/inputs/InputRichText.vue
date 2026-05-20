@@ -3,6 +3,7 @@ import { watch, onBeforeUnmount } from 'vue';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import TextAlign from '@tiptap/extension-text-align';
 
 import FormInputLabel from './FormInputLabel.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
@@ -12,6 +13,7 @@ interface Props {
     name: string;
     errors?: string;
     placeholder?: string;
+    extended?: boolean;
 }
 
 const model = defineModel<string>();
@@ -32,6 +34,9 @@ const editor = useEditor({
                 rel: 'noopener noreferrer',
                 target: '_blank',
             },
+        }),
+        TextAlign.configure({
+            types: ['heading', 'paragraph'],
         }),
     ],
 });
@@ -79,6 +84,7 @@ onBeforeUnmount(() => {
 
 <template>
     <FormInputLabel
+        v-if="editor"
         :id="name"
         :label="label"
         :errors="errors"
@@ -90,79 +96,133 @@ onBeforeUnmount(() => {
             >
                 <Icon
                     name="bold"
-                    :disabled="!editor?.can().chain().focus().toggleBold().run()"
-                    :class="{ 'is-active': editor?.isActive('bold') }"
+                    color="none"
+                    :disabled="!editor.can().chain().focus().toggleBold().run()"
+                    :class="{ 'is-active': editor.isActive('bold') }"
                     class="cursor-pointer border-r-1"
-                    @click="editor?.chain().focus().toggleBold().run()"
+                    @click="editor.chain().focus().toggleBold().run()"
                 />
                 <Icon
                     name="italic"
-                    :disabled="!editor?.can().chain().focus().toggleItalic().run()"
-                    :class="{ 'is-active': editor?.isActive('italic') }"
-                    @click="editor?.chain().focus().toggleItalic().run()"
+                    color="none"
+                    :disabled="!editor.can().chain().focus().toggleItalic().run()"
+                    :class="{ 'is-active': editor.isActive('italic') }"
+                    @click="editor.chain().focus().toggleItalic().run()"
                 />
                 <Icon
                     name="underline"
-                    :disabled="!editor?.can().chain().focus().toggleUnderline().run()"
-                    :class="{ 'is-active': editor?.isActive('underline') }"
-                    @click="editor?.chain().focus().toggleUnderline().run()"
+                    color="none"
+                    :disabled="!editor.can().chain().focus().toggleUnderline().run()"
+                    :class="{ 'is-active': editor.isActive('underline') }"
+                    @click="editor.chain().focus().toggleUnderline().run()"
                 />
                 <Icon
                     name="strike"
-                    :disabled="!editor?.can().chain().focus().toggleStrike().run()"
-                    :class="{ 'is-active': editor?.isActive('strike') }"
-                    @click="editor?.chain().focus().toggleStrike().run()"
+                    color="none"
+                    :disabled="!editor.can().chain().focus().toggleStrike().run()"
+                    :class="{ 'is-active': editor.isActive('strike') }"
+                    @click="editor.chain().focus().toggleStrike().run()"
                 />
                 <Icon
                     name="h1"
-                    :class="{ 'is-active': editor?.isActive('heading', { level: 1 }) }"
-                    @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+                    @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
                 />
                 <Icon
                     name="h2"
-                    :class="{ 'is-active': editor?.isActive('heading', { level: 2 }) }"
-                    @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+                    @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
                 />
                 <Icon
                     :name="'h3'"
-                    :class="{ 'is-active': editor?.isActive('heading', { level: 3 }) }"
-                    @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+                    @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
                 />
+                <template v-if="extended">
+                    <Icon
+                        :name="'h4'"
+                        color="none"
+                        :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
+                        @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
+                    />
+                    <Icon
+                        :name="'h5'"
+                        color="none"
+                        :class="{ 'is-active': editor.isActive('heading', { level: 5 }) }"
+                        @click="editor.chain().focus().toggleHeading({ level: 5 }).run()"
+                    />
+                </template>
                 <Icon
                     name="bullet_list"
-                    :class="{ 'is-active': editor?.isActive('bulletList') }"
-                    @click="editor?.chain().focus().toggleBulletList().run()"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('bulletList') }"
+                    @click="editor.chain().focus().toggleBulletList().run()"
                 />
                 <Icon
                     name="ordered_list"
-                    :class="{ 'is-active': editor?.isActive('orderedList') }"
-                    @click="editor?.chain().focus().toggleOrderedList().run()"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('orderedList') }"
+                    @click="editor.chain().focus().toggleOrderedList().run()"
                 />
                 <Icon
                     name="blockquote"
-                    :class="{ 'is-active': editor?.isActive('blockquote') }"
-                    @click="editor?.chain().focus().toggleBlockquote().run()"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('blockquote') }"
+                    @click="editor.chain().focus().toggleBlockquote().run()"
                 />
                 <Icon
                     name="link"
-                    :class="{ 'is-active': editor?.isActive('link') }"
+                    color="none"
+                    :class="{ 'is-active': editor.isActive('link') }"
                     @click="addLink()"
                 />
                 <Icon
                     name="link_off"
-                    :disabled="!editor?.isActive('link')"
+                    color="none"
+                    :disabled="!editor.isActive('link')"
                     @click="removeLink()"
                 />
+                <template v-if="extended">
+                    <Icon
+                        v-if="editor.isActive({ textAlign: 'right' })"
+                        name="align_horizontal_left"
+                        color="none"
+                        :class="{ 'is-active': editor.isActive({ textAlign: 'left' }) }"
+                        @click="editor.chain().focus().setTextAlign('left').run()"
+                    />
+                    <Icon
+                        v-if="
+                            editor.isActive({ textAlign: 'left' }) ||
+                            (!editor.isActive({ textAlign: 'right' }) && !editor.isActive({ textAlign: 'center' }))
+                        "
+                        name="align_horizontal_center"
+                        color="none"
+                        :class="{ 'is-active': editor.isActive({ textAlign: 'center' }) }"
+                        @click="editor.chain().focus().setTextAlign('center').run()"
+                    />
+                    <Icon
+                        v-if="editor.isActive({ textAlign: 'center' })"
+                        name="align_horizontal_right"
+                        color="none"
+                        :class="{ 'is-active': editor.isActive({ textAlign: 'right' }) }"
+                        @click="editor.chain().focus().setTextAlign('right').run()"
+                    />
+                </template>
 
                 <Icon
                     name="undo"
-                    :disabled="!editor?.can().chain().focus().undo().run()"
-                    @click="editor?.chain().focus().undo().run()"
+                    color="none"
+                    :disabled="!editor.can().chain().focus().undo().run()"
+                    @click="editor.chain().focus().undo().run()"
                 />
                 <Icon
                     name="redo"
-                    :disabled="!editor?.can().chain().focus().redo().run()"
-                    @click="editor?.chain().focus().redo().run()"
+                    color="none"
+                    :disabled="!editor.can().chain().focus().redo().run()"
+                    @click="editor.chain().focus().redo().run()"
                 />
             </section>
             <EditorContent
@@ -177,11 +237,15 @@ onBeforeUnmount(() => {
 
 <style>
 .kern-form-input--error .prose {
-    border-color: #BD0F09 !important;
-    background-color: #FEECE8 !important;
+    border-color: #bd0f09 !important;
+    background-color: #feece8 !important;
 }
 
 .rich-text-wrapper {
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
     .toolbar {
         display: flex;
         flex-wrap: wrap;

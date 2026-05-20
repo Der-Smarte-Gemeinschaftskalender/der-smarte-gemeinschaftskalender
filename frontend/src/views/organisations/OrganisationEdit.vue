@@ -8,6 +8,8 @@ import { buildSuggestions } from '@/composables/EventCreateFormComposable';
 import { loadImage } from '@/lib/dsgClient';
 import { stripHtml } from '@/lib/helper';
 import { dsgApi } from '@/lib/dsgApi';
+import { user } from '@/composables/UserComposoable';
+import { isStrictModeEnabled } from '@/lib/instanceConfig';
 
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
@@ -17,11 +19,12 @@ import Alert from '@/components/KERN/Alert.vue';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import Map from '@/components/Map.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
+import OrganisationFeaturedToggle from '@/components/OrganisationFeaturedToggle.vue';
 
 import { ZodType } from 'zod';
 import { addressDefaults, type AddressForm, AddressFormSchema } from '@/types/Mobilizon';
 import type { AxiosError } from '@/lib/dsgApi';
-import { isStrictModeEnabled } from '@/lib/instanceConfig';
+import type { IOrganisation } from '@/types/General';
 
 interface EditOrganisationForm {
     name: string;
@@ -38,9 +41,13 @@ const rawAddress = ref<string>('');
 const mapRef = ref<InstanceType<typeof Map> | null>(null);
 const isMapLoading = computed(() => mapRef.value?.isLoading ?? false);
 const mapSuggestions = computed(() => buildSuggestions(mapRef.value?.suggestions ?? []));
+const organisation = ref<IOrganisation | null>(null);
 
 const route = useRoute();
 const preferredUsername = route.params.preferredUsername as string;
+
+const isFeatured = ref<boolean>(false);
+const featuredError = ref<string | null>(null);
 
 const validationSchema = toTypedSchema(
     zod.object({
@@ -91,7 +98,7 @@ const onSubmit = handleSubmit(async (values) => {
 
         showSuccessMessage.value = true;
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error: any | AxiosError) {
+    } catch (error: AxiosError) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         showErrorMessage.value = true;
         errorMessageContent.value =
@@ -99,6 +106,7 @@ const onSubmit = handleSubmit(async (values) => {
             'Es ist ein Fehler aufgetreten. Bevor du deinen Benutzer weiter einrichten kannst, musst du erst deine E-Mail-Adresse bestätigen.';
     }
 });
+
 const loadOrganisation = async () => {
     if (!preferredUsername) {
         showErrorMessage.value = true;
@@ -106,15 +114,18 @@ const loadOrganisation = async () => {
         return;
     }
     try {
-        const { data } = await dsgApi.get('organisations/group', {
+        const { data } = await dsgApi.get<IOrganisation>('organisations/group', {
             params: {
                 preferred_username: preferredUsername,
             },
         });
 
         groupId.value = data.id;
-        summary.value = data.summary;
+        summary.value = data.summary || '';
         name.value = data.name;
+        organisation.value = data;
+        isFeatured.value = data.is_featured ?? false;
+
         if (data.physicalAddress) {
             physicalAddress.value = data.physicalAddress || '';
             rawAddress.value = buildSuggestions([physicalAddress.value])[0];
@@ -172,6 +183,28 @@ loadOrganisation();
             "
             :severity="!isStrictModeEnabled ? 'success' : 'info'"
         />
+        <Alert
+            v-if="featuredError"
+            :title="'Fehler'"
+            :content="featuredError"
+            severity="danger"
+            class="mb-4"
+        />
+
+        <Fieldset
+            v-if="user?.type === 'admin'"
+            class="mb-4"
+        >
+            <div class="flex flex-column gap-4">
+                <div class="flex align-items-center gap-3">
+                    <OrganisationFeaturedToggle
+                        v-if="user?.type === 'admin' && groupId"
+                        v-model:error="featuredError"
+                        v-model:organisation="organisation as IOrganisation"
+                    />
+                </div>
+            </div>
+        </Fieldset>
 
         <Fieldset>
             <div class="flex flex-column gap-5">

@@ -3,9 +3,10 @@ import dayjs from '@/lib/dayjs';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import { searchEvents } from '@/lib/mobilizonClient';
-import { mobilizon_category_options, mobilizon_event_status, mobilizon_event_language_options } from '@/lib/const';
+import { mobilizon_category_options, mobilizon_main_category_options, mobilizon_event_status, mobilizon_event_language_options } from '@/lib/const';
 
 import Card from '@/components/KERN/Card.vue';
 import EventCardHorizontal from '@/components/EventCardHorizontal.vue';
@@ -24,11 +25,26 @@ import Loader from '@/components/KERN/cosmetics/Loader.vue';
 import { searchPage, searchDefaults } from '@/lib/instanceConfig';
 
 import { type Accordion } from '@/types/KERN';
+import { type IEventDetailed } from '@/types/General';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
 const maxResultsPerPage = 25;
+
+const applySubCategoryFilter = () => {
+    if (!route.query.category) return;
+
+    const subCategories = mobilizon_main_category_options.value
+            .find((category) => category.value === route.query.category)?.sub_categories || [];
+            
+    localStorage.setItem('searchCategory', JSON.stringify(subCategories));
+
+    const newQuery = { ...route.query };
+    delete newQuery.category;
+    router.replace({ query: newQuery });
+};
 
 const searchTerm = ref((route.query.tag as string) || localStorage.getItem('searchTerm') || '');
 const searchTarget = ref(localStorage.getItem('searchTarget') || searchDefaults.target);
@@ -94,7 +110,7 @@ const getLocationGeoHash = (): string => {
     return searchDefaults.locationGeoHash || '';
 };
 
-const events = ref([]);
+const events = ref<IEventDetailed[]>([]);
 const totalEvents = ref(0);
 const currentPage = ref(route.query.page ? parseInt(route.query.page as string, 10) : 1);
 
@@ -115,13 +131,13 @@ const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
 const loading = ref(false);
 const isMapExpanded = ref(false);
 
-const searchAccordions: Accordion[] = [
-    { header: 'Instanz' },
-    { header: 'Zeitraum', open: true },
-    { header: 'Kategorien' },
-    { header: 'Status der Veranstaltung' },
-    { header: 'Sprachen' },
-];
+const searchAccordions = computed((): Accordion[] => [
+    { header: t('public.search.accAbout') },
+    { header: t('public.search.accTimeRange'), open: true },
+    { header: t('public.search.accCategories') },
+    { header: t('public.search.accEventStatus') },
+    { header: t('public.search.accLanguages') },
+]);
 
 const saveSearchState = (locationGeoHash: string) => {
     localStorage.setItem('searchTerm', searchTerm.value);
@@ -183,7 +199,7 @@ const loadSearchEvents = async (resetPageNumber: boolean = true) => {
 
 const changePage = (newPage: number) => {
     currentPage.value = newPage;
-    router.push({
+    router.replace({
         query: {
             ...route.query,
             page: newPage.toString(),
@@ -211,13 +227,17 @@ const resetSearch = () => {
     loadSearchEvents();
 };
 
-if (route.query.page) loadSearchEvents(false);
-else changePage(1);
+if (route.query.page) {
+    applySubCategoryFilter();
+    loadSearchEvents(false);
+} else {
+    changePage(1);
+}
 </script>
 <template>
     <Teleport to="#headerslot">
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6">
-            <h1 class="kern-heading text-theme-primary">Veranstaltungen finden</h1>
+            <h1 class="kern-heading text-theme-primary">{{ t('public.search.title') }}</h1>
             <h2
                 v-if="searchPage.description && searchPage.description !== ''"
                 class="kern-heading font-semilight text-theme-primary"
@@ -249,7 +269,7 @@ else changePage(1);
                     :disabled="locationSearchRef?.triggered"
                     @click="loadSearchEvents()"
                 >
-                    Suchen
+                    {{ t('public.search.search') }}
                 </Button>
                 <KernAccordion
                     :accordions="searchAccordions"
@@ -260,13 +280,13 @@ else changePage(1);
                             <div class="kern-fieldset__content">
                                 <InputRadio
                                     v-model="searchTarget"
-                                    label="Dieser Kalender"
+                                    :label="t('public.search.instanceThis')"
                                     name="INTERNAL"
                                     value="INTERNAL"
                                 />
                                 <InputRadio
                                     v-model="searchTarget"
-                                    label="Gesamtes Kalendernetzwerk"
+                                    :label="t('public.search.instanceGlobal')"
                                     name="GLOBAL"
                                     value="GLOBAL"
                                 />
@@ -278,49 +298,49 @@ else changePage(1);
                             <div class="kern-fieldset__content">
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Alle Veranstaltungen"
+                                    :label="t('public.search.timeAll')"
                                     name="all"
                                     value="all"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Heute"
+                                    :label="t('public.search.timeToday')"
                                     name="today"
                                     value="today"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Morgen"
+                                    :label="t('public.search.timeTomorrow')"
                                     name="tomorrow"
                                     value="tomorrow"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Diese Woche"
+                                    :label="t('public.search.timeThisWeek')"
                                     name="thisWeek"
                                     value="thisWeek"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Dieses Wochenende"
+                                    :label="t('public.search.timeThisWeekend')"
                                     name="thisWeekend"
                                     value="thisWeekend"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Nächste Woche"
+                                    :label="t('public.search.timeNextWeek')"
                                     name="nextWeek"
                                     value="nextWeek"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Diesen Monat"
+                                    :label="t('public.search.timeThisMonth')"
                                     name="thisMonth"
                                     value="thisMonth"
                                 />
                                 <InputRadio
                                     v-model="searchBegin"
-                                    label="Nächster Monat"
+                                    :label="t('public.search.timeNextMonth')"
                                     name="nextMonth"
                                     value="nextMonth"
                                 />
@@ -382,10 +402,11 @@ else changePage(1);
                     <div class="flex flex-column md:flex-row align-items-center gap-4 pt-4 md:pt-1">
                         <InputText
                             v-model="searchTerm"
-                            placeholder="Schlagwort, Veranstaltungstitel..."
+                            :placeholder="t('public.search.searchPlaceholder')"
                             name="searchTerm"
                             class="col"
-                            aria-label="Suchbegriff: Schlagwort, Veranstaltungstitel"
+                            :aria-label="t('public.search.searchLabel')"
+                            @keyup.enter="loadSearchEvents()"
                         />
 
                         <InputLocation
@@ -403,7 +424,7 @@ else changePage(1);
                             class="lg:hidden"
                             @click="overlayable?.openOverlay()"
                         >
-                            Filter
+                            {{ t('public.search.filter') }}
                         </Button>
                         <Button
                             class="primary-search-button"
@@ -412,7 +433,7 @@ else changePage(1);
                             :disabled="locationSearchRef?.triggered"
                             @click="loadSearchEvents()"
                         >
-                            Suchen
+                            {{ t('public.search.search') }}
                         </Button>
                     </div>
                 </div>
@@ -423,16 +444,16 @@ else changePage(1);
                     <div class="kern-row">
                         <div class="kern-col">
                             <h4 class="kern-heading font-medium my-4 text-theme-primary">
-                                Keine Veranstaltungen gefunden
+                                {{ t('public.search.noResults') }}
                             </h4>
-                            <p>Versuchen Sie es mit einem anderen Suchbegriff oder passen Sie die Filter an.</p>
+                            <p>{{ t('public.search.tryDifferent') }}</p>
                             <Button
                                 variant="secondary"
                                 icon-left="autorenew"
                                 class="mt-4"
                                 @click="resetSearch()"
                             >
-                                Suchfilter zurücksetzen
+                                {{ t('public.search.resetFilters') }}
                             </Button>
                         </div>
                     </div>
@@ -441,12 +462,12 @@ else changePage(1);
                     <div class="kern-row mb-5">
                         <div class="kern-col-lg-6">
                             <h4 class="kern-heading font-medium my-4 text-theme-primary">
-                                {{ totalEvents }} Veranstaltungen gefunden
+                                {{ totalEvents }} {{ t('public.search.foundEvents') }}
                             </h4>
                         </div>
                         <div class="kern-col-lg-6">
                             <div class="kern-text kern-text--bold text-theme-primary text-right mt-4">
-                                Suchergebnis teilen
+                                {{ t('public.search.shareResults') }}
                             </div>
                             <div class="flex justify-content-end">
                                 <ShareLinks
@@ -491,7 +512,7 @@ else changePage(1);
                         @toggle="isMapExpanded = ($event.target as HTMLDetailsElement).open"
                     >
                         <summary class="kern-accordion__header">
-                            <span class="flex gap-2 align-items-center">Karte</span>
+                            <span class="flex gap-2 align-items-center">{{ t('public.search.map') }}</span>
                         </summary>
                         <section class="kern-accordion__content">
                             <EventsMap
@@ -502,7 +523,7 @@ else changePage(1);
                     </details>
 
                     <div class="w-full">
-                        <template v-for="event in events">
+                        <template v-for="event in events" :key="event!.uuid">
                             <EventCardHorizontal
                                 :event="event"
                                 class="event-card  mb-5 hidden md:flex lg:hidden xl:flex"
@@ -524,7 +545,7 @@ else changePage(1);
                                 class="px-2 sm:px-3 mx-1 hidden sm:flex"
                                 @click="changePage(currentPage - 1)"
                             >
-                                Zurück
+                                {{ t('public.search.back') }}
                             </Button>
                             <Button
                                 v-if="visiblePages[0]! > 1"
@@ -573,7 +594,7 @@ else changePage(1);
                                 class="px-2 sm:px-3 mx-1 hidden sm:flex"
                                 @click="changePage(currentPage + 1)"
                             >
-                                Weiter
+                                {{ t('public.search.next') }}
                             </Button>
                         </div>
                     </template>

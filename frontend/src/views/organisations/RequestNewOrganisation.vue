@@ -36,8 +36,7 @@ const validationSchema = toTypedSchema(
                 required_error: 'Der Name der Organisation ist erforderlich.',
             })
             .nonempty('Der Name der Organisation darf nicht leer sein.'),
-        preferredUsername: preferredUsernameSchema
-            .nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
+        preferredUsername: preferredUsernameSchema,
         summary: zod
             .string({
                 required_error: 'Die Beschreibung der Organisation ist erforderlich.',

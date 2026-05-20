@@ -56,6 +56,16 @@ class SeriesEvent extends Model
         'start',
         'end',
         'user_id',
+        'time',
+        'duration',
+        'mobilizon_fields',
+        'holidays_check',
+        'school_holidays_check',
+        'holidays_state',
+        'weekly_day',
+        'monthly_week_day',
+        'monthly_weeks',
+        'monthly_use_start_date_as_default',
         'mobilizon_group_id',
     ];
 
@@ -68,6 +78,10 @@ class SeriesEvent extends Model
     {
         return [
             'mobilizon_fields' => Json::class,
+            'monthly_weeks' => 'array',
+            'monthly_use_start_date_as_default' => 'boolean',
+            'holidays_check' => 'boolean',
+            'school_holidays_check' => 'boolean',
         ];
     }
 

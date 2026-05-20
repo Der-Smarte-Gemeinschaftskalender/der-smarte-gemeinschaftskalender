@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import Card from './KERN/Card.vue';
-import Button from './KERN/Button.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
 import EventStatusBadge from './EventStatusBadge.vue';
 import { formatOnDate, formatOnTime, buildAddress, formatDateTime, getCardImageUrl } from '@/lib/helper';
@@ -19,14 +18,22 @@ defineProps<Props>();
         class="p-1"
         :image-src="getCardImageUrl(event)"
         :image-alt="''"
-        :image-class="'max-w-20rem p-2 my-auto'"
+        :image-class="'max-w-18rem w-18rem p-2 my-auto flex-shrink-0'"
         :horizontal="true"
     >
-        <div class="kern-row w-full kern-text kern-text--bold pt-0 pl-3">
-            <div class="kern-col-8 p-0 min-w-24rem">
+        <div class="kern-row w-full kern-text kern-text--bold pt-0 pl-3 flex-grow-1">
+            <div class="w-full p-0 ml-2 content">
                 <div class="kern-row">
-                    <div class="kern-col-10">
-                        <h4 class="kern-heading font-medium text-theme-primary">{{ event.title }}</h4>
+                    <div class="kern-col-10 mt-3">
+                        <RouterLink
+                            :to="{
+                                name: 'public.event',
+                                params: { uuid: event.uuid },
+                            }"
+                            class="kern-heading text-2xl font-medium text-theme-primary"
+                        >
+                            {{ event.title }}
+                        </RouterLink>
                     </div>
                     <div
                         v-if="event.status && event.status !== 'CONFIRMED'"
@@ -39,25 +46,23 @@ defineProps<Props>();
                     <div class="kern-col-4 align-items-start p-2 flex gap-2">
                         <Icon name="calendar_month" />
 
-                        <span class="hidden xl:inline-block">
-                            {{ formatOnDate(event.beginsOn) }}
+                        <div class="hidden xl:inline-block">
+                            <div>{{ formatOnDate(event.beginsOn) }}</div>
                             <template v-if="formatOnDate(event.beginsOn) != formatOnDate(event.endsOn)">
-                                <br />
-                                <span>{{ formatOnDate(event.endsOn) }}</span>
+                                <div>{{ formatOnDate(event.endsOn) }}</div>
                             </template>
-                        </span>
-                        <span class="xl:hidden">
-                            {{ formatDateTime(event.beginsOn) }}
+                        </div>
+                        <div class="xl:hidden">
+                            <div>{{ formatDateTime(event.beginsOn) }}</div>
                             <template v-if="formatDateTime(event.beginsOn) != formatDateTime(event.endsOn)">
-                                <br />
-                                <span>{{ formatDateTime(event.endsOn) }}</span>
+                                <div>{{ formatDateTime(event.endsOn) }}</div>
                             </template>
-                        </span>
+                        </div>
                     </div>
                     <div class="kern-col-8 p-2 flex gap-2 align-items-start">
                         <Icon name="location_on" />
                         <div class="line-height-2 white-space-pre-line">
-                            {{ buildAddress(event.physicalAddress) || 'Keine Adresse' }}
+                            {{ buildAddress(event.physicalAddress) || $t('public.event.noAddress') }}
                         </div>
                     </div>
                     <div class="kern-col-4 flex gap-2 align-items-start p-2">
@@ -74,20 +79,12 @@ defineProps<Props>();
                         {{ event?.attributedTo?.name }}
                     </div>
                 </div>
-                <RouterLink
-                    v-if="event.uuid"
-                    :to="{ name: 'public.event', params: { uuid: event.uuid } }"
-                >
-                    <Button
-                        title="Veranstaltung ansehen"
-                        aria-label="Veranstaltung ansehen"
-                        icon-left="visibility"
-                        class="px-4 m-2"
-                    >
-                        Ansehen
-                    </Button>
-                </RouterLink>
             </div>
         </div>
     </Card>
 </template>
+<style scoped lang="scss">
+.content {
+    max-width: 550px !important;
+}
+</style>
