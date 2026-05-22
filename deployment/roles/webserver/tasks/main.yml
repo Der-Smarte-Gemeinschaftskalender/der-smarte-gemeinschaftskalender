@@ -73,7 +73,7 @@
 - name: Override nginx config with custom nginx-combined.conf if exists
   template:
     src: "{{ playbook_dir }}/roles/dsgdev/files/{{ inventory_name }}/nginx-combined.conf"
-    dest: "/etc/nginx/sites-available/events.diday.org.conf"
+    dest: "/etc/nginx/sites-available/{{ domain }}.conf"
     owner: root
     group: root
     mode: '0644'
