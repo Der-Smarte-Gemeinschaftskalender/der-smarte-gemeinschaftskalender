@@ -24,7 +24,6 @@ watch(model, (newVal) => {
     <FocusLock :active="model" initial-focus-selector=".reject-button">
         <div
             v-if="model"
-            $attrs
             class="dialog-overlay h-full w-full fixed top-0 left-0 flex align-items-center justify-content-center"
         >
             <dialog

@@ -115,6 +115,14 @@
             "noEventsForCriteria": "No events found for these search criteria.",
             "allEventInfo": "All event information"
         },
+        "timezoneNotice": {
+            "title": "Timezone notice",
+            "content": "Your browser is set to the \"{detectedTz}\" timezone – event times are shown in this timezone accordingly."
+        },
+        "timezoneFormHint": {
+            "stored": "Note: Entered date and time are stored as Berlin time (CET/CEST). Viewers see events in the timezone of their browser – an event at \"17:00\" will automatically appear as \"11:00\" for a browser in New York.",
+            "browserMismatch": "Your browser timezone is \"{detectedTz}\". Note: An input of \"13:00\" will still be stored as 13:00 Berlin time. If you want to create an event in your own local time, please convert to Berlin time first."
+        },
         "search": {
             "title": "Find Events",
             "results": "Search Results",

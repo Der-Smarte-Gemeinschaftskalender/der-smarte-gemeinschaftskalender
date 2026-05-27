@@ -11,6 +11,7 @@ import { mobilizon_main_category_options, mobilizon_event_status, mobilizon_even
 import deLocale from '@fullcalendar/core/locales/de';
 import enLocale from '@fullcalendar/core/locales/en-gb';
 
+import TimezoneNotice from '@/components/TimezoneNotice.vue';
 import KernAccordion from '@/components/KERN/Accordion.vue';
 import InputRadio from '@/components/KERN/inputs/InputRadio.vue';
 import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
@@ -149,7 +150,9 @@ const fullCalendarRefetchEvents = () => {
 const getSubCategoriesForMainCategory = (): MobilizonCategory[] => {
     searchCategory.value = searchMainCategory.value
         .map((category) => {
-            return mobilizon_main_category_options.value.find((option) => option.value === category)?.sub_categories || [];
+            return (
+                mobilizon_main_category_options.value.find((option) => option.value === category)?.sub_categories || []
+            );
         })
         .flat();
 };
@@ -171,14 +174,13 @@ watch(searchTerm, async () => {
 
 watch(locale, (newLocale) => {
     if (!fullCalendar?.value) return;
-    
+
     nextTick(() => {
         fullCalendarRefetchEvents();
     });
 });
 
 getSubCategoriesForMainCategory();
-
 </script>
 <template>
     <Teleport to="#headerslot">
@@ -295,6 +297,7 @@ getSubCategoriesForMainCategory();
             </Card>
         </Overlayable>
         <div class="calendar-wrapper flex-grow-1 flex flex-column">
+            <TimezoneNotice class="mb-3" />
             <FullCalendar
                 v-if="!loading"
                 ref="fullCalendar"

@@ -6,10 +6,16 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import { searchEvents } from '@/lib/mobilizonClient';
-import { mobilizon_category_options, mobilizon_main_category_options, mobilizon_event_status, mobilizon_event_language_options } from '@/lib/const';
+import {
+    mobilizon_category_options,
+    mobilizon_main_category_options,
+    mobilizon_event_status,
+    mobilizon_event_language_options,
+} from '@/lib/const';
 
 import Card from '@/components/KERN/Card.vue';
 import EventCardHorizontal from '@/components/EventCardHorizontal.vue';
+import TimezoneNotice from '@/components/TimezoneNotice.vue';
 import EventsMap from '@/components/EventsMap.vue';
 import KernAccordion from '@/components/KERN/Accordion.vue';
 import InputRadio from '@/components/KERN/inputs/InputRadio.vue';
@@ -36,9 +42,10 @@ const maxResultsPerPage = 25;
 const applySubCategoryFilter = () => {
     if (!route.query.category) return;
 
-    const subCategories = mobilizon_main_category_options.value
-            .find((category) => category.value === route.query.category)?.sub_categories || [];
-            
+    const subCategories =
+        mobilizon_main_category_options.value.find((category) => category.value === route.query.category)
+            ?.sub_categories || [];
+
     localStorage.setItem('searchCategory', JSON.stringify(subCategories));
 
     const newQuery = { ...route.query };
@@ -522,11 +529,16 @@ if (route.query.page) {
                         </section>
                     </details>
 
+                    <TimezoneNotice class="mb-3" />
+
                     <div class="w-full">
-                        <template v-for="event in events" :key="event!.uuid">
+                        <template
+                            v-for="event in events"
+                            :key="event!.uuid"
+                        >
                             <EventCardHorizontal
                                 :event="event"
-                                class="event-card  mb-5 hidden md:flex lg:hidden xl:flex"
+                                class="event-card mb-5 hidden md:flex lg:hidden xl:flex"
                             />
                             <EventCard
                                 :event="event"
