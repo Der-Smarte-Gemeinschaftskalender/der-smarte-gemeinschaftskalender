@@ -2,6 +2,12 @@
 
 Hier gibt es eine Übersicht der Änderungen zwischen den Versionen.
 
+## 27.05.2026 - v1.4.1
+- Fix: Verbesserte Anzeige von Zeitzonen.
+    - Im öffentlichen Bereich gibt es jetzt einen Alert, wenn nicht Europe/Berlin Zeitzone vom Browser benutzt wird.
+    - Im internen Bereich gibt es einen Hinweis auf die richtige Zeitzone.
+- Fix: Möglicher Fehler beim Öffnen vom Dialog Komponente. 
+
 ## 20.05.2026 - v1.4.0
 
 - Serien Termine:
