@@ -21,6 +21,7 @@ import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import EventStatusBadge from '@/components/EventStatusBadge.vue';
 import Button from '@/components/KERN/Button.vue';
 import EventCard from '@/components/EventCard.vue';
+import TimezoneNotice from '@/components/TimezoneNotice.vue';
 import Map from '@/components/Map.vue';
 import EventShare from '@/components/ShareLinks.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
@@ -93,7 +94,10 @@ const selectCategoryAndRedirect = (category: MobilizonCategory) => {
 };
 
 const getCategoryText = (category: MobilizonCategory) => {
-    return mobilizon_category_options.value.find((option) => option.value === category)?.text || t('public.event.unknownCategory');
+    return (
+        mobilizon_category_options.value.find((option) => option.value === category)?.text ||
+        t('public.event.unknownCategory')
+    );
 };
 
 loadEvent();
@@ -177,7 +181,9 @@ loadEvent();
                 <div class="kern-col">
                     <div class="w-full flex sm:flex-row justify-content-between flex-column gap-5 flex-wrap">
                         <div>
-                            <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.when') }}</h3>
+                            <h3 class="kern-heading font-medium text-theme-primary my-3">
+                                {{ $t('public.event.when') }}
+                            </h3>
                             <section v-if="formatOnDate(event?.beginsOn) === formatOnDate(event?.endsOn)">
                                 <div class="kern-text flex gap-2 align-items-start">
                                     <Icon name="calendar_month" />
@@ -189,6 +195,7 @@ loadEvent();
                                     {{ $t('public.event.until') }}
                                     {{ formatOnTime(event?.endsOn) }}
                                 </div>
+                                <TimezoneNotice class="mb-3" />
                             </section>
                             <section v-else>
                                 <div class="kern-text flex gap-2 align-items-start">
@@ -204,7 +211,9 @@ loadEvent();
                             </section>
                         </div>
                         <div>
-                            <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.where') }}</h3>
+                            <h3 class="kern-heading font-medium text-theme-primary my-3">
+                                {{ $t('public.event.where') }}
+                            </h3>
                             <div
                                 v-if="event?.physicalAddress?.geom"
                                 class="kern-text flex gap-2 align-items-start"
@@ -247,7 +256,9 @@ loadEvent();
                     <div
                         class="kern-text prose"
                         v-html="
-                            stripHtml(event.description!) ? event.description : `<p>${$t('public.event.noDescription')}</p>`
+                            stripHtml(event.description!)
+                                ? event.description
+                                : `<p>${$t('public.event.noDescription')}</p>`
                         "
                     ></div>
                     <div class="mt-5">
@@ -283,7 +294,8 @@ loadEvent();
                             <LinkToDocs
                                 path="DSG%20Funktionen/"
                                 fragment="veranstaltungsdatei-exportieren"
-                            />.
+                            />
+                            .
                         </p>
                         <Button
                             icon-left="download"
@@ -309,7 +321,9 @@ loadEvent();
                 <div class="kern-col">
                     <div class="mb-4">
                         <template v-if="event.joinOptions === MobilizonEventJoinOptions.EXTERNAL">
-                            <h3 class="kern-heading font-medium text-theme-primary my-3">{{ $t('public.event.externalRegistration') }}</h3>
+                            <h3 class="kern-heading font-medium text-theme-primary my-3">
+                                {{ $t('public.event.externalRegistration') }}
+                            </h3>
                             <a
                                 :href="event.externalParticipationUrl!"
                                 target="_blank"

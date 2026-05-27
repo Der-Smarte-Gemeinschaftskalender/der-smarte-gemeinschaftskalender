@@ -2,10 +2,12 @@
 import zod from '@/lib/zod';
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSingleEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { formatInputDate, reconstructOptions } from '@/lib/helper';
+import { useTimezoneCheck } from '@/composables/TimezoneComposable';
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import { createEventDefaults } from '@/lib/instanceConfig';
@@ -44,6 +46,8 @@ import {
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
+const { isMismatch: tzMismatch, detectedTz } = useTimezoneCheck();
 const mobilizionGroupOptions = ref<Option[]>([]);
 const errorMessageContent = ref<string>('');
 const rawAddress = ref<string>('');
@@ -224,6 +228,15 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     name="duration"
                     :hours-max="999"
                     :errors="submitCount === 0 ? undefined : errors.duration"
+                />
+                <p class="kern-text kern-text--small text-color-secondary">
+                    {{ t('public.timezoneFormHint.stored') }}
+                </p>
+                <Alert
+                    v-if="tzMismatch"
+                    severity="warning"
+                    :title="$t('public.timezoneNotice.title')"
+                    :content="t('public.timezoneFormHint.browserMismatch', { detectedTz })"
                 />
                 <Divider class="my-5" />
                 <InputSelect

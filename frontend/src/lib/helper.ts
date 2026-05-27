@@ -8,6 +8,13 @@ import type { AddressForm } from '@/types/Mobilizon';
 import { type IEvent, type Option, MobilizonCategory } from '@/types/General';
 import { defaultEventImageBasedOnCategory } from './instanceConfig';
 
+// Server-Speicher-Zeitzone: Eingaben in den Termin-Formularen werden vom
+// Backend (Laravel config/app.php) immer als Europa/Berlin interpretiert und
+// gespeichert. Die Anzeige im Frontend nutzt aber die jeweilige Browser-TZ
+// (dayjs Default), damit Nutzer in anderen Zeitzonen lokale Uhrzeit sehen.
+// useTimezoneCheck/TimezoneNotice nutzt diese Konstante als Referenz.
+export const DISPLAY_TIMEZONE = 'Europe/Berlin';
+
 // App
 /**
  * Formats a date in the format "01.01.2023".
@@ -34,7 +41,8 @@ export const formatInputDate = (value: dayjs.ConfigType = new Date()): string =>
  * @return { string } - The formatted time string.
  */
 export const formatInputTime = (value: dayjs.ConfigType = new Date(), tz: boolean = false): string => {
-    return tz ? dayjs(value).format('HH:mm Z') : dayjs(value).format('HH:mm');
+    const d = dayjs(value);
+    return tz ? d.format('HH:mm Z') : d.format('HH:mm');
 };
 
 // Public

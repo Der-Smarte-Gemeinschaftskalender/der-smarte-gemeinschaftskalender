@@ -115,6 +115,14 @@
             "noEventsForCriteria": "Keine Veranstaltung mit diesen Suchkriterien gefunden.",
             "allEventInfo": "Alle Infos zum Event"
         },
+        "timezoneNotice": {
+            "title": "Hinweis zur Zeitzone",
+            "content": "Ihr Browser ist auf die Zeitzone „{detectedTz}\" eingestellt – Termin-Uhrzeiten werden entsprechend in dieser Zeitzone angezeigt. Stimmt Ihre Browser-Zeitzone nicht, können die angezeigten Uhrzeiten abweichen."
+        },
+        "timezoneFormHint": {
+            "stored": "Hinweis: Eingegebene Datum und Uhrzeit werden als Berliner Zeit (MEZ/MESZ) gespeichert. Betrachter sehen die Termine in der Zeitzone ihres jeweiligen Browsers – ein Termin „17:00\" erscheint bei einem Browser in New York zum Beispiel automatisch als „11:00\".",
+            "browserMismatch": "Ihre Browser-Zeitzone ist „{detectedTz}\". Achtung: Eine Eingabe „13:00\" wird trotzdem als 13:00 Berliner Zeit gespeichert. Wenn Sie einen Termin in Ihrer eigenen Ortszeit anlegen möchten, rechnen Sie bitte vorher in Berliner Zeit um."
+        },
         "search": {
             "title": "Veranstaltungen finden",
             "results": "Suchergebnisse",

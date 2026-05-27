@@ -4,11 +4,13 @@ import zod from '@/lib/zod';
 import { dsgApi } from '@/lib/dsgApi';
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSeriesEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import { formatInputDate, reconstructOptions } from '@/lib/helper';
+import { useTimezoneCheck } from '@/composables/TimezoneComposable';
 import { createEventDefaults, seriesEventsHolidaysFilter, seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig';
 import {
     intervall_options,
@@ -52,6 +54,8 @@ import HolidaysSelect, { HolidaysPayload } from '@/components/HolidaysSelect.vue
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
+const { isMismatch: tzMismatch, detectedTz } = useTimezoneCheck();
 const mobilizionGroupOptions = ref<Option[]>([]);
 const errorMessageContent = ref<string>('');
 const rawAddress = ref<string>('');
@@ -323,6 +327,15 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             :errors="submitCount === 0 ? undefined : errors.duration"
                         />
                     </div>
+                    <p class="kern-text kern-text--small text-color-secondary">
+                        {{ t('public.timezoneFormHint.stored') }}
+                    </p>
+                    <Alert
+                        v-if="tzMismatch"
+                        severity="warning"
+                        :title="$t('public.timezoneNotice.title')"
+                        :content="t('public.timezoneFormHint.browserMismatch', { detectedTz })"
+                    />
                     <div class="my-5">
                         <InputSelect
                             v-model="intervall"
