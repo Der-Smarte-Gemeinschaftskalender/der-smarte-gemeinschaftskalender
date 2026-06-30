@@ -22,46 +22,32 @@ export const addressDefaults = {
     id: null,
 };
 
+const optionalAddressString = (defaultValue: string) =>
+    zod
+        .string()
+        .nullable()
+        .default(defaultValue)
+        .transform((value) => value ?? '');
+
 export const AddressFormSchema = zod
     .object({
-        description: zod
-            .string()
-            .default(addressDefaults.description),
-        country: zod
-            .string()
-            .default(addressDefaults.country),
-        region: zod
-            .string()
-            .default(addressDefaults.region),
-        locality: zod
-            .string()
-            .default(addressDefaults.locality),
-        postalCode: zod
-            .string()
-            .default(addressDefaults.postalCode),
-        street: zod
-            .string()
-            .default(addressDefaults.street),
-        type: zod
-            .nativeEnum(EventPlaceType)
-            .default(EventPlaceType.OFFICE),
-        geom: zod
-            .string()
-            .default(addressDefaults.geom),
-        timezone: zod
-            .string()
-            .nullable()
-            .default(addressDefaults.timezone),
-        id: zod
-            .string()
-            .nullable()
-            .default(addressDefaults.id),
+        description: optionalAddressString(addressDefaults.description),
+        country: optionalAddressString(addressDefaults.country),
+        region: optionalAddressString(addressDefaults.region),
+        locality: optionalAddressString(addressDefaults.locality),
+        postalCode: optionalAddressString(addressDefaults.postalCode),
+        street: optionalAddressString(addressDefaults.street),
+        type: zod.nativeEnum(EventPlaceType).default(EventPlaceType.OFFICE),
+        geom: optionalAddressString(addressDefaults.geom),
+        timezone: zod.string().nullable().default(addressDefaults.timezone),
+        id: zod.string().nullable().default(addressDefaults.id),
     })
     .superRefine((value, ctx) => {
-        if (value.description && (!value.locality || !value.postalCode || !value.street)) {
+        if (value.description && !value.geom?.trim()) {
             ctx.addIssue({
                 code: zod.ZodIssueCode.custom,
-                message: 'Wenn eine Beschreibung angegeben ist, müssen Ort, Postleitzahl und Straße ausgefüllt sein.',
+                message:
+                    'Die Adresse konnte keinem Ort zugeordnet werden. Wählen einen Vorschlag aus der Liste aus. Die Vorschläge erscheinen nur, wenn eine Adresse eingeben wurde, die in OpenStreetMap hinterlegt ist.',
             });
         }
     });
@@ -74,17 +60,9 @@ export const pictureDefaults = {
 };
 
 export const PictureSchema = zod.object({
-    name: zod
-        .string()
-        .nonempty()
-        .default(pictureDefaults.name),
-    alt: zod
-        .string()
-        .nullable()
-        .default(pictureDefaults.alt),
-    url: zod
-        .string()
-        .optional(),
+    name: zod.string().nonempty().default(pictureDefaults.name),
+    alt: zod.string().nullable().default(pictureDefaults.alt),
+    url: zod.string().optional(),
     file: zod
         .instanceof(File)
         .optional()
@@ -136,32 +114,13 @@ export const MobilizonFieldsFormSchema = zod.object({
                 params: { mimeType: 'image/jpeg, image/png' },
             }
         ),
-    pictureAlt: zod
-        .string()
-        .optional()
-        .default(mobilizonFieldsDefaults.pictureAlt),
-    description: zod
-        .string()
-        .default(mobilizonFieldsDefaults.description),
-    category: zod
-        .string()
-        .nonempty()
-        .default(mobilizonFieldsDefaults.category),
-    tags: zod
-        .array(zod.string())
-        .default(mobilizonFieldsDefaults.tags),
-    joinOptions: zod
-        .string()
-        .nonempty()
-        .default(mobilizonFieldsDefaults.joinOptions),
-    language: zod
-        .string()
-        .nonempty()
-        .default(mobilizonFieldsDefaults.language),
-    status: zod
-        .string()
-        .nonempty()
-        .default(mobilizonFieldsDefaults.status),
+    pictureAlt: zod.string().optional().default(mobilizonFieldsDefaults.pictureAlt),
+    description: zod.string().default(mobilizonFieldsDefaults.description),
+    category: zod.string().nonempty().default(mobilizonFieldsDefaults.category),
+    tags: zod.array(zod.string()).default(mobilizonFieldsDefaults.tags),
+    joinOptions: zod.string().nonempty().default(mobilizonFieldsDefaults.joinOptions),
+    language: zod.string().nonempty().default(mobilizonFieldsDefaults.language),
+    status: zod.string().nonempty().default(mobilizonFieldsDefaults.status),
     externalParticipationUrl: zod
         .string()
         .nullable()
@@ -169,13 +128,8 @@ export const MobilizonFieldsFormSchema = zod.object({
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
             message: 'Bei Angabe einer externen Teilnahme-URL bitte eine gültige URL eingeben.',
         }),
-    visibility: zod
-        .string()
-        .nonempty()
-        .default(mobilizonFieldsDefaults.visibility),
-    physicalAddress: AddressFormSchema
-        .nullable()
-        .optional(),
+    visibility: zod.string().nonempty().default(mobilizonFieldsDefaults.visibility),
+    physicalAddress: AddressFormSchema.nullable().optional(),
     onlineAddress: zod
         .string()
         .nullable()
@@ -188,18 +142,12 @@ export const MobilizonFieldsFormSchema = zod.object({
 export type MobilizonFieldsForm = zod.infer<typeof MobilizonFieldsFormSchema>;
 
 export const MobilizonFieldsSchema = zod.object({
-    picture: PictureSchema
-        .optional()
-        .nullable(),
+    picture: PictureSchema.optional().nullable(),
     description: zod
         .string()
         .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' }),
-    category: zod
-        .string()
-        .nonempty(),
-    joinOptions: zod
-        .string()
-        .nonempty(),
+    category: zod.string().nonempty(),
+    joinOptions: zod.string().nonempty(),
     externalParticipationUrl: zod
         .string()
         .optional()
@@ -207,19 +155,10 @@ export const MobilizonFieldsSchema = zod.object({
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
             message: 'Bei Angabe einer externen Teilnahme-URL bitte eine gültige URL eingeben.',
         }),
-    language: zod
-        .string()
-        .nonempty(),
-    status: zod
-        .string()
-        .nonempty(),
-    visibility: zod
-        .string()
-        .nonempty(),
-    tags: zod
-        .array(zod.string())
-        .optional()
-        .nullable(),
+    language: zod.string().nonempty(),
+    status: zod.string().nonempty(),
+    visibility: zod.string().nonempty(),
+    tags: zod.array(zod.string()).optional().nullable(),
     onlineAddress: zod
         .string()
         .nullable()
@@ -227,23 +166,15 @@ export const MobilizonFieldsSchema = zod.object({
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
             message: 'Bei Angabe einer Online-Adresse bitte eine gültige URL eingeben.',
         }),
-    physicalAddress: AddressFormSchema
-        .optional()
-        .nullable(),
+    physicalAddress: AddressFormSchema.optional().nullable(),
 });
 
 export type MobilizonFields = zod.infer<typeof MobilizonFieldsSchema>;
 
 export const MobilizonGroupSchema = zod.object({
-    id: zod
-        .coerce
-        .number(),
-    name: zod
-        .string()
-        .nonempty(),
-    preferredUsername: zod
-        .string()
-        .nonempty(),
+    id: zod.coerce.number(),
+    name: zod.string().nonempty(),
+    preferredUsername: zod.string().nonempty(),
 });
 
 export type MobilizonGroup = zod.infer<typeof MobilizonGroupSchema>;

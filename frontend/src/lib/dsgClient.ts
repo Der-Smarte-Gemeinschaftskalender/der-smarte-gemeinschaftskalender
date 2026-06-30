@@ -3,7 +3,7 @@ import { axiosErrorHandler, dsgApi } from './dsgApi';
 import type { ZodSchema, ZodType } from 'zod';
 import type { AxiosError } from 'axios';
 
-import { MobilizonGroupSchema, type MobilizonGroup, MobilizonFieldsSchema } from '@/types/Mobilizon';
+import { MobilizonGroupSchema, type MobilizonGroup, MobilizonFieldsSchema, type AddressForm } from '@/types/Mobilizon';
 import { SingleEventResponseSchema, type SingleEventResponse } from '@/types/events/SingleEvents';
 import { type SeriesEvent, SeriesEventSchema } from '@/types/events/SeriesEvents';
 
@@ -92,6 +92,24 @@ export const getEventsStatistics = async (mobilizionGroupId: string | number): P
     } catch (error) {
         console.error('Error fetching events statistics:', error);
         throw error;
+    }
+};
+
+export const getSuggestedAddresses = async (
+    mobilizionGroupId: string | number
+): Promise<{ organisationAddress: Partial<AddressForm> | null; frequentAddresses: Partial<AddressForm>[] }> => {
+    try {
+        const { data } = await dsgApi.get('/created-events/suggested-addresses', {
+            params: { mobilizon_group_id: mobilizionGroupId },
+        });
+
+        return {
+            organisationAddress: data.organisation_address ?? null,
+            frequentAddresses: data.frequent_addresses ?? [],
+        };
+    } catch (error) {
+        console.error('Error fetching suggested addresses:', error);
+        return { organisationAddress: null, frequentAddresses: [] };
     }
 };
 

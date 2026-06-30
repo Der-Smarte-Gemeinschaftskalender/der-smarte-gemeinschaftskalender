@@ -65,6 +65,7 @@ Route::prefix('single-events')->group(function () {
 
 Route::prefix('created-events')->group(function () {
     Route::get('/statistics/{group_id}', [EventController::class, 'index']);
+    Route::get('/suggested-addresses', [EventController::class, 'suggestedAddresses']);
     Route::post('/findEvent', [CreatedEventController::class, 'getEventId']);
     Route::post('/{createdEvent}', [CreatedEventController::class, 'update']);
     Route::delete('/{createdEvent}', [CreatedEventController::class, 'delete']);

@@ -82,17 +82,6 @@ async function geocodeAndUpdateMap(location: string) {
         if (data.length > 0) {
             const bestMatch = data[0];
 
-            const [lon, lat] = bestMatch.geom.split(';').map((coord) => parseFloat(coord.trim()));
-
-            // Move map view to the new coordinates
-            map.value!.setView([lat, lon], 13);
-
-            // Remove old marker
-            marker.value?.remove();
-
-            // Add new marker
-            marker.value = L.marker([lat, lon], { icon: myIcon }).addTo(map.value as L.Map);
-
             props.physicalAddress.street = bestMatch.street;
             props.physicalAddress.postalCode = bestMatch.postalCode?.trim();
             props.physicalAddress.locality = bestMatch.locality?.trim();
@@ -101,6 +90,18 @@ async function geocodeAndUpdateMap(location: string) {
             props.physicalAddress.geom = bestMatch.geom?.trim();
 
             suggestions.value = data;
+
+            const [lon, lat] = bestMatch.geom.split(';').map((coord) => parseFloat(coord.trim()));
+
+            if (map.value && Number.isFinite(lat) && Number.isFinite(lon)) {
+                map.value.setView([lat, lon], 13);
+
+                // Remove old marker
+                marker.value?.remove();
+
+                // Add new marker
+                marker.value = L.marker([lat, lon], { icon: myIcon }).addTo(map.value as L.Map);
+            }
         }
     } catch (err) {
         suggestions.value = [];

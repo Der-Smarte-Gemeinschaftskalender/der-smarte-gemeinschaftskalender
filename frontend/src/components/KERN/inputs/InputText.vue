@@ -91,6 +91,7 @@ window.addEventListener('keydown', (event) => {
         :errors="errors"
         class="relative"
         :disabled="($attrs.disabled as boolean) ?? false"
+        style="z-index: 499;"
     >
         <input
             :id="name"

@@ -32,6 +32,7 @@ import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import InputTags from '@/components/InputTags.vue';
+import AddressInput from '@/components/AddressInput.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 
 import { MobilizonEventJoinOptions, type Option } from '@/types/General';
@@ -150,13 +151,6 @@ const createFromTemplate = async () => {
     } catch (error) {
         console.error(error);
     }
-};
-
-const updateAddress = (address: string) => {
-    physicalAddress.value = {
-        ...addressDefaults,
-        description: address,
-    };
 };
 
 watch(joinOptions, (newValue) => {
@@ -316,13 +310,14 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     name="onlineAddress"
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
-                <InputText
+                <AddressInput
                     v-model="rawAddress"
+                    v-model:address="physicalAddress"
                     name="physicalAddress"
                     label="Adresse (optional)"
-                    :list="mapSuggestions"
+                    :suggestions="mapSuggestions"
+                    :mobilizon-group-id="mobilizon_group_id"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
-                    @input="updateAddress(rawAddress)"
                 />
             </div>
         </Fieldset>
