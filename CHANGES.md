@@ -2,6 +2,10 @@
 
 Hier gibt es eine Übersicht der Änderungen zwischen den Versionen.
 
+## 30.06.2026 - v1.5.0
+- Bei der Adresseingabe lassen sich jetzt mit einem Klick die Adresse, die Organisation oder die meistbenutzten bisherigen Adressen übernehmen. #32
+- [Eircodes](https://en.wikipedia.org/wiki/Postal_addresses_in_the_Republic_of_Ireland) können als Adressen hinterlegt werden #36
+
 ## 27.05.2026 - v1.4.1
 - Fix: Verbesserte Anzeige von Zeitzonen.
     - Im öffentlichen Bereich gibt es jetzt einen Alert, wenn nicht Europe/Berlin Zeitzone vom Browser benutzt wird.
