@@ -47,7 +47,7 @@ export const AddressFormSchema = zod
             ctx.addIssue({
                 code: zod.ZodIssueCode.custom,
                 message:
-                    'Die Adresse konnte keinem Ort zugeordnet werden. Bitte wählen Sie einen Vorschlag aus der Liste aus.',
+                    'Die Adresse konnte keinem Ort zugeordnet werden. Wählen einen Vorschlag aus der Liste aus. Die Vorschläge erscheinen nur, wenn eine Adresse eingeben wurde, die in OpenStreetMap hinterlegt ist.',
             });
         }
     });

@@ -33,6 +33,7 @@ import EventStatusBadge from '@/components/EventStatusBadge.vue';
 import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import InputImage from '@/components/KERN/inputs/InputImage.vue';
 import InputTags from '@/components/InputTags.vue';
+import AddressInput from '@/components/AddressInput.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import DeleteCreatedEvent from '@/components/DeleteCreatedEvent.vue';
 
@@ -204,13 +205,6 @@ const loadCreatedEvent = async () => {
     } finally {
         loading.value = false;
     }
-};
-
-const updateAddress = (address: string) => {
-    physicalAddress.value = {
-        ...addressDefaults,
-        description: address,
-    };
 };
 
 const getEventTypeLabel = (eventType: string): string => {
@@ -398,13 +392,14 @@ loadCreatedEvent();
                     name="onlineAddress"
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
-                <InputText
+                <AddressInput
                     v-model="rawAddress"
+                    v-model:address="physicalAddress"
                     name="physicalAddress"
                     label="Adresse (optional)"
-                    :list="mapSuggestions"
+                    :suggestions="mapSuggestions"
+                    :mobilizon-group-id="mobilizon_group_id"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
-                    @input="updateAddress(rawAddress)"
                 />
             </div>
         </Fieldset>

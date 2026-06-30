@@ -17,7 +17,6 @@ import InputUrl from '@/components/KERN/inputs/InputUrl.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
-import InputText from '@/components/KERN/inputs/InputText.vue';
 import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
@@ -25,11 +24,12 @@ import InputRadios from '@/components/KERN/inputs/InputRadios.vue';
 import Map from '@/components/Map.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import InputTags from '@/components/InputTags.vue';
+import AddressInput from '@/components/AddressInput.vue';
 
 import { MobilizonEventJoinOptions, type Option } from '@/types/General';
 import type { RemoveKeys } from '@/types/Generics';
 
-import { addressDefaults, type AddressForm } from '@/types/Mobilizon';
+import { type AddressForm } from '@/types/Mobilizon';
 import {
     type ImportedEvent,
     ImportedEventSchema,
@@ -85,13 +85,6 @@ const onSubmit = handleSubmit(async (values: ImportedEventForm) => {
         isSubmitting.value = false;
     }
 });
-
-const updateAddress = (address: string) => {
-    physicalAddress.value = {
-        ...addressDefaults,
-        description: address,
-    };
-};
 
 watch(joinOptions, (newValue) => {
     if (newValue !== MobilizonEventJoinOptions.EXTERNAL) externalParticipationUrl.value = undefined;
@@ -240,13 +233,14 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
             </div>
-            <InputText
+            <AddressInput
                 v-model="rawAddress"
+                v-model:address="physicalAddress"
                 name="physicalAddress"
                 label="Adresse (optional)"
-                :list="mapSuggestions"
+                :suggestions="mapSuggestions"
+                :mobilizon-group-id="mobilizon_group_id"
                 :errors="submitCount === 0 ? undefined : errors.physicalAddress"
-                @input="updateAddress(rawAddress)"
             />
         </Fieldset>
         <Map
