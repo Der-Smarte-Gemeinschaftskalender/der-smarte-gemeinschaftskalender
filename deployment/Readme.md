@@ -6,9 +6,7 @@ RUN
 * update inventory file
 
 than run:
-```
-```
+```bash
 ssh-add
 ansible-playbook -i inventory/example.yml playbook.yml   
-´´´
-
+```
