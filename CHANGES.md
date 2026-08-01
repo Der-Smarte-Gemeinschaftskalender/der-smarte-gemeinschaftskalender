@@ -2,6 +2,13 @@
 
 Hier gibt es eine Übersicht der Änderungen zwischen den Versionen.
 
+## dd.mm.yyyy - v1.5.1
+
+- Fix: Das Anlegen von (langen) Serienterminen mit großen Bildern funktioniert wieder (#35).
+- Fehlerbehebung: Beim Ändern des Status von Terminen gehen Bilder nicht verloren.
+- Fix: In der Ansible-Konfiguration funktioniert der Cronjob für die Verlängerung des SSL-Zertifikats.
+
+
 ## 30.06.2026 - v1.5.0
 - Bei der Adresseingabe lassen sich jetzt mit einem Klick die Adresse, die Organisation oder die meistbenutzten bisherigen Adressen übernehmen. #32
 - [Eircodes](https://en.wikipedia.org/wiki/Postal_addresses_in_the_Republic_of_Ireland) können als Adressen hinterlegt werden #36

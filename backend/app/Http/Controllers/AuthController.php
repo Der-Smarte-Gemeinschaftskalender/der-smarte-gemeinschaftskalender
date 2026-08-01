@@ -80,6 +80,14 @@ class AuthController extends Controller
             return response()->json(['error' => $createdMobilizonUser['errors'][0]['message']], 500);
         }
 
+        if (!isset($createdMobilizonUser['data']['createUser']['id'])) {
+            Log::error('Mobilizon createUser lieferte keine gültige Antwort', ['response' => $createdMobilizonUser]);
+
+            return response()->json([
+                'error' => 'Die Registrierung ist zurzeit leider nicht möglich. Bitte versuchen Sie es später erneut.'
+            ], 503);
+        }
+
         $user = new User();
         $user->email = $email;
         $user->password = Hash::make($request->input('password'));

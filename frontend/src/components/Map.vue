@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
 watch(
     () => props.searchValue,
     async (newValue) => {
-        if (!map.value || !newValue || newValue.length <= 2) return;
+        if (!newValue || newValue.length <= 2) return;
 
         suggestions.value = [];
         isLoading.value = true;

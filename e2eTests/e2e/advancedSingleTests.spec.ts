@@ -158,6 +158,47 @@ test("single termin with image", async ({ page }) => {
   await verifyEventDetails(page, eventData);
 });
 
+test("single termin with image and status change", async ({ page }) => {
+  const config = loadEnv();
+  const eventName = generateRandomTestName(
+    "E2E test termin image status change"
+  );
+
+  await login(page, config);
+  await navigateToApp(page, config);
+  await createSingleEvent(page);
+
+  const eventData = {
+    name: eventName,
+    description: `Das ist eine Beschreibung${eventName}`,
+    imagePath: "./e2e/testFiles/test-image.png",
+  };
+
+  await fillEventForm(page, eventData);
+  await submitSingleEvent(page);
+  await editEventFromList(page, eventName);
+
+  await expect(page.getByAltText("Ereignisvorschau")).toBeVisible({
+    timeout: 15000,
+  });
+
+  await page.getByRole("button", { name: "Vorläufig", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Status auf Vorläufig ändern" })
+    .click();
+
+  await expect(
+    page.getByRole("button", { name: "Bestätigt", exact: true })
+  ).toBeVisible({ timeout: 15000 });
+
+  await expect(page.getByAltText("Ereignisvorschau")).toBeVisible({
+    timeout: 15000,
+  });
+  
+  await saveEventChanges(page);
+  await verifyEventDetails(page, eventData);
+});
+
 test("single termin with url", async ({ page }) => {
   const config = loadEnv();
   const eventName = generateRandomTestName("E2E Test Termin with URL");

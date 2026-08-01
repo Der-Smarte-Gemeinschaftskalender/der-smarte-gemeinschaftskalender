@@ -66,6 +66,10 @@ class SeriesEventController extends Controller implements HasMiddleware
 
     public function create(Request $request): JsonResponse
     {
+        if ($invalidPictureResponse = CreatedEventController::rejectInvalidPictureUpload($request)) {
+            return $invalidPictureResponse;
+        }
+
         $request->merge([
             'monthly_use_start_date_as_default' => $request->boolean('monthly_use_start_date_as_default'),
         ]);
@@ -112,13 +116,12 @@ class SeriesEventController extends Controller implements HasMiddleware
         foreach ($period as $eventDate) {
             // Default and new behavior are similar
             if ($intervall === Intervall::WEEKLY->getLabel() && $weeklyDay != $eventDate->dayOfWeek) continue;
-            
+
             if ($intervall === Intervall::MONTHLY->getLabel()) {
                 // Default behavior
                 if ($monthlyUseStartDateAsDefault) {
                     if ($start->day != $eventDate->day) continue;
-                }
-                else {
+                } else {
                     if ($eventDate->dayOfWeek != $monthlyWeekDay) continue;
 
                     $isMatchingWeek = false;
@@ -209,6 +212,12 @@ class SeriesEventController extends Controller implements HasMiddleware
                 "endsOn"    => $eventDate->copy()->addMinutes($durationMinutes)->toAtomString()
             ]);
 
+            $uploadPicture = $request->hasFile('mobilizon_fields.picture.media.file');
+            if (!empty($pictureResponse['uuid'])) {
+                $eventData['picture'] = ['mediaUuid' => $pictureResponse['uuid']];
+                $uploadPicture = false;
+            }
+
             $createdEvent = new CreatedEvent();
             $createdEvent->series_events_id = $seriesEvent->id;
             $createdEvent->user_id = $request->user()->id;
@@ -221,7 +230,7 @@ class SeriesEventController extends Controller implements HasMiddleware
                 MobilizonTag::saveTags($mobilizonFields['tags'], (int)$request->input('mobilizon_group_id'));
             }
 
-            $mresponse = $mclient->createEvent($eventData, $request->hasFile('mobilizon_fields.picture.media.file'));
+            $mresponse = $mclient->createEvent($eventData, $uploadPicture);
 
             if ($mclient->hasError($mresponse)) {
                 $createdEvent->delete();

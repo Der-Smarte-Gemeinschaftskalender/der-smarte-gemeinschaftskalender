@@ -72,7 +72,7 @@ class Mobilizon
                 self::$instance->getPersonId();
             } else {
                 $login = self::$instance->login($user);
-                
+
                 if (self::$instance->hasError($login)) {
                     Log::error('Mobilizon Login fehlgeschlagen für Benutzer ID ' . $user->id, [
                         'response' => $login
@@ -80,7 +80,7 @@ class Mobilizon
 
                     return self::$instance;
                 }
-   
+
                 $newAccessToken = $login['data']['login']['accessToken'];
                 self::$instance->setAccessToken($newAccessToken, $user);
                 self::$instance->getUserId();
@@ -399,14 +399,15 @@ class Mobilizon
             $query = Query::mutation("CreateEvent");
             $query->field("createEvent")->attributes($event);
             $query->createEvent->fields(['id', 'uuid', 'picture']);
-            $query->createEvent->picture->fields(['url', 'alt', 'name']);
+            $query->createEvent->picture->fields(['uuid', 'url', 'alt', 'name']);
 
             return $this->requestWithMedia($query->build(), $event, $file);
         }
 
         $query = Query::mutation("CreateEvent");
         $query->field("createEvent")->attributes($event);
-        $query->createEvent->fields(['id', 'uuid']);
+        $query->createEvent->fields(['id', 'uuid', 'picture']);
+        $query->createEvent->picture->fields(['uuid', 'url', 'alt', 'name']);
 
         return $this->requestWithoutMedia($query->build());
     }
@@ -458,29 +459,29 @@ class Mobilizon
         return $this->requestWithoutMedia($query->build());
     }
 
-public function findProfileByPreferredUsername(
-    string $preferredUsername,
-    bool $local = true
-): int {
-    $query = Query::query('ListProfiles');
+    public function findProfileByPreferredUsername(
+        string $preferredUsername,
+        bool $local = true
+    ): int {
+        $query = Query::query('ListProfiles');
 
-    $query->field('persons')
-        ->attributes([
-            'preferredUsername' => $preferredUsername,
-            'local' => $local,
-            'page' => 1,
-            'limit' => 1,
-        ]);
+        $query->field('persons')
+            ->attributes([
+                'preferredUsername' => $preferredUsername,
+                'local' => $local,
+                'page' => 1,
+                'limit' => 1,
+            ]);
 
-    $query->persons->fields(['total']);
+        $query->persons->fields(['total']);
 
-    if ($this->debug) {
-        var_dump($query->build());
+        if ($this->debug) {
+            var_dump($query->build());
+        }
+
+        $response = $this->requestWithoutMedia($query->build());
+        return (int) ($response['data']['persons']['total'] ?? 0);
     }
-
-    $response = $this->requestWithoutMedia($query->build());
-    return (int) ($response['data']['persons']['total'] ?? 0);
-}
 
 
     public function hasError($response)
@@ -494,7 +495,7 @@ public function findProfileByPreferredUsername(
     }
 
     private function isRateLimitError($response): bool
-    {   
+    {
         if (!isset($response['error']) && !isset($response['errors'])) {
             return false;
         }
@@ -541,7 +542,7 @@ public function findProfileByPreferredUsername(
     public function searchAddress(?string $query, int $limit = 10): ?array
     {
         if (!$query) return null;
-        
+
         $gqlQuery = Query::query("SearchAddress");
         $gqlQuery->field("searchAddress")
             ->attributes(["query" => $query, "limit" => $limit])
@@ -610,7 +611,12 @@ public function findProfileByPreferredUsername(
                 ]);
 
                 $result = json_decode((string)$response->getBody(), true);
-                
+
+                if (!is_array($result)) {
+                    Log::error('Mobilizon lieferte keine JSON-Antwort (HTTP ' . $response->getStatusCode() . ')');
+                    return ['error' => 'Mobilizon lieferte eine ungültige Antwort (HTTP ' . $response->getStatusCode() . ')'];
+                }
+
                 if ($this->isRateLimitError($result)) {
                     $retryCount++;
                     if ($retryCount <= $maxRetries) {
@@ -620,14 +626,14 @@ public function findProfileByPreferredUsername(
                         continue;
                     }
                 }
-                
-                return json_decode((string)$response->getBody(), true);
+
+                return $result;
             } catch (Throwable $e) {
                 Log::error($e->getMessage());
                 return ['error' => $e->getMessage()];
             }
         }
-        
+
         return ['error' => 'Too many requests - max retries exceeded'];
     }
 
@@ -651,7 +657,12 @@ public function findProfileByPreferredUsername(
                 ]);
 
                 $result = json_decode((string)$response->getBody(), true);
-                
+
+                if (!is_array($result)) {
+                    Log::error('Mobilizon lieferte keine JSON-Antwort (HTTP ' . $response->getStatusCode() . ')');
+                    return ['error' => 'Mobilizon lieferte eine ungültige Antwort (HTTP ' . $response->getStatusCode() . ')'];
+                }
+
                 if ($this->isRateLimitError($result)) {
                     $retryCount++;
                     if ($retryCount <= $maxRetries) {
@@ -661,14 +672,14 @@ public function findProfileByPreferredUsername(
                         continue;
                     }
                 }
-                
-                return json_decode((string)$response->getBody(), true);
+
+                return $result;
             } catch (Throwable $e) {
                 Log::error($e->getMessage());
                 return ['error' => $e->getMessage()];
             }
         }
-        
+
         return ['error' => 'Too many requests - max retries exceeded'];
     }
 }

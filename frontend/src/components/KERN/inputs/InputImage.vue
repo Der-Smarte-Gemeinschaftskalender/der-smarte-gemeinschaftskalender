@@ -68,7 +68,6 @@ watch(model, (newFile) => {
                 :multiple="false"
                 :accept="props.accept || ['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                 @file-change="onFileChange"
-                @click="clearModel"
             />
             <!--
             <InputText

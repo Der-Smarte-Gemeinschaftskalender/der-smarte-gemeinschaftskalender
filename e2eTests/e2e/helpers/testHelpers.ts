@@ -173,8 +173,11 @@ export async function fillEventForm(page: Page, data: EventFormData): Promise<vo
 
         await page.waitForTimeout(3000);
         await page.waitForSelector('ul.z-10.w-full.border.list-none.absolute:visible', { timeout: 10000 });
-        await page.waitForSelector(`text=${data.location.confirmationAddress}`, { timeout: 10000 });
-        await page.getByText(data.location.confirmationAddress).click();
+        const suggestionItem = page
+            .locator('ul.z-10.w-full.border.list-none.absolute li', { hasText: data.location.confirmationAddress })
+            .first();
+        await suggestionItem.waitFor({ timeout: 10000 });
+        await suggestionItem.click();
     }
 }
 

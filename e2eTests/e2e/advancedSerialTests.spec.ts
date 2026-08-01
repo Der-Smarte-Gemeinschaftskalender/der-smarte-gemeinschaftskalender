@@ -47,6 +47,40 @@ test('serial termin with location', async ({ page }) => {
     await verifyEventDetails(page, eventData);
 });
 
+test('serial termin with image on all events', async ({ page }) => {
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with image');
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    const eventData = {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+        imagePath: './e2e/testFiles/test-image.png',
+    };
+
+    await fillEventForm(page, eventData);
+
+    await page.locator('#end').pressSequentially(getFutureDate(4), { delay: 150 });
+
+    await submitSerialEvent(page);
+    await viewSerialEventFromList(page, eventName);
+
+    const viewButtons = page.getByLabel('Ansehen');
+    await expect(viewButtons.first()).toBeVisible({ timeout: 15000 });
+    const eventCount = await viewButtons.count();
+    expect(eventCount).toBeGreaterThanOrEqual(2);
+
+    for (let i = 0; i < eventCount; i++) {
+        await page.getByLabel('Ansehen').nth(i).click();
+        await verifyEventDetails(page, eventData);
+        await page.goBack();
+        await page.waitForLoadState('networkidle');
+    }
+});
+
 test('serial termin with category and tags', async ({ page }) => {
     const config = loadEnv();
     const eventName = generateRandomTestName('E2E serial test termin with category and tags');
@@ -245,9 +279,9 @@ test('serial termin use as template with holidays', async ({ page }) => {
 
     await fillEventForm(page, eventData);
 
-    // Extend the end date so there is room for at least one non-holiday, non-vacation day
+    // Extend the end date so there is room for at least one non-holiday, non-vacation day.
     const holidaysEndDate = new Date();
-    holidaysEndDate.setDate(holidaysEndDate.getDate() + 21);
+    holidaysEndDate.setDate(holidaysEndDate.getDate() + 70);
     await page.locator('#end').fill(holidaysEndDate.toISOString().split('T')[0]);
 
     const holidaysCheckbox = page.locator('input[name="holidaysEnabled"]');

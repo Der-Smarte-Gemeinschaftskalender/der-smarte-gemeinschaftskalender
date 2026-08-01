@@ -67,6 +67,10 @@ class SingleEventController extends Controller implements HasMiddleware
 
     public function store(Request $request): JsonResponse
     {
+        if ($invalidPictureResponse = CreatedEventController::rejectInvalidPictureUpload($request)) {
+            return $invalidPictureResponse;
+        }
+
         // Strict mode: create approval request instead of event
         if (config('dsg.strict_mode')) {
             $approvalRequestService = new ApprovalRequestService();

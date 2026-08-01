@@ -67,6 +67,7 @@ const mapSuggestions = computed(() => buildSuggestions(mapRef.value?.suggestions
 
 const errorMessageContent = ref<string>('');
 const showApprovalRequestSuccessMessage = ref<boolean>(false);
+const pictureLoadFailed = ref<boolean>(false);
 
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm<CreatedEventForm>({
     validationSchema: toTypedSchema(CreatedEventFormSchema),
@@ -101,6 +102,10 @@ const onSubmit = handleSubmit(async (values: CreatedEventForm) => {
         'duration',
     ]);
     preparedValues.mobilizon_id = createdEvent.value.mobilizon_id;
+    // Bild nur löschen, wenn es der Nutzer entfernt hat – nicht, wenn es
+    // lediglich nicht in das Formular geladen werden konnte.
+    preparedValues.picture_removed =
+        !!createdEventData.value?.picture?.url && !values.picture && !pictureLoadFailed.value;
 
     try {
         isSubmitting.value = true;
@@ -174,9 +179,11 @@ const loadCreatedEvent = async () => {
             },
         ];
 
+        pictureLoadFailed.value = false;
         picture.value = createdEventData.value?.picture?.url
             ? (await loadCreatedEventImageByID(createdEvent.value?.id!)) || undefined
             : undefined;
+        pictureLoadFailed.value = !!createdEventData.value?.picture?.url && !picture.value;
         pictureAlt.value = createdEventData.value?.picture?.alt || '';
         name.value = createdEventData.value?.title;
         description.value = createdEventData.value?.description;
@@ -298,6 +305,12 @@ loadCreatedEvent();
                     label="Titel"
                     name="name"
                     :errors="submitCount === 0 ? undefined : errors.name"
+                />
+                <Alert
+                    v-if="pictureLoadFailed"
+                    title="Bild konnte nicht geladen werden"
+                    content="Das vorhandene Veranstaltungsbild konnte nicht geladen werden und wird deshalb hier nicht angezeigt. Beim Speichern bleibt es unverändert erhalten. Laden Sie die Seite neu, um es erneut zu versuchen, oder wählen Sie ein neues Bild aus."
+                    severity="warning"
                 />
                 <InputImage
                     v-model="picture"

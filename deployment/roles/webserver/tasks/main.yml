@@ -98,7 +98,7 @@
     minute: "0"
     hour: "0"
     day: "*/12"
-    job: "sleep $((RANDOM \\% 43200)) && certbot renew --quiet --post-hook 'systemctl reload nginx'"
+    job: "sleep $(shuf -i 0-43200 -n 1) && certbot renew --quiet --post-hook 'systemctl reload nginx'"
     user: root
     state: present
   tags:

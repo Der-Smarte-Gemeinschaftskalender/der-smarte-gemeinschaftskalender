@@ -30,6 +30,21 @@ class CreatedEventController extends Controller implements HasMiddleware
         ];
     }
 
+    static public function rejectInvalidPictureUpload(Request $request): ?JsonResponse
+    {
+        $pictureFile = $request->file('mobilizon_fields.picture.media.file');
+
+        if ($pictureFile && !$pictureFile->isValid()) {
+            $error = in_array($pictureFile->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE])
+                ? 'Das Bild überschreitet die maximal erlaubte Dateigröße von ' . ini_get('upload_max_filesize') . 'B. Bitte wählen Sie ein kleineres Bild.'
+                : 'Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.';
+
+            return response()->json(['error' => $error], 422);
+        }
+
+        return null;
+    }
+
     static public function buildMobilizonEventData(Request $request, SingleEvent|SeriesEvent $event, Mobilizon $mclient, array $customDateTimes = []): array
     {
         $mobilizonFields = $request->input('mobilizon_fields');
@@ -56,9 +71,9 @@ class CreatedEventController extends Controller implements HasMiddleware
         if ($request->hasFile('mobilizon_fields.picture.media.file')) {
             $eventData['picture'] = $mobilizonFields['picture'];
             $eventData['picture']['media']['file'] = $request->file('mobilizon_fields.picture.media.file');
-        } elseif ($request->get('mobilizon_fields.picture.media.url')) {
+        } elseif ($request->input('mobilizon_fields.picture.media.url')) {
             $eventData['picture'] = $mobilizonFields['picture'];
-            $eventData['picture']['media']['url'] = $request->get('mobilizon_fields.picture.media.url');
+            $eventData['picture']['media']['url'] = $request->input('mobilizon_fields.picture.media.url');
         }
 
         if (isset($mobilizonFields['onlineAddress'])) {
@@ -126,13 +141,17 @@ class CreatedEventController extends Controller implements HasMiddleware
 
     public function update(CreatedEvent $createdEvent, Request $request): JsonResponse
     {
+        if ($invalidPictureResponse = self::rejectInvalidPictureUpload($request)) {
+            return $invalidPictureResponse;
+        }
+
         // Strict mode: create approval request instead of event
         // Only apply strict mode for created events that belong to single events.
         if (config('dsg.strict_mode') && $createdEvent->single_events_id) {
 
             // Add the created event ID to the request for the approval system
-            $request->merge([ '_created_event_id' => $createdEvent->id ]);
-            
+            $request->merge(['_created_event_id' => $createdEvent->id]);
+
             $approvalRequestService = new ApprovalRequestService();
             $result = $approvalRequestService->createApprovalRequest($request, 'CreatedEvent', 'update', $createdEvent->id);
 
@@ -175,11 +194,10 @@ class CreatedEventController extends Controller implements HasMiddleware
         if ($request->hasFile('mobilizon_fields.picture.media.file')) {
             $eventData['picture'] = $mobilizonFields['picture'];
             $eventData['picture']['media']['file'] = $request->file('mobilizon_fields.picture.media.file');
-        } else if ($request->get('mobilizon_fields.picture.media.url')) {
+        } else if ($request->input('mobilizon_fields.picture.media.url')) {
             $eventData['picture'] = $mobilizonFields['picture'];
-            $eventData['picture']['media']['url'] = $request->get('mobilizon_fields.picture.media.url');
-        }
-        else {
+            $eventData['picture']['media']['url'] = $request->input('mobilizon_fields.picture.media.url');
+        } else if ($request->boolean('picture_removed')) {
             $eventData['picture'] = null;
         }
 
@@ -188,15 +206,13 @@ class CreatedEventController extends Controller implements HasMiddleware
                 $mobilizonFields['onlineAddress'] = 'https://' . $mobilizonFields['onlineAddress'];
             }
             $eventData['onlineAddress'] = $mobilizonFields['onlineAddress'];
-        }
-        else {
+        } else {
             $eventData['onlineAddress'] = null;
         }
 
         if (isset($mobilizonFields['physicalAddress'])) {
             $eventData['physicalAddress'] = $mobilizonFields['physicalAddress'];
-        }
-        else {
+        } else {
             $eventData['physicalAddress'] = null;
         }
 
@@ -206,8 +222,7 @@ class CreatedEventController extends Controller implements HasMiddleware
             }
 
             $eventData['externalParticipationUrl'] = $mobilizonFields['externalParticipationUrl'];
-        }
-        else {
+        } else {
             $eventData['externalParticipationUrl'] = null;
         }
 
@@ -250,16 +265,16 @@ class CreatedEventController extends Controller implements HasMiddleware
             $eventDisplayData = $createdEvent->getRelatedEvent();
 
             $fullEventData = array_merge(
-                $eventDisplayData->toArray(), 
+                $eventDisplayData->toArray(),
                 [
                     'start' => $createdEvent->start,
                     'time' => $createdEvent->time,
                     'duration' => $createdEvent->duration,
                 ]
-            );    
-            
+            );
+
             $request->merge($fullEventData);
-            
+
             $approvalRequestService = new ApprovalRequestService();
             $result = $approvalRequestService->createApprovalRequest($request, 'CreatedEvent', 'delete', $createdEvent->id);
 
@@ -279,7 +294,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         }
 
         $createdEvent = CreatedEvent::find($createdEvent->id);
-        
+
         $mclient = Mobilizon::getInstance();
         $mresponse = $mclient->deleteEvent($createdEvent->mobilizon_id);
         if ($mclient->hasError($mresponse)) {

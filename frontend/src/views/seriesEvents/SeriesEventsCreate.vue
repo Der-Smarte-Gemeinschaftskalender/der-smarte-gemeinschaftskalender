@@ -59,6 +59,7 @@ const { t } = useI18n();
 const { isMismatch: tzMismatch, detectedTz } = useTimezoneCheck();
 const mobilizionGroupOptions = ref<Option[]>([]);
 const errorMessageContent = ref<string>('');
+const templatePictureLoadFailed = ref<boolean>(false);
 const rawAddress = ref<string>('');
 const mapRef = ref<InstanceType<typeof Map> | null>(null);
 const isMapLoading = computed(() => mapRef.value?.isLoading ?? false);
@@ -145,6 +146,8 @@ const createFromTemplate = async () => {
             seriesEvent.mobilizon_fields.picture?.url && seriesEvent.created_events.length
                 ? (await loadCreatedEventImageByID(seriesEvent.created_events[0].id)) || undefined
                 : undefined;
+        templatePictureLoadFailed.value =
+            !!seriesEvent.mobilizon_fields.picture?.url && !!seriesEvent.created_events.length && !picture.value;
         pictureAlt.value = seriesEvent.mobilizon_fields.picture?.alt || '';
         name.value = seriesEvent.name;
         description.value = seriesEvent.mobilizon_fields.description || '';
@@ -207,6 +210,9 @@ watch(joinOptions, (newValue) => {
     if (newValue !== MobilizonEventJoinOptions.EXTERNAL) externalParticipationUrl.value = undefined;
     else if (!externalParticipationUrl.value) externalParticipationUrl.value = '';
 });
+watch(picture, (newValue) => {
+    if (newValue) templatePictureLoadFailed.value = false;
+});
 
 let holidaysDebounceTimeout: number | undefined; 
 watch(
@@ -254,6 +260,13 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 label="Titel des Serientermins"
                 name="name"
                 :errors="submitCount === 0 ? undefined : errors.name"
+            />
+            <Alert
+                v-if="templatePictureLoadFailed"
+                class="mb-3"
+                title="Bild der Vorlage konnte nicht geladen werden"
+                content="Das Bild aus dem Vorlagen-Termin konnte nicht geladen werden. Bitte wählen Sie das Bild manuell aus, sonst wird der Serientermin ohne Bild erstellt."
+                severity="warning"
             />
             <InputImage
                 v-model="picture"

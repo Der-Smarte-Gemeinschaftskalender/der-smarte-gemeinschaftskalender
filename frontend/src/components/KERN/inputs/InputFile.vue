@@ -16,7 +16,6 @@ const props = defineProps<Props>();
 
 const emit = defineEmits(['fileChange']);
 
-
 const getAccept = (): string => {
     const accept: string[] = typeof props.accept === 'string' ? props.accept.split(',') : props.accept!;
 
@@ -33,6 +32,9 @@ const onFileChanged = ($event: Event) => {
     if (target && target.files) {
         emit('fileChange', target.files);
     }
+};
+const onClick = ($event: Event) => {
+    ($event.target as HTMLInputElement).value = '';
 };
 </script>
 
@@ -59,6 +61,7 @@ const onFileChanged = ($event: Event) => {
             :aria-describedby="`input-${name} file-input`"
             :disabled="disabled"
             :multiple="multiple ?? false"
+            @click="onClick"
             @change="onFileChanged"
         />
     </FormInputLabel>
