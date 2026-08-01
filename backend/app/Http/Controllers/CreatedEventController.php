@@ -199,6 +199,16 @@ class CreatedEventController extends Controller implements HasMiddleware
             $eventData['picture']['media']['url'] = $request->input('mobilizon_fields.picture.media.url');
         } else if ($request->boolean('picture_removed')) {
             $eventData['picture'] = null;
+        } else {
+            $pictureResponse = $mclient->getEventPicture($createdEvent->mobilizon_uuid);
+            if ($mclient->hasError($pictureResponse)) {
+                return response()->json([
+                    'error' => $mclient->getError($pictureResponse)
+                ], 400);
+            }
+            if ($pictureUuid = $pictureResponse['data']['event']['picture']['uuid'] ?? null) {
+                $eventData['picture'] = ['mediaUuid' => $pictureUuid];
+            }
         }
 
         if (isset($mobilizonFields['onlineAddress'])) {
@@ -322,6 +332,20 @@ class CreatedEventController extends Controller implements HasMiddleware
             "eventId" => $request->input('mobilizon_id'),
             "status" => Query::enum($request->input('mobilizon_fields')['status']),
         ];
+
+        // Mobilizon behandelt ein fehlendes 'picture'-Attribut wie picture: null
+        // und löscht das Bild. Vorhandenes Bild daher explizit per mediaUuid behalten.
+        $pictureResponse = $createdEvent->mobilizon_uuid
+            ? $mclient->getEventPicture($createdEvent->mobilizon_uuid)
+            : [];
+        if ($mclient->hasError($pictureResponse)) {
+            return response()->json([
+                'error' => $mclient->getError($pictureResponse)
+            ], 400);
+        }
+        if ($pictureUuid = $pictureResponse['data']['event']['picture']['uuid'] ?? null) {
+            $eventData['picture'] = ['mediaUuid' => $pictureUuid];
+        }
 
         $mresponse = $mclient->updateEvent($eventData, false);
         if ($mclient->hasError($mresponse)) {

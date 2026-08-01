@@ -343,6 +343,16 @@ class Mobilizon
         return $this->requestWithoutMedia($query->build());
     }
 
+    public function getEventPicture(string $uuid): array
+    {
+        $query = Query::query("GetEventPicture");
+        $query->field("event")->attribute('uuid', $uuid);
+        $query->event->fields(['picture']);
+        $query->event->picture->fields(['uuid', 'url']);
+
+        return $this->requestWithoutMedia($query->build());
+    }
+
     public function getEventImage(string $uuid): array
     {
         $query = Query::query("event");
@@ -421,7 +431,7 @@ class Mobilizon
             $query = Query::mutation("UpdateEvent");
             $query->field("updateEvent")->attributes($event);
             $query->updateEvent->fields(['id', 'uuid', 'picture']);
-            $query->updateEvent->picture->fields(['url', 'alt', 'name']);
+            $query->updateEvent->picture->fields(['uuid', 'url', 'alt', 'name']);
 
             return $this->requestWithMedia($query->build(), $event, $file);
         }
@@ -429,7 +439,7 @@ class Mobilizon
         $query = Query::mutation("UpdateEvent");
         $query->field("updateEvent")->attributes($event);
         $query->updateEvent->fields(['id', 'uuid', 'picture']);
-        $query->updateEvent->picture->fields(['url', 'alt', 'name']);
+        $query->updateEvent->picture->fields(['uuid', 'url', 'alt', 'name']);
 
         return $this->requestWithoutMedia($query->build());
     }
