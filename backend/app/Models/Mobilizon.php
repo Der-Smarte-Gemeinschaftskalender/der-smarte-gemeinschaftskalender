@@ -596,6 +596,7 @@ class Mobilizon
         while ($retryCount <= $maxRetries) {
             try {
                 $response = $this->client->request("POST", "/api", [
+                    'timeout' => 120.0,
                     'headers' => [
                         "Authorization" => "bearer " . $this->accessToken,
                         "Accept" => "application/json",
