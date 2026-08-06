@@ -17,6 +17,7 @@ import {
     setupWeeklyTemplateControls,
     assertWeeklyTemplateControls,
 } from './helpers/testHelpers';
+import { createLargeTestImage } from './helpers/imageHelper';
 
 test('serial termin with location', async ({ page }) => {
     const config = loadEnv();
@@ -78,6 +79,79 @@ test('serial termin with image on all events', async ({ page }) => {
         await verifyEventDetails(page, eventData);
         await page.goBack();
         await page.waitForLoadState('networkidle');
+    }
+});
+
+test('serial termin with large image on long series', async ({ page }) => {
+    test.setTimeout(300000);
+
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with large image');
+    const imagePath = createLargeTestImage();
+    const imageName = imagePath.split('/').pop()!.split('.')[0]!;
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    const eventData = {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+        imagePath,
+    };
+
+    await fillEventForm(page, eventData);
+
+    await page.locator('#end').pressSequentially(getFutureDate(6), { delay: 150 });
+
+    const createRequest = page.waitForResponse(
+        (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
+        { timeout: 240000 }
+    );
+
+    await submitSerialEvent(page);
+    const createResponse = await createRequest;
+    expect(createResponse.status()).toBe(200);
+
+    const createdEvents = (await createResponse.json()).seriesEvent.created_events;
+    expect(createdEvents.length).toBeGreaterThanOrEqual(20);
+
+    await viewSerialEventFromList(page, eventName);
+    await expect(page.getByLabel('Ansehen').first()).toBeVisible({ timeout: 15000 });
+
+    const paginationInfo = await page.locator('.pagination-info').first().textContent();
+    const totalPages = Number(paginationInfo?.match(/von\s+(\d+)/)?.[1] ?? 1);
+    expect(totalPages).toBeGreaterThan(1);
+
+    const getImageSourceOfEvent = async (pageNumber: number, position: 'first' | 'last') => {
+        for (let currentPage = 1; currentPage < pageNumber; currentPage++) {
+            await page.getByLabel('Nächste Seite').click();
+        }
+        await expect(page.locator('.pagination-info').first()).toHaveText(`Seite ${pageNumber} von ${totalPages}`);
+
+        const viewButtons = page.getByLabel('Ansehen');
+        await (position === 'first' ? viewButtons.first() : viewButtons.last()).click();
+        await verifyEventDetails(page, eventData);
+        const imageSource = await page.locator(`img[src*="${imageName}"]`).first().getAttribute('src');
+
+        await page.goBack();
+        await page.waitForLoadState('networkidle');
+        await expect(page.getByLabel('Ansehen').first()).toBeVisible({ timeout: 15000 });
+
+        return imageSource;
+    };
+
+    // Erster, mittlerer und letzter Termin der Serie
+    const imageSources = [
+        await getImageSourceOfEvent(1, 'first'),
+        await getImageSourceOfEvent(Math.ceil(totalPages / 2), 'first'),
+        await getImageSourceOfEvent(totalPages, 'last'),
+    ];
+
+    for (const imageSource of imageSources) {
+        expect(imageSource).toBeTruthy();
+        // Gleiche URL = dieselbe Mobilizon-Media, also nur ein Upload für die ganze Serie.
+        expect(imageSource).toBe(imageSources[0]);
     }
 });
 

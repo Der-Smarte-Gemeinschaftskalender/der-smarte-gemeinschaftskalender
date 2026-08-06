@@ -6,3 +6,6 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 test.ics
+
+# Zur Laufzeit erzeugte Testdateien (z.B. großes Testbild)
+/e2e/testFiles/generated/
