@@ -51,6 +51,7 @@ import InputTags from '@/components/InputTags.vue';
 import AddressInput from '@/components/AddressInput.vue';
 import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
 import HolidaysSelect, { HolidaysPayload } from '@/components/HolidaysSelect.vue';
+import LoadingDialog from '@/components/LoadingDialog.vue';
 
 
 const route = useRoute();
@@ -243,6 +244,11 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             fragment="serientermin-erstellen"
         />.
     </p>
+    <LoadingDialog
+        v-model="isSubmitting"
+        title="Serientermin wird angelegt"
+        description="Alle Termine der Serie werden nacheinander angelegt. Je nach Anzahl der Termine kann das einige Momente dauern."
+    />
     <form
         novalidate
         @submit.prevent="onSubmit"

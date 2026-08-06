@@ -110,6 +110,9 @@ test('serial termin with large image on long series', async ({ page }) => {
     );
 
     await submitSerialEvent(page);
+
+    await expect(page.getByRole('heading', { name: 'Serientermin wird angelegt' })).toBeVisible();
+
     const createResponse = await createRequest;
     expect(createResponse.status()).toBe(200);
 

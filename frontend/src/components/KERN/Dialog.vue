@@ -1,27 +1,37 @@
 <script lang="ts" setup>
-import { watch } from 'vue';
+import { onBeforeUnmount, watch } from 'vue';
 
 import Button from './Button.vue';
 import FocusLock from '../FocusLock.vue';
-
 
 const model = defineModel<boolean>();
 
 interface Props {
     title: string;
     showContent?: boolean;
+    showFooter?: boolean;
+    closable?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
     showContent: true,
+    showFooter: true,
+    closable: true,
 });
 
 watch(model, (newVal) => {
     document.documentElement.style.overflow = newVal ? 'hidden' : '';
 });
+
+onBeforeUnmount(() => {
+    document.documentElement.style.overflow = '';
+});
 </script>
 <template>
-    <FocusLock :active="model" initial-focus-selector=".reject-button">
+    <FocusLock
+        :active="model"
+        initial-focus-selector=".reject-button"
+    >
         <div
             v-if="model"
             class="dialog-overlay h-full w-full fixed top-0 left-0 flex align-items-center justify-content-center"
@@ -42,6 +52,7 @@ watch(model, (newVal) => {
                         {{ title }}
                     </h2>
                     <Button
+                        v-if="closable"
                         icon-left="close"
                         variant="tertiary"
                         class="close-button"
@@ -54,7 +65,10 @@ watch(model, (newVal) => {
                 >
                     <slot />
                 </section>
-                <footer class="kern-dialog__footer">
+                <footer
+                    v-if="showFooter"
+                    class="kern-dialog__footer"
+                >
                     <slot name="footer">
                         <Button
                             variant="secondary"

@@ -5,6 +5,7 @@ Hier gibt es eine Übersicht der Änderungen zwischen den Versionen.
 ## dd.mm.yyyy - v1.5.1
 
 - Fix: Das Anlegen von (langen) Serienterminen mit großen Bildern funktioniert wieder (#35).
+- Beim Anlegen eines Serientermins zeigt ein Hinweisdialog mit Ladeanimation, dass der Vorgang einige Momente dauern kann und das Browserfenster nicht geschlossen werden sollte.
 - Fehlerbehebung: Beim Ändern des Status von Terminen gehen Bilder nicht verloren.
 - Fix: In der Ansible-Konfiguration funktioniert der Cronjob für die Verlängerung des SSL-Zertifikats.
 
