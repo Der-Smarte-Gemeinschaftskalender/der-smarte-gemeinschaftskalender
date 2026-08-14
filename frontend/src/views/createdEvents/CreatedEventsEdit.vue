@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { formatDateTime, formatInputDate, reconstructOptions } from '@/lib/helper';
+import { formatDateTime, formatInputDate, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { dsgApi } from '@/lib/dsgApi';
 import { handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { useField, useForm } from 'vee-validate';
@@ -297,6 +297,7 @@ loadCreatedEvent();
     <form
         novalidate
         @submit.prevent="onSubmit"
+        @keydown.enter="preventImplicitSubmit"
     >
         <Fieldset>
             <div class="flex flex-column gap-5">

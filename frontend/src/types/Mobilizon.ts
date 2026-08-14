@@ -1,5 +1,6 @@
 import zod from '@/lib/zod';
 import { stripHtml } from '@/lib/helper';
+import { mimeTypes } from '@/types/File';
 import {
     mobilizon_category_options,
     mobilizon_event_join_options,
@@ -59,27 +60,51 @@ export const pictureDefaults = {
     alt: '',
 };
 
+export const PICTURE_MAX_BYTES = 2_097_152;
+export const PICTURE_ALLOWED_MIME_TYPES = ['image/gif', 'image/png', 'image/jpeg', 'image/webp'];
+
+const describeFileFormat = (file: File): string => {
+    const knownFormat = mimeTypes[file.type];
+    if (knownFormat) return knownFormat;
+
+    const extension = file.name.includes('.') ? file.name.split('.').pop() : '';
+    return extension ? extension.toUpperCase() : file.type || 'unbekannt';
+};
+
+export const validatePictureFile = (file: File | undefined, ctx: zod.RefinementCtx): void => {
+    if (!file) return;
+
+    if (!(file instanceof File) || file.size === 0) {
+        ctx.addIssue({
+            code: zod.ZodIssueCode.custom,
+            message:
+                'Die ausgewählte Datei ist leer oder konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.',
+        });
+        return;
+    }
+
+    if (!PICTURE_ALLOWED_MIME_TYPES.includes(file.type)) {
+        ctx.addIssue({
+            code: zod.ZodIssueCode.custom,
+            message: `Das Format ${describeFileFormat(file)} wird nicht unterstützt. Bitte wählen Sie ein Bild im Format JPG, PNG, GIF oder WEBP.`,
+        });
+        return;
+    }
+
+    if (file.size >= PICTURE_MAX_BYTES) {
+        const sizeInMb = (file.size / 1_048_576).toFixed(1).replace('.', ',');
+        ctx.addIssue({
+            code: zod.ZodIssueCode.custom,
+            message: `Das Bild ist mit ${sizeInMb} MB zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.`,
+        });
+    }
+};
+
 export const PictureSchema = zod.object({
     name: zod.string().nonempty().default(pictureDefaults.name),
     alt: zod.string().nullable().default(pictureDefaults.alt),
     url: zod.string().optional(),
-    file: zod
-        .instanceof(File)
-        .optional()
-        .refine(
-            (file) => {
-                if (!file) return true;
-
-                const maxSize = 2_097_152;
-                const allowed = ['image/gif', 'image/png', 'image/jpeg', 'image/webp'];
-
-                return file instanceof File && maxSize > file.size && file.size > 0 && allowed.includes(file.type);
-            },
-            {
-                message: 'Bitte eine gültige Bilddatei (max. 2 MB) auswählen.',
-                params: { mimeType: 'image/jpeg, image/png' },
-            }
-        ),
+    file: zod.instanceof(File).optional().superRefine(validatePictureFile),
 });
 
 export const mobilizonFieldsDefaults = {
@@ -97,23 +122,7 @@ export const mobilizonFieldsDefaults = {
 };
 
 export const MobilizonFieldsFormSchema = zod.object({
-    picture: zod
-        .instanceof(File)
-        .optional()
-        .refine(
-            (file) => {
-                if (!file) return true;
-
-                const maxSize = 2_097_152;
-                const allowed = ['image/gif', 'image/png', 'image/jpeg', 'image/webp'];
-
-                return file instanceof File && maxSize > file.size && file.size > 0 && allowed.includes(file.type);
-            },
-            {
-                message: 'Bitte eine gültige Bilddatei (max. 2 MB) auswählen.',
-                params: { mimeType: 'image/jpeg, image/png' },
-            }
-        ),
+    picture: zod.instanceof(File).optional().superRefine(validatePictureFile),
     pictureAlt: zod.string().optional().default(mobilizonFieldsDefaults.pictureAlt),
     description: zod.string().default(mobilizonFieldsDefaults.description),
     category: zod.string().nonempty().default(mobilizonFieldsDefaults.category),

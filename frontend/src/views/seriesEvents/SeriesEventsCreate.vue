@@ -9,7 +9,7 @@ import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSeriesEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
-import { formatInputDate, reconstructOptions } from '@/lib/helper';
+import { formatInputDate, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { useTimezoneCheck } from '@/composables/TimezoneComposable';
 import { createEventDefaults, seriesEventsHolidaysFilter, seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig';
 import {
@@ -252,6 +252,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
     <form
         novalidate
         @submit.prevent="onSubmit"
+        @keydown.enter="preventImplicitSubmit"
     >
         <Alert
             v-if="errorMessageContent.length"

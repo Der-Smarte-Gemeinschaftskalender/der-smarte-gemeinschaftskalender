@@ -61,6 +61,7 @@ const removeTag = (tag: string) => {
                     v-model="newTag"
                     label="Schlagwörter hinzufügen"
                     name="tags"
+                    @keydown.enter.prevent
                     @keyup.enter="addTag(newTag)"
                 />
             </div>

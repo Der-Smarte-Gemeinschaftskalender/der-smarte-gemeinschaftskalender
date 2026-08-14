@@ -308,3 +308,13 @@ export const preferredUsernameSchema = zod
     .regex(/^(?!.*__)/, {
         message: 'Der Benutzername darf keine aufeinanderfolgenden Unterstriche enthalten.',
     });
+
+export const preventImplicitSubmit = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement | null;
+
+    if (!target) return;
+    if (target.isContentEditable) return;
+    if (['TEXTAREA', 'BUTTON', 'A', 'SELECT'].includes(target.tagName)) return;
+
+    event.preventDefault();
+};

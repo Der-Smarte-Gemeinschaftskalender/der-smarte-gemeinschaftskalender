@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { dsgApi } from '@/lib/dsgApi';
-import { formatDateTime, formatInputTime, reconstructOptions } from '@/lib/helper';
+import { formatDateTime, formatInputTime, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { handleSubmitCallback, prepareEventsValues } from '@/lib/dsgClient';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import {
@@ -214,6 +214,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <form
             novalidate
             @submit.prevent="onSubmit"
+            @keydown.enter="preventImplicitSubmit"
         >
             <Alert
                 v-if="errorMessageContent.length"
@@ -360,7 +361,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 class="my-5"
             />
             <Button
-                type="primary"
+                type="submit"
                 :disabled="isSubmitting || isMapLoading"
                 class="mx-auto flex align-items-center"
             >

@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSingleEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
-import { formatInputDate, reconstructOptions } from '@/lib/helper';
+import { formatInputDate, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { useTimezoneCheck } from '@/composables/TimezoneComposable';
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
@@ -174,6 +174,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
     <form
         novalidate
         @submit.prevent="onSubmit"
+        @keydown.enter="preventImplicitSubmit"
     >
         <Fieldset>
             <Alert
