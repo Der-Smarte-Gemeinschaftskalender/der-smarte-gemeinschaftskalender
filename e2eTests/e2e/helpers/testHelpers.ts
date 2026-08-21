@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 
 export interface TestConfig {
     siteUrl: string;
+    siteTitle?: string;
     adminEmail?: string;
     adminPassword?: string;
     userEmail?: string;
@@ -23,6 +24,7 @@ export function loadEnv(): TestConfig {
     try {
         dotenv.config();
         const rawSiteUrl = process.env.SITE_URL;
+        const siteTitle = process.env.SITE_TITLE;
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
         const userEmail = process.env.USER_EMAIL;
@@ -39,6 +41,7 @@ export function loadEnv(): TestConfig {
 
         return {
             siteUrl,
+            siteTitle,
             adminEmail,
             adminPassword,
             userEmail,
@@ -74,7 +77,8 @@ export async function login(page: Page, config: TestConfig, userType: 'admin' | 
 
     await page.goto(config.siteUrl);
     await page.getByRole('link').getByText('Zum internen Bereich').click();
-    await expect(page).toHaveURL(/.*\/login/);
+    // Unter Last lädt die App den Login-Chunk spürbar langsamer als die Standard-5s der Expects.
+    await expect(page).toHaveURL(/.*\/login/, { timeout: 15000 });
 
     await page.locator('#email').fill(email);
     await page.locator('#password').fill(password);
@@ -181,14 +185,28 @@ export async function fillEventForm(page: Page, data: EventFormData): Promise<vo
     }
 }
 
-export async function submitSingleEvent(page: Page): Promise<void> {
+/**
+ * Ein Serientermin wird angelegt, indem jeder Termin der Serie einzeln in Mobilizon erstellt wird.
+ * Das dauert deutlich länger als ein einzelner Request - vor allem mit Bild und bei langen Serien.
+ */
+export const SERIES_CREATION_TIMEOUT = 120000;
+
+/** Auch ein einzelner Termin geht über das Backend an Mobilizon - unter Last dauert das deutlich länger. */
+export const EVENT_CREATION_TIMEOUT = 60000;
+
+export async function submitSingleEvent(page: Page, timeout: number = EVENT_CREATION_TIMEOUT): Promise<void> {
     await page.getByRole('button').getByText('Einzeltermin anlegen').click();
-    await expect(page).toHaveURL(/.*\/app\/single-events/);
+    // Ohne Anker würde auch die Formular-URL (/app/single-events/create) passen - der Test
+    // liefe dann auf dem noch offenen Formular weiter.
+    await expect(page).toHaveURL(/\/app\/single-events(\?.*)?$/, { timeout });
 }
 
-export async function submitSerialEvent(page: Page): Promise<void> {
+export async function submitSerialEvent(page: Page, timeout: number = SERIES_CREATION_TIMEOUT): Promise<void> {
     await page.getByRole('button').getByText('Serientermin anlegen').click();
-    await expect(page).toHaveURL(/.*\/app\/series-events/);
+    // Solange der Ladedialog offen ist, werden noch Termine angelegt und das Formular bleibt
+    // sichtbar. Erst danach wechselt die App auf die Detailseite der Serie. Ohne Anker würde
+    // auch /app/series-events/create passen und der Test würde das Formular weiter bedienen.
+    await expect(page).toHaveURL(/\/app\/series-events\/\d+(\?.*)?$/, { timeout });
 }
 
 /**
@@ -350,7 +368,13 @@ export async function verifyEventDetails(page: Page, data: EventFormData): Promi
     if (data.imagePath) {
         const imageName = data.imagePath.split('/').pop()?.split('.')[0];
         if (imageName) {
-            await expect(page.locator(`img[src*="${imageName}"]`).first()).toBeVisible();
+            // Beim Speichern einer Bearbeitung lädt das Frontend das vorhandene Bild erneut zu
+            // Mobilizon hoch (dsgClient.ts benennt es dabei in "event_image.<ext>" um) - der
+            // ursprüngliche Dateiname steht danach nicht mehr in der URL.
+            const eventImage = page
+                .locator(`img[src*="${imageName}"], img[alt="Event Bild"][src*="event_image"]`)
+                .first();
+            await expect(eventImage, `Bild "${imageName}" fehlt auf der Terminseite`).toBeVisible();
         }
     }
 
@@ -416,7 +440,8 @@ export async function register(page: Page, config: TestConfig, email?: string): 
 
     await page.goto(config.siteUrl);
     await page.getByRole('link').getByText('Zum internen Bereich').click();
-    await expect(page).toHaveURL(/.*\/login/);
+    // Unter Last lädt die App den Login-Chunk spürbar langsamer als die Standard-5s der Expects.
+    await expect(page).toHaveURL(/.*\/login/, { timeout: 15000 });
 
     await page.getByRole('link', { name: 'Noch kein Konto? Jetzt registrieren!' }).click();
     await expect(page).toHaveURL(/.*\/register/);
@@ -456,7 +481,8 @@ export async function viewSerialEventFromList(page: Page, eventName: string): Pr
         }
     }
 
-    await expect(page).toHaveURL(/.*\/app\/series-events\/.*/);
+    // /create würde sonst ebenfalls passen, wenn die Serie noch gar nicht angelegt ist.
+    await expect(page).toHaveURL(/\/app\/series-events\/\d+/);
     await expect(page.getByText(eventName).first()).toBeVisible();
 }
 

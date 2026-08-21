@@ -18,7 +18,11 @@ import {
 test("availability", async ({ page }) => {
   const config = loadEnv();
   await page.goto(config.siteUrl);
-  await expect(page).toHaveTitle("Der Smarte Gemeinschaftskalender");
+  // Der Seitentitel wird pro Instanz gebrandet (demo-dev2 z.B. "Veranstaltungen im Amt Süderbrarup").
+  // Nur wenn SITE_TITLE gesetzt ist, wird exakt geprüft - sonst reicht als Smoke-Test, dass die
+  // App überhaupt ausgeliefert und gerendert wird.
+  await expect(page).toHaveTitle(config.siteTitle ?? /.+/);
+  await expect(page.getByRole("link").getByText("Zum internen Bereich")).toBeVisible();
 });
 
 test("signup", async ({ page }) => {

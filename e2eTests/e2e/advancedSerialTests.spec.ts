@@ -21,6 +21,7 @@ import {
     addTagsWithEnter,
     PICTURE_FORMAT_ERROR_MESSAGE,
     PICTURE_TOO_LARGE_ERROR_MESSAGE,
+    SERIES_CREATION_TIMEOUT,
 } from './helpers/testHelpers';
 import {
     createJpegTestImage,
@@ -121,7 +122,9 @@ test('serial termin with large image on long series', async ({ page }) => {
         { timeout: 240000 }
     );
 
-    await submitSerialEvent(page);
+    // Hier bewusst ohne submitSerialEvent: Der Ladedialog muss direkt nach dem Klick sichtbar
+    // sein, das Anlegen der langen Serie läuft danach noch minutenlang weiter.
+    await page.getByRole('button').getByText('Serientermin anlegen').click();
 
     await expect(page.getByRole('heading', { name: 'Serientermin wird angelegt' })).toBeVisible();
 
@@ -130,6 +133,8 @@ test('serial termin with large image on long series', async ({ page }) => {
 
     const createdEvents = (await createResponse.json()).seriesEvent.created_events;
     expect(createdEvents.length).toBeGreaterThanOrEqual(20);
+
+    await expect(page).toHaveURL(/\/app\/series-events\/\d+$/, { timeout: SERIES_CREATION_TIMEOUT });
 
     await viewSerialEventFromList(page, eventName);
     await expect(page.getByLabel('Ansehen').first()).toBeVisible({ timeout: 15000 });

@@ -96,7 +96,7 @@ test("upload ical file", async ({ page }) => {
   await expect(page).toHaveURL(/.*\/uploaded-events/);
 });
 
-test("navigate to events without login and verify Kunst category URL", async ({
+test("navigate to events without login and verify category filter", async ({
   page,
 }) => {
     const config = loadEnv();
@@ -118,17 +118,26 @@ test("navigate to events without login and verify Kunst category URL", async ({
 
     await page.waitForLoadState('networkidle');
 
-    // either kunst or netzwerke
-    await page
-        .getByText(/Kunst|Netzwerke/)
-        .first()
-        .click();
+    // Welche Kategorie der erste Treffer hat, hängt von den Daten der Instanz ab - deshalb den
+    // Kategorie-Chip des Termins auslesen statt eine feste Kategorie zu erwarten.
+    const categorySection = page
+        .locator('div', { has: page.getByRole('heading', { name: 'Kategorie', exact: true }) })
+        .last();
+    const categoryButton = categorySection.getByRole('button').first();
+    const categoryLabel = ((await categoryButton.textContent()) ?? '').trim();
+    expect(categoryLabel, 'Termin ohne Kategorie-Chip').toBeTruthy();
+
+    await categoryButton.click();
     await page.waitForLoadState('networkidle');
 
     await expect(page).toHaveURL(/.*\/search/);
     await page.waitForLoadState('networkidle');
 
-    const artsChecked = await page.locator('input[type="checkbox"][value="ARTS"]').isChecked();
-    const networkingChecked = await page.locator('input[type="checkbox"][value="NETWORKING"]').isChecked();
-    expect(artsChecked || networkingChecked).toBe(true);
+    // Der Chip muss den passenden Filter in der Suche setzen (Label der Checkbox = Kategoriename).
+    // Die Filterliste steckt in einem zugeklappten Accordion, ist also nicht im A11y-Baum -
+    // deshalb über das Label statt über getByRole.
+    const categoryFilter = page.locator(
+        `.kern-form-check:has(label:text-is("${categoryLabel}")) input[type="checkbox"]`
+    );
+    await expect(categoryFilter).toBeChecked();
 });
