@@ -247,6 +247,16 @@ class SeriesEventController extends Controller implements HasMiddleware
                 }
 
                 $createdEvent->save();
+
+                // Create error message if the picture was not accepted by Mobilizon for any of the events
+                if ($uploadPicture && empty($pictureResponse)) {
+                    Log::error('Mobilizon hat das hochgeladene Bild nicht übernommen (Serientermin ' . $seriesEvent->id . ')');
+                    $this->rollbackSeriesEvent($seriesEvent, $mclient);
+
+                    return response()->json([
+                        'error' => 'Das Bild konnte nicht gespeichert werden. Die Datei ist möglicherweise beschädigt oder liegt in einem Format vor, das nicht unterstützt wird. Der Serientermin wurde nicht angelegt - bitte wählen Sie ein anderes Bild (JPG, PNG, GIF oder WEBP).'
+                    ], 422);
+                }
             }
         }
 
@@ -259,6 +269,27 @@ class SeriesEventController extends Controller implements HasMiddleware
         ];
 
         return response()->json($response);
+    }
+
+    /**
+     * Entfernt eine angefangene Serie samt bereits erstellter Mobilizon-Veranstaltungen,
+     * damit beim Abbruch keine unvollständige Serie zurückbleibt.
+     */
+    private function rollbackSeriesEvent(SeriesEvent $seriesEvent, Mobilizon $mclient): void
+    {
+        foreach ($seriesEvent->created_events()->get() as $createdEvent) {
+            if ($createdEvent->mobilizon_id) {
+                $mresponse = $mclient->deleteEvent($createdEvent->mobilizon_id);
+
+                if ($mclient->hasError($mresponse)) {
+                    Log::error("Rollback: Mobilizon-Veranstaltung {$createdEvent->mobilizon_id} konnte nicht gelöscht werden: " . $mclient->getError($mresponse));
+                }
+            }
+
+            $createdEvent->delete();
+        }
+
+        $seriesEvent->delete();
     }
 
     public function delete(SeriesEvent $seriesEvent): JsonResponse

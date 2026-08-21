@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page, Request, expect } from '@playwright/test';
 import dotenv from 'dotenv';
 
 export interface TestConfig {
@@ -189,6 +189,59 @@ export async function submitSingleEvent(page: Page): Promise<void> {
 export async function submitSerialEvent(page: Page): Promise<void> {
     await page.getByRole('button').getByText('Serientermin anlegen').click();
     await expect(page).toHaveURL(/.*\/app\/series-events/);
+}
+
+/**
+ * Fügt Schlagwörter über die Enter-Taste hinzu (statt über den "Hinzufügen"-Button).
+ * Enter in einem Formularfeld löst im Browser den ersten Submit-Button des Formulars aus -
+ * deshalb darf im Formular kein anderer Button versehentlich vom Typ "submit" sein.
+ */
+export async function addTagsWithEnter(page: Page, tags: string[]): Promise<void> {
+    for (const tag of tags) {
+        await page.locator('#tags').fill(tag);
+        await page.locator('#tags').press('Enter');
+        await expect(page.getByRole('button', { name: tag })).toBeVisible();
+    }
+}
+
+/** Fehlermeldungen des Bildfeldes, siehe validatePictureFile in frontend/src/types/Mobilizon.ts. */
+export const PICTURE_TOO_LARGE_ERROR_MESSAGE = 'zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.';
+export const PICTURE_FORMAT_ERROR_MESSAGE = 'wird nicht unterstützt. Bitte wählen Sie ein Bild im Format JPG, PNG, GIF oder WEBP.';
+
+export async function selectEventPicture(page: Page, filePath: string): Promise<void> {
+    await page.locator('#picture').setInputFiles(filePath);
+}
+
+/**
+ * Erwartet, dass ein Serientermin mit ungültigem Bild nicht angelegt wird: Es muss eine
+ * Fehlermeldung am Bildfeld erscheinen und es darf kein Serientermin (ohne Bild) gespeichert werden.
+ */
+export async function submitSerialEventExpectingPictureError(
+    page: Page,
+    expectedMessage: string = PICTURE_FORMAT_ERROR_MESSAGE
+): Promise<void> {
+    const seriesEventRequests: string[] = [];
+    const collectSeriesEventRequests = (request: Request) => {
+        if (request.method() === 'POST' && request.url().includes('/series-events')) {
+            seriesEventRequests.push(request.url());
+        }
+    };
+
+    page.on('request', collectSeriesEventRequests);
+
+    try {
+        await page.getByRole('button').getByText('Serientermin anlegen').click();
+
+        const pictureError = page.locator('#picture-error');
+        await expect(pictureError).toBeVisible();
+        await expect(pictureError).toContainText(expectedMessage);
+
+        // Formular bleibt offen, der Serientermin wird nicht still ohne Bild gespeichert
+        await expect(page).toHaveURL(/.*\/app\/series-events\/create/);
+        expect(seriesEventRequests).toHaveLength(0);
+    } finally {
+        page.off('request', collectSeriesEventRequests);
+    }
 }
 
 export async function viewEventFromList(page: Page, eventName: string): Promise<void> {

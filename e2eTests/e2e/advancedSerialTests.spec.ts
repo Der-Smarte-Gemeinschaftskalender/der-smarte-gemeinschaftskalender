@@ -16,8 +16,20 @@ import {
     assertMonthlyTemplateControls,
     setupWeeklyTemplateControls,
     assertWeeklyTemplateControls,
+    selectEventPicture,
+    submitSerialEventExpectingPictureError,
+    addTagsWithEnter,
+    PICTURE_FORMAT_ERROR_MESSAGE,
+    PICTURE_TOO_LARGE_ERROR_MESSAGE,
 } from './helpers/testHelpers';
-import { createLargeTestImage } from './helpers/imageHelper';
+import {
+    createJpegTestImage,
+    createLargeTestImage,
+    createNonImageTestFile,
+    createUnsupportedFormatTestFile,
+    MAX_PICTURE_BYTES,
+    OVERSIZED_IMAGE_BYTES,
+} from './helpers/imageHelper';
 
 test('serial termin with location', async ({ page }) => {
     const config = loadEnv();
@@ -156,6 +168,257 @@ test('serial termin with large image on long series', async ({ page }) => {
         // Gleiche URL = dieselbe Mobilizon-Media, also nur ein Upload für die ganze Serie.
         expect(imageSource).toBe(imageSources[0]);
     }
+});
+
+test('serial termin keeps jpeg image on first save', async ({ page }) => {
+    test.setTimeout(180000);
+
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with jpeg image');
+    const imagePath = createJpegTestImage();
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    const eventData = {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+        imagePath,
+    };
+
+    await fillEventForm(page, eventData);
+
+    await page.locator('#end').pressSequentially(getFutureDate(1), { delay: 150 });
+
+    const createRequest = page.waitForResponse(
+        (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
+        { timeout: 120000 }
+    );
+
+    await submitSerialEvent(page);
+
+    const createResponse = await createRequest;
+    expect(createResponse.status()).toBe(200);
+
+    const seriesEvent = (await createResponse.json()).seriesEvent;
+
+    // Das Bild muss bereits beim Anlegen der Serie übernommen werden. Wird es still verworfen,
+    // müsste jeder Termin der Serie einzeln nachbearbeitet werden.
+    expect(seriesEvent.mobilizon_fields?.picture?.url).toBeTruthy();
+    expect(seriesEvent.created_events.length).toBeGreaterThanOrEqual(2);
+
+    await viewSerialEventFromList(page, eventName);
+
+    const viewButtons = page.getByLabel('Ansehen');
+    await expect(viewButtons.first()).toBeVisible({ timeout: 15000 });
+    const eventCount = await viewButtons.count();
+
+    for (let i = 0; i < eventCount; i++) {
+        await page.getByLabel('Ansehen').nth(i).click();
+        await verifyEventDetails(page, eventData);
+        await page.goBack();
+        await page.waitForLoadState('networkidle');
+    }
+});
+
+test('serial termin keeps image while filling the form', async ({ page }) => {
+    test.setTimeout(180000);
+
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with image and tags');
+    const imagePath = createJpegTestImage();
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    const eventData = {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+        imagePath,
+        tags: ['SerienbildTagEins', 'SerienbildTagZwei'],
+    };
+
+    // Erst das Bild wählen, danach den Rest ausfüllen - so arbeitet man das Formular von oben nach unten ab.
+    await fillEventForm(page, { name: eventData.name, description: eventData.description, imagePath });
+    await expect(page.getByAltText('Ereignisvorschau')).toBeVisible();
+
+    const submitRequests: string[] = [];
+    page.on('request', (request) => {
+        if (request.method() === 'POST' && request.url().includes('/series-events')) {
+            submitRequests.push(request.url());
+        }
+    });
+
+    // Enter in einem einzeiligen Feld löst im Browser den ersten Submit-Button des Formulars aus.
+    // Das darf weder das ausgewählte Bild entfernen noch den Serientermin vorzeitig anlegen.
+    const enterFields = [
+        { selector: '#name', label: 'Titel', value: eventName },
+        { selector: '#onlineAddress', label: 'Webseite', value: 'https://example.org' },
+        { selector: '#end', label: 'Enddatum' },
+        { selector: "input[placeholder='hh']", label: 'Uhrzeit' },
+    ];
+
+    for (const field of enterFields) {
+        const input = page.locator(field.selector).first();
+        if (field.value) await input.fill(field.value);
+        await input.press('Enter');
+
+        await expect(page.getByAltText('Ereignisvorschau'), `Bild nach Enter im Feld "${field.label}"`).toBeVisible();
+        await expect(page).toHaveURL(/.*\/app\/series-events\/create/);
+    }
+
+    await addTagsWithEnter(page, eventData.tags);
+    await expect(page.getByAltText('Ereignisvorschau'), 'Bild nach Enter im Schlagwortfeld').toBeVisible();
+    await expect(page).toHaveURL(/.*\/app\/series-events\/create/);
+
+    expect(submitRequests, 'Serientermin darf beim Ausfüllen nicht angelegt werden').toHaveLength(0);
+
+    await page.locator('#end').fill('');
+    await page.locator('#end').pressSequentially(getFutureDate(1), { delay: 150 });
+
+    const createRequest = page.waitForResponse(
+        (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
+        { timeout: 120000 }
+    );
+
+    await submitSerialEvent(page);
+
+    const createResponse = await createRequest;
+    expect(createResponse.status()).toBe(200);
+
+    const seriesEvent = (await createResponse.json()).seriesEvent;
+    expect(seriesEvent.mobilizon_fields?.picture?.url).toBeTruthy();
+
+    await viewSerialEventFromList(page, eventName);
+    await page.getByLabel('Ansehen').first().click();
+    await verifyEventDetails(page, eventData);
+});
+
+test('serial termin keeps image at the upper size limit', async ({ page }) => {
+    test.setTimeout(180000);
+
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with image at size limit');
+    // Knapp unter dem Formular-Limit: Was das Formular annimmt, muss auch gespeichert werden -
+    // sonst landet die Serie ohne Bild und ohne Fehlermeldung (z.B. bei kleinerem PHP-Uploadlimit).
+    const imagePath = createJpegTestImage(MAX_PICTURE_BYTES - 10_000, 'size-limit-test-flyer.jpg');
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    const eventData = {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+        imagePath,
+    };
+
+    await fillEventForm(page, eventData);
+
+    await page.locator('#end').pressSequentially(getFutureDate(1), { delay: 150 });
+
+    const createRequest = page.waitForResponse(
+        (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
+        { timeout: 120000 }
+    );
+
+    await submitSerialEvent(page);
+
+    const createResponse = await createRequest;
+    expect(createResponse.status()).toBe(200);
+
+    const seriesEvent = (await createResponse.json()).seriesEvent;
+    expect(seriesEvent.mobilizon_fields?.picture?.url).toBeTruthy();
+
+    await viewSerialEventFromList(page, eventName);
+    await page.getByLabel('Ansehen').first().click();
+    await verifyEventDetails(page, eventData);
+});
+
+test('serial termin rejects image above the size limit', async ({ page }) => {
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with oversized image');
+    const imagePath = createLargeTestImage(OVERSIZED_IMAGE_BYTES, 'oversized-test-image.png');
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    await fillEventForm(page, {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+    });
+
+    await selectEventPicture(page, imagePath);
+
+    // Die Meldung muss die Größe benennen, damit klar ist, was zu tun ist
+    await submitSerialEventExpectingPictureError(page, PICTURE_TOO_LARGE_ERROR_MESSAGE);
+});
+
+// Formate, die Nutzer*innen typischerweise erwischen: PDF-Flyer, iPhone-Foto, Scan, Vektorgrafik
+const unsupportedPictureFiles = [
+    { label: 'PDF', createFile: () => createNonImageTestFile() },
+    { label: 'HEIC', createFile: () => createUnsupportedFormatTestFile('iphone-foto.heic') },
+    { label: 'TIFF', createFile: () => createUnsupportedFormatTestFile('scan.tiff') },
+    { label: 'SVG', createFile: () => createUnsupportedFormatTestFile('grafik.svg') },
+];
+
+for (const pictureFile of unsupportedPictureFiles) {
+    test(`serial termin rejects ${pictureFile.label} with a message about the format`, async ({ page }) => {
+        const config = loadEnv();
+        const eventName = generateRandomTestName(`E2E serial test termin with ${pictureFile.label} image`);
+        const filePath = pictureFile.createFile();
+
+        await login(page, config);
+        await navigateToApp(page, config);
+        await createSerialEvent(page);
+
+        await fillEventForm(page, {
+            name: eventName,
+            description: `Das ist eine Beschreibung${eventName}`,
+        });
+
+        await selectEventPicture(page, filePath);
+
+        // Die Meldung muss das Format benennen - "zu groß" wäre hier irreführend
+        await submitSerialEventExpectingPictureError(page, PICTURE_FORMAT_ERROR_MESSAGE);
+    });
+}
+
+test('serial termin is not created when the server cannot store the picture', async ({ page }) => {
+    test.setTimeout(180000);
+
+    const config = loadEnv();
+    const eventName = generateRandomTestName('E2E serial test termin with broken image');
+    // Erlaubte Dateiendung, unbrauchbarer Inhalt: kommt durch die Formularprüfung, Mobilizon
+    // kann das Bild aber nicht verarbeiten. Die Serie darf dann nicht ohne Bild angelegt werden.
+    const filePath = createNonImageTestFile('kaputtes-bild.png');
+
+    await login(page, config);
+    await navigateToApp(page, config);
+    await createSerialEvent(page);
+
+    await fillEventForm(page, {
+        name: eventName,
+        description: `Das ist eine Beschreibung${eventName}`,
+    });
+
+    await selectEventPicture(page, filePath);
+
+    const createRequest = page.waitForResponse(
+        (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
+        { timeout: 120000 }
+    );
+
+    await page.getByRole('button').getByText('Serientermin anlegen').click();
+
+    const createResponse = await createRequest;
+    expect(createResponse.status(), 'Server darf die Serie nicht stillschweigend ohne Bild anlegen').toBe(422);
+
+    await expect(page.getByText('Das Bild konnte nicht gespeichert werden.')).toBeVisible();
+    await expect(page).toHaveURL(/.*\/app\/series-events\/create/);
 });
 
 test('serial termin with category and tags', async ({ page }) => {

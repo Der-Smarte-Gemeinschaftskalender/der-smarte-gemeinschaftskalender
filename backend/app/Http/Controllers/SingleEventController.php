@@ -121,7 +121,8 @@ class SingleEventController extends Controller implements HasMiddleware
                 MobilizonTag::saveTags($mobilizonFields['tags'], (int)$request->get('mobilizon_group_id'));
             }
 
-            $mresponse = $mclient->createEvent($eventData, $request->hasFile('mobilizon_fields.picture.media.file'));
+            $uploadPicture = $request->hasFile('mobilizon_fields.picture.media.file');
+            $mresponse = $mclient->createEvent($eventData, $uploadPicture);
             if ($mclient->hasError($mresponse)) {
                 $singleEvent->delete();
                 $createdEvent->delete();
@@ -135,6 +136,18 @@ class SingleEventController extends Controller implements HasMiddleware
 
                 $mobilizonFields['picture'] = $mresponse['data']['createEvent']['picture'] ?? null;
                 $singleEvent->mobilizon_fields = $mobilizonFields;
+
+                if ($uploadPicture && empty($mobilizonFields['picture'])) {
+                    Log::error('Mobilizon hat das hochgeladene Bild nicht übernommen (Einzeltermin ' . $singleEvent->id . ')');
+
+                    $mclient->deleteEvent($createdEvent->mobilizon_id);
+                    $createdEvent->delete();
+                    $singleEvent->delete();
+
+                    return response()->json([
+                        'error' => 'Das Bild konnte nicht gespeichert werden. Die Datei ist möglicherweise beschädigt oder liegt in einem Format vor, das nicht unterstützt wird. Der Termin wurde nicht angelegt - bitte wählen Sie ein anderes Bild (JPG, PNG, GIF oder WEBP).'
+                    ], 422);
+                }
 
                 $singleEvent->save();
                 $createdEvent->save();
