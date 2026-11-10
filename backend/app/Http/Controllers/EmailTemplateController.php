@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Validator;
-use App\Enums\EmailTemplateType;
 use Log;
 use Throwable;
 
@@ -24,7 +23,7 @@ class EmailTemplateController extends Controller implements HasMiddleware
             return response()->json($emailTemplate);
         } catch (Throwable $e) {
             Log::error("Error showing email template: " . $e->getMessage());
-            return response()->json(['error' => 'Vorlage nicht gefunden'], 404);
+            return response()->json(['error' => __('messages.emailTemplates.notFound')], 404);
         }
     }
 
@@ -36,9 +35,9 @@ class EmailTemplateController extends Controller implements HasMiddleware
         $page = max($page, 1);
         $pageSize = max($pageSize, 1);
 
-        $data = EmailTemplate::paginate(
+        $data = EmailTemplate::orderBy('on_event')->orderBy('locale')->paginate(
             $pageSize,
-            ['id', 'on_event', 'subject'],
+            ['id', 'on_event', 'locale', 'subject'],
             'page',
             $page
         );
@@ -72,17 +71,5 @@ class EmailTemplateController extends Controller implements HasMiddleware
         ]);
 
         return response()->json($emailTemplate);
-    }
-
-    public function getEventDefaultTemplateBody(EmailTemplateType $type): ?string
-    {
-        $template = EmailTemplate::where('on_event', $type)->first();
-        return $template?->body;
-    }
-
-    public function getEventDefaultTemplateSubject(EmailTemplateType $type): ?string
-    {
-        $template = EmailTemplate::where('on_event', $type)->first();
-        return $template?->subject;
     }
 }

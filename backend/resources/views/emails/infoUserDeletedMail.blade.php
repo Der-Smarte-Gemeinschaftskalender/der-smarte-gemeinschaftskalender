@@ -4,9 +4,9 @@
 @include('emails.partials.header')
 
 <div class="content">
-    <h1>Moin</h1>
+    <h1>{{ __('emails.common.greeting') }}</h1>
     <p>
-        Ihr Benutzerkonto auf {{ env('APP_NAME') }} wurde gelöscht.
+        {{ __('emails.userDeleted.text', ['appName' => config('app.name')]) }}
     </p>
 </div>
 

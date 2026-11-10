@@ -61,7 +61,7 @@ class SingleEventController extends Controller implements HasMiddleware
             ]);
         } catch (Throwable $e) {
             Log::error("Error showing single event: " . $e->getMessage());
-            return response()->json(['error' => 'Event not found'], 404);
+            return response()->json(['error' => __('messages.events.notFound')], 404);
         }
     }
 
@@ -94,6 +94,8 @@ class SingleEventController extends Controller implements HasMiddleware
         // Standard mode: create event directly
         $mobilizonFields = $request->input('mobilizon_fields');
         $mobilizonFields['description'] = $mobilizonFields['description'] ?? '';
+        $timezone = CreatedEventController::eventTimezone($request);
+        $mobilizonFields['options']['timezone'] = $timezone;
 
         try {
             $mclient = Mobilizon::getInstance();
@@ -107,7 +109,7 @@ class SingleEventController extends Controller implements HasMiddleware
 
             $eventData = CreatedEventController::buildMobilizonEventData($request, $singleEvent, $mclient);
 
-            $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'));
+            $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
 
             $createdEvent = new CreatedEvent();
             $createdEvent->single_events_id = $singleEvent->id;
@@ -145,7 +147,7 @@ class SingleEventController extends Controller implements HasMiddleware
                     $singleEvent->delete();
 
                     return response()->json([
-                        'error' => 'Das Bild konnte nicht gespeichert werden. Die Datei ist möglicherweise beschädigt oder liegt in einem Format vor, das nicht unterstützt wird. Der Termin wurde nicht angelegt - bitte wählen Sie ein anderes Bild (JPG, PNG, GIF oder WEBP).'
+                        'error' => __('messages.events.imageSaveFailed')
                     ], 422);
                 }
 
@@ -160,7 +162,7 @@ class SingleEventController extends Controller implements HasMiddleware
 
             Log::error("Error creating single event: " . $e->getMessage());
             return response()->json([
-                'error' => 'Failed to create event',
+                'error' => __('messages.events.createFailed'),
                 'details' => $e->getMessage()
             ], 500);
         }

@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'Europe/Berlin',
+    'timezone' => env('APP_TIMEZONE', 'Europe/Berlin'),
 
     /*
     |--------------------------------------------------------------------------
@@ -79,6 +79,11 @@ return [
     */
 
     'locale' => env('APP_LOCALE', 'en'),
+
+    // Instance default language. Unlike "locale" it is not overwritten per request by
+    // App::setLocale() (SetLocale middleware), so it is safe to use e.g. as the email
+    // language of users without a preference.
+    'default_locale' => env('APP_LOCALE', 'en'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

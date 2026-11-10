@@ -1,9 +1,11 @@
 import { axiosErrorHandler, dsgApi } from './dsgApi';
+import i18n from '@/i18n';
 
 import type { ZodSchema, ZodType } from 'zod';
 import type { AxiosError } from 'axios';
 
 import { MobilizonGroupSchema, type MobilizonGroup, MobilizonFieldsSchema, type AddressForm } from '@/types/Mobilizon';
+import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { SingleEventResponseSchema, type SingleEventResponse } from '@/types/events/SingleEvents';
 import { type SeriesEvent, SeriesEventSchema } from '@/types/events/SeriesEvents';
 
@@ -138,8 +140,8 @@ export const handleSubmitCallback = async (
         console.error('Error in handleSubmitCallback:', error);
 
         throw axiosErrorHandler(error)
-            ? (error?.response?.data?.message ?? error?.response?.data?.error ?? 'Ein Fehler ist aufgetreten.')
-            : 'Ein Fehler ist aufgetreten.';
+            ? (error?.response?.data?.message ?? error?.response?.data?.error ?? i18n.global.t('app.shared.errorOccurred'))
+            : i18n.global.t('app.shared.errorOccurred');
     }
 };
 
@@ -175,6 +177,7 @@ export const prepareEventsValues = <
             onlineAddress: values.onlineAddress || null,
             physicalAddress: values.physicalAddress?.description ? values.physicalAddress : null,
             tags: values.tags || [],
+            options: { timezone: values.timezone || INSTANCE_TIMEZONE },
         },
     };
 

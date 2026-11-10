@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { fetchOrganisationEvents, findEvent, searchEvents as searchInstanceEvents } from '@/lib/mobilizonClient';
 import { user } from '@/composables/UserComposoable';
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
@@ -25,6 +26,7 @@ import {
     type CalendarEvent, type EventInfoPayload, type MgGlobalSettings,
 } from '@/composables/MaterialGenerator/materialGeneratorConstants';
 
+const { t } = useI18n();
 const route = useRoute();
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const router = useRouter();
@@ -123,18 +125,18 @@ const { saveTemplate, deleteTemplate, getTemplate, listForContext, fetchTemplate
 const availableTemplates = computed(() => listForContext(materialType, selectedDimension.value));
 
 const editorFeatures: Record<string, string> = {
-    'open-in-new': 'Objekte per Drag & Drop verschieben, skalieren und drehen',
-    'image': 'Bild hochladen (PNG, JPEG, SVG)',
-    'stamp': 'Stempel (Abgesagt, Verschoben, Aktualisiert)',
-    'list_alt': 'Reihenfolge ändern (Ebenen via Rechtsklick im Menü nach vorne/hinten rücken)',
-    'content-copy': 'Objekte duplizieren und löschen via Rechtsklick im Menü',
-    'edit': 'Textanpassungen: Schriftart, Schriftgröße, Farben, Fett- und Unterstreichung',
-    'undo': 'Bearbeitungen rückgängig machen und wiederherstellen',
-    'drive-folder-upload': 'Hintergrundbild hochladen',
-    'settings': 'Global Schrift, Farben und Trennlinien anpassen',
-    'home_repair_service': 'Vorlagen speichern und wiederverwenden für konsistente Designs',
-    'checklist': 'Manuelle Auswahl und Bearbeitung der Veranstaltungen',
-    'download': 'Grafik als PNG-Datei herunterladen',
+    'open-in-new': t('app.materialGenerator.editorFeatures.dragDrop'),
+    'image': t('app.materialGenerator.editorFeatures.uploadImage'),
+    'stamp': t('app.materialGenerator.editorFeatures.stamps'),
+    'list_alt': t('app.materialGenerator.editorFeatures.order'),
+    'content-copy': t('app.materialGenerator.editorFeatures.duplicate'),
+    'edit': t('app.materialGenerator.editorFeatures.textAdjustments'),
+    'undo': t('app.materialGenerator.editorFeatures.undo'),
+    'drive-folder-upload': t('app.materialGenerator.editorFeatures.uploadBackground'),
+    'settings': t('app.materialGenerator.editorFeatures.globalSettings'),
+    'home_repair_service': t('app.materialGenerator.editorFeatures.templates'),
+    'checklist': t('app.materialGenerator.editorFeatures.eventSelection'),
+    'download': t('app.materialGenerator.editorFeatures.download'),
 };
 
 const infoBoxStartX = computed(() => selectedDimensionInfoBox.value?.infoBoxStartX ?? 0);
@@ -270,7 +272,7 @@ const loadDefaultValues = async (groupId: string | null = null, mobilizonPreferr
         canvasClearAndLoadImage(uploadedImageBlob, uploadedImageBlob.value, materialType);
     } catch {
         showError.value = true;
-        errorMessage.value = 'Standardwerte konnten nicht geladen werden.';
+        errorMessage.value = t('app.materialGenerator.errors.defaultValues');
     }
 };
 
@@ -366,7 +368,7 @@ const loadData = async (withoutClear = false) => {
                 );
                 if (!fetched.length) {
                     showError.value = true;
-                    errorMessage.value = 'Es wurden keine Veranstaltungen gefunden.';
+                    errorMessage.value = t('app.materialGenerator.errors.noEventsFound');
                     return;
                 }
                 organisationAvatarUrl.value = null;
@@ -375,7 +377,7 @@ const loadData = async (withoutClear = false) => {
                 organisationUsername.value = route.params?.preferredUsername as string;
                 if (!organisationUsername.value) {
                     showError.value = true;
-                    errorMessage.value = 'Keine Organisation ausgewählt.';
+                    errorMessage.value = t('app.materialGenerator.errors.noOrganisation');
                     return;
                 }
                 if (typeof Number(organisationUsername.value) === 'number') {
@@ -403,7 +405,7 @@ const loadData = async (withoutClear = false) => {
                 );
                 if (!fetched.length) {
                     showError.value = true;
-                    errorMessage.value = 'Es wurden keine Veranstaltungen gefunden.';
+                    errorMessage.value = t('app.materialGenerator.errors.noEventsFound');
                     return;
                 }
                 organisationAvatarUrl.value = avatar?.url || null;
@@ -412,7 +414,7 @@ const loadData = async (withoutClear = false) => {
         } else {
             if (!route.params?.uuid) {
                 showError.value = true;
-                errorMessage.value = 'Keine Veranstaltung ausgewählt.';
+                errorMessage.value = t('app.materialGenerator.errors.noEvent');
                 return;
             }
             const response = await findEvent(route.params?.uuid as string);
@@ -425,7 +427,7 @@ const loadData = async (withoutClear = false) => {
         }
     } catch {
         showError.value = true;
-        errorMessage.value = 'Inhalte konnten nicht geladen werden.';
+        errorMessage.value = t('app.materialGenerator.errors.contentLoad');
     } finally {
         loading.value = false;
         await displayCanvaData(withoutClear);
@@ -462,12 +464,12 @@ const refetchEvents = async () => {
         );
         if (!fetched.length) {
             showError.value = true;
-            errorMessage.value = 'Es wurden keine Veranstaltungen gefunden.';
+            errorMessage.value = t('app.materialGenerator.errors.noEventsFound');
             return;
         }
     } catch {
         showError.value = true;
-        errorMessage.value = 'Veranstaltungen konnten nicht geladen werden.';
+        errorMessage.value = t('app.materialGenerator.errors.eventsLoad');
         return;
     }
     await displayCanvaData(true);
@@ -515,7 +517,7 @@ async function onLoadMoreEvents() {
         pickerPage.value = nextPage;
     } catch {
         showError.value = true;
-        errorMessage.value = 'Weitere Veranstaltungen konnten nicht geladen werden.';
+        errorMessage.value = t('app.materialGenerator.errors.moreEventsLoad');
     } finally {
         loadingMore.value = false;
     }
@@ -526,7 +528,7 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 const onBgFileChange = async (file: File) => {
     if (file.size > MAX_FILE_SIZE) {
         showError.value = true;
-        errorMessage.value = 'Das Hintergrundbild ist zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.';
+        errorMessage.value = t('app.materialGenerator.errors.backgroundTooLarge');
         return;
     }
     showError.value = false;
@@ -542,7 +544,7 @@ async function onAddImage(files: File[]) {
         await addUserImage(files);
     } catch (err: unknown) {
         showError.value = true;
-        errorMessage.value = err instanceof Error ? err.message : 'Bild konnte nicht hinzugefügt werden.';
+        errorMessage.value = err instanceof Error ? err.message : t('app.materialGenerator.errors.imageAdd');
     }
 }
 
@@ -656,23 +658,23 @@ const stampSvgMap: Record<string, string> = {
 };
 
 const stampOptions: StampOption[] = [
-    { label: 'Abgesagt', file: 'AbgesagtBadge.svg' },
-    { label: 'Verschoben', file: 'VerschobenBadge.svg' },
-    { label: 'Aktualisiert', file: 'AktualisiertBadge.svg' },
+    { label: t('app.materialGenerator.stamps.cancelled'), file: 'AbgesagtBadge.svg' },
+    { label: t('app.materialGenerator.stamps.postponed'), file: 'VerschobenBadge.svg' },
+    { label: t('app.materialGenerator.stamps.updated'), file: 'AktualisiertBadge.svg' },
 ];
 
 async function onAddStamp(file: string) {
     const svgString = stampSvgMap[file];
     if (!svgString) {
         showError.value = true;
-        errorMessage.value = 'Stempel konnte nicht geladen werden.';
+        errorMessage.value = t('app.materialGenerator.errors.stampLoad');
         return;
     }
     try {
         await addUserStamp(svgString);
     } catch {
         showError.value = true;
-        errorMessage.value = 'Stempel konnte nicht geladen werden.';
+        errorMessage.value = t('app.materialGenerator.errors.stampLoad');
     }
 }
 
@@ -722,32 +724,32 @@ watch(templateError, (msg) => {
 
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary">Werbemittelgenerator</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.materialGenerator.page.title') }}</h1>
         <h2 class="kern-heading text-theme-primary">
-            <span v-if="materialType === 'eventList'">– Veranstaltungsübersichten (mehrere Veranstaltungen)</span>
-            <span v-else>– Ankündigung einer einzelnen Veranstaltung</span>
+            <span v-if="materialType === 'eventList'">{{ t('app.materialGenerator.page.subtitleEventList') }}</span>
+            <span v-else>{{ t('app.materialGenerator.page.subtitleEvent') }}</span>
         </h2>
         <p v-if="materialType === 'eventList'" class="mt-3 mb-5">
-            <b>Hinweis:</b>
-            Gestalten Sie Übersichten für anstehende Veranstaltungen im Design Ihrer Organisation. Nutzen Sie dafür auch
-            das Markenkit. Ankündigungen für einzelne Veranstaltungen können über den Button der Veranstaltung generiert
-            werden. Weitere Informationen finden Sie im
-            <LinkToDocs path="Werbemittelgenerator/" fragment="bedienung-des-werbemittelgenerators" />.
+            <b>{{ t('app.materialGenerator.noteLabel') }}</b> <I18nT scope="global" keypath="app.materialGenerator.page.hintEventList" tag="span">
+                <template #docs>
+                    <LinkToDocs path="Werbemittelgenerator/" fragment="bedienung-des-werbemittelgenerators" />
+                </template>
+            </I18nT>
         </p>
         <p v-else class="mt-3 mb-5">
-            <b>Hinweis:</b>
-            Gestalten Sie Ankündigungen für einzelne Veranstaltungen im Design Ihrer Organisation. Nutzen Sie dafür auch
-            das Markenkit. Übersichten für mehrere Veranstaltungen können über den Menüpunkt "Werbemittel" im Seitenmenü
-            erstellt werden. Weitere Informationen finden Sie im
-            <LinkToDocs path="Werbemittelgenerator/" fragment="werbemittelgenerator-fur-ankundigungen-einzelner-veranstaltungen" />.
+            <b>{{ t('app.materialGenerator.noteLabel') }}</b> <I18nT scope="global" keypath="app.materialGenerator.page.hintEvent" tag="span">
+                <template #docs>
+                    <LinkToDocs path="Werbemittelgenerator/" fragment="werbemittelgenerator-fur-ankundigungen-einzelner-veranstaltungen" />
+                </template>
+            </I18nT>
         </p>
     </div>
 
     <Alert
         v-if="showError"
-        title="Fehler"
+        :title="t('common.error')"
         severity="danger"
-        :content="errorMessage || 'Es ist ein Fehler aufgetreten.'"
+        :content="errorMessage || t('app.materialGenerator.page.errorDefault')"
         class="mb-5"
     />
 
@@ -780,7 +782,7 @@ watch(templateError, (msg) => {
 
     <div v-if="loading" class="flex align-items-center justify-content-center mt-4">
         <Loader />
-        <p class="ml-2">Daten werden geladen</p>
+        <p class="ml-2">{{ t('app.materialGenerator.page.loadingData') }}</p>
     </div>
 
     <div v-show="!loading" class="mg-layout">
@@ -808,7 +810,7 @@ watch(templateError, (msg) => {
             <div v-if="selectedDimensionData.preview === 'text'" class="mb-3">
                 <InputTextarea
                     v-model="formatTextOutput"
-                    label="Ausgabetext"
+                    :label="t('app.materialGenerator.page.outputText')"
                     name="formatTextOutput"
                     rows="40"
                     cols="50"
@@ -817,12 +819,12 @@ watch(templateError, (msg) => {
                 />
             </div>
             <div v-else-if="selectedDimensionData.preview === null" class="mb-3">
-                <p class="kern-text">Es gibt keine Vorschau für dieses Dateiformat.</p>
+                <p class="kern-text">{{ t('app.materialGenerator.page.noPreview') }}</p>
             </div>
 
             <Legend
                 v-if="selectedDimensionData?.preview === 'canvas'"
-                title="Funktionen des Editors"
+                :title="t('app.materialGenerator.page.editorFeaturesTitle')"
                 :icons="editorFeatures"
                 class="mt-3"
             />

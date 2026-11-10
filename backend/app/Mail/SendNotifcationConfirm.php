@@ -32,7 +32,7 @@ class SendNotifcationConfirm extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Bestätigen Sie Ihre E-Mail-Adresse, um Benachrichtigungen zu erhalten',
+            subject: __('emails.subjects.notificationConfirm'),
         );
     }
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { translateMessage } from '@/i18n';
+
 interface Props {
   forId: string;
   errors?: string;
@@ -12,6 +14,6 @@ const props = defineProps<Props>();
       class="kern-icon kern-icon--danger kern-icon--md"
       aria-hidden="true"
     />
-    <span class="kern-text">{{ errors }}</span>
+    <span class="kern-text">{{ translateMessage(errors) }}</span>
   </p>
 </template>

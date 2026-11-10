@@ -6,6 +6,7 @@ import { useField, useForm } from 'vee-validate';
 import type { AxiosError } from 'axios';
 
 import zod from '@/lib/zod';
+import { translateMessage } from '@/i18n';
 import { axiosErrorHandler, dsgApi } from '@/lib/dsgApi';
 import { intervall_notification_options, mobilizon_category_options_all } from '@/lib/const';
 import { findOrganisationOptions } from '@/lib/mobilizonClient';
@@ -364,7 +365,7 @@ const submitForm = handleSubmit(async (values) => {
                                         role="alert"
                                     >
                                         <Icon name="danger" />
-                                        {{ errors.postal_code || errors.radius }}
+                                        {{ translateMessage(errors.postal_code || errors.radius || '') }}
                                     </span>
                                 </div>
                             </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import zod from '@/lib/zod';
 import { ref, watch } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { checkAuthDsgApi, dsgApi } from '@/lib/dsgApi';
 import { checkLogin, setUserData } from '@/composables/UserComposoable';
 import { useRouter } from 'vue-router';
@@ -27,6 +28,7 @@ interface RegisterWithProfileAndOrganisationResponse {
     person: any;
 }
 
+const { t } = useI18n();
 const router = useRouter();
 const showErrorMessage = ref(false);
 const errorMessageContent = ref('');
@@ -37,49 +39,49 @@ const validationSchema = toTypedSchema(
             // Account
             email: zod
                 .string({
-                    required_error: 'Die E-Mail-Adresse ist erforderlich.',
+                    required_error: 'auth.validation.emailRequired',
                 })
-                .nonempty('Die E-Mail-Adresse ist erforderlich.')
-                .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+                .nonempty('auth.validation.emailRequired')
+                .email('auth.validation.emailInvalid'),
             password: zod
                 .string({
-                    required_error: 'Das Passwort ist erforderlich.',
+                    required_error: 'auth.validation.passwordRequired',
                 })
-                .nonempty('Das Passwort ist erforderlich.')
-                .min(8, 'Das Passwort muss mindestens 8 Zeichen lang sein.')
+                .nonempty('auth.validation.passwordRequired')
+                .min(8, 'auth.validation.passwordMin8')
                 .trim(),
             password_confirmation: zod
                 .string({
-                    required_error: 'Die Passwortbestätigung ist erforderlich.',
+                    required_error: 'auth.validation.passwordConfirmationRequired',
                 })
-                .nonempty('Das Passwort ist erforderlich.')
-                .min(8, 'Das Passwort muss mindestens 8 Zeichen lang sein.')
+                .nonempty('auth.validation.passwordRequired')
+                .min(8, 'auth.validation.passwordMin8')
                 .trim(),
             accept_terms: zod.boolean().refine((val) => val, {
-                message: 'Die Nutzungsbedingungen und die Datenschutzerklärung müssen akzeptiert werden.',
+                message: 'auth.validation.acceptTerms',
             }),
             // Profile
-            name: zod.string().nonempty('Der Name ist erforderlich.'),
-            preferredUsername: preferredUsernameSchema.nonempty('Der Benutzername ist erforderlich.'),
+            name: zod.string().nonempty('auth.validation.nameRequired'),
+            preferredUsername: preferredUsernameSchema.nonempty('auth.validation.usernameRequired'),
             // Organisation
             organisation_name: zod
                 .string({
-                    required_error: 'Der Name der Organisation ist erforderlich.',
+                    required_error: 'app.organisations.validation.nameRequired',
                 })
-                .nonempty('Der Name der Organisation darf nicht leer sein.'),
-            organisation_preferredUsername: preferredUsernameSchema.nonempty('Der Benutzername der Organisation darf nicht leer sein.'),
+                .nonempty('app.organisations.validation.nameNotEmpty'),
+            organisation_preferredUsername: preferredUsernameSchema.nonempty('auth.validation.organisationUsernameNotEmpty'),
             organisation_summary: zod
                 .string({
-                    required_error: 'Die Beschreibung der Organisation ist erforderlich.',
+                    required_error: 'app.organisations.validation.summaryRequired',
                 })
-                .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' }),
+                .refine((val) => stripHtml(val).length > 0, { message: 'app.organisations.validation.summaryNotEmpty' }),
             })
         .superRefine(({ password, password_confirmation }, ctx) => {
             if (password !== password_confirmation) {
                 ctx.addIssue({
                     path: ['password_confirmation'],
                     code: zod.ZodIssueCode.custom,
-                    message: 'Die Passwörter stimmen nicht überein.',
+                    message: 'auth.validation.passwordsDoNotMatch',
                 });
             }
         })
@@ -149,7 +151,7 @@ const onSubmit = handleSubmit(async (values) => {
         errorMessageContent.value =
             error?.response?.data?.message ||
             error?.response?.data?.error ||
-            'Registrierung konnte nicht durchgeführt werden.';
+            t('auth.registerWithOrganisation.error');
     }
 });
 
@@ -162,12 +164,12 @@ if (checkLogin()) {
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="register-card">
             <Card
-                title="Registrierung mit Profil und Organisation"
+                :title="t('auth.registerWithOrganisation.title')"
                 class="p-2"
             >
                 <Alert
                     v-if="showErrorMessage"
-                    title="Fehler"
+                    :title="t('common.error')"
                     :content="errorMessageContent"
                     severity="danger"
                     class="mb-4 w-full"
@@ -181,49 +183,52 @@ if (checkLogin()) {
                     >
                         <!-- Account Section -->
                         <div>
-                            <h2 class="kern-heading text-theme-primary mb-3">Account</h2>
+                            <h2 class="kern-heading text-theme-primary mb-3">{{ t('auth.registerWithOrganisation.account') }}</h2>
                             <div class="flex flex-column gap-3">
                                 <InputEmail
                                     v-model="email"
-                                    label="E-Mail-Adresse"
+                                    :label="t('auth.email')"
                                     name="email"
                                     required
                                     :errors="submitCount === 0 ? undefined : errors.email"
                                 />
                                 <InputPassword
                                     v-model="password"
-                                    label="Passwort"
+                                    :label="t('auth.password')"
                                     name="password"
                                     :errors="submitCount === 0 ? undefined : errors.password"
                                 />
                                 <InputPassword
                                     v-model="password_confirmation"
-                                    label="Passwort bestätigen"
+                                    :label="t('auth.passwordConfirm')"
                                     name="password_confirmation"
                                     :errors="submitCount === 0 ? undefined : errors.password_confirmation"
                                 />
                                 <InputCheckbox
                                     v-model="accept_terms"
                                     name="accept_terms"
-                                    label="Nutzungsbedingungen"
+                                    :label="t('auth.terms.label')"
                                     :errors="submitCount === 0 ? undefined : errors.accept_terms"
                                 >
                                     <template #label>
-                                        Ich habe die
-                                        <RouterLink
-                                            :to="{ name: 'public.terms' }"
-                                            class="terms-link"
-                                        >
-                                            Nutzungsbedingungen
-                                        </RouterLink>
-                                        und
-                                        <RouterLink
-                                            :to="{ name: 'public.privacy' }"
-                                            class="terms-link"
-                                        >
-                                            Datenschutzerklärung
-                                        </RouterLink>
-                                        gelesen und akzeptiere sie.
+                                        <I18nT scope="global" keypath="auth.terms.text">
+                                            <template #terms>
+                                                <RouterLink
+                                                    :to="{ name: 'public.terms' }"
+                                                    class="terms-link"
+                                                >
+                                                    {{ t('auth.terms.terms') }}
+                                                </RouterLink>
+                                            </template>
+                                            <template #privacy>
+                                                <RouterLink
+                                                    :to="{ name: 'public.privacy' }"
+                                                    class="terms-link"
+                                                >
+                                                    {{ t('auth.terms.privacy') }}
+                                                </RouterLink>
+                                            </template>
+                                        </I18nT>
                                     </template>
                                 </InputCheckbox>
                             </div>
@@ -233,31 +238,33 @@ if (checkLogin()) {
 
                         <!-- Profile Section -->
                         <div>
-                            <h2 class="kern-heading text-theme-primary mb-3">Profil</h2>
+                            <h2 class="kern-heading text-theme-primary mb-3">{{ t('auth.registerWithOrganisation.profile') }}</h2>
                             <p class="mb-4">
-                                <b>Hinweis:</b>
-                                Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/Organisation/"
-                                    fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
-                                />.
+                                <b>{{ t('auth.hint') }}</b> <I18nT scope="global" keypath="auth.registerWithOrganisation.profileHint">
+                                    <template #docs>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Organisation/"
+                                            fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                             <div class="flex flex-column gap-4">
                                 <div class="flex flex-column md:flex-row gap-4">
                                     <div class="flex-1">
                                         <InputText
                                             v-model="name"
-                                            label="Ihr vollständiger Name"
+                                            :label="t('auth.registerWithOrganisation.fullName')"
                                             name="name"
                                             :errors="submitCount === 0 ? undefined : errors.name"
                                         />
                                     </div>
                                     <div class="flex-1">
                                         <Alert
-                                            title="Information"
+                                            :title="t('auth.information')"
                                             severity="info"
                                         >
-                                            <p>Ihr vollständiger Name kann später geändert werden.</p>
+                                            <p>{{ t('auth.registerWithOrganisation.fullNameInfo') }}</p>
                                         </Alert>
                                     </div>
                                 </div>
@@ -266,20 +273,21 @@ if (checkLogin()) {
                                     <div class="flex-1">
                                         <InputText
                                             v-model="preferredUsername"
-                                            label="Ihr Benutzername"
+                                            :label="t('auth.registerWithOrganisation.username')"
                                             name="preferredUsername"
                                             :errors="submitCount === 0 ? undefined : errors.preferredUsername"
                                         />
                                     </div>
                                     <div class="flex-1">
                                         <Alert
-                                            title="Information"
+                                            :title="t('auth.information')"
                                             severity="info"
                                         >
-                                            Ihr eindeutiger Benutzername wird benötigt, um Sie zu Organisationen
-                                            einzuladen. Dieser kann später
-                                            <b>nicht mehr geändert</b>
-                                            werden.
+                                            <I18nT scope="global" keypath="auth.registerWithOrganisation.usernameInfo">
+                                                <template #notChangeable>
+                                                    <b>{{ t('auth.registerWithOrganisation.usernameInfoNotChangeable') }}</b>
+                                                </template>
+                                            </I18nT>
                                         </Alert>
                                     </div>
                                 </div>
@@ -290,32 +298,33 @@ if (checkLogin()) {
 
                         <!-- Organisation Section -->
                         <div>
-                            <h2 class="kern-heading text-theme-primary mb-3">Organisation</h2>
+                            <h2 class="kern-heading text-theme-primary mb-3">{{ t('auth.registerWithOrganisation.organisation') }}</h2>
                             <p class="mb-4">
-                                <b>Hinweis:</b>
-                                Mit diesem Formular stellen Sie eine Anfrage an die Betreiber*innen dieser
-                                Kalenderinstanz. Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/Organisation/"
-                                    fragment="organisation-erstellen-zugang-fur-veranstalter-innen"
-                                />.
+                                <b>{{ t('auth.hint') }}</b> <I18nT scope="global" keypath="auth.registerWithOrganisation.organisationHint">
+                                    <template #docs>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Organisation/"
+                                            fragment="organisation-erstellen-zugang-fur-veranstalter-innen"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                             <div class="flex flex-column gap-4">
                                 <div class="flex flex-column md:flex-row gap-4">
                                     <div class="flex-1">
                                         <InputText
                                             v-model="organisation_name"
-                                            label="Organisationsname"
+                                            :label="t('auth.registerWithOrganisation.organisationName')"
                                             name="organisation_name"
                                             :errors="submitCount === 0 ? undefined : errors.organisation_name"
                                         />
                                     </div>
                                     <div class="flex-1">
                                         <Alert
-                                            title="Information"
+                                            :title="t('auth.information')"
                                             severity="info"
                                         >
-                                            <p>Geben Sie den offiziellen Namen Ihrer Organisation ein.</p>
+                                            <p>{{ t('auth.registerWithOrganisation.organisationNameInfo') }}</p>
                                         </Alert>
                                     </div>
                                 </div>
@@ -324,7 +333,7 @@ if (checkLogin()) {
                                     <div class="flex-1">
                                         <InputText
                                             v-model="organisation_preferredUsername"
-                                            label="Benutzername der Organisation"
+                                            :label="t('auth.registerWithOrganisation.organisationUsername')"
                                             name="organisation_preferredUsername"
                                             :errors="
                                                 submitCount === 0 ? undefined : errors.organisation_preferredUsername
@@ -333,10 +342,10 @@ if (checkLogin()) {
                                     </div>
                                     <div class="flex-1">
                                         <Alert
-                                            title="Information"
+                                            :title="t('auth.information')"
                                             severity="info"
                                         >
-                                            <p>Der Benutzername kann später nicht geändert werden.</p>
+                                            <p>{{ t('auth.registerWithOrganisation.organisationUsernameInfo') }}</p>
                                             <LinkToDocs
                                                 path="Terminverwaltung/Organisation/"
                                                 fragment="schritt-2-formular-zur-organisationserstellung"
@@ -347,7 +356,7 @@ if (checkLogin()) {
 
                                 <InputRichText
                                     v-model="organisation_summary"
-                                    label="Beschreibung (für die öffentliche Organisationsseite)"
+                                    :label="t('auth.registerWithOrganisation.organisationSummary')"
                                     name="organisation_summary"
                                     :errors="submitCount === 0 ? undefined : errors.organisation_summary"
                                 />
@@ -360,13 +369,13 @@ if (checkLogin()) {
                             :disabled="isSubmitting"
                             icon-left="add"
                         >
-                            Registrierung abschließen
+                            {{ t('auth.registerWithOrganisation.submit') }}
                         </Button>
                     </form>
                 </Fieldset>
 
                 <div class="text-sm mt-4 text-center">
-                    <RouterLink :to="{ name: 'login' }">Zurück zum Login</RouterLink>
+                    <RouterLink :to="{ name: 'login' }">{{ t('auth.backToLogin') }}</RouterLink>
                 </div>
             </Card>
         </div>

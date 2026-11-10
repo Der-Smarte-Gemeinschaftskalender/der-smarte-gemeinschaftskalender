@@ -54,7 +54,7 @@ class MaterialGeneratorValueController extends Controller implements HasMiddlewa
 
 
         if (!$groupId && !$preferredUsername) {
-            return response()->json(['error' => 'mobilizon_group_id oder mobilizon_preferredusername sind erforderlich.'], 400);
+            return response()->json(['error' => __('messages.materialGenerator.groupRequired')], 400);
         }
 
         $generatorValues = $groupId
@@ -71,7 +71,7 @@ class MaterialGeneratorValueController extends Controller implements HasMiddlewa
         $groups = $mobilizon->getGroupsAsArray();
 
         if (!in_array($groupId, array_column($groups, 'id'))) {
-            return response()->json(['error' => 'Du bist nicht Teil der Gruppe oder die Gruppe existiert nicht.'], 403);
+            return response()->json(['error' => __('messages.general.notInGroup')], 403);
         }
 
         return response()->json($generatorValues);

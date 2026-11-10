@@ -73,7 +73,7 @@ const calendarOptions = reactive<CalendarOptions>({
         dayGrid1Day: {
             type: 'dayGrid',
             duration: { days: 1 },
-            buttonText: t('public.calendar.twoDays'),
+            buttonText: t('public.calendar.day'),
         },
     },
     events: async (

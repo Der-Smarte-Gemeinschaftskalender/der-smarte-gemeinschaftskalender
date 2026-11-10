@@ -18,7 +18,7 @@
         "imprint": {
             "title": "Impressum",
             "contact": "Kontaktmöglichkeit",
-            "registrations": "Registrierungen ist",
+            "registrations": "Registrierung ist",
             "registrationsOpen": "offen",
             "registrationsClosed": "geschlossen"
         },
@@ -73,7 +73,7 @@
             "tags": "Schlagwörter",
             "externalRegistration": "Externe Anmeldung",
             "registerNow": "Jetzt anmelden",
-            "imageAlt": "Event Bild",
+            "imageAlt": "Veranstaltungsbild",
             "website": "Webseite",
             "relatedEvents": "Ähnliche Veranstaltungen",
             "moreEventsFromCalendar": "Weitere Veranstaltungen aus dem Kalender {operatedBy}",
@@ -108,8 +108,9 @@
             "addUpcomingEventsToCalendar": "Bevorstehende Veranstaltungen zum Kalender hinzufügen",
             "shareEvents": "Veranstaltungen teilen",
             "noUpcomingEvents": "Keine bevorstehenden Veranstaltungen",
-            "infoMonitorDisplay": "Infomonitor anzeige",
-            "navigateToInfoMonitor": "Zur Infomonitor Anzeige der Organisation"
+            "infoMonitorDisplay": "Infomonitor-Anzeige",
+            "navigateToInfoMonitor": "Zur Infomonitor-Anzeige der Organisation",
+            "featured": "Empfohlen"
         },
         "infoMonitor": {
             "noEventsForCriteria": "Keine Veranstaltung mit diesen Suchkriterien gefunden.",
@@ -117,11 +118,11 @@
         },
         "timezoneNotice": {
             "title": "Hinweis zur Zeitzone",
-            "content": "Ihr Browser ist auf die Zeitzone „{detectedTz}\" eingestellt – Termin-Uhrzeiten werden entsprechend in dieser Zeitzone angezeigt. Stimmt Ihre Browser-Zeitzone nicht, können die angezeigten Uhrzeiten abweichen."
+            "content": "Ihr Browser ist auf die Zeitzone „{detectedTz}“ eingestellt – Termin-Uhrzeiten werden entsprechend in dieser Zeitzone angezeigt. Stimmt Ihre Browser-Zeitzone nicht, können die angezeigten Uhrzeiten abweichen."
         },
         "timezoneFormHint": {
-            "stored": "Hinweis: Eingegebene Datum und Uhrzeit werden als Berliner Zeit (MEZ/MESZ) gespeichert. Betrachter sehen die Termine in der Zeitzone ihres jeweiligen Browsers – ein Termin „17:00\" erscheint bei einem Browser in New York zum Beispiel automatisch als „11:00\".",
-            "browserMismatch": "Ihre Browser-Zeitzone ist „{detectedTz}\". Achtung: Eine Eingabe „13:00\" wird trotzdem als 13:00 Berliner Zeit gespeichert. Wenn Sie einen Termin in Ihrer eigenen Ortszeit anlegen möchten, rechnen Sie bitte vorher in Berliner Zeit um."
+            "stored": "Hinweis: Eingegebenes Datum und Uhrzeit werden in der gewählten Zeitzone ({timezone}) gespeichert. Betrachter sehen die Termine in der Zeitzone ihres jeweiligen Browsers – ein Termin „17:00“ in Berlin erscheint bei einem Browser in New York zum Beispiel automatisch als „11:00“.",
+            "browserMismatch": "Ihre Browser-Zeitzone ist „{detectedTz}“. Achtung: Eine Eingabe „13:00“ wird als 13:00 in der gewählten Zeitzone ({timezone}) gespeichert. Wenn Sie einen Termin in Ihrer eigenen Ortszeit anlegen möchten, wählen Sie bitte Ihre Zeitzone aus."
         },
         "search": {
             "title": "Veranstaltungen finden",
@@ -130,10 +131,10 @@
             "filter": "Filter",
             "search": "Suchen",
             "tryDifferent": "Versuchen Sie es mit einem anderen Suchbegriff oder passen Sie die Filter an.",
-            "resetFilters": "Suchfilter zur\u00fccksetzen",
+            "resetFilters": "Suchfilter zurücksetzen",
             "shareResults": "Suchergebnis teilen",
             "map": "Karte",
-            "back": "Zur\u00fcck",
+            "back": "Zurück",
             "next": "Weiter",
             "foundEvents": "Veranstaltungen gefunden",
             "accAbout": "Diese Instanz",
@@ -148,14 +149,14 @@
             "timeTomorrow": "Morgen",
             "timeThisWeek": "Diese Woche",
             "timeThisWeekend": "Dieses Wochenende",
-            "timeNextWeek": "N\u00e4chste Woche",
+            "timeNextWeek": "Nächste Woche",
             "timeThisMonth": "Diesen Monat",
-            "timeNextMonth": "N\u00e4chster Monat",
+            "timeNextMonth": "Nächster Monat",
             "searchLabel": "Suchbegriff",
             "searchPlaceholder": "Schlagwort, Veranstaltungstitel...",
             "allOrganisations": "Alle Organisationen",
             "orgnisationsFound": "Organisationen gefunden",
-            "organisationsStartingWith": "Organisationen, die mit \"{letter}\" beginnen",
+            "organisationsStartingWith": "Organisationen, die mit „{letter}“ beginnen",
             "organisationSearchPlaceholder": "Nach Organisationen suchen..."
         },
         "navigation": {
@@ -194,7 +195,7 @@
             "email": {
                 "buttonTitle": "E-Mail-Benachrichtigungen abonnieren",
                 "title": "E-Mail-Benachrichtigungen",
-                "description": "Erhalten Sie regelmäßig E-Mail-Benachrichtigungen zu neuen Veranstaltungen in Ihrer Nähe. Wählen Sie selbst, wie oft Sie informiert werden, welche Themen und Organisationen Sie interessieren und für welchen Umkreis nach Veranstaltungen gesucht werden sollen. ",
+                "description": "Erhalten Sie regelmäßig E-Mail-Benachrichtigungen zu neuen Veranstaltungen in Ihrer Nähe. Wählen Sie selbst, wie oft Sie informiert werden, welche Themen und Organisationen Sie interessieren und in welchem Umkreis nach Veranstaltungen gesucht werden soll.",
                 "create": {
                     "title": "E-Mail-Benachrichtigungen abonnieren",
                     "subtitle": "Stellen Sie Ihr persönliches Abo zusammen",
@@ -255,13 +256,18 @@
                 "step1Filter": "Filter",
                 "step1Suffix": "ein (z. B. Kategorien oder Zeiträume wie heute, morgen oder nächste Woche).",
                 "step2Prefix": "Klicken Sie oben rechts auf das",
-                "step2Suffix": "Info-Icon im Bereich \"Suchergebnis teilen\", um eine passende URL zu erzeugen.",
+                "step2Suffix": "Info-Icon im Bereich „Suchergebnis teilen“, um eine passende URL zu erzeugen.",
                 "step3": "Kopieren Sie die URL und hinterlegen Sie diese direkt auf einer Infotafel oder einem Bildschirm.",
                 "tipLabel": "Tipp:",
                 "tipText": "Sie können auch spezifisch für eine Organisation eine Infotafel-Ansicht erstellen – direkt über die öffentliche Seite der jeweiligen Organisation. Auch dort finden Sie ein Info-Icon.",
                 "description": "Die Anzeige läuft automatisch durch und zeigt Ihre gefilterten Veranstaltungen fortlaufend im Wechsel an – immer aktuell und ohne zusätzliche Pflege.",
                 "moreInfoPrefix": "Weitere Informationen finden Sie im"
             }
+        },
+        "share": {
+            "copy": "Kopieren",
+            "copyTextAria": "Link zum Suchergebnis",
+            "eventListTitle": "Veranstaltungsübersicht"
         }
     },
     "categories": {
@@ -321,8 +327,11 @@
         "documentation": "Handbuch",
         "weekly": "Wöchentlich",
         "monthly": "Monatlich",
-        "mondayMorning": "Montag morgen",
-        "firstDayOfMonth": "erster Tag des Monats"
+        "mondayMorning": "Montagmorgen",
+        "firstDayOfMonth": "erster Tag des Monats",
+        "timezone": {
+            "label": "Zeitzone"
+        }
     },
     "languages": {
         "de": "Deutsch",
@@ -353,10 +362,1048 @@
             "externalLinkText": "Über den Kalender"
         },
         "mainFooter": {
-            "disclaimerText": "Alle Termine werden eigenständig von den jeweiligen Veranstalter*innen eingestellt und gepflegt.\nBitte wende Dich bei Fragen direkt an die im Termin genannte Organisation.\nWenn du Bedenken zu einer Veranstaltung oder einer Organisation hast, wende Dich an uns."
+            "disclaimerText": "Alle Termine werden eigenständig von den jeweiligen Veranstalter*innen eingestellt und gepflegt.\nBitte wende dich bei Fragen direkt an die im Termin genannte Organisation.\nWenn du Bedenken zu einer Veranstaltung oder einer Organisation hast, wende dich an uns."
         },
         "showEventPage": {
             "eventShareTitle": "Veranstaltung teilen"
+        }
+    },
+    "validation": {
+        "name": {
+            "required": "Der Name ist erforderlich.",
+            "eventRequired": "Der Name des Termins ist erforderlich.",
+            "min": "Der Name muss mindestens 3 Zeichen lang sein.",
+            "max": "Der Name darf maximal 100 Zeichen lang sein.",
+            "notEmpty": "Der Name darf nicht leer sein."
+        },
+        "description": {
+            "notEmpty": "Die Beschreibung darf nicht leer sein."
+        },
+        "email": {
+            "required": "Die E-Mail-Adresse ist erforderlich.",
+            "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein."
+        },
+        "password": {
+            "currentRequired": "Das aktuelle Passwort ist erforderlich.",
+            "newRequired": "Das neue Passwort ist erforderlich.",
+            "newMin": "Das neue Passwort muss mindestens 8 Zeichen lang sein.",
+            "confirmRequired": "Die Bestätigung des neuen Passworts ist erforderlich.",
+            "confirmMin": "Die Bestätigung des neuen Passworts muss mindestens 8 Zeichen lang sein.",
+            "mismatch": "Die Passwörter stimmen nicht überein."
+        },
+        "url": {
+            "invalid": "Bitte eine gültige URL eingeben.",
+            "externalParticipation": "Bei Angabe einer externen Teilnahme-URL bitte eine gültige URL eingeben.",
+            "onlineAddress": "Bei Angabe einer Online-Adresse bitte eine gültige URL eingeben."
+        },
+        "time": {
+            "invalid": "Bitte eine gültige Uhrzeit im Format HH:mm eingeben."
+        },
+        "duration": {
+            "invalid": "Bitte eine gültige Dauer im Format HHH:MM eingeben."
+        },
+        "date": {
+            "startAfterEnd": "Das Startdatum darf nicht nach dem Enddatum liegen."
+        },
+        "address": {
+            "notGeocoded": "Die Adresse konnte keinem Ort zugeordnet werden. Wählen Sie einen Vorschlag aus der Liste aus. Die Vorschläge erscheinen nur, wenn eine Adresse eingegeben wurde, die in OpenStreetMap hinterlegt ist."
+        },
+        "picture": {
+            "unreadable": "Die ausgewählte Datei ist leer oder konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.",
+            "unsupportedFormat": "Das Format {format} wird nicht unterstützt. Bitte wählen Sie ein Bild im Format JPG, PNG, GIF oder WEBP.",
+            "tooLarge": "Das Bild ist mit {size} MB zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.",
+            "unknownFormat": "unbekannt"
+        },
+        "ical": {
+            "fileRequired": "Bitte eine iCal-Datei (max. 2 MB) hochladen"
+        },
+        "username": {
+            "startLowercase": "Der Benutzername muss mit einem Kleinbuchstaben anfangen.",
+            "endLowercaseOrNumber": "Der Benutzername muss mit einem Kleinbuchstaben oder einer Zahl enden.",
+            "invalid": "Bitte einen gültigen Benutzernamen eingeben. Erlaubt sind Kleinbuchstaben, Zahlen und Unterstriche.",
+            "noConsecutiveUnderscores": "Der Benutzername darf keine aufeinanderfolgenden Unterstriche enthalten."
+        },
+        "fileFormats": {
+            "allAudio": "alle Audioformate",
+            "allVideo": "alle Videoformate",
+            "allImage": "alle Bildformate",
+            "allText": "alle Textformate",
+            "allApplication": "alle Anwendungsformate",
+            "calendar": "Kalender"
+        }
+    },
+    "app": {
+        "helper": {
+            "invalidDate": "Ungültiges Datum",
+            "hours": "{hours} h",
+            "minutes": "{minutes} min",
+            "languageFallback": "Deutsch"
+        },
+        "materialGenerator": {
+            "noteLabel": "Hinweis:",
+            "page": {
+                "title": "Werbemittelgenerator",
+                "subtitleEventList": "– Veranstaltungsübersichten (mehrere Veranstaltungen)",
+                "subtitleEvent": "– Ankündigung einer einzelnen Veranstaltung",
+                "hintEventList": "Gestalten Sie Übersichten für anstehende Veranstaltungen im Design Ihrer Organisation. Nutzen Sie dafür auch das Markenkit. Ankündigungen für einzelne Veranstaltungen können über den Button der Veranstaltung generiert werden. Weitere Informationen finden Sie im {docs}.",
+                "hintEvent": "Gestalten Sie Ankündigungen für einzelne Veranstaltungen im Design Ihrer Organisation. Nutzen Sie dafür auch das Markenkit. Übersichten für mehrere Veranstaltungen können über den Menüpunkt „Werbemittel“ im Seitenmenü erstellt werden. Weitere Informationen finden Sie im {docs}.",
+                "errorDefault": "Es ist ein Fehler aufgetreten.",
+                "loadingData": "Daten werden geladen",
+                "outputText": "Ausgabetext",
+                "noPreview": "Es gibt keine Vorschau für dieses Dateiformat.",
+                "editorFeaturesTitle": "Funktionen des Editors"
+            },
+            "editorFeatures": {
+                "dragDrop": "Objekte per Drag & Drop verschieben, skalieren und drehen",
+                "uploadImage": "Bild hochladen (PNG, JPEG, SVG)",
+                "stamps": "Stempel (Abgesagt, Verschoben, Aktualisiert)",
+                "order": "Reihenfolge ändern (Ebenen via Rechtsklick im Menü nach vorne/hinten rücken)",
+                "duplicate": "Objekte duplizieren und löschen via Rechtsklick im Menü",
+                "textAdjustments": "Textanpassungen: Schriftart, Schriftgröße, Farben, Fettdruck und Unterstreichung",
+                "undo": "Bearbeitungen rückgängig machen und wiederherstellen",
+                "uploadBackground": "Hintergrundbild hochladen",
+                "globalSettings": "Schriften, Farben und Trennlinien global anpassen",
+                "templates": "Vorlagen speichern und wiederverwenden für konsistente Designs",
+                "eventSelection": "Manuelle Auswahl und Bearbeitung der Veranstaltungen",
+                "download": "Grafik als PNG-Datei herunterladen"
+            },
+            "errors": {
+                "defaultValues": "Standardwerte konnten nicht geladen werden.",
+                "noEventsFound": "Es wurden keine Veranstaltungen gefunden.",
+                "noOrganisation": "Keine Organisation ausgewählt.",
+                "noEvent": "Keine Veranstaltung ausgewählt.",
+                "contentLoad": "Inhalte konnten nicht geladen werden.",
+                "eventsLoad": "Veranstaltungen konnten nicht geladen werden.",
+                "moreEventsLoad": "Weitere Veranstaltungen konnten nicht geladen werden.",
+                "backgroundTooLarge": "Das Hintergrundbild ist zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.",
+                "imageAdd": "Bild konnte nicht hinzugefügt werden.",
+                "stampLoad": "Stempel konnte nicht geladen werden.",
+                "fileTooLarge": "Die Datei ist zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.",
+                "templatesLoad": "Vorlagen konnten nicht geladen werden.",
+                "templateSave": "Vorlage konnte nicht gespeichert werden.",
+                "templateDelete": "Vorlage konnte nicht gelöscht werden."
+            },
+            "stamps": {
+                "cancelled": "Abgesagt",
+                "postponed": "Verschoben",
+                "updated": "Aktualisiert"
+            },
+            "canvas": {
+                "newText": "Neuer Text"
+            },
+            "dimensions": {
+                "post": "Social-Media-Beitrag (1080 x 1350 px)",
+                "story": "Social-Media-Story (1080 x 1920 px)",
+                "text": "Text"
+            },
+            "sidebar": {
+                "download": "Herunterladen",
+                "format": "Format",
+                "scope": "Bereich",
+                "myOrganisation": "Meine Organisation",
+                "wholeInstance": "Gesamte Instanz",
+                "period": "Zeitraum",
+                "startDate": "Startdatum",
+                "endDate": "Enddatum",
+                "maxEventsHint": "Es können maximal {count} Veranstaltungen angezeigt werden",
+                "events": "Veranstaltungen",
+                "selectEvents": "Auswählen ({selected}/{max})",
+                "onlyFirstSelected": "Es werden nur die ersten {count} ausgewählten Veranstaltungen auf der Grafik angezeigt.",
+                "deselectAll": "Alle abwählen",
+                "selectAll": "Alle auswählen",
+                "loadingMore": "Laden …",
+                "loadMore": "Weitere Veranstaltungen laden",
+                "showLogo": "Logo anzeigen",
+                "backgroundImage": "Hintergrundbild",
+                "layoutTemplates": "Layout-Vorlagen",
+                "globalSettings": "Globale Einstellungen",
+                "fontTexts": "Schriftart Texte",
+                "color": "Farbe",
+                "fontHeadlines": "Schriftart Überschriften",
+                "headline": "Überschrift",
+                "dividers": "Trennlinien",
+                "templates": "Vorlagen",
+                "loadTemplate": "Vorlage laden: {name}",
+                "deleteTemplate": "Vorlage löschen",
+                "noTemplates": "Keine Vorlagen für dieses Format gespeichert.",
+                "saveTemplateAs": "Neue Vorlage speichern unter",
+                "deleteTemplateConfirm": "Vorlage „{name}“ wirklich löschen?"
+            },
+            "toolbar": {
+                "undo": "Rückgängig",
+                "redo": "Wiederholen",
+                "add": "Hinzufügen",
+                "addText": "Text hinzufügen",
+                "addShape": "Form hinzufügen",
+                "addImage": "Bild hinzufügen",
+                "addStamp": "Stempel hinzufügen",
+                "shapes": {
+                    "rect": "Rechteck",
+                    "circle": "Kreis",
+                    "ellipse": "Ellipse",
+                    "triangle": "Dreieck",
+                    "line": "Linie",
+                    "star": "Stern",
+                    "arrow": "Pfeil",
+                    "hexagon": "Sechseck"
+                },
+                "font": "Schriftart",
+                "textColor": "Textfarbe",
+                "size": "Größe",
+                "formatting": "Formatierung",
+                "bold": "Fett",
+                "underline": "Unterstrichen",
+                "fillColor": "Füllfarbe",
+                "background": "Hintergrund",
+                "borderAndText": "Rahmen & Text"
+            },
+            "contextMenu": {
+                "bringForward": "Ebene nach vorne",
+                "sendBackward": "Ebene nach hinten",
+                "bringToFront": "Ganz nach vorne",
+                "sendToBack": "Ganz nach hinten",
+                "duplicate": "Duplizieren"
+            },
+            "brandKit": {
+                "title": "Markenkit",
+                "hint": "Im Markenkit können Sie die Designvorgaben Ihrer Organisation speichern. Diese können für die Erstellung von Veranstaltungsankündigungen genutzt werden. Jedes Mitglied Ihrer Organisation kann bei der Nutzung des Werbemittelgenerators darauf zugreifen. So sparen Sie Zeit und stellen ein einheitliches Erscheinungsbild sicher. Ihr Logo hinterlegen Sie im Bereich Organisation. Weitere Informationen finden Sie im {docs}.",
+                "colorsAndFonts": "Farben und Schriften",
+                "texts": "Texte",
+                "underlineColor": "Farbe der Trennlinien",
+                "textColor": "Textfarbe",
+                "font": "Schriftart",
+                "headlineOptional": "Überschrift (optional)",
+                "headlineText": "Text Überschrift",
+                "backgroundImages": "Hintergrundbilder",
+                "infoTitle": "Information",
+                "infoText1": "Mit dem Werbemittelgenerator können Ankündigungen für einzelne Veranstaltungen oder Übersichten mehrerer anstehender Veranstaltungen erstellt werden.",
+                "infoText2": "Hier können Hintergrundbilder für die verschiedenen Formate und Ankündigungsarten bereitgestellt werden. Layout-Vorlagen zur passgenauen Gestaltung der Hintergründe finden Sie im {docs}.",
+                "eventLists": "Veranstaltungsübersichten",
+                "singleEvent": "Einzelne Veranstaltung",
+                "formatStory": "Format: Story",
+                "formatPost": "Format: Beitrag",
+                "sizeLabel": "Größe:",
+                "savedTitle": "Gespeichert",
+                "savedContent": "Die Einstellungen wurden erfolgreich gespeichert.",
+                "saveError": "Die Einstellungen konnten nicht gespeichert werden."
+            }
+        },
+        "organisations": {
+            "hint": "Hinweis:",
+            "information": "Information",
+            "errorOccurred": "Es ist ein Fehler aufgetreten.",
+            "loadError": "Organisation konnte nicht geladen werden.",
+            "saved": "Gespeichert",
+            "unknown": "Unbekannt",
+            "validation": {
+                "nameRequired": "Der Name der Organisation ist erforderlich.",
+                "nameNotEmpty": "Der Name der Organisation darf nicht leer sein.",
+                "summaryRequired": "Die Beschreibung der Organisation ist erforderlich.",
+                "summaryNotEmpty": "Die Beschreibung darf nicht leer sein.",
+                "usernameRequired": "Der Benutzername ist erforderlich.",
+                "usernameNotEmpty": "Der Benutzername darf nicht leer sein."
+            },
+            "index": {
+                "title": "Meine Organisationen",
+                "create": "Organisation erstellen",
+                "hint": "Hier finden Sie alle Organisationen, in denen Sie Mitglied sind, und können diese bearbeiten. Weitere Informationen finden Sie im {docs}.",
+                "requestSentTitle": "Anfrage gesendet",
+                "requestSentContent": "Ihr Organisationsantrag wurde zur Genehmigung eingereicht. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde.",
+                "columnName": "Name",
+                "columnFeatured": "Empfohlen",
+                "columnStatus": "Status",
+                "members": "Mitglieder",
+                "view": "Ansehen",
+                "accept": "Annehmen",
+                "acceptInvitation": "Einladung annehmen",
+                "reject": "Ablehnen",
+                "rejectInvitation": "Einladung ablehnen",
+                "acceptError": "Die Einladung konnte nicht angenommen werden. Bitte versuchen Sie es später erneut.",
+                "rejectError": "Die Einladung konnte nicht abgelehnt werden. Bitte versuchen Sie es später erneut.",
+                "requestedTitle": "Angefragte Organisationen"
+            },
+            "edit": {
+                "title": "{name} - Organisation bearbeiten",
+                "hint": "In diesem Formular können Sie die öffentlichen Angaben Ihrer Organisation anpassen. Weitere Informationen finden Sie im {docs}.",
+                "saveError": "Es ist ein Fehler aufgetreten. Bevor Sie Ihren Benutzer weiter einrichten können, müssen Sie zuerst Ihre E-Mail-Adresse bestätigen.",
+                "savedContent": "Die Änderungen wurden erfolgreich gespeichert.",
+                "savedContentStrict": "Ihre Änderungen wurden gespeichert und werden von den Administrator*innen der Instanz überprüft.",
+                "name": "Name der Organisation",
+                "username": "Benutzername der Organisation",
+                "summary": "Beschreibung",
+                "avatar": "Profilbild (optional)",
+                "address": "Adresse (optional)",
+                "submit": "Änderungen speichern"
+            },
+            "members": {
+                "title": "{name} - Mitglieder verwalten",
+                "hint": "In dieser Ansicht können Sie alle Mitglieder der Organisation einsehen, diese entfernen und neue Mitglieder einladen. Weitere Informationen finden Sie im {docs}.",
+                "inviteError": "Benutzer konnte nicht gefunden oder eingeladen werden.",
+                "notMember": "Sie sind kein Mitglied dieser Organisation.",
+                "columnName": "Name",
+                "columnUsername": "Benutzername",
+                "columnRole": "Rolle",
+                "columnCreatedAt": "Erstellt am",
+                "membersTitle": "Mitglieder der Organisation",
+                "inviteTitle": "Neues Mitglied einladen",
+                "inviteHint": "Das Mitglied, welches Sie zu Ihrer Organisation einladen wollen, muss bereits registriert sein. Nutzen Sie den individuellen Benutzernamen und achten Sie auf die genaue Schreibweise. Weitere Informationen finden Sie im {docs}.",
+                "username": "Benutzername",
+                "invite": "Benutzer einladen",
+                "inviteSuccess": "Benutzer wurde erfolgreich eingeladen.",
+                "leaveConfirmTitle": "Möchten Sie diese Organisation wirklich verlassen?",
+                "leaveConfirm": "Verlassen",
+                "leaveTitle": "Organisation verlassen",
+                "leaveHint": "Hinweis: Die Organisation kann nicht verlassen werden, wenn Sie das einzige Mitglied sind. Um die Organisation zu löschen, wenden Sie sich bitte an die Administrator*innen dieser Kalenderinstanz. Weitere Informationen finden Sie im {docs}.",
+                "leave": "Organisation verlassen",
+                "leaveErrorTitle": "Organisation konnte nicht verlassen werden",
+                "leaveErrorContent": "Beim Verlassen der Organisation ist ein Fehler aufgetreten."
+            },
+            "request": {
+                "title": "Organisation erstellen",
+                "hint": "Mit diesem Formular stellen Sie eine Anfrage an die Betreiber*innen dieser Kalenderinstanz. Sobald Ihre Anfrage genehmigt ist, können Sie für Ihre Organisation Termine erstellen und Organisationsmitglieder hinzufügen. Weitere Informationen finden Sie im {docs}.",
+                "name": "Organisationsname",
+                "nameInfo": "Geben Sie den offiziellen Namen Ihrer Organisation ein, unter dem Veranstaltungen veröffentlicht werden sollen.",
+                "username": "Benutzername der Organisation",
+                "usernameInfo": "Der Benutzername ist erforderlich, um die Organisation eindeutig im System zu identifizieren. Dieser kann später nicht geändert werden.",
+                "usernameMoreInfo": "Weitere Informationen zur Wahl eines Benutzernamens finden Sie im {docs}.",
+                "summary": "Beschreibung (für die öffentliche Organisationsseite)",
+                "submit": "Organisationserstellung anfragen"
+            },
+            "featured": {
+                "markFeatured": "Als empfohlen markieren",
+                "markNotFeatured": "Als nicht empfohlen markieren",
+                "invalidOrganisation": "Ungültige Organisation.",
+                "updateError": "Fehler beim Aktualisieren des empfohlenen Status."
+            }
+        },
+        "profile": {
+            "hint": "Hinweis:",
+            "information": "Information",
+            "errorOccurred": "Es ist ein Fehler aufgetreten.",
+            "page": {
+                "title": "Profil bearbeiten",
+                "moreInfo": "Weitere Informationen finden Sie im {docs}."
+            },
+            "form": {
+                "storedDataTitle": "Gespeicherte personenbezogene Daten",
+                "storedDataIntro": "Wir speichern zu Ihrem Benutzerkonto die folgenden personenbezogenen Daten:",
+                "storedName": "Name:",
+                "storedUsername": "Benutzername:",
+                "storedEmail": "E-Mail-Adresse:",
+                "storedEmailLanguage": "E-Mail-Sprache:",
+                "storedDataPurpose": "Diese Daten werden ausschließlich für die Nutzung Ihres Kontos und die Anmeldung benötigt.",
+                "name": "Name",
+                "username": "Benutzername",
+                "email": "E-Mail-Adresse",
+                "emailInfo": "Diese E-Mail-Adresse benötigen Sie für den Login.",
+                "emailLanguage": "E-Mail-Sprache",
+                "emailLanguageInfo": "In dieser Sprache erhalten Sie E-Mails (z. B. Passwort zurücksetzen oder Genehmigungsanfragen). Die Sprache der Oberfläche ändern Sie oben über die Sprachauswahl.",
+                "submit": "Änderungen speichern",
+                "updateError": "Fehler beim Aktualisieren des Profils. Bitte versuchen Sie es später erneut."
+            },
+            "password": {
+                "title": "Passwort ändern",
+                "current": "Aktuelles Passwort",
+                "new": "Neues Passwort",
+                "confirm": "Neues Passwort bestätigen",
+                "submit": "Passwort ändern",
+                "error": "Fehler beim Ändern des Passworts. Bitte versuchen Sie es später erneut."
+            },
+            "registerPerson": {
+                "title": "Ihr persönliches Profil einrichten",
+                "hint": "Nutzen Sie zur Profileinrichtung Ihre persönlichen Daten. Verwenden Sie nicht den Organisationsnamen. Ihr persönliches Profil wird benötigt, um die Erstellung einer Organisation anzufragen. Eine Organisation kann von mehreren Einzelnutzer*innen verwaltet werden.",
+                "moreInfo": "Weitere Informationen zur Profileinrichtung finden Sie im {docs}.",
+                "saveError": "Es ist ein Fehler aufgetreten. Bevor Sie Ihren Benutzer weiter einrichten können, müssen Sie zuerst Ihre E-Mail-Adresse bestätigen.",
+                "name": "Name",
+                "namePlaceholder": "Vorname Nachname",
+                "nameInfo": "Geben Sie möglichst Ihren Namen an (z. B.: Vorname Nachname). Ihr Name wird im Profil angezeigt. Dieser kann später geändert werden.",
+                "username": "Persönlicher Benutzername",
+                "usernamePlaceholder": "vorname_nachname",
+                "usernameInfo1": "Bitte geben Sie eine Kombination aus Ihrem {firstLastName} (z. B. beate_beispiel) oder Ihren Rufnamen an.",
+                "usernameInfo1Bold": "Vor- und Nachnamen",
+                "usernameInfo2": "Verwenden Sie {noOrganisationName}, da dieser Benutzername immer Ihrem persönlichen Profil zugeordnet ist. Der Benutzername wird benötigt, um Sie zu Organisationen einzuladen, und kann später {notChangeable}. Bitte wählen Sie ihn sorgfältig.",
+                "usernameInfo2NoOrganisationName": "keinen Organisationsnamen",
+                "usernameInfo2NotChangeable": "nicht mehr geändert werden",
+                "submit": "Profil erstellen"
+            }
+        },
+        "notFound": {
+            "title": "Seite konnte nicht gefunden werden",
+            "overview": "Übersicht"
+        },
+        "const": {
+            "userTypes": {
+                "user": "Benutzer*in",
+                "admin": "Administrator*in"
+            },
+            "userIsActive": {
+                "active": "Aktiv",
+                "inactive": "Inaktiv"
+            },
+            "organisationStatus": {
+                "requested": "Angefragt",
+                "requestDenied": "Abgelehnt",
+                "active": "Aktiv",
+                "inactive": "Inaktiv"
+            },
+            "memberRole": {
+                "administrator": "Administrator",
+                "invited": "Eingeladen"
+            },
+            "monthWeek": {
+                "first": "1. (Erste)",
+                "second": "2. (Zweite)",
+                "third": "3. (Dritte)",
+                "fourth": "4. (Vierte)",
+                "last": "Letzte"
+            }
+        },
+        "admin": {
+            "emailTemplates": {
+                "events": {
+                    "validation": "Validierung der E-Mail-Adresse",
+                    "passwordReset": "Passwort zurücksetzen",
+                    "approvalRequestSent": "Genehmigungsanfrage gesendet",
+                    "approvalRequestHandled": "Genehmigungsanfrage bearbeitet",
+                    "organisationInvitation": "Einladung zur Organisation",
+                    "organisationRemoval": "Aus der Organisation entfernt"
+                },
+                "variables": {
+                    "appName": "Der Name der Anwendung",
+                    "requestTypeNameSent": "Art der Anfrage (z. B. „Serientermin erstellen“)",
+                    "requestTypeNameHandled": "Art der Anfrage (z. B. „Serientermin erstellen“)",
+                    "handledStatus": "Der Status der Anfrage (z. B. „genehmigt“ oder „abgelehnt“)",
+                    "organisationName": "Der Name der Organisation"
+                },
+                "validation": {
+                    "invalidEventType": "Ungültiger Ereignistyp",
+                    "subjectMax": "Der Betreff darf maximal 70 Zeichen lang sein.",
+                    "bodyRequired": "Die Nachricht darf nicht leer sein."
+                },
+                "loadError": "Fehler beim Laden der Vorlage.",
+                "saveError": "Fehler beim Speichern der Vorlage.",
+                "editTitle": "E-Mail-Vorlage bearbeiten",
+                "onEvent": "Bei welchem Ereignis",
+                "onEventPlaceholder": "Ereignis auswählen",
+                "locale": "Sprache",
+                "subject": "Betreff",
+                "subjectPlaceholder": "E-Mail-Betreff",
+                "body": "Nachricht",
+                "bodyPlaceholder": "E-Mail-Inhalt",
+                "availableVariables": "Verfügbare Variablen für Betreff und Nachricht:",
+                "notFoundTitle": "Nicht gefunden",
+                "notFound": "Die angeforderte E-Mail-Vorlage wurde nicht gefunden."
+            },
+            "shared": {
+                "note": "Hinweis:",
+                "moreInfo": "Weitere Informationen finden Sie im {link}.",
+                "unknown": "Unbekannt",
+                "information": "Information",
+                "saveChanges": "Änderungen speichern",
+                "saving": "Speichern...",
+                "genericError": "Es ist ein Fehler aufgetreten."
+            },
+            "users": {
+                "columns": {
+                    "name": "Name",
+                    "username": "Benutzername",
+                    "email": "E-Mail",
+                    "role": "Rolle (Instanz)",
+                    "status": "Status"
+                },
+                "indexTitle": "Nutzer*innen der Instanz",
+                "createButton": "Nutzer*in anlegen",
+                "indexHint": "Als Administrator*in der Instanz können Sie hier die Mitglieder aller Organisationen einsehen und bearbeiten. Über den Button „Bearbeiten“ können Sie Nutzer*innen entfernen. Weitere Informationen finden Sie im {link}.",
+                "exportEmails": "Export der E-Mail-Adressen aktiver Nutzer*innen",
+                "validation": {
+                    "emailRequired": "Die E-Mail-Adresse ist erforderlich.",
+                    "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+                    "passwordRequired": "Das Passwort ist erforderlich.",
+                    "passwordMin": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+                    "passwordEmpty": "Das Passwort darf nicht leer sein."
+                },
+                "saveError": "Benutzer konnte nicht gespeichert werden.",
+                "createTitle": "Neuen Benutzer anlegen",
+                "createHint": "Als Administrator*in können Sie hier manuell neue Nutzer*innen für Ihre Instanz anlegen.",
+                "password": "Passwort",
+                "type": "Typ",
+                "createSubmit": "Benutzer anlegen",
+                "editTitle": "Nutzer*in bearbeiten",
+                "editHint": "Als Administrator*in einer Instanz können Sie Einstellungen für Nutzer*innen aller Organisationen vornehmen. Weitere Informationen finden Sie im {link}.",
+                "updateSuccess": "Benutzer erfolgreich aktualisiert.",
+                "emailLoginInfo": "Diese E-Mail-Adresse benötigen Sie für den Login.",
+                "deleteConfirm": "Möchten Sie diesen Benutzer wirklich löschen?",
+                "deleteButton": "Benutzer löschen",
+                "emailLanguage": "E-Mail-Sprache"
+            },
+            "approval": {
+                "types": {
+                    "singleEvent": "Einzeltermin"
+                },
+                "actions": {
+                    "create": "Erstellen",
+                    "update": "Bearbeiten",
+                    "delete": "Löschen"
+                },
+                "columns": {
+                    "action": "Aktion",
+                    "title": "Titel",
+                    "createdBy": "Erstellt von",
+                    "createdAt": "Erstellt am"
+                },
+                "loadRequestsError": "Beim Laden der Anfragen ist ein Fehler aufgetreten.",
+                "emailNotVerified": "(E-Mail nicht bestätigt)",
+                "view": "Ansehen",
+                "approveSuccess": "Anfrage erfolgreich freigegeben.",
+                "approveError": "Beim Freigeben der Anfrage ist ein Fehler aufgetreten.",
+                "rejectSuccess": "Anfrage erfolgreich abgelehnt.",
+                "rejectError": "Beim Ablehnen der Anfrage ist ein Fehler aufgetreten.",
+                "status": {
+                    "pending": "Ausstehend",
+                    "approved": "Genehmigt",
+                    "rejected": "Abgelehnt"
+                },
+                "description": "Beschreibung",
+                "noDescription": "Keine Beschreibung angegeben.",
+                "address": "Adresse",
+                "noAddress": "Keine Adresse angegeben.",
+                "image": "Bild",
+                "imageAlt": "Angehängtes Bild",
+                "imageUnavailable": "Nachdem die Anfrage bearbeitet wurde, ist das angehängte Bild nicht mehr verfügbar.",
+                "noImage": "Kein Bild angehängt.",
+                "adminComment": "Kommentar der Administration (optional)",
+                "adminCommentPlaceholder": "Fügen Sie hier einen Kommentar hinzu...",
+                "adminCommentInfo": "Der hier eingegebene Kommentar wird der Organisation nach Annahme oder Ablehnung der Termin- oder Bearbeitungsanfrage übermittelt. Sie können den Kommentar nutzen, um beispielsweise einen Ablehnungsgrund zu erläutern oder gewünschte Änderungen zu benennen, auch im Fall einer Annahme.",
+                "approve": "Anfrage genehmigen",
+                "reject": "Anfrage ablehnen",
+                "noComment": "Kein Kommentar hinterlegt.",
+                "notSpecified": "Keine Angabe",
+                "notAssignedYet": "Noch nicht vergeben"
+            },
+            "eventRequests": {
+                "indexTitle": "Ausstehende Terminanfragen",
+                "indexHint": "Werden Termine von Organisationen erstellt oder bearbeitet, ist vor der Veröffentlichung eine Freigabe durch die Instanzadministration erforderlich. Über den Button „Ansehen“ in der Tabelle können Sie die von der Organisation angegebenen Informationen zum Termin prüfen und den Termin bzw. die Terminänderung genehmigen oder ablehnen. Nach erfolgter Freigabe erscheinen Termine und Änderungen in der öffentlichen Kalenderansicht.",
+                "noneTitle": "Keine ausstehenden Freigabeanfragen",
+                "none": "Keine ausstehenden Freigabeanfragen vorhanden.",
+                "externalRegistrationRequired": "Anmeldung über externen Link erforderlich",
+                "fields": {
+                    "organisation": "Organisation",
+                    "start": "Start",
+                    "duration": "Dauer",
+                    "category": "Kategorie",
+                    "tags": "Schlagwörter (optional)",
+                    "joinOptions": "Anmeldeoptionen",
+                    "language": "Sprache",
+                    "website": "Webseite",
+                    "status": "Status"
+                },
+                "startAt": "{date} um {time} Uhr",
+                "noCategory": "Keine Kategorie",
+                "noTags": "Keine Schlagwörter",
+                "noJoinOptions": "Keine Anmeldeoptionen",
+                "showTitle": "Terminfreigabe – Detailansicht",
+                "showHint": "Als Administrator*in der Instanz können Sie hier Terminanfragen von Organisationen genehmigen oder ablehnen. Termine erscheinen erst nach Freigabe in der öffentlichen Kalenderansicht.",
+                "notFound": "Die Terminanfrage wurde nicht gefunden."
+            },
+            "organisationRequests": {
+                "typeOrganisation": "Organisation",
+                "organisationName": "Organisationsname",
+                "organisationUsername": "Benutzername der Organisation",
+                "handledBy": "Bearbeitet von",
+                "showTitle": "Organisationsfreigabe – Detailansicht",
+                "showHint": "Als Administrator*in der Instanz können Sie hier angefragte Organisationen bzw. Änderungen genehmigen oder ablehnen. Organisationen und geänderte Informationen erscheinen erst nach Freigabe in der öffentlichen Kalenderansicht.",
+                "notFound": "Die Organisationsanfrage wurde nicht gefunden.",
+                "indexTitle": "Ausstehende Organisationsanfragen",
+                "indexHint": "Werden Organisationen erstellt oder Organisationsinformationen bearbeitet, ist vor der Veröffentlichung eine Freigabe durch die Instanzadministration erforderlich. Über den Button „Ansehen“ in der Tabelle können Sie die angegebenen Informationen zur Organisation prüfen und die Organisationserstellung bzw. Änderungen genehmigen oder ablehnen. Erst nach erfolgter Freigabe sind Organisationen und Änderungen öffentlich sichtbar.",
+                "noneTitle": "Keine ausstehenden Organisationsanfragen",
+                "none": "Keine ausstehenden Organisationsanfragen vorhanden."
+            },
+            "instance": {
+                "credentialsLoadError": "Fehler beim Laden der Zugangsdaten. Bitte versuchen Sie es später erneut.",
+                "templateUpdated": "Vorlage erfolgreich aktualisiert.",
+                "title": "Instanz verwalten",
+                "hint": "Die zentrale Verwaltung Ihrer Instanz erfolgt über Mobilizon. Mobilizon ist die zugrunde liegende Open-Source-Plattform, auf der der Smarte Gemeinschaftskalender basiert. Dort können Sie alle instanzweiten Einstellungen und Funktionen administrieren. Weitere Informationen finden Sie im {link}.",
+                "toMobilizon": "Zur Instanzverwaltung auf Mobilizon",
+                "credentials": "Zugangsdaten",
+                "credentialsCreated": "Diese Zugangsdaten wurden automatisch bei der Installation erstellt.",
+                "credentialsUsage": "Sie sind ausschließlich für die {login} gedacht und dürfen {restriction} werden.",
+                "credentialsUsageLogin": "Anmeldung bei Mobilizon",
+                "credentialsUsageRestriction": "nicht verändert oder weitergegeben",
+                "warning": "Warnung",
+                "credentialsWarning": "Änderungen an diesen Daten in Mobilizon führen dazu, dass die Integration mit dem Smarten Gemeinschaftskalender nicht mehr funktioniert.",
+                "emailAddress": "E-Mail-Adresse",
+                "copyEmail": "E-Mail-Adresse kopieren",
+                "togglePassword": "Passwort anzeigen/verbergen",
+                "copyPassword": "Passwort kopieren",
+                "emailTemplates": "E-Mail-Vorlagen",
+                "emailTemplatesHint": "Hier können Sie die E-Mail-Vorlagen verwalten, die für Benachrichtigungen der Nutzer*innen verwendet werden. Weitere Informationen finden Sie im {link}."
+            },
+            "requestedOrganisations": {
+                "changeStatusError": "Beim Ändern des Organisationsstatus ist ein Fehler aufgetreten.",
+                "hint": "Als Administrator*in der Instanz können Sie hier Anfragen von Organisationen annehmen oder ablehnen. Organisationen mit ausstehenden Anfragen können keine Termine erstellen.",
+                "hintManage": "Die Verwaltung aller aktiven Organisationen Ihrer Instanz können Sie im Bereich „Instanz verwalten“ (Seitenmenü) vornehmen.",
+                "accept": "Annehmen",
+                "reject": "Ablehnen"
+            },
+            "manageInstance": {
+                "title": "Instanz verwalten",
+                "hint": "Die Einstellungen zur Verwaltung der Instanz können nur direkt in Mobilizon vorgenommen werden. Bitte besuchen Sie die Mobilizon-Weboberfläche, um Änderungen vorzunehmen:",
+                "toMobilizon": "Zur Mobilizon-Instanz",
+                "credentialsInfo": "Diese Zugangsdaten wurden bei der Installation automatisch generiert. Diese Daten dürfen Sie mit niemandem teilen. Sie dürfen diese Daten auch nicht in der Mobilizon-Weboberfläche ändern, da sonst die Integration nicht mehr funktioniert.",
+                "emailAddress": "E-Mail-Adresse:",
+                "password": "Passwort:"
+            }
+        },
+        "nav": {
+            "dashboard": "Dashboard",
+            "singleEvents": "Einzeltermine",
+            "seriesEvents": "Serientermine",
+            "uploadedEvents": "Kalenderdateien",
+            "importedEvents": "Kalenderintegrationen",
+            "materialGenerator": "Werbemittel",
+            "brandkit": "Markenkit",
+            "myOrganisations": "Meine Organisationen",
+            "editProfile": "Profil bearbeiten",
+            "organisationRequests": "Organisationsanfragen",
+            "manageUsers": "Nutzer*innen verwalten",
+            "manageInstance": "Instanz verwalten",
+            "eventRequests": "Terminanfragen",
+            "openSideMenu": "Seitenmenü öffnen"
+        },
+        "shared": {
+            "hint": "Hinweis:",
+            "hintTitle": "Hinweis",
+            "information": "Information",
+            "moreInfoInDocs": "Weitere Informationen finden Sie im {link}.",
+            "requestSent": "Anfrage gesendet",
+            "deleteErrorTitle": "Fehler beim Löschen",
+            "genericErrorTryLater": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+            "errorOccurred": "Ein Fehler ist aufgetreten.",
+            "deleting": "Wird gelöscht...",
+            "notSet": "Nicht gesetzt",
+            "unknown": "unbekannt",
+            "active": "Aktiv",
+            "inactive": "Inaktiv",
+            "logout": "Abmelden",
+            "actions": {
+                "duplicate": "Duplizieren",
+                "view": "Ansehen",
+                "generatePromoMaterials": "Werbemittel generieren",
+                "toEvent": "Zum Termin"
+            },
+            "eventTypes": {
+                "series_event": "Einzeltermin aus Terminserie",
+                "single_event": "Einzeltermin",
+                "imported_event": "Einzeltermin aus Kalenderintegration",
+                "uploaded_event": "Einzeltermin aus Kalenderdatei",
+                "unknown": "Unbekannter Termin"
+            },
+            "buttonLegend": {
+                "title": "Button-Legende (je nach Tabelle sind nicht alle Icons vorhanden)",
+                "duplicate": "Duplizieren (als Vorlage verwenden)",
+                "edit": "Bearbeiten",
+                "delete": "Löschen",
+                "openPublic": "Öffentliche Seite ansehen",
+                "details": "Details ansehen",
+                "promoMaterials": "Werbemittelgenerator (Ankündigung einer einzelnen Veranstaltung)"
+            },
+            "legend": {
+                "title": "Legende",
+                "empty": "Keine Legenden vorhanden."
+            },
+            "loadingDialog": {
+                "hint": "Bitte schließen Sie das Browserfenster nicht und laden Sie die Seite nicht neu."
+            },
+            "confirmDialog": {
+                "title": "Bestätigen"
+            },
+            "table": {
+                "deleteTitle": "Veranstaltung löschen",
+                "noEntries": "Keine Einträge gefunden.",
+                "firstPage": "Erste Seite",
+                "previousPage": "Vorherige Seite",
+                "nextPage": "Nächste Seite",
+                "lastPage": "Letzte Seite",
+                "pageOf": "Seite {current} von {total}",
+                "confirmDeleteEntry": "Möchten Sie wirklich diesen Eintrag löschen?"
+            },
+            "createdEventsTable": {
+                "empty": "Es wurden noch keine Veranstaltungen erstellt"
+            },
+            "deleteCreatedEvent": {
+                "title": "{type} löschen",
+                "description": "Sie sind dabei, einen {type} zu löschen.\nEine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltung gemacht wurde, sollten Sie den Status der Veranstaltung auf „Abgesagt“ setzen, statt die Veranstaltung zu löschen. Nach dem Löschen kann die Veranstaltung auch nicht mehr als Vorlage verwendet werden.",
+                "button": "Veranstaltung löschen"
+            },
+            "changeStatus": {
+                "title": "Status ändern",
+                "confirm": "Status auf {status} ändern"
+            },
+            "changeImportedStatus": {
+                "activate": "Aktivieren",
+                "deactivate": "Deaktivieren",
+                "error": "Der Status konnte nicht geändert werden. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support."
+            },
+            "holidays": {
+                "noEventsOn": "Keine Veranstaltungen an:",
+                "holidaysCheckbox": "Feiertagen",
+                "schoolHolidaysCheckbox": "Schulferien",
+                "stateLabel": "Bundesland (Deutschland)",
+                "affectedDays": "An folgenden Tagen werden keine Veranstaltungen erstellt:",
+                "noEntries": "Keine Einträge für die aktuelle Auswahl.",
+                "holidaysHeader": "Feiertage",
+                "schoolHolidaysHeader": "Schulferien",
+                "dateRange": "{start} bis {end}",
+                "states": {
+                    "all_states": "Alle Bundesländer",
+                    "bw": "Baden-Württemberg",
+                    "by": "Bayern",
+                    "be": "Berlin",
+                    "bb": "Brandenburg",
+                    "hb": "Bremen",
+                    "hh": "Hamburg",
+                    "he": "Hessen",
+                    "mv": "Mecklenburg-Vorpommern",
+                    "ni": "Niedersachsen",
+                    "nw": "Nordrhein-Westfalen",
+                    "rp": "Rheinland-Pfalz",
+                    "sh": "Schleswig-Holstein",
+                    "sl": "Saarland",
+                    "sn": "Sachsen",
+                    "st": "Sachsen-Anhalt",
+                    "th": "Thüringen",
+                    "augsburg": "Augsburg",
+                    "none": "Nicht berücksichtigen"
+                }
+            },
+            "addressInput": {
+                "organisation": "Organisation",
+                "frequentlyUsed": "Häufig genutzt",
+                "apply": "Adresse übernehmen"
+            },
+            "tags": {
+                "addLabel": "Schlagwörter hinzufügen",
+                "addButton": "Hinzufügen",
+                "none": "Sie haben noch keine Schlagwörter ausgewählt.",
+                "suggestions": "Vorschläge, basierend auf bisher genutzten Schlagwörtern Ihrer Organisation:"
+            },
+            "password": {
+                "show": "Passwort anzeigen",
+                "hide": "Passwort verbergen"
+            },
+            "image": {
+                "previewAlt": "Ereignisvorschau"
+            },
+            "file": {
+                "allowedFormats": "Erlaubte Formate: {formats}"
+            },
+            "richText": {
+                "enterUrl": "URL eingeben"
+            },
+            "location": {
+                "searchPlace": "Ort suchen",
+                "addressFound": "Adresse gefunden",
+                "loadingAddress": "Adresse wird geladen",
+                "placeholder": "Ort oder Adresse",
+                "searchAria": "Ort oder Adresse suchen",
+                "radius": "Umkreis"
+            },
+            "weekDays": {
+                "select": "Wochentage auswählen",
+                "long": {
+                    "monday": "Montag",
+                    "tuesday": "Dienstag",
+                    "wednesday": "Mittwoch",
+                    "thursday": "Donnerstag",
+                    "friday": "Freitag",
+                    "saturday": "Samstag",
+                    "sunday": "Sonntag"
+                },
+                "short": {
+                    "monday": "Mo",
+                    "tuesday": "Di",
+                    "wednesday": "Mi",
+                    "thursday": "Do",
+                    "friday": "Fr",
+                    "saturday": "Sa",
+                    "sunday": "So"
+                }
+            },
+            "monthOccurrence": {
+                "weeks": "Woche(n)",
+                "weekDay": "Wochentag",
+                "weekOptions": {
+                    "first": "1. (Erste)",
+                    "second": "2. (Zweite)",
+                    "third": "3. (Dritte)",
+                    "fourth": "4. (Vierte)",
+                    "last": "Letzte"
+                }
+            }
+        },
+        "dashboard": {
+            "title": "Dashboard",
+            "noMembership": "Sie sind noch kein Mitglied einer Organisation. Um Termine anzulegen, können Sie entweder selbst eine Organisation {link} oder sich in eine bestehende Organisation einladen lassen – dafür geben Sie einfach Ihren Profilnamen an die Organisation weiter.",
+            "noMembershipLink": "erstellen",
+            "welcomeTitle": "Willkommen im Verwaltungsbereich des Smarten Gemeinschaftskalenders!",
+            "welcomeText": "Hier können Sie ganz einfach Ihre Organisation verwalten und Termine pflegen.",
+            "docsHint": "Eine Schritt-für-Schritt-Anleitung zur Terminverwaltung finden Sie im {link}.",
+            "instanceOverview": "Gesamtübersicht der Kalenderinstanz",
+            "users": "Nutzer*innen",
+            "events": "Veranstaltungen",
+            "organisations": "Organisationen",
+            "createNewEvents": "Neue Termine anlegen",
+            "createSingleEvent": "Einzeltermin anlegen",
+            "singleEvent": "Einzeltermin",
+            "createSeriesEvent": "Serientermin anlegen",
+            "seriesEvent": "Serientermin",
+            "uploadCalendarFile": "Kalenderdatei hochladen",
+            "calendarFile": "Kalenderdatei",
+            "createCalendarIntegration": "Kalenderintegration anlegen",
+            "calendarIntegration": "Kalenderintegration",
+            "upcomingEvents": "Bevorstehende Veranstaltungen",
+            "noUpcomingEvents": "Keine bevorstehenden Veranstaltungen"
+        },
+        "events": {
+            "form": {
+                "eventTitle": "Titel der Veranstaltung",
+                "title": "Titel",
+                "seriesTitle": "Titel des Serientermins",
+                "picture": "Bild (optional)",
+                "description": "Beschreibung",
+                "descriptionOptional": "Beschreibung (optional)",
+                "startDate": "Startdatum",
+                "endDate": "Enddatum",
+                "startTime": "Beginn (Uhrzeit)",
+                "duration": "Dauer",
+                "organisation": "Organisation",
+                "category": "Kategorie",
+                "joinOptions": "Anmeldeoptionen",
+                "externalParticipationUrl": "Externe Anmeldeseite (URL)",
+                "joinOptionsInfo": "Wenn Sie eine externe Anmeldeseite verwenden, geben Sie hier den entsprechenden Link an. Wenn Sie keine Online-Anmeldung nutzen, informieren Sie die Teilnehmer*innen in der Veranstaltungsbeschreibung über das Anmeldeverfahren und ob eine Anmeldung erforderlich ist.",
+                "language": "Sprache",
+                "status": "Status",
+                "website": "Webseite (optional)",
+                "address": "Adresse (optional)",
+                "intervall": "Intervall",
+                "weekDay": "Wochentag",
+                "useStartDateDay": "Tag des Monats aus dem Startdatum übernehmen"
+            },
+            "columns": {
+                "title": "Titel",
+                "name": "Name",
+                "date": "Datum",
+                "startDate": "Startdatum",
+                "endDate": "Enddatum",
+                "time": "Uhrzeit",
+                "start": "Start",
+                "duration": "Dauer",
+                "intervall": "Intervall",
+                "createdAt": "Erstellt am",
+                "createdBy": "Erstellt von",
+                "addedBy": "Angelegt von",
+                "addedAt": "Angelegt am",
+                "eventType": "Art des Termins",
+                "eventCount": "Terminanzahl",
+                "status": "Status",
+                "icalUrl": "iCal-URL",
+                "url": "URL",
+                "syncedAt": "Synchronisiert am",
+                "filename": "Dateiname",
+                "uploadedAt": "Hochgeladen am",
+                "weekDay": "Wochentag",
+                "weeks": "Woche(n)",
+                "useStartDate": "Startdatum übernehmen"
+            },
+            "createdEvents": "Angelegte Termine",
+            "fileLoadError": "Die Datei konnte nicht geladen werden.",
+            "tryAgainLater": "Bitte versuchen Sie es später erneut.",
+            "requestSentMessage": "Ihre Terminanfrage wurde gesendet. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde.",
+            "singleEventDeleted": "Einzeltermin erfolgreich gelöscht.",
+            "single": {
+                "index": {
+                    "title": "Einzeltermine",
+                    "create": "Einzeltermin anlegen",
+                    "deleteTitle": "Veranstaltung löschen",
+                    "deleteDescription": "Sie sind dabei, folgende Veranstaltung zu löschen: {name}.\nEine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltung gemacht wurde, sollten Sie den Status der Veranstaltung auf „Abgesagt“ setzen, statt die Veranstaltung zu löschen."
+                },
+                "create": {
+                    "title": "Einzeltermin erstellen",
+                    "submit": "Einzeltermin anlegen"
+                }
+            },
+            "series": {
+                "index": {
+                    "title": "Serientermine",
+                    "create": "Serientermin anlegen",
+                    "hint": "Serientermine eignen sich für wiederkehrende Veranstaltungen mit gleichbleibender Uhrzeit und Dauer. Weitere Informationen finden Sie im {link}.",
+                    "deleted": "Serientermin und alle zugehörigen Einzeltermine erfolgreich gelöscht."
+                },
+                "deleteTitle": "Gesamten Serientermin löschen",
+                "deleteDescription": "Sie sind dabei, folgenden Serientermin zu löschen: {name}.\n\nAlle darin enthaltenen Einzeltermine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf „Abgesagt“ setzen, statt den Serientermin zu löschen.",
+                "create": {
+                    "title": "Serientermin erstellen",
+                    "hint": "Serientermine eignen sich für wiederkehrende Veranstaltungen mit gleichbleibender Uhrzeit und Dauer. Weitere Informationen finden Sie im {link}.",
+                    "loadingTitle": "Serientermin wird angelegt",
+                    "loadingDescription": "Alle Termine der Serie werden nacheinander angelegt. Je nach Anzahl der Termine kann das einige Momente dauern.",
+                    "templatePictureFailedTitle": "Bild der Vorlage konnte nicht geladen werden",
+                    "templatePictureFailedContent": "Das Bild aus dem Vorlagen-Termin konnte nicht geladen werden. Bitte wählen Sie das Bild manuell aus, sonst wird der Serientermin ohne Bild erstellt.",
+                    "periodInfo": "Das Start- und Enddatum beziehen sich auf den Zeitraum der gesamten Terminserie. Beginn und Dauer werden für alle Termine der Terminserie übernommen.",
+                    "submit": "Serientermin anlegen"
+                },
+                "show": {
+                    "title": "Serientermin",
+                    "deleteError": "Fehler beim Löschen der Serientermine. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support."
+                }
+            },
+            "created": {
+                "edit": {
+                    "title": "Einzeltermin bearbeiten",
+                    "saveError": "Beim Speichern der Änderungen ist ein Fehler aufgetreten.",
+                    "approvalRequestTitle": "Änderungsanfrage gesendet",
+                    "approvalRequestContent": "Ihre Änderungen wurden erfolgreich zur Genehmigung eingereicht.",
+                    "currentStatus": "Aktueller Status:",
+                    "changeStatus": "Status ändern:",
+                    "pictureLoadFailedTitle": "Bild konnte nicht geladen werden",
+                    "pictureLoadFailedContent": "Das vorhandene Veranstaltungsbild konnte nicht geladen werden und wird deshalb hier nicht angezeigt. Beim Speichern bleibt es unverändert erhalten. Laden Sie die Seite neu, um es erneut zu versuchen, oder wählen Sie ein neues Bild aus.",
+                    "submit": "Änderungen speichern"
+                }
+            },
+            "imported": {
+                "index": {
+                    "title": "Kalenderintegrationen",
+                    "createTitle": "iCal-URL anbinden",
+                    "create": "iCal-URL",
+                    "deleted": "Kalenderintegration und alle zugehörigen Termine erfolgreich gelöscht.",
+                    "deleteDescription": "Sie sind dabei, folgende Kalenderintegration zu löschen:\n{url}.\n\nAlle importierten Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf „Abgesagt“ setzen, statt die Kalenderintegration zu löschen."
+                },
+                "hint": "Durch die Anbindung von iCal-URLs können externe Kalender (z. B. Outlook oder Google Kalender) dauerhaft angebunden und automatisch synchronisiert werden. Weitere Informationen finden Sie im {link}.",
+                "deleteTitle": "Gesamte Kalenderintegration löschen",
+                "show": {
+                    "deleteDescription": "Sie sind dabei, folgende Kalenderintegration zu löschen: {url}.\n\nAlle importierten Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf „Abgesagt“ setzen, statt die Kalenderintegration zu löschen.",
+                    "deleteError": "Beim Löschen der Kalenderintegration ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
+                    "noDescription": "Es wurde keine Beschreibung angegeben."
+                },
+                "title": "Kalenderintegration (iCal-URL)",
+                "create": {
+                    "urlLabel": "iCal-URL",
+                    "urlInfo": "Geben Sie hier die öffentliche iCal-URL eines externen Kalenders ein (z. B. von Google Calendar, Outlook oder Nextcloud). Die Termine werden automatisch und regelmäßig aktualisiert. Stellen Sie sicher, dass die URL dauerhaft erreichbar ist und das Format .ics unterstützt.",
+                    "submit": "Kalender integrieren"
+                }
+            },
+            "uploaded": {
+                "index": {
+                    "title": "Kalenderdateien",
+                    "upload": "Kalenderdatei (iCal) hochladen",
+                    "hint": "Die Funktion „Kalenderdateien“ eignet sich, um mehrere Termine einmalig gesammelt aus einem externen Kalenderprogramm zu übernehmen. Weitere Informationen finden Sie im {link}.",
+                    "deleted": "Kalenderdatei und alle darin enthaltenen Termine erfolgreich gelöscht.",
+                    "deleteDescription": "Sie sind dabei, die Kalenderdatei „{filename}“ zu löschen.\n\nAlle darin enthaltenen Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf „Abgesagt“ setzen, statt die Kalenderdatei zu löschen."
+                },
+                "deleteTitle": "Gesamte Kalenderdatei löschen",
+                "show": {
+                    "deleteDescription": "Sie sind dabei, folgende Kalenderdatei zu löschen: {filename}.\n\nAlle darin enthaltenen Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf „Abgesagt“ setzen, statt die Kalenderdatei zu löschen.",
+                    "title": "Kalenderdatei",
+                    "deleteError": "Fehler beim Löschen der Kalenderdatei. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support."
+                },
+                "create": {
+                    "title": "Kalenderdatei hochladen",
+                    "hint": "Der Upload von Kalenderdateien eignet sich, um mehrere Termine gesammelt aus einem externen Kalenderprogramm zu übernehmen. Weitere Informationen finden Sie im {link}.",
+                    "fileLabel": "iCal-Datei hochladen",
+                    "fileInfo": "Sie können Ihre iCal-Datei entweder per Drag & Drop hier hineinziehen oder über den Button „Durchsuchen …“ auswählen. Bitte beachten Sie: Nur iCal-Dateien (.ics) werden unterstützt.",
+                    "showEvents": "Veranstaltungen anzeigen",
+                    "noUpcomingEvents": "Es wurden keine bevorstehenden Veranstaltungen in der hochgeladenen Datei gefunden.",
+                    "noNewEvents": "Es sind keine neuen Veranstaltungen vorhanden.",
+                    "allAlreadyUploaded": "Alle Termine in dieser Datei wurden bereits hochgeladen.",
+                    "genericError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+                    "previewTitle": "iCal-Datei: Veranstaltungen",
+                    "previewHint": "Die Tabelle zeigt Ihnen alle Termine, die aus der hochgeladenen iCal-Datei übernommen werden. Nach dem Import können einzelne Termine bei Bedarf manuell bearbeitet oder ergänzt werden. Weitere Informationen finden Sie im {link}.",
+                    "acceptButton": "Vorschautermine anlegen",
+                    "existingTitle": "Bereits vorhandene Termine",
+                    "existingHint": "Die folgenden Termine der iCal-Datei wurden erkannt, sind jedoch bereits im Kalender vorhanden und werden beim Anlegen übersprungen. Weitere Informationen finden Sie im {link}."
+                }
+            }
+        }
+    },
+    "auth": {
+        "hint": "Hinweis:",
+        "information": "Information",
+        "errorOccurred": "Es ist ein Fehler aufgetreten.",
+        "backToLogin": "Zurück zum Login",
+        "email": "E-Mail-Adresse",
+        "password": "Passwort",
+        "passwordConfirm": "Passwort bestätigen",
+        "validation": {
+            "emailRequired": "Die E-Mail-Adresse ist erforderlich.",
+            "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+            "passwordRequired": "Das Passwort ist erforderlich.",
+            "passwordConfirmationRequired": "Die Passwortbestätigung ist erforderlich.",
+            "newPasswordMin8": "Das neue Passwort muss mindestens 8 Zeichen lang sein.",
+            "passwordMin8": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+            "passwordMin6": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+            "passwordConfirmationMissing": "Bitte Passwortbestätigung eingeben.",
+            "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein.",
+            "passwordsDoNotMatchShort": "Passwörter stimmen nicht überein.",
+            "acceptTerms": "Die Nutzungsbedingungen und die Datenschutzerklärung müssen akzeptiert werden.",
+            "nameRequired": "Der Name ist erforderlich.",
+            "usernameRequired": "Der Benutzername ist erforderlich.",
+            "organisationUsernameNotEmpty": "Der Benutzername der Organisation darf nicht leer sein."
+        },
+        "terms": {
+            "label": "Nutzungsbedingungen",
+            "text": "Ich habe die {terms} und {privacy} gelesen und akzeptiere sie.",
+            "terms": "Nutzungsbedingungen",
+            "privacy": "Datenschutzerklärung"
+        },
+        "login": {
+            "title": "Login",
+            "successDefault": "Vorgang wurde erfolgreich durchgeführt.",
+            "invalidCredentials": "E-Mail-Adresse und Passwort sind ungültig.",
+            "accountDisabled": "Benutzerkonto ist deaktiviert.",
+            "emailNotVerified": "E-Mail-Adresse wurde noch nicht bestätigt.",
+            "submit": "Einloggen",
+            "noAccount": "Noch kein Konto? Jetzt registrieren!",
+            "registerWithOrganisation": "Neues Konto mit Organisation anlegen!",
+            "forgotPassword": "Passwort vergessen?"
+        },
+        "forgotPassword": {
+            "title": "Passwort vergessen",
+            "submit": "Passwort zurücksetzen"
+        },
+        "register": {
+            "title": "Registrieren",
+            "error": "Account konnte nicht erstellt werden.",
+            "submit": "Jetzt registrieren",
+            "success": "Ihr Account wurde erfolgreich erstellt. Bitte bestätigen Sie Ihre E-Mail-Adresse, um fortzufahren."
+        },
+        "registerWithOrganisation": {
+            "title": "Registrierung mit Profil und Organisation",
+            "error": "Registrierung konnte nicht durchgeführt werden.",
+            "account": "Account",
+            "profile": "Profil",
+            "profileHint": "Weitere Informationen finden Sie im {docs}.",
+            "fullName": "Ihr vollständiger Name",
+            "fullNameInfo": "Ihr vollständiger Name kann später geändert werden.",
+            "username": "Ihr Benutzername",
+            "usernameInfo": "Ihr eindeutiger Benutzername wird benötigt, um Sie zu Organisationen einzuladen. Dieser kann später {notChangeable} werden.",
+            "usernameInfoNotChangeable": "nicht mehr geändert",
+            "organisation": "Organisation",
+            "organisationHint": "Mit diesem Formular stellen Sie eine Anfrage an die Betreiber*innen dieser Kalenderinstanz. Weitere Informationen finden Sie im {docs}.",
+            "organisationName": "Organisationsname",
+            "organisationNameInfo": "Geben Sie den offiziellen Namen Ihrer Organisation ein.",
+            "organisationUsername": "Benutzername der Organisation",
+            "organisationUsernameInfo": "Der Benutzername kann später nicht geändert werden.",
+            "organisationSummary": "Beschreibung (für die öffentliche Organisationsseite)",
+            "submit": "Registrierung abschließen"
+        },
+        "resetPassword": {
+            "title": "Passwort zurücksetzen",
+            "newPassword": "Neues Passwort",
+            "submit": "Passwort speichern"
+        },
+        "validate": {
+            "title": "Validierung",
+            "success": "Ihre E-Mail-Adresse wurde erfolgreich verifiziert. Bitte melden Sie sich an.",
+            "invalidToken": "Das Verifizierungstoken ist ungültig."
         }
     }
 }

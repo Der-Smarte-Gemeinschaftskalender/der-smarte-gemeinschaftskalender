@@ -5,9 +5,11 @@ import i18n from '@/i18n';
 
 const { t } = i18n.global;
 
+// Label maps / option lists below use getters so that the text is translated on every access
+// (language-reactive) while consumers can keep using them like plain objects.
 export const intervall_keys = {
-    weekly: "Wöchentlich",
-    monthly: "Monatlich"
+    get weekly() { return t('common.weekly'); },
+    get monthly() { return t('common.monthly'); },
 };
 
 export const intervall_notification_options = computed<Option[]>(() => [
@@ -22,23 +24,23 @@ export const intervall_notification_options = computed<Option[]>(() => [
 ]);
 
 export const intervall_options: Option[] = [
-    { value: Intervall.WEEKLY, text: intervall_keys.weekly },
-    { value: Intervall.MONTHLY, text: intervall_keys.monthly },
+    { value: Intervall.WEEKLY, get text() { return intervall_keys.weekly; } },
+    { value: Intervall.MONTHLY, get text() { return intervall_keys.monthly; } },
 ];
 
 export const user_types_keys = {
-    user: "Benutzer*in",
-    admin: "Administrator*in"
+    get user() { return t('app.const.userTypes.user'); },
+    get admin() { return t('app.const.userTypes.admin'); },
 };
 
 export const user_types_options: Option[] = [
-    { value: USER_TYPES.USER, text: user_types_keys.user },
-    { value: USER_TYPES.ADMIN, text: user_types_keys.admin }
+    { value: USER_TYPES.USER, get text() { return user_types_keys.user; } },
+    { value: USER_TYPES.ADMIN, get text() { return user_types_keys.admin; } }
 ];
 
 export const user_is_active_options: Option[] = [
-    { value: true, text: "Aktiv" },
-    { value: false, text: "Inaktiv" }
+    { value: true, get text() { return t('app.const.userIsActive.active'); } },
+    { value: false, get text() { return t('app.const.userIsActive.inactive'); } }
 ];
 
 export const mobilizon_event_join_options = computed<Option[]>(() => [
@@ -99,23 +101,23 @@ export const fontSelectionOptions: Array<{ text: string; value: string }> = [
 ];
 
 export const requested_organisation_status = {
-    REQUESTED: "Angefragt",
-    REQUEST_DENIED: "Abgelehnt",
-    ACTIVE: "Aktiv",
-    INACTIVE: "Inaktiv",
+    get REQUESTED() { return t('app.const.organisationStatus.requested'); },
+    get REQUEST_DENIED() { return t('app.const.organisationStatus.requestDenied'); },
+    get ACTIVE() { return t('app.const.organisationStatus.active'); },
+    get INACTIVE() { return t('app.const.organisationStatus.inactive'); },
 }
 
 export const member_role = {
-    ADMINISTRATOR: "Administrator",
-    INVITED: "Eingeladen",
+    get ADMINISTRATOR() { return t('app.const.memberRole.administrator'); },
+    get INVITED() { return t('app.const.memberRole.invited'); },
 }
 
-export const monthlyIntervalWeekOptions = [
-    { value: 1, text: '1. (Erste)' },
-    { value: 2, text: '2. (Zweite)' },
-    { value: 3, text: '3. (Dritte)' },
-    { value: 4, text: '4. (Vierte)' },
-    { value: -1, text: 'Letzte' },
+export const monthlyIntervalWeekOptions: Array<{ value: number; readonly text: string }> = [
+    { value: 1, get text() { return t('app.const.monthWeek.first'); } },
+    { value: 2, get text() { return t('app.const.monthWeek.second'); } },
+    { value: 3, get text() { return t('app.const.monthWeek.third'); } },
+    { value: 4, get text() { return t('app.const.monthWeek.fourth'); } },
+    { value: -1, get text() { return t('app.const.monthWeek.last'); } },
 ];
 
 export {

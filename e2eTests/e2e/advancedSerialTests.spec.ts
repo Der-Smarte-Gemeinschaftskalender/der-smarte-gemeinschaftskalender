@@ -12,6 +12,7 @@ import {
     copySerialEventFromList,
     generateRandomTestName,
     getFutureDate,
+    fillDateInput,
     setupMonthlyTemplateControls,
     assertMonthlyTemplateControls,
     setupWeeklyTemplateControls,
@@ -77,7 +78,7 @@ test('serial termin with image on all events', async ({ page }) => {
 
     await fillEventForm(page, eventData);
 
-    await page.locator('#end').pressSequentially(getFutureDate(4), { delay: 150 });
+    await fillDateInput(page.locator('#end'), getFutureDate(4));
 
     await submitSerialEvent(page);
     await viewSerialEventFromList(page, eventName);
@@ -115,7 +116,7 @@ test('serial termin with large image on long series', async ({ page }) => {
 
     await fillEventForm(page, eventData);
 
-    await page.locator('#end').pressSequentially(getFutureDate(6), { delay: 150 });
+    await fillDateInput(page.locator('#end'), getFutureDate(6));
 
     const createRequest = page.waitForResponse(
         (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
@@ -194,7 +195,7 @@ test('serial termin keeps jpeg image on first save', async ({ page }) => {
 
     await fillEventForm(page, eventData);
 
-    await page.locator('#end').pressSequentially(getFutureDate(1), { delay: 150 });
+    await fillDateInput(page.locator('#end'), getFutureDate(1));
 
     const createRequest = page.waitForResponse(
         (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
@@ -281,7 +282,7 @@ test('serial termin keeps image while filling the form', async ({ page }) => {
     expect(submitRequests, 'Serientermin darf beim Ausfüllen nicht angelegt werden').toHaveLength(0);
 
     await page.locator('#end').fill('');
-    await page.locator('#end').pressSequentially(getFutureDate(1), { delay: 150 });
+    await fillDateInput(page.locator('#end'), getFutureDate(1));
 
     const createRequest = page.waitForResponse(
         (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),
@@ -322,7 +323,7 @@ test('serial termin keeps image at the upper size limit', async ({ page }) => {
 
     await fillEventForm(page, eventData);
 
-    await page.locator('#end').pressSequentially(getFutureDate(1), { delay: 150 });
+    await fillDateInput(page.locator('#end'), getFutureDate(1));
 
     const createRequest = page.waitForResponse(
         (response) => response.request().method() === 'POST' && response.url().includes('/series-events'),

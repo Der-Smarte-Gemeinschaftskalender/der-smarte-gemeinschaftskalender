@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { dsgApi } from '@/lib/dsgApi';
+import { localeOptions } from '@/i18n';
 import {
     emailTemplateOptions,
     EmailTemplateFormSchema,
@@ -23,10 +25,13 @@ import VariablesLegend from '@/components/VariablesLegend.vue';
 import { type EmailTemplate } from '@/types/EmailTemplate';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
 const template = ref<EmailTemplate | null>(null);
+// Read-only: every template row belongs to exactly one language
+const templateLocale = ref<string>('');
 const loading = ref(false);
 const errorMessage = ref('');
 
@@ -51,10 +56,11 @@ const loadTemplate = async () => {
         template.value = response.data as EmailTemplate;
 
         on_event.value = template.value!.on_event!;
+        templateLocale.value = template.value.locale;
         subject.value = template.value.subject;
         body.value = template.value.body;
     } catch {
-        errorMessage.value = 'Fehler beim Laden der Vorlage.';
+        errorMessage.value = t('app.admin.emailTemplates.loadError');
     } finally {
         loading.value = false;
     }
@@ -77,9 +83,9 @@ const saveTemplate = handleSubmit(async (values) => {
             const axiosError = error as { response?: { data?: { errors?: Record<string, string[]> } } };
             errorMessage.value = axiosError.response?.data?.errors
                 ? Object.values(axiosError.response.data.errors).flat().join(', ')
-                : 'Fehler beim Speichern der Vorlage.';
+                : t('app.admin.emailTemplates.saveError');
         } else {
-            errorMessage.value = 'Fehler beim Speichern der Vorlage.';
+            errorMessage.value = t('app.admin.emailTemplates.saveError');
         }
     }
 });
@@ -89,19 +95,24 @@ onMounted(loadTemplate);
 
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary mb-4">E-Mail-Vorlage bearbeiten</h1>
+        <h1 class="kern-heading text-theme-primary mb-4">{{ t('app.admin.emailTemplates.editTitle') }}</h1>
         <p class="mt-1 mb-6">
-            <b>Hinweis:</b>
-            Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/Einzeltermine/"
-                fragment="kalender-integrieren-ical-url-anbinden"
-            />.
+            <b>{{ t('app.admin.shared.note') }}</b> <I18nT
+                keypath="app.admin.shared.moreInfo"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/Einzeltermine/"
+                        fragment="kalender-integrieren-ical-url-anbinden"
+                    />
+                </template>
+            </I18nT>
         </p>
 
         <Alert
             v-if="errorMessage"
-            title="Fehler"
+            :title="t('common.error')"
             :content="errorMessage"
             severity="danger"
             class="mb-4"
@@ -120,18 +131,25 @@ onMounted(loadTemplate);
                     <InputSelect
                         v-model="on_event"
                         name="on_event"
-                        label="Bei welchem Ereignis"
-                        placeholder="Ereignis auswählen"
+                        :label="t('app.admin.emailTemplates.onEvent')"
+                        :placeholder="t('app.admin.emailTemplates.onEventPlaceholder')"
                         disabled
                         :options="emailTemplateOptions"
                         :errors="errors.on_event"
+                    />
+                    <InputSelect
+                        v-model="templateLocale"
+                        name="locale"
+                        :label="t('app.admin.emailTemplates.locale')"
+                        disabled
+                        :options="localeOptions"
                     />
 
                     <InputText
                         v-model="subject"
                         name="subject"
-                        label="Betreff"
-                        placeholder="E-Mail Betreff"
+                        :label="t('app.admin.emailTemplates.subject')"
+                        :placeholder="t('app.admin.emailTemplates.subjectPlaceholder')"
                         required
                         :errors="errors.subject"
                     />
@@ -139,8 +157,8 @@ onMounted(loadTemplate);
                     <InputRichText
                         v-model="body"
                         name="body"
-                        label="Nachricht"
-                        placeholder="E-Mail Inhalt"
+                        :label="t('app.admin.emailTemplates.body')"
+                        :placeholder="t('app.admin.emailTemplates.bodyPlaceholder')"
                         required
                         :rows="15"
                         :extended="true"
@@ -153,7 +171,7 @@ onMounted(loadTemplate);
                     >
                         <template #title>
                             <p class="mt-1 mb-3 font-bold text-theme-primary">
-                                Verfügbare Variablen für Betreff und Nachricht:
+                                {{ t('app.admin.emailTemplates.availableVariables') }}
                             </p>
                         </template>
                     </VariablesLegend>
@@ -163,7 +181,7 @@ onMounted(loadTemplate);
                     <Button
                         variant="primary"
                         type="submit"
-                        :label="isSubmitting ? 'Speichern...' : 'Änderungen speichern'"
+                        :label="isSubmitting ? t('app.admin.shared.saving') : t('app.admin.shared.saveChanges')"
                         :disabled="!subject || !body || isSubmitting || !noErrors"
                     />
                 </div>
@@ -172,8 +190,8 @@ onMounted(loadTemplate);
 
         <template v-else-if="!loading && !template">
             <Alert
-                title="Nicht gefunden"
-                content="Die angeforderte E-Mail-Vorlage wurde nicht gefunden."
+                :title="t('app.admin.emailTemplates.notFoundTitle')"
+                :content="t('app.admin.emailTemplates.notFound')"
                 severity="warning"
             />
         </template>

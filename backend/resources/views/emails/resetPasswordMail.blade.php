@@ -1,17 +1,17 @@
-@extends('emails.partials.body')
+@extends('emails.partials.body', ['title' => __('emails.resetPassword.heading')])
 @section('content')
 @include('emails.partials.header')
 
 <div class="content">
-    <h2>Passwort zurücksetzen</h2>
+    <h2>{{ __('emails.resetPassword.heading') }}</h2>
 
     {!! $mailBody !!}
 
     <a href="{{ env('APP_URL') }}/reset-password/{{ $resetToken }}"
-        class="btn">Passwort zurücksetzen</a>
+        class="btn">{{ __('emails.resetPassword.button') }}</a>
 
     <p>
-        Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail bitte.
+        {{ __('emails.resetPassword.ignoreHint') }}
     </p>
 </div>
 

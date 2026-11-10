@@ -95,19 +95,19 @@ export type CreatedEventRequest = zod.infer<typeof CreatedEventRequestSchema> & 
 export const CreatedEventFormSchema = DefaultEventFormSchema.extend({
     name: zod
         .string({
-            required_error: 'Der Name ist erforderlich.',
+            required_error: 'validation.name.required',
         })
-        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
-        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .min(3, 'validation.name.min')
+        .max(100, 'validation.name.max')
         .refine(
             (val) => val.trim().length >= 3, {
-                message: "Der Name darf nicht leer sein."
+                message: "validation.name.notEmpty"
         }),
     description: zod
         .string()
         .refine(
             (val) => stripHtml(val).length > 0,
-            { message: "Die Beschreibung darf nicht leer sein." }
+            { message: "validation.description.notEmpty" }
         ),
     start: zod
         .string()

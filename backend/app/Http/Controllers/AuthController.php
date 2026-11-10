@@ -11,6 +11,7 @@ use App\Http\Controllers\OrganisationController;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -40,7 +41,7 @@ class AuthController extends Controller
         ]);
 
         if (!$token) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => __('messages.auth.unauthorized')], 401);
         }
 
         $mclient = Mobilizon::getInstance();
@@ -69,7 +70,7 @@ class AuthController extends Controller
         $email = strtolower($request->email);
         // Don't differentiate between email already exists for security reasons
         if (!$validInputs || User::where('email', $email)->exists()) {
-            return response()->json(['error' => 'Nutzervalidierung fehlgeschlagen'], 422);
+            return response()->json(['error' => __('messages.auth.userValidationFailed')], 422);
         }
 
         $mclient = Mobilizon::getInstance(true);
@@ -84,12 +85,14 @@ class AuthController extends Controller
             Log::error('Mobilizon createUser lieferte keine gültige Antwort', ['response' => $createdMobilizonUser]);
 
             return response()->json([
-                'error' => 'Die Registrierung ist zurzeit leider nicht möglich. Bitte versuchen Sie es später erneut.'
+                'error' => __('messages.auth.registrationUnavailable')
             ], 503);
         }
 
         $user = new User();
         $user->email = $email;
+        // Emails are sent in the language the user registered with (resolved from Accept-Language by SetLocale)
+        $user->locale = App::getLocale();
         $user->password = Hash::make($request->input('password'));
         $user->mobilizon_email = $email;
         $user->mobilizon_password = $mobilizon_password;
@@ -98,7 +101,7 @@ class AuthController extends Controller
         $user->save();
 
         try {
-            Mail::to($user->email)
+            Mail::to($user)
                 ->send(new SendConfirmEmail($user->email_verification_token));
         } catch (\Exception $e) {
             Log::error('Error sending confirmation email: ' . $e->getMessage());
@@ -115,7 +118,7 @@ class AuthController extends Controller
     public function registerWithProfileAndOrganisation(Request $request): JsonResponse
     {
         if (!config('dsg.strict_mode')) {
-            return response()->json(['error' => 'Nur in striktem Modus verfügbar'], 403);
+            return response()->json(['error' => __('messages.auth.strictModeOnly')], 403);
         }
 
         $validatedUserData = $request->validate([
@@ -138,19 +141,19 @@ class AuthController extends Controller
 
         // Don't differentiate between email already exists for security reasons
         if (!$validatedUserData || User::where('email', $email)->exists()) {
-            return response()->json(['error' => 'Nutzervalidierung fehlgeschlagen'], 422);
+            return response()->json(['error' => __('messages.auth.userValidationFailed')], 422);
         }
 
         if (!$validatedProfileData) {
-            return response()->json(['error' => 'Profilvalidierung fehlgeschlagen'], 422);
+            return response()->json(['error' => __('messages.auth.profileValidationFailed')], 422);
         }
 
         if (!$validatedOrganisationData) {
-            return response()->json(['error' => 'Organisationsvalidierung fehlgeschlagen'], 422);
+            return response()->json(['error' => __('messages.auth.organisationValidationFailed')], 422);
         }
 
         if ($validatedOrganisationData['organisation_preferredUsername'] === $validatedProfileData['preferredUsername']) {
-            return response()->json(['error' => 'Der Organisations-Benutzername darf nicht mit dem Profil-Benutzernamen übereinstimmen'], 422);
+            return response()->json(['error' => __('messages.auth.organisationUsernameEqualsProfile')], 422);
         }
 
         $adminMclient = Mobilizon::getInstanceAdmin();
@@ -158,13 +161,13 @@ class AuthController extends Controller
         $existingGroups = $adminMclient->adminGetAllGroupsArray();
         foreach ($existingGroups as $group) {
             if ($group['preferredUsername'] === $validatedOrganisationData['organisation_preferredUsername']) {
-                return response()->json(['error' => 'Organisations-Benutzername bereits vorhanden'], 422);
+                return response()->json(['error' => __('messages.auth.organisationUsernameTaken')], 422);
             }
         }
 
         $userWithSameUsernameExists = (bool) $adminMclient->findProfileByPreferredUsername($validatedOrganisationData['organisation_preferredUsername']);
         if ($userWithSameUsernameExists) {
-            return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits von einem Benutzer verwendet wird.'], 422);
+            return response()->json(['error' => __('messages.organisations.usernameUsedByUser')], 422);
         }
 
         // Step 1: Create User (Mobilizon + local)
@@ -177,6 +180,8 @@ class AuthController extends Controller
 
         $user = new User();
         $user->email = $email;
+        // Emails are sent in the language the user registered with (resolved from Accept-Language by SetLocale)
+        $user->locale = App::getLocale();
         $user->password = $request->input('password');
         $user->mobilizon_email = $email;
         $user->mobilizon_password = $mobilizon_password;
@@ -194,7 +199,7 @@ class AuthController extends Controller
         if ($adminMclient->hasError($activateResponse)) {
             $user->delete();
             $adminMclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
-            return response()->json(['error' => 'User validation failed'], 500);
+            return response()->json(['error' => __('messages.auth.userValidationFailed')], 500);
         } else {
             $user->is_active = true;
             $user->save();
@@ -208,7 +213,7 @@ class AuthController extends Controller
             $user->delete();
             $mclient->deletePerson($user->mobilizon_profile_id);
             $mclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
-            return response()->json(['error' => 'User mobilizon login failed'], 500);
+            return response()->json(['error' => __('messages.auth.mobilizonLoginFailed')], 500);
         }
 
         // Step 2.3: Create Profile
@@ -220,7 +225,7 @@ class AuthController extends Controller
         if (isset($profileResponse['errors'])) {
             $user->delete();
             $mclient->deleteAccount($user->mobilizon_user_id, $user->mobilizon_password);
-            return response()->json(['error' => 'Profilerstellung fehlgeschlagen: ' . $profileResponse['errors'][0]['message'][0]], 500);
+            return response()->json(['error' => __('messages.auth.profileCreationFailed', ['message' => $profileResponse['errors'][0]['message'][0]])], 500);
         } else {
             $user->mobilizon_name = $profileResponse['data']['createPerson']['name'];
             $user->mobilizon_preferred_username = $profileResponse['data']['createPerson']['preferredUsername'];
@@ -241,13 +246,13 @@ class AuthController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Mobilizon person not available after creation'
+                'error' => __('messages.auth.personNotAvailable')
             ], 500);
         }
 
         // Step 4: Send Emails
         try {
-            Mail::to($user->email)
+            Mail::to($user)
                 ->send(new SendConfirmEmail($user->email_verification_token));
         } catch (Exception $e) {
             Log::error('Error sending confirmation email: ' . $e->getMessage());
@@ -286,11 +291,11 @@ class AuthController extends Controller
         $email = strtolower($request->input('email'));
 
         if (!$validInputs) {
-            return response()->json(['error' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein'], 422);
+            return response()->json(['error' => __('messages.auth.invalidEmail')], 422);
         }
 
         if (!User::where('email', $email)->exists()) {
-            return response()->json(['message' => 'Wenn diese E-Mail-Adresse in unserem System vorhanden ist, erhalten Sie eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts.']);
+            return response()->json(['message' => __('messages.auth.resetLinkSent')]);
         }
 
         $status = Password::sendResetLink(
@@ -298,8 +303,8 @@ class AuthController extends Controller
         );
 
         return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => 'Wenn diese E-Mail-Adresse in unserem System vorhanden ist, erhalten Sie eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts.'])
-            : response()->json(['error' => 'Fehler beim Senden des Passwort-Zurücksetzen-Links'], 500);
+            ? response()->json(['message' => __('messages.auth.resetLinkSent')])
+            : response()->json(['error' => __('messages.auth.resetLinkFailed')], 500);
     }
 
     public function validateUser(Request $request): JsonResponse
@@ -308,7 +313,7 @@ class AuthController extends Controller
 
         $user = User::where('email_verification_token', $verificationToken)->first();
         if (!$user) {
-            return response()->json(['error' => 'User validation failed'], 500);
+            return response()->json(['error' => __('messages.auth.userValidationFailed')], 500);
         }
         $systemAdmin = User::find(1);
 
@@ -322,7 +327,7 @@ class AuthController extends Controller
 
             if ($mclient->hasError($mresponse)) {
                 Log::error('Mobilizon user activation failed for user ID ' . $user->id, ['response' => $mresponse]);
-                return response()->json(['error' => 'User validation failed'], 500);
+                return response()->json(['error' => __('messages.auth.userValidationFailed')], 500);
             }
         }
 
@@ -331,7 +336,7 @@ class AuthController extends Controller
         $user->is_active = true;
         $user->save();
 
-        return response()->json(['message' => 'User validated successfully']);
+        return response()->json(['message' => __('messages.auth.userValidated')]);
     }
 
     public function resetPassword(Request $request): JsonResponse
@@ -343,7 +348,7 @@ class AuthController extends Controller
         ]);
 
         if (!$validated) {
-            return response()->json(['error' => 'Fehlende oder ungültige Eingaben'], 422);
+            return response()->json(['error' => __('messages.auth.invalidInput')], 422);
         }
 
         $plainToken = $validated['token'];
@@ -354,7 +359,7 @@ class AuthController extends Controller
             });
 
         if (!$record) {
-            return response()->json(['error' => 'Ungültiges oder abgelaufenes Token'], 400);
+            return response()->json(['error' => __('messages.auth.invalidToken')], 400);
         }
 
         $status = Password::reset(
@@ -374,9 +379,9 @@ class AuthController extends Controller
         );
 
         return $status === Password::PASSWORD_RESET
-            ? response()->json(['message' => 'Passwort erfolgreich zurückgesetzt'])
+            ? response()->json(['message' => __('messages.auth.passwordReset')])
             : response()->json([
-                'error' =>  'Fehler beim Zurücksetzen des Passworts',
+                'error' =>  __('messages.auth.passwordResetFailed'),
                 'status' => $status,
                 'rp_record_email' => $record->email,
                 'rp_record_token' => $record->token
@@ -400,7 +405,7 @@ class AuthController extends Controller
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => __('messages.auth.loggedOut')]);
     }
 
     /**

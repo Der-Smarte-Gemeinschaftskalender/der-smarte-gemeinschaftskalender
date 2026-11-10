@@ -8,19 +8,18 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Str;
 
 class SendApprovalRequestEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public ApprovalRequest $approvalRequest;
-    public string $requestTypeName;
     public string $approvalUrl;
 
     public function __construct(ApprovalRequest $approvalRequest)
     {
         $this->approvalRequest = $approvalRequest;
-        $this->requestTypeName = $this->getRequestTypeName($approvalRequest->requestable_type, $approvalRequest->request_type);
         $this->approvalUrl = $approvalRequest->requestable_type === 'Organisation'
             ? env('APP_URL') . '/app/admin/organisations/requests/' . $approvalRequest->id
             : env('APP_URL') . '/app/admin/events/requests/' . $approvalRequest->id;
@@ -29,7 +28,9 @@ class SendApprovalRequestEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Neue Genehmigungsanfrage: ' . $this->requestTypeName,
+            subject: __('emails.subjects.adminApprovalRequest', [
+                'requestTypeName' => $this->requestTypeName(),
+            ]),
         );
     }
 
@@ -39,7 +40,7 @@ class SendApprovalRequestEmail extends Mailable
             view: 'emails.adminApprovalRequestMail',
             with: [
                 'approvalRequest' => $this->approvalRequest,
-                'requestTypeName' => $this->requestTypeName,
+                'requestTypeName' => $this->requestTypeName(),
                 'approvalUrl' => $this->approvalUrl,
             ]
         );
@@ -50,29 +51,8 @@ class SendApprovalRequestEmail extends Mailable
         return [];
     }
 
-    private function getRequestTypeName(string $requestableType, string $requestType): string
+    private function requestTypeName(): string
     {
-        $typeMap = [
-            'SingleEvent' => 'Einzeltermin',
-            'SeriesEvent' => 'Serienterm',
-            'CreatedEvent' => 'Angelegter Termin',
-            'UploadedEvent' => 'Hochgeladene Termine',
-            'ImportedEvent' => 'Importierte Termine',
-            'Organisation' => 'Organisation',
-        ];
-
-        $actionMap = [
-            'store' => 'erstellen',
-            'create' => 'erstellen',
-            'update' => 'aktualisieren',
-            'delete' => 'löschen',
-            'updateGroup' => 'aktualisieren',
-            'changeOrganisationStatus' => 'erstellen',  
-        ];
-
-        $type = $typeMap[$requestableType] ?? $requestableType;
-        $action = $actionMap[$requestType] ?? $requestType;
-
-        return ucfirst($type) . ' ' . $action;
+        return Str::ucfirst($this->approvalRequest->getRequestTypeLabel());
     }
 }

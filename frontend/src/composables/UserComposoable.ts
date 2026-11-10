@@ -3,6 +3,7 @@ import { jwtDecode, type JwtPayload } from 'jwt-decode';
 import router from '@/router/router';
 
 import type { FullUser, User } from '@/types/User';
+import type { SupportedLocale } from '@/i18n';
 
 export const user = ref<FullUser | null>(
     localStorage.getItem('user') ? JSON.parse(<string>localStorage.getItem('user')) : null
@@ -18,7 +19,10 @@ export const setUserPersonData = (person: object | null): void => {
     localStorage.setItem('user', JSON.stringify(user.value));
 };
 
-export const updateProfileData = (profileData: { email: string }, person: object | null): void => {
+export const updateProfileData = (
+    profileData: { email: string; locale?: SupportedLocale | null },
+    person: object | null
+): void => {
     if (!user.value) return;
     user.value = { ...user.value, ...profileData, person };
     localStorage.setItem('user', JSON.stringify(user.value));

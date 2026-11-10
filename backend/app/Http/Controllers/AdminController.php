@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\User;
+use App\Http\Middleware\SetLocale;
+use Illuminate\Validation\Rule;
 use Log;
 use rdx\graphqlquery\Query;
 use Str;
@@ -85,6 +87,7 @@ class AdminController extends Controller implements HasMiddleware
             'email' => 'required|email|unique:users',
             'type' => 'required',
             'password' => 'required',
+            'locale' => ['nullable', Rule::in(SetLocale::SUPPORTED_LOCALES)],
         ]);
 
         $type = $request->type;
@@ -96,6 +99,7 @@ class AdminController extends Controller implements HasMiddleware
 
         $user = new User();
         $user->email = $email;
+        $user->locale = $request->input('locale') ?: config('app.default_locale');
         $user->type = $type;
         $user->password = bcrypt($request->password);
         $user->mobilizon_email = $email;
@@ -118,7 +122,7 @@ class AdminController extends Controller implements HasMiddleware
                     'error' => $mclient->getError($mresponse),
                     'user_id' => $user->id
                 ]);
-                return response()->json(['error' => 'Validierung des neuen Benutzers fehlgeschlagen'], 500);
+                return response()->json(['error' => __('messages.admin.userValidationFailed')], 500);
             }
             $mresponseChangeRole = $adminClient->adminUpdateUser([
                 'id' => $user->mobilizon_user_id,
@@ -130,19 +134,19 @@ class AdminController extends Controller implements HasMiddleware
                     'error' => $mclient->getError($mresponseChangeRole),
                     'user_id' => $user->id
                 ]);
-                return response()->json(['error' => 'Rollen veränderung des neuen Benutzers fehlgeschlagen'], 500);
+                return response()->json(['error' => __('messages.admin.roleChangeFailed')], 500);
             }
             $user->is_active = true;
             $user->save();
         } else {
             $user->email_verification_token = Str::uuid()->toString();
             $user->save();
-            Mail::to($user->email)
+            Mail::to($user)
                 ->send(new SendConfirmEmail($user->email_verification_token));
         }
 
         return response()->json([
-            'message' => 'Erfolgreich erstellt',
+            'message' => __('messages.admin.userCreated'),
             'id' => $user->id
         ], 201);
     }
@@ -153,11 +157,16 @@ class AdminController extends Controller implements HasMiddleware
             'email' => 'required|email|unique:users,email,' . $user->id,
             'type' => 'required',
             'password' => 'nullable',
-            'is_active' => 'required'
+            'is_active' => 'required',
+            'locale' => ['nullable', Rule::in(SetLocale::SUPPORTED_LOCALES)],
         ]);
 
         $user->email = strtolower($request->email);
         $user->type = $request->type;
+
+        if ($request->filled('locale')) {
+            $user->locale = $request->input('locale');
+        }
 
         if ($request->password) {
             $user->password = bcrypt($request->password);
@@ -177,7 +186,7 @@ class AdminController extends Controller implements HasMiddleware
         $user->save();
 
         return response()->json([
-            'message' => 'Nutzer erfolgreich aktualisiert',
+            'message' => __('messages.admin.userUpdated'),
             'user' => $user
         ]);
     }
@@ -192,14 +201,15 @@ class AdminController extends Controller implements HasMiddleware
             $user->delete();
 
             try {
-                Mail::to($user->email)
+                // $user is already deleted, but the in-memory model still carries email and locale
+                Mail::to($user)
                     ->send(new SendInfoUserDeletedEmail());
             } catch (\Exception $e) {
                 Log::error('Fehler beim Email Senden Löschen des Mobilizon Benutzers: ' . $e->getMessage());
             }
             return response()->json([
                 'username' => $mresponse['data']['deleteAccount']['id'],
-                'message' => 'Nutzer erfolgreich gelöscht',
+                'message' => __('messages.admin.userDeleted'),
             ]);
         } catch (\Exception $e) {
             Log::error(
@@ -209,7 +219,7 @@ class AdminController extends Controller implements HasMiddleware
                     'user_id' => $user->id
                 ]
             );
-            return response()->json(['error' => 'Fehler beim Löschen des Benutzers'], 500);
+            return response()->json(['error' => __('messages.admin.userDeleteFailed')], 500);
         }
     }
 

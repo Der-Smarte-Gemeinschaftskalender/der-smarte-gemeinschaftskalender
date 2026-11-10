@@ -1,18 +1,21 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import Legend from '@/components/Legend.vue';
 
+const { t } = useI18n();
+
 const listLegendItems = { 
-    'content-copy': 'Duplizieren (als Vorlage verwenden)',
-    'edit': 'Bearbeiten',
-    'delete': 'Löschen',
-    'open-in-new': 'Öffentliche Seite ansehen',
-    'visibility': 'Details ansehen',
-    'wall_art': 'Werbemittelgenerator (Ankündigung einer einzelnen Veranstaltung)',
+    'content-copy': t('app.shared.buttonLegend.duplicate'),
+    'edit': t('app.shared.buttonLegend.edit'),
+    'delete': t('app.shared.buttonLegend.delete'),
+    'open-in-new': t('app.shared.buttonLegend.openPublic'),
+    'visibility': t('app.shared.buttonLegend.details'),
+    'wall_art': t('app.shared.buttonLegend.promoMaterials'),
 };
 </script>
 <template>
     <Legend
-        title="Button-Legende (je nach Tabelle sind nicht alle Icons vorhanden)"
+        :title="t('app.shared.buttonLegend.title')"
         :icons="listLegendItems"
         
     />

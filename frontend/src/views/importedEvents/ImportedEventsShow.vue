@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { formatDateTime } from '@/lib/helper';
 import { stripHtml } from '@/lib/helper';
@@ -31,6 +32,7 @@ const error = ref(false);
 const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const createdEvents = ref();
 const importedEvent = ref<ImportedEventWithRelations>();
 const importedEventListData = ref<{ name: string; value: unknown }[]>([]);
@@ -38,8 +40,8 @@ const importedEventListData = ref<{ name: string; value: unknown }[]>([]);
 const { deleting, showDeleteDialog, alertMessage, handleDelete } = useEventShowDelete({
     getDeleteUrl: () => `/imported-events/${route.params.id}`,
     redirectRouteName: 'importedEvents.index',
-    fallbackErrorTitle: 'Fehler',
-    fallbackErrorText: 'Beim Löschen der Kalenderintegration ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
+    fallbackErrorTitle: t('common.error'),
+    fallbackErrorText: t('app.events.imported.show.deleteError'),
 });
 
 const loadImportedEvent = async () => {
@@ -61,27 +63,27 @@ const loadImportedEvent = async () => {
                 value: importedEvent.value.id,
             },
             {
-                name: 'URL',
+                name: t('app.events.columns.url'),
                 value: importedEvent.value.url,
             },
             {
-                name: 'Terminanzahl',
+                name: t('app.events.columns.eventCount'),
                 value: createdEvents.value?.length,
             },
             {
-                name: 'Status',
-                value: importedEvent.value.is_active ? 'Aktiv' : 'Inaktiv',
+                name: t('app.events.columns.status'),
+                value: importedEvent.value.is_active ? t('app.shared.active') : t('app.shared.inactive'),
             },
             {
-                name: 'Angelegt von',
+                name: t('app.events.columns.addedBy'),
                 value: `${importedEvent.value.user.mobilizon_name}`,
             },
             {
-                name: 'Angelegt am',
+                name: t('app.events.columns.addedAt'),
                 value: formatDateTime(importedEvent.value.created_at),
             },
             {
-                name: 'Synchronisiert am',
+                name: t('app.events.columns.syncedAt'),
                 value: formatDateTime(importedEvent.value.updated_at),
             },
         ];
@@ -100,9 +102,9 @@ loadImportedEvent();
 <template>
     <ConfirmDialog
         v-model="showDeleteDialog"
-        title="Gesamte Kalenderintegration löschen"
-        :description='`Sie sind dabei, folgende Kalenderintegration zu löschen: ${ importedEvent?.url }.\n\n Alle importierten Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf "Abgesagt" setzen, statt die Kalenderintegration zu löschen.`'
-        confirm-text="Löschen"
+        :title="t('app.events.imported.deleteTitle')"
+        :description="t('app.events.imported.show.deleteDescription', { url: `${importedEvent?.url}` })"
+        :confirm-text="t('common.delete')"
         @confirm="handleDelete"
     />
     <Alert
@@ -113,7 +115,7 @@ loadImportedEvent();
         :content="alertMessage.content"
     />
     <div class="flex align-items-center justify-content-between mb-1">
-        <h1 class="kern-heading text-theme-primary">Kalenderintegration (iCal-URL)</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.events.imported.title') }}</h1>
         <div class="flex gap-2">
             <template v-if="!!importedEvent">
                 <ChangeImportedEventStatus
@@ -128,7 +130,7 @@ loadImportedEvent();
                     :disabled="deleting"
                     @click="showDeleteDialog = true"
                 >
-                    {{ deleting ? 'Wird gelöscht...' : 'Löschen' }}
+                    {{ deleting ? t('app.shared.deleting') : t('common.delete') }}
                 </Button>
             </template>
         </div>
@@ -143,13 +145,13 @@ loadImportedEvent();
                         v-html="
                             stripHtml(importedEvent?.mobilizon_fields?.description)
                                 ? importedEvent?.mobilizon_fields?.description
-                                : 'Es wurde keine Beschreibung angegeben.'
+                                : t('app.events.imported.show.noDescription')
                         "
                     ></p>
                 </template>
             </DescriptionList>
 
-            <h3 class="kern-heading mt-8 text-theme-primary">Angelegte Termine</h3>
+            <h3 class="kern-heading mt-8 text-theme-primary">{{ t('app.events.createdEvents') }}</h3>
             <CreatedEventsTable
                 :data="createdEvents"
                 :show-created-at="true"
@@ -158,11 +160,11 @@ loadImportedEvent();
         </div>
         <Alert
             v-else
-            title="Fehler"
+            :title="$t('common.error')"
             type="error"
         >
-            <p>Die Datei konnte nicht geladen werden.</p>
-            <p>Bitte versuchen Sie es später erneut.</p>
+            <p>{{ t('app.events.fileLoadError') }}</p>
+            <p>{{ t('app.events.tryAgainLater') }}</p>
         </Alert>
     </div>
     <Loader

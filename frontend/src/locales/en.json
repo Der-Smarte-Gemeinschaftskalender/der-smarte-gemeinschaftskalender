@@ -2,7 +2,7 @@
     "public": {
         "landing": {
             "subscribeNotifications": "Subscribe to notifications",
-            "stayInformed": "Stay informed about events in your region.",
+            "stayInformed": "Stay informed about what's on in your region.",
             "searchEvents": "Search for events",
             "searchTermLabel": "Search term",
             "searchPlaceholder": "Keyword, event title...",
@@ -11,19 +11,19 @@
             "stayInformedAboutNew": "Stay informed about new",
             "offersAndEvents": "offers and events",
             "in": "in",
-            "easySignup": "Easy to sign up – cancel anytime!",
+            "easySignup": "Easy to sign up – unsubscribe at any time.",
             "exploreCategories": "Explore categories",
             "imageFor": "Image for"
         },
         "imprint": {
-            "title": "Imprint",
-            "contact": "Contact Information",
+            "title": "Legal notice",
+            "contact": "Contact",
             "registrations": "Registrations are",
             "registrationsOpen": "open",
             "registrationsClosed": "closed"
         },
         "terms": {
-            "title": "Terms of Service"
+            "title": "Terms of use"
         },
         "privacy": {
             "title": "Privacy Policy"
@@ -68,7 +68,7 @@
             "noDescription": "No description available.",
             "promoMaterials": "Promotional materials",
             "addToCalendarTitle": "Add event to personal calendar",
-            "addToCalendarDescription": "You can download this event and save it in your personal calendar. More information can be found in the",
+            "addToCalendarDescription": "You can download this event and save it in your personal calendar. You can find more information in the",
             "addToCalendarButton": "Add to calendar",
             "tags": "Tags",
             "externalRegistration": "External registration",
@@ -76,24 +76,24 @@
             "imageAlt": "Event image",
             "website": "Website",
             "relatedEvents": "Related events",
-            "moreEventsFromCalendar": "More events from the calendar {operatedBy}",
+            "moreEventsFromCalendar": "More events from the {operatedBy} calendar",
             "showAllEvents": "Show all events",
             "unknownCategory": "Unknown",
-            "details": "Event Details",
-            "organizer": "Organizer",
+            "details": "Event details",
+            "organizer": "Organiser",
             "category": "Category",
             "status": "Status",
             "language": "Language",
-            "physicalAddress": "Physical Address",
-            "onlineAddress": "Online Address",
-            "participationUrl": "Participation Link",
+            "physicalAddress": "Physical address",
+            "onlineAddress": "Online address",
+            "participationUrl": "Participation link",
             "description": "Description",
             "view": "View",
             "upcomingEvents": "upcoming events",
             "noUpcomingEvents": "No upcoming events found."
         },
         "organisation": {
-            "details": "Organisation Details",
+            "details": "Organisation details",
             "about": "About",
             "contact": "Contact",
             "events": "Events",
@@ -109,23 +109,24 @@
             "shareEvents": "Share events",
             "noUpcomingEvents": "No upcoming events",
             "infoMonitorDisplay": "Info monitor display",
-            "navigateToInfoMonitor": "Navigate to info monitor display for the organisation"
+            "navigateToInfoMonitor": "Open the organisation's info monitor display",
+            "featured": "Featured"
         },
         "infoMonitor": {
             "noEventsForCriteria": "No events found for these search criteria.",
-            "allEventInfo": "All event information"
+            "allEventInfo": "All event details"
         },
         "timezoneNotice": {
             "title": "Timezone notice",
-            "content": "Your browser is set to the \"{detectedTz}\" timezone – event times are shown in this timezone accordingly."
+            "content": "Your browser is set to the \"{detectedTz}\" timezone – event times are shown in this timezone accordingly. If your browser timezone is not correct, the times shown may differ."
         },
         "timezoneFormHint": {
-            "stored": "Note: Entered date and time are stored as Berlin time (CET/CEST). Viewers see events in the timezone of their browser – an event at \"17:00\" will automatically appear as \"11:00\" for a browser in New York.",
-            "browserMismatch": "Your browser timezone is \"{detectedTz}\". Note: An input of \"13:00\" will still be stored as 13:00 Berlin time. If you want to create an event in your own local time, please convert to Berlin time first."
+            "stored": "Note: Entered date and time are stored in the selected timezone ({timezone}). Viewers see events in the timezone of their browser – an event at \"17:00\" in Berlin will automatically appear as \"11:00\" for a browser in New York.",
+            "browserMismatch": "Your browser timezone is \"{detectedTz}\". Note: An input of \"13:00\" will be stored as 13:00 in the selected timezone ({timezone}). If you want to create an event in your own local time, please select your timezone."
         },
         "search": {
-            "title": "Find Events",
-            "results": "Search Results",
+            "title": "Find events",
+            "results": "Search results",
             "noResults": "No events found",
             "filter": "Filter",
             "search": "Search",
@@ -136,21 +137,21 @@
             "back": "Back",
             "next": "Next",
             "foundEvents": "events found",
-            "accAbout": "About Instance",
-            "accTimeRange": "Time Range",
+            "accAbout": "This instance",
+            "accTimeRange": "Time range",
             "accCategories": "Categories",
             "accEventStatus": "Event status",
             "accLanguages": "Languages",
             "instanceThis": "This calendar",
-            "instanceGlobal": "Global Calendar Network",
-            "timeAll": "All Events",
+            "instanceGlobal": "Entire calendar network",
+            "timeAll": "All events",
             "timeToday": "Today",
             "timeTomorrow": "Tomorrow",
-            "timeThisWeek": "This Week",
-            "timeThisWeekend": "This Weekend",
-            "timeNextWeek": "Next Week",
-            "timeThisMonth": "This Month",
-            "timeNextMonth": "Next Month",
+            "timeThisWeek": "This week",
+            "timeThisWeekend": "This weekend",
+            "timeNextWeek": "Next week",
+            "timeThisMonth": "This month",
+            "timeNextMonth": "Next month",
             "searchLabel": "Search term",
             "searchPlaceholder": "Keyword, event title...",
             "allOrganisations": "All organisations",
@@ -168,20 +169,20 @@
             "events": "Events",
             "calendar": "Calendar",
             "organisations": "Organisations",
-            "internalArea": "Go to admin area",
+            "internalArea": "Go to the admin area",
             "menu": "Menu",
-            "homeAlt": "Go to home page of {name}"
+            "homeAlt": "Go to the {name} home page"
         },
         "footer": {
             "logoAlt": "{name} logo",
             "isInstanceOf": "is an instance of the",
-            "smartCommunityCalendar": "Smarter Gemeinschafts Kalender (Smart Community Calendar)",
+            "smartCommunityCalendar": "Smart Community Calendar (Smarter Gemeinschaftskalender)",
             "operatedBy": ", operated by {operatedBy}.",
             "basedOn": "The calendar is based on",
             "inFediverseMaintainedBy": "in the Fediverse and is technically maintained by",
             "maintained": ".",
-            "developmentFundedIn": "The development was co-funded through the",
-            "openInnovationProgram": "Open Innovation Program in Schleswig-Holstein",
+            "developmentFundedIn": "Its development was co-funded by the",
+            "openInnovationProgram": "State Programme for Open Innovation in Schleswig-Holstein",
             "coFunded": ".",
             "aboutCalendar": "About the calendar",
             "licenseInfo": "License information",
@@ -194,7 +195,7 @@
             "email": {
                 "buttonTitle": "Subscribe to email notifications",
                 "title": "Email notifications",
-                "description": "Receive regular email notifications about new events in your area. Choose how often you want to be informed, which topics and organizations interest you, and the radius used to search for events.",
+                "description": "Receive regular email notifications about new events in your area. Choose how often you want to be informed, which topics and organisations interest you, and the radius used to search for events.",
                 "create": {
                     "title": "Subscribe to email notifications",
                     "subtitle": "Set up your personal subscription",
@@ -205,14 +206,14 @@
                     "eventsGlobal": "Show all events from the network",
                     "noticeTitle": "Note",
                     "alertGlobalTitle": "All events from the network",
-                    "alertGlobalText": "means you will also see events from other municipalities and organizations that run a calendar.",
+                    "alertGlobalText": "means you will also see events from other municipalities and organisations that run a calendar.",
                     "alertInternalTitle": "Only events from this calendar",
                     "alertInternalText": "means you will only see events from this calendar instance.",
                     "organisationsLabel": "Organisations",
                     "postalCodeLabel": "Postal code",
                     "emailLabel": "Email address",
                     "emailPlaceholder": "Your email address",
-                    "termsLabel": "Terms of service",
+                    "termsLabel": "Terms of use",
                     "termsIntro": "I have read the",
                     "termsOutro": "and accept them.",
                     "submitButton": "Subscribe to email notifications now",
@@ -226,7 +227,7 @@
                     "submitError": "An error occurred. Please try again later.",
                     "validation": {
                         "invalidEmail": "Please enter a valid email address.",
-                        "termsRequired": "You must accept the terms of service.",
+                        "termsRequired": "You must accept the terms of use.",
                         "invalidPostalCode": "Please enter a valid postal code",
                         "invalidRadius": "Please select a valid radius"
                     }
@@ -234,34 +235,39 @@
             },
             "script": {
                 "buttonTitle": "Embed script",
-                "title": "Embed calendar on your website (Script)",
+                "title": "Embed the calendar on your website (script)",
                 "description": "You can easily embed the event calendar on your own website – for example as an association, municipality or initiative. You can choose which events are displayed (e.g. only your own, or filtered by topic or area).\n\nThe embedded calendar updates automatically – no duplicate maintenance needed.",
                 "pageSubtitle": "You can easily embed the event calendar on your own website",
                 "noticeLabel": "Note:",
-                "noticePrefix": "Further information can be found in the",
+                "noticePrefix": "You can find more information in the",
                 "organisationLabel": "Organisations",
                 "categoryLabel": "Categories",
-                "jsEmbedLabel": "Java Scrips embed script",
+                "jsEmbedLabel": "Embed script (JavaScript)",
                 "htmlEmbedLabel": "Embed output (HTML)"
             },
             "infoboards": {
                 "buttonTitle": "Generate URL for information boards",
                 "title": "Display events on information boards",
-                "intro": "Display a pre-filtered selection of events automatically in rotation on digital information boards or screens – for example in town halls, public service offices or community centers.",
+                "intro": "Display a pre-filtered selection of events automatically in rotation on digital information boards or screens – for example in town halls, public service offices or community centres.",
                 "howItWorks": "How it works:",
-                "step1Prefix": "Open",
+                "step1Prefix": "Open the",
                 "step1Search": "event search",
                 "step1Middle": "and set your desired",
                 "step1Filter": "filters",
                 "step1Suffix": "(e.g. categories or time periods like today, tomorrow or next week).",
-                "step2Prefix": "Click on the",
-                "step2Suffix": "Info icon in the top right in the \"Share search results\" section to generate a suitable URL.",
+                "step2Prefix": "Click the",
+                "step2Suffix": "info icon at the top right of the \"Share search results\" section to generate a suitable URL.",
                 "step3": "Copy the URL and enter it on an information board or screen.",
                 "tipLabel": "Tip:",
-                "tipText": "You can also create an information board view for a specific organization – directly from that organization's public page. You'll find an info icon there as well.",
+                "tipText": "You can also create an information board view for a specific organisation – directly from that organisation's public page. You'll find an info icon there as well.",
                 "description": "The display runs automatically and shows your filtered events continuously in rotation – always up-to-date and without any additional maintenance.",
-                "moreInfoPrefix": "Further information can be found in the"
+                "moreInfoPrefix": "You can find more information in the"
             }
+        },
+        "share": {
+            "copy": "Copy",
+            "copyTextAria": "Link to the search results",
+            "eventListTitle": "Event overview"
         }
     },
     "categories": {
@@ -318,11 +324,14 @@
         "no": "No",
         "submit": "Submit",
         "close": "Close",
-        "documentation": "Documentation",
+        "documentation": "documentation",
         "weekly": "Weekly",
         "monthly": "Monthly",
-        "mondayMorning": "monday morning",
-        "firstDayOfMonth": "first day of the month"
+        "mondayMorning": "Monday morning",
+        "firstDayOfMonth": "first day of the month",
+        "timezone": {
+            "label": "Timezone"
+        }
     },
     "languages": {
         "de": "German",
@@ -341,22 +350,1060 @@
     "instanceConfig": {
         "landingPage": {
             "heading": "Events in Amt Süderbrarup",
-            "description": "Dates, offers & events in Amt Süderbrarup",
+            "description": "Dates, activities & events in Amt Süderbrarup",
             "upcomingEventsMapTitle": "Map – events in the next 30 days",
             "showNotificationImageAlt": "Notifications"
         },
         "searchPage": {
-            "description": "Public events from clubs, organizations & the municipality",
+            "description": "Public events from clubs, organisations & the municipality",
             "descriptionHTML": ""
         },
         "mainHeader": {
             "externalLinkText": "About the calendar"
         },
         "mainFooter": {
-            "disclaimerText": "All events are created and managed independently by their respective organisers.\nIf you have any questions, please contact the organisation listed for the event directly.\nHowever, if you have any concerns about an event or organisation, please contact us."
+            "disclaimerText": "All events are created and managed independently by their respective organisers.\nIf you have any questions, please contact the organisation named in the event directly.\nIf you have any concerns about an event or an organisation, please contact us."
         },
         "showEventPage": {
             "eventShareTitle": "Share event"
+        }
+    },
+    "validation": {
+        "name": {
+            "required": "The name is required.",
+            "eventRequired": "The name of the event is required.",
+            "min": "The name must be at least 3 characters long.",
+            "max": "The name must not exceed 100 characters.",
+            "notEmpty": "The name must not be empty."
+        },
+        "description": {
+            "notEmpty": "The description must not be empty."
+        },
+        "email": {
+            "required": "The email address is required.",
+            "invalid": "Please enter a valid email address."
+        },
+        "password": {
+            "currentRequired": "The current password is required.",
+            "newRequired": "The new password is required.",
+            "newMin": "The new password must be at least 8 characters long.",
+            "confirmRequired": "Confirmation of the new password is required.",
+            "confirmMin": "The confirmation of the new password must be at least 8 characters long.",
+            "mismatch": "The passwords do not match."
+        },
+        "url": {
+            "invalid": "Please enter a valid URL.",
+            "externalParticipation": "If you provide an external registration URL, please enter a valid URL.",
+            "onlineAddress": "If you provide an online address, please enter a valid URL."
+        },
+        "time": {
+            "invalid": "Please enter a valid time in HH:mm format."
+        },
+        "duration": {
+            "invalid": "Please enter a valid duration in HHH:MM format."
+        },
+        "date": {
+            "startAfterEnd": "The start date must not be after the end date."
+        },
+        "address": {
+            "notGeocoded": "The address could not be matched to a location. Select a suggestion from the list. Suggestions only appear if you have entered an address that is listed in OpenStreetMap."
+        },
+        "picture": {
+            "unreadable": "The selected file is empty or could not be read. Please select it again.",
+            "unsupportedFormat": "The format {format} is not supported. Please select an image in JPG, PNG, GIF or WEBP format.",
+            "tooLarge": "At {size} MB, the image is too large. Please select an image of no more than 2 MB.",
+            "unknownFormat": "unknown"
+        },
+        "ical": {
+            "fileRequired": "Please upload an iCal file (max. 2 MB)"
+        },
+        "username": {
+            "startLowercase": "The username must start with a lowercase letter.",
+            "endLowercaseOrNumber": "The username must end with a lowercase letter or a number.",
+            "invalid": "Please enter a valid username. Lowercase letters, numbers and underscores are allowed.",
+            "noConsecutiveUnderscores": "The username must not contain consecutive underscores."
+        },
+        "fileFormats": {
+            "allAudio": "all audio formats",
+            "allVideo": "all video formats",
+            "allImage": "all image formats",
+            "allText": "all text formats",
+            "allApplication": "all application formats",
+            "calendar": "Calendar"
+        }
+    },
+    "app": {
+        "helper": {
+            "invalidDate": "Invalid date",
+            "hours": "{hours} h",
+            "minutes": "{minutes} min",
+            "languageFallback": "German"
+        },
+        "materialGenerator": {
+            "noteLabel": "Note:",
+            "page": {
+                "title": "Promotional material generator",
+                "subtitleEventList": "– Event overviews (multiple events)",
+                "subtitleEvent": "– Announcement of a single event",
+                "hintEventList": "Design overviews of upcoming events in your organisation's style. Make use of the brand kit as well. Announcements for single events can be generated via the button on the event. You can find more information in the {docs}.",
+                "hintEvent": "Design announcements for single events in your organisation's style. Make use of the brand kit as well. Overviews of multiple events can be created via the \"Promotional materials\" item in the side menu. You can find more information in the {docs}.",
+                "errorDefault": "An error occurred.",
+                "loadingData": "Loading data",
+                "outputText": "Output text",
+                "noPreview": "There is no preview for this file format.",
+                "editorFeaturesTitle": "Editor features"
+            },
+            "editorFeatures": {
+                "dragDrop": "Move, scale and rotate objects via drag & drop",
+                "uploadImage": "Upload image (PNG, JPEG, SVG)",
+                "stamps": "Stamps (Cancelled, Postponed, Updated)",
+                "order": "Change order (bring layers forward/backward via the right-click menu)",
+                "duplicate": "Duplicate and delete objects via the right-click menu",
+                "textAdjustments": "Text adjustments: font, font size, colours, bold and underline",
+                "undo": "Undo and redo edits",
+                "uploadBackground": "Upload background image",
+                "globalSettings": "Adjust fonts, colours and dividers globally",
+                "templates": "Save and reuse templates for consistent designs",
+                "eventSelection": "Manually select and edit the events",
+                "download": "Download graphic as PNG file"
+            },
+            "errors": {
+                "defaultValues": "Default values could not be loaded.",
+                "noEventsFound": "No events were found.",
+                "noOrganisation": "No organisation selected.",
+                "noEvent": "No event selected.",
+                "contentLoad": "Content could not be loaded.",
+                "eventsLoad": "Events could not be loaded.",
+                "moreEventsLoad": "More events could not be loaded.",
+                "backgroundTooLarge": "The background image is too large. Please choose an image of no more than 2 MB.",
+                "imageAdd": "Image could not be added.",
+                "stampLoad": "Stamp could not be loaded.",
+                "fileTooLarge": "The file is too large. Please choose an image of no more than 2 MB.",
+                "templatesLoad": "Templates could not be loaded.",
+                "templateSave": "Template could not be saved.",
+                "templateDelete": "Template could not be deleted."
+            },
+            "stamps": {
+                "cancelled": "Cancelled",
+                "postponed": "Postponed",
+                "updated": "Updated"
+            },
+            "canvas": {
+                "newText": "New text"
+            },
+            "dimensions": {
+                "post": "Social media post (1080 x 1350 px)",
+                "story": "Social media story (1080 x 1920 px)",
+                "text": "Text"
+            },
+            "sidebar": {
+                "download": "Download",
+                "format": "Format",
+                "scope": "Scope",
+                "myOrganisation": "My organisation",
+                "wholeInstance": "Entire instance",
+                "period": "Time period",
+                "startDate": "Start date",
+                "endDate": "End date",
+                "maxEventsHint": "A maximum of {count} events can be displayed",
+                "events": "Events",
+                "selectEvents": "Select ({selected}/{max})",
+                "onlyFirstSelected": "Only the first {count} selected events will be shown on the graphic.",
+                "deselectAll": "Deselect all",
+                "selectAll": "Select all",
+                "loadingMore": "Loading …",
+                "loadMore": "Load more events",
+                "showLogo": "Show logo",
+                "backgroundImage": "Background image",
+                "layoutTemplates": "Layout templates",
+                "globalSettings": "Global settings",
+                "fontTexts": "Body text font",
+                "color": "Colour",
+                "fontHeadlines": "Heading font",
+                "headline": "Heading",
+                "dividers": "Dividers",
+                "templates": "Templates",
+                "loadTemplate": "Load template: {name}",
+                "deleteTemplate": "Delete template",
+                "noTemplates": "No templates saved for this format.",
+                "saveTemplateAs": "Save new template as",
+                "deleteTemplateConfirm": "Really delete the template \"{name}\"?"
+            },
+            "toolbar": {
+                "undo": "Undo",
+                "redo": "Redo",
+                "add": "Add",
+                "addText": "Add text",
+                "addShape": "Add shape",
+                "addImage": "Add image",
+                "addStamp": "Add stamp",
+                "shapes": {
+                    "rect": "Rectangle",
+                    "circle": "Circle",
+                    "ellipse": "Ellipse",
+                    "triangle": "Triangle",
+                    "line": "Line",
+                    "star": "Star",
+                    "arrow": "Arrow",
+                    "hexagon": "Hexagon"
+                },
+                "font": "Font",
+                "textColor": "Text colour",
+                "size": "Size",
+                "formatting": "Formatting",
+                "bold": "Bold",
+                "underline": "Underline",
+                "fillColor": "Fill colour",
+                "background": "Background",
+                "borderAndText": "Border & text"
+            },
+            "contextMenu": {
+                "bringForward": "Bring forward",
+                "sendBackward": "Send backward",
+                "bringToFront": "Bring to front",
+                "sendToBack": "Send to back",
+                "duplicate": "Duplicate"
+            },
+            "brandKit": {
+                "title": "Brand kit",
+                "hint": "In the brand kit you can save your organisation's design guidelines. These can be used to create event announcements. Every member of your organisation can access them when using the promotional material generator. This saves time and ensures a consistent look. You can upload your logo in the Organisation section. You can find more information in the {docs}.",
+                "colorsAndFonts": "Colours and fonts",
+                "texts": "Texts",
+                "underlineColor": "Divider colour",
+                "textColor": "Text colour",
+                "font": "Font",
+                "headlineOptional": "Heading (optional)",
+                "headlineText": "Heading text",
+                "backgroundImages": "Background images",
+                "infoTitle": "Information",
+                "infoText1": "With the promotional material generator, you can create announcements for single events or overviews of several upcoming events.",
+                "infoText2": "Here you can provide background images for the different formats and announcement types. You can find layout templates for designing perfectly fitting backgrounds in the {docs}.",
+                "eventLists": "Event overviews",
+                "singleEvent": "Single event",
+                "formatStory": "Format: Story",
+                "formatPost": "Format: Post",
+                "sizeLabel": "Size:",
+                "savedTitle": "Saved",
+                "savedContent": "The settings were saved successfully.",
+                "saveError": "The settings could not be saved."
+            }
+        },
+        "organisations": {
+            "hint": "Note:",
+            "information": "Information",
+            "errorOccurred": "An error occurred.",
+            "loadError": "The organisation could not be loaded.",
+            "saved": "Saved",
+            "unknown": "Unknown",
+            "validation": {
+                "nameRequired": "The name of the organisation is required.",
+                "nameNotEmpty": "The name of the organisation must not be empty.",
+                "summaryRequired": "The description of the organisation is required.",
+                "summaryNotEmpty": "The description must not be empty.",
+                "usernameRequired": "The username is required.",
+                "usernameNotEmpty": "The username must not be empty."
+            },
+            "index": {
+                "title": "My organisations",
+                "create": "Create organisation",
+                "hint": "Here you can find all organisations you are a member of and edit them. You can find more information in the {docs}.",
+                "requestSentTitle": "Request sent",
+                "requestSentContent": "Your organisation request has been submitted for approval. You will be notified by email as soon as your request has been processed.",
+                "columnName": "Name",
+                "columnFeatured": "Featured",
+                "columnStatus": "Status",
+                "members": "Members",
+                "view": "View",
+                "accept": "Accept",
+                "acceptInvitation": "Accept invitation",
+                "reject": "Decline",
+                "rejectInvitation": "Decline invitation",
+                "acceptError": "The invitation could not be accepted. Please try again later.",
+                "rejectError": "The invitation could not be declined. Please try again later.",
+                "requestedTitle": "Requested organisations"
+            },
+            "edit": {
+                "title": "{name} – Edit organisation",
+                "hint": "In this form you can adjust the public information of your organisation. You can find more information in the {docs}.",
+                "saveError": "An error occurred. Before you can continue setting up your account, you need to confirm your email address.",
+                "savedContent": "The changes have been saved successfully.",
+                "savedContentStrict": "Your changes have been saved and will be reviewed by the administrators of this instance.",
+                "name": "Name of the organisation",
+                "username": "Username of the organisation",
+                "summary": "Description",
+                "avatar": "Profile picture (optional)",
+                "address": "Address (optional)",
+                "submit": "Save changes"
+            },
+            "members": {
+                "title": "{name} – Manage members",
+                "hint": "In this view you can see all members of the organisation, remove them and invite new members. You can find more information in the {docs}.",
+                "inviteError": "The user could not be found or invited.",
+                "notMember": "You are not a member of this organisation.",
+                "columnName": "Name",
+                "columnUsername": "Username",
+                "columnRole": "Role",
+                "columnCreatedAt": "Created on",
+                "membersTitle": "Members of the organisation",
+                "inviteTitle": "Invite new member",
+                "inviteHint": "The member you want to invite to your organisation must already be registered. Use their individual username and pay attention to the exact spelling. You can find more information in the {docs}.",
+                "username": "Username",
+                "invite": "Invite user",
+                "inviteSuccess": "The user has been invited successfully.",
+                "leaveConfirmTitle": "Do you really want to leave this organisation?",
+                "leaveConfirm": "Leave",
+                "leaveTitle": "Leave organisation",
+                "leaveHint": "Note: You cannot leave the organisation if you are its only member. To delete the organisation, please contact the administrators of this calendar instance. You can find more information in the {docs}.",
+                "leave": "Leave organisation",
+                "leaveErrorTitle": "Could not leave the organisation",
+                "leaveErrorContent": "An error occurred while leaving the organisation."
+            },
+            "request": {
+                "title": "Create organisation",
+                "hint": "With this form you send a request to the operators of this calendar instance. As soon as your request has been approved, you can create events for your organisation and add organisation members. You can find more information in the {docs}.",
+                "name": "Organisation name",
+                "nameInfo": "Enter the official name of your organisation under which events are to be published.",
+                "username": "Username of the organisation",
+                "usernameInfo": "The username is required to uniquely identify the organisation in the system. It cannot be changed later.",
+                "usernameMoreInfo": "You can find more information on choosing a username in the {docs}.",
+                "summary": "Description (for the public organisation page)",
+                "submit": "Request organisation creation"
+            },
+            "featured": {
+                "markFeatured": "Mark as featured",
+                "markNotFeatured": "Mark as not featured",
+                "invalidOrganisation": "Invalid organisation.",
+                "updateError": "Error updating the featured status."
+            }
+        },
+        "profile": {
+            "hint": "Note:",
+            "information": "Information",
+            "errorOccurred": "An error occurred.",
+            "page": {
+                "title": "Edit profile",
+                "moreInfo": "You can find more information in the {docs}."
+            },
+            "form": {
+                "storedDataTitle": "Stored personal data",
+                "storedDataIntro": "We store the following personal data for your user account:",
+                "storedName": "Name:",
+                "storedUsername": "Username:",
+                "storedEmail": "Email address:",
+                "storedEmailLanguage": "Email language:",
+                "storedDataPurpose": "This data is only needed for using your account and for logging in.",
+                "name": "Name",
+                "username": "Username",
+                "email": "Email address",
+                "emailInfo": "You need this email address to log in.",
+                "emailLanguage": "Email language",
+                "emailLanguageInfo": "You receive emails in this language (e.g. password reset or approval requests). You can change the language of the interface with the language selection at the top.",
+                "submit": "Save changes",
+                "updateError": "Error updating the profile. Please try again later."
+            },
+            "password": {
+                "title": "Change password",
+                "current": "Current password",
+                "new": "New password",
+                "confirm": "Confirm new password",
+                "submit": "Change password",
+                "error": "Error changing the password. Please try again later."
+            },
+            "registerPerson": {
+                "title": "Set up your personal profile",
+                "hint": "Use your personal details to set up your profile. Do not use the name of your organisation. Your personal profile is required to request the creation of an organisation. An organisation can be managed by several individual users.",
+                "moreInfo": "You can find more information on setting up your profile in the {docs}.",
+                "saveError": "An error occurred. Before you can continue setting up your account, you need to confirm your email address.",
+                "name": "Name",
+                "namePlaceholder": "Firstname Lastname",
+                "nameInfo": "If possible, enter your name (e.g. firstname lastname). Your name is shown in your profile and can be changed later.",
+                "username": "Personal username",
+                "usernamePlaceholder": "firstname_lastname",
+                "usernameInfo1": "Please enter a combination of your {firstLastName} (e.g. beate_beispiel) or the name you go by.",
+                "usernameInfo1Bold": "first and last name",
+                "usernameInfo2": "Do {noOrganisationName}, as this username is always assigned to your personal profile. The username is needed to invite you to organisations and {notChangeable}. Please choose it carefully.",
+                "usernameInfo2NoOrganisationName": "not use an organisation name",
+                "usernameInfo2NotChangeable": "cannot be changed later",
+                "submit": "Create profile"
+            }
+        },
+        "notFound": {
+            "title": "Page could not be found",
+            "overview": "Overview"
+        },
+        "const": {
+            "userTypes": {
+                "user": "User",
+                "admin": "Administrator"
+            },
+            "userIsActive": {
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "organisationStatus": {
+                "requested": "Requested",
+                "requestDenied": "Rejected",
+                "active": "Active",
+                "inactive": "Inactive"
+            },
+            "memberRole": {
+                "administrator": "Administrator",
+                "invited": "Invited"
+            },
+            "monthWeek": {
+                "first": "1st (first)",
+                "second": "2nd (second)",
+                "third": "3rd (third)",
+                "fourth": "4th (fourth)",
+                "last": "Last"
+            }
+        },
+        "admin": {
+            "emailTemplates": {
+                "events": {
+                    "validation": "Email address verification",
+                    "passwordReset": "Reset password",
+                    "approvalRequestSent": "Approval request sent",
+                    "approvalRequestHandled": "Approval request processed",
+                    "organisationInvitation": "Invitation to the organisation",
+                    "organisationRemoval": "Removed from the organisation"
+                },
+                "variables": {
+                    "appName": "The name of the application",
+                    "requestTypeNameSent": "Request type (e.g. \"series event creation\")",
+                    "requestTypeNameHandled": "Request type (e.g. \"series event creation\")",
+                    "handledStatus": "The status of the request (e.g. \"approved\" or \"rejected\")",
+                    "organisationName": "The name of the organisation"
+                },
+                "validation": {
+                    "invalidEventType": "Invalid event type",
+                    "subjectMax": "The subject must not exceed 70 characters.",
+                    "bodyRequired": "The message must not be empty."
+                },
+                "loadError": "Error loading the template.",
+                "saveError": "Error saving the template.",
+                "editTitle": "Edit email template",
+                "onEvent": "Trigger event",
+                "onEventPlaceholder": "Select event",
+                "locale": "Language",
+                "subject": "Subject",
+                "subjectPlaceholder": "Email subject",
+                "body": "Message",
+                "bodyPlaceholder": "Email content",
+                "availableVariables": "Available variables for subject and message:",
+                "notFoundTitle": "Not found",
+                "notFound": "The requested email template was not found."
+            },
+            "shared": {
+                "note": "Note:",
+                "moreInfo": "You can find more information in the {link}.",
+                "unknown": "Unknown",
+                "information": "Information",
+                "saveChanges": "Save changes",
+                "saving": "Saving...",
+                "genericError": "An error occurred."
+            },
+            "users": {
+                "columns": {
+                    "name": "Name",
+                    "username": "Username",
+                    "email": "Email",
+                    "role": "Role (instance)",
+                    "status": "Status"
+                },
+                "indexTitle": "Users of the instance",
+                "createButton": "Create user",
+                "indexHint": "As an administrator of the instance, you can view and edit the members of all organisations here. You can remove users via the \"Edit\" button. You can find more information in the {link}.",
+                "exportEmails": "Export email addresses of active users",
+                "validation": {
+                    "emailRequired": "The email address is required.",
+                    "emailInvalid": "Please enter a valid email address.",
+                    "passwordRequired": "The password is required.",
+                    "passwordMin": "The password must be at least 8 characters long.",
+                    "passwordEmpty": "The password must not be empty."
+                },
+                "saveError": "The user could not be saved.",
+                "createTitle": "Create new user",
+                "createHint": "As an administrator, you can manually create new users for your instance here.",
+                "password": "Password",
+                "type": "Type",
+                "createSubmit": "Create user",
+                "editTitle": "Edit user",
+                "editHint": "As an administrator of an instance, you can change settings for users of all organisations. You can find more information in the {link}.",
+                "updateSuccess": "User updated successfully.",
+                "emailLoginInfo": "You need this email address to log in.",
+                "deleteConfirm": "Do you really want to delete this user?",
+                "deleteButton": "Delete user",
+                "emailLanguage": "Email language"
+            },
+            "approval": {
+                "types": {
+                    "singleEvent": "Single event"
+                },
+                "actions": {
+                    "create": "Create",
+                    "update": "Edit",
+                    "delete": "Delete"
+                },
+                "columns": {
+                    "action": "Action",
+                    "title": "Title",
+                    "createdBy": "Created by",
+                    "createdAt": "Created on"
+                },
+                "loadRequestsError": "An error occurred while loading the requests.",
+                "emailNotVerified": "(email not verified)",
+                "view": "View",
+                "approveSuccess": "Request approved successfully.",
+                "approveError": "An error occurred while approving the request.",
+                "rejectSuccess": "Request rejected successfully.",
+                "rejectError": "An error occurred while rejecting the request.",
+                "status": {
+                    "pending": "Pending",
+                    "approved": "Approved",
+                    "rejected": "Rejected"
+                },
+                "description": "Description",
+                "noDescription": "No description provided.",
+                "address": "Address",
+                "noAddress": "No address provided.",
+                "image": "Image",
+                "imageAlt": "Attached image",
+                "imageUnavailable": "Once the request has been processed, the attached image is no longer available.",
+                "noImage": "No image attached.",
+                "adminComment": "Admin comment (optional)",
+                "adminCommentPlaceholder": "Add a comment here...",
+                "adminCommentInfo": "The comment entered here will be sent to the organisation once the event or edit request has been approved or rejected. You can use it, for example, to explain why a request was rejected or to point out changes you would like, even when approving.",
+                "approve": "Approve request",
+                "reject": "Reject request",
+                "noComment": "No comment provided.",
+                "notSpecified": "Not specified",
+                "notAssignedYet": "Not yet assigned"
+            },
+            "eventRequests": {
+                "indexTitle": "Pending event requests",
+                "indexHint": "When organisations create or edit events, approval by the instance administration is required before publication. Using the \"View\" button in the table, you can check the information about the event provided by the organisation and approve or reject the event or the event change. Once approved, events and changes appear in the public calendar view.",
+                "noneTitle": "No pending approval requests",
+                "none": "There are no pending approval requests.",
+                "externalRegistrationRequired": "Registration via external link required",
+                "fields": {
+                    "organisation": "Organisation",
+                    "start": "Start",
+                    "duration": "Duration",
+                    "category": "Category",
+                    "tags": "Tags (optional)",
+                    "joinOptions": "Registration options",
+                    "language": "Language",
+                    "website": "Website",
+                    "status": "Status"
+                },
+                "startAt": "{date} at {time}",
+                "noCategory": "No category",
+                "noTags": "No tags",
+                "noJoinOptions": "No registration options",
+                "showTitle": "Event approval – detail view",
+                "showHint": "As an administrator of the instance, you can approve or reject event requests from organisations here. Events only appear in the public calendar view after approval.",
+                "notFound": "The event request was not found."
+            },
+            "organisationRequests": {
+                "typeOrganisation": "Organisation",
+                "organisationName": "Organisation name",
+                "organisationUsername": "Username of the organisation",
+                "handledBy": "Processed by",
+                "showTitle": "Organisation approval – detail view",
+                "showHint": "As an administrator of the instance, you can approve or reject requested organisations or changes here. Organisations and changed information only appear in the public calendar view after approval.",
+                "notFound": "The organisation request was not found.",
+                "indexTitle": "Pending organisation requests",
+                "indexHint": "When organisations are created or organisation information is edited, approval by the instance administration is required before publication. Using the \"View\" button in the table, you can check the information provided about the organisation and approve or reject the creation of the organisation or the changes. Organisations and changes are only publicly visible after approval.",
+                "noneTitle": "No pending organisation requests",
+                "none": "There are no pending organisation requests."
+            },
+            "instance": {
+                "credentialsLoadError": "Error loading the credentials. Please try again later.",
+                "templateUpdated": "Template updated successfully.",
+                "title": "Manage instance",
+                "hint": "Your instance is managed centrally via Mobilizon. Mobilizon is the open-source platform the Smart Community Calendar is based on. There you can administer all instance-wide settings and features. You can find more information in the {link}.",
+                "toMobilizon": "Go to instance management on Mobilizon",
+                "credentials": "Credentials",
+                "credentialsCreated": "These credentials were created automatically during installation.",
+                "credentialsUsage": "They are intended exclusively for {login} and must {restriction}.",
+                "credentialsUsageLogin": "logging in to Mobilizon",
+                "credentialsUsageRestriction": "not be changed or shared",
+                "warning": "Warning",
+                "credentialsWarning": "Changing this data in Mobilizon will cause the integration with the Smart Community Calendar to stop working.",
+                "emailAddress": "Email address",
+                "copyEmail": "Copy email address",
+                "togglePassword": "Show/hide password",
+                "copyPassword": "Copy password",
+                "emailTemplates": "Email templates",
+                "emailTemplatesHint": "Here you can manage the email templates that are used for notifications to users. You can find more information in the {link}."
+            },
+            "requestedOrganisations": {
+                "changeStatusError": "An error occurred while changing the organisation status.",
+                "hint": "As an administrator of the instance, you can accept or reject requests from organisations here. Organisations with pending requests cannot create events.",
+                "hintManage": "You can manage all active organisations of your instance in the \"Manage instance\" section (side menu).",
+                "accept": "Accept",
+                "reject": "Reject"
+            },
+            "manageInstance": {
+                "title": "Manage instance",
+                "hint": "The settings for managing the instance can only be made directly in Mobilizon. Please visit the Mobilizon web interface to make changes:",
+                "toMobilizon": "Go to the Mobilizon instance",
+                "credentialsInfo": "These credentials were generated automatically during installation. You must not share this data with anyone. You also must not change this data in the Mobilizon web interface, otherwise the integration will no longer work.",
+                "emailAddress": "Email address:",
+                "password": "Password:"
+            }
+        },
+        "nav": {
+            "dashboard": "Dashboard",
+            "singleEvents": "Single events",
+            "seriesEvents": "Recurring events",
+            "uploadedEvents": "Calendar files",
+            "importedEvents": "Calendar integrations",
+            "materialGenerator": "Promotional materials",
+            "brandkit": "Brand kit",
+            "myOrganisations": "My organisations",
+            "editProfile": "Edit profile",
+            "organisationRequests": "Organisation requests",
+            "manageUsers": "Manage users",
+            "manageInstance": "Manage instance",
+            "eventRequests": "Event requests",
+            "openSideMenu": "Open side menu"
+        },
+        "shared": {
+            "hint": "Note:",
+            "hintTitle": "Note",
+            "information": "Information",
+            "moreInfoInDocs": "You can find more information in the {link}.",
+            "requestSent": "Request sent",
+            "deleteErrorTitle": "Error deleting",
+            "genericErrorTryLater": "An error occurred. Please try again later.",
+            "errorOccurred": "An error occurred.",
+            "deleting": "Deleting...",
+            "notSet": "Not set",
+            "unknown": "unknown",
+            "active": "Active",
+            "inactive": "Inactive",
+            "logout": "Log out",
+            "actions": {
+                "duplicate": "Duplicate",
+                "view": "View",
+                "generatePromoMaterials": "Generate promotional materials",
+                "toEvent": "Go to event"
+            },
+            "eventTypes": {
+                "series_event": "Single event from a recurring event",
+                "single_event": "Single event",
+                "imported_event": "Single event from calendar integration",
+                "uploaded_event": "Single event from calendar file",
+                "unknown": "Unknown event"
+            },
+            "buttonLegend": {
+                "title": "Button legend (not every table shows all icons)",
+                "duplicate": "Duplicate (use as template)",
+                "edit": "Edit",
+                "delete": "Delete",
+                "openPublic": "View public page",
+                "details": "View details",
+                "promoMaterials": "Promotional material generator (announcement of a single event)"
+            },
+            "legend": {
+                "title": "Legend",
+                "empty": "No legend entries available."
+            },
+            "loadingDialog": {
+                "hint": "Please do not close the browser window or reload the page."
+            },
+            "confirmDialog": {
+                "title": "Confirm"
+            },
+            "table": {
+                "deleteTitle": "Delete event",
+                "noEntries": "No entries found.",
+                "firstPage": "First page",
+                "previousPage": "Previous page",
+                "nextPage": "Next page",
+                "lastPage": "Last page",
+                "pageOf": "Page {current} of {total}",
+                "confirmDeleteEntry": "Do you really want to delete this entry?"
+            },
+            "createdEventsTable": {
+                "empty": "No events have been created yet"
+            },
+            "deleteCreatedEvent": {
+                "title": "Delete {type}",
+                "description": "You are about to delete this event ({type}).\nThis cannot be undone.\n\nIf the event has already been promoted, you should set its status to \"Cancelled\" instead of deleting it. After deletion, the event can no longer be used as a template.",
+                "button": "Delete event"
+            },
+            "changeStatus": {
+                "title": "Change status",
+                "confirm": "Change status to {status}"
+            },
+            "changeImportedStatus": {
+                "activate": "Activate",
+                "deactivate": "Deactivate",
+                "error": "The status could not be changed. Please try again later or contact support."
+            },
+            "holidays": {
+                "noEventsOn": "No events on:",
+                "holidaysCheckbox": "Public holidays",
+                "schoolHolidaysCheckbox": "School holidays",
+                "stateLabel": "Federal state (Germany)",
+                "affectedDays": "No events will be created on the following days:",
+                "noEntries": "No entries for the current selection.",
+                "holidaysHeader": "Public holidays",
+                "schoolHolidaysHeader": "School holidays",
+                "dateRange": "{start} to {end}",
+                "states": {
+                    "all_states": "All federal states",
+                    "bw": "Baden-Württemberg",
+                    "by": "Bavaria",
+                    "be": "Berlin",
+                    "bb": "Brandenburg",
+                    "hb": "Bremen",
+                    "hh": "Hamburg",
+                    "he": "Hesse",
+                    "mv": "Mecklenburg-Western Pomerania",
+                    "ni": "Lower Saxony",
+                    "nw": "North Rhine-Westphalia",
+                    "rp": "Rhineland-Palatinate",
+                    "sh": "Schleswig-Holstein",
+                    "sl": "Saarland",
+                    "sn": "Saxony",
+                    "st": "Saxony-Anhalt",
+                    "th": "Thuringia",
+                    "augsburg": "Augsburg",
+                    "none": "None"
+                }
+            },
+            "addressInput": {
+                "organisation": "Organisation",
+                "frequentlyUsed": "Frequently used",
+                "apply": "Use address"
+            },
+            "tags": {
+                "addLabel": "Add tags",
+                "addButton": "Add",
+                "none": "You have not selected any tags yet.",
+                "suggestions": "Suggestions based on tags previously used by your organisation:"
+            },
+            "password": {
+                "show": "Show password",
+                "hide": "Hide password"
+            },
+            "image": {
+                "previewAlt": "Image preview"
+            },
+            "file": {
+                "allowedFormats": "Allowed formats: {formats}"
+            },
+            "richText": {
+                "enterUrl": "Enter URL"
+            },
+            "location": {
+                "searchPlace": "Search location",
+                "addressFound": "Address found",
+                "loadingAddress": "Loading address",
+                "placeholder": "Location or address",
+                "searchAria": "Search location or address",
+                "radius": "Radius"
+            },
+            "weekDays": {
+                "select": "Select weekdays",
+                "long": {
+                    "monday": "Monday",
+                    "tuesday": "Tuesday",
+                    "wednesday": "Wednesday",
+                    "thursday": "Thursday",
+                    "friday": "Friday",
+                    "saturday": "Saturday",
+                    "sunday": "Sunday"
+                },
+                "short": {
+                    "monday": "Mo",
+                    "tuesday": "Tu",
+                    "wednesday": "We",
+                    "thursday": "Th",
+                    "friday": "Fr",
+                    "saturday": "Sa",
+                    "sunday": "Su"
+                }
+            },
+            "monthOccurrence": {
+                "weeks": "Week(s)",
+                "weekDay": "Weekday",
+                "weekOptions": {
+                    "first": "1st (first)",
+                    "second": "2nd (second)",
+                    "third": "3rd (third)",
+                    "fourth": "4th (fourth)",
+                    "last": "Last"
+                }
+            }
+        },
+        "dashboard": {
+            "title": "Dashboard",
+            "noMembership": "You are not a member of an organisation yet. To create events, you can either {link} an organisation yourself or get invited to an existing organisation – simply share your profile name with the organisation.",
+            "noMembershipLink": "create",
+            "welcomeTitle": "Welcome to the admin area of the Smart Community Calendar!",
+            "welcomeText": "Here you can easily manage your organisation and maintain your events.",
+            "docsHint": "A step-by-step guide to event management can be found in the {link}.",
+            "instanceOverview": "Overview of the calendar instance",
+            "users": "Users",
+            "events": "Events",
+            "organisations": "Organisations",
+            "createNewEvents": "Create new events",
+            "createSingleEvent": "Create single event",
+            "singleEvent": "Single event",
+            "createSeriesEvent": "Create recurring event",
+            "seriesEvent": "Recurring event",
+            "uploadCalendarFile": "Upload calendar file",
+            "calendarFile": "Calendar file",
+            "createCalendarIntegration": "Create calendar integration",
+            "calendarIntegration": "Calendar integration",
+            "upcomingEvents": "Upcoming events",
+            "noUpcomingEvents": "No upcoming events"
+        },
+        "events": {
+            "form": {
+                "eventTitle": "Event title",
+                "title": "Title",
+                "seriesTitle": "Title of the recurring event",
+                "picture": "Image (optional)",
+                "description": "Description",
+                "descriptionOptional": "Description (optional)",
+                "startDate": "Start date",
+                "endDate": "End date",
+                "startTime": "Start time",
+                "duration": "Duration",
+                "organisation": "Organisation",
+                "category": "Category",
+                "joinOptions": "Registration options",
+                "externalParticipationUrl": "External registration page (URL)",
+                "joinOptionsInfo": "If you use an external registration page, enter the corresponding link here. If you do not use online registration, inform participants in the event description about the registration procedure and whether registration is required.",
+                "language": "Language",
+                "status": "Status",
+                "website": "Website (optional)",
+                "address": "Address (optional)",
+                "intervall": "Interval",
+                "weekDay": "Weekday",
+                "useStartDateDay": "Use day of month from start date"
+            },
+            "columns": {
+                "title": "Title",
+                "name": "Name",
+                "date": "Date",
+                "startDate": "Start date",
+                "endDate": "End date",
+                "time": "Time",
+                "start": "Start",
+                "duration": "Duration",
+                "intervall": "Interval",
+                "createdAt": "Created on",
+                "createdBy": "Created by",
+                "addedBy": "Created by",
+                "addedAt": "Created on",
+                "eventType": "Event type",
+                "eventCount": "Number of events",
+                "status": "Status",
+                "icalUrl": "iCal URL",
+                "url": "URL",
+                "syncedAt": "Synchronised on",
+                "filename": "File name",
+                "uploadedAt": "Uploaded on",
+                "weekDay": "Weekday",
+                "weeks": "Week(s)",
+                "useStartDate": "Use start date"
+            },
+            "createdEvents": "Created events",
+            "fileLoadError": "The file could not be loaded.",
+            "tryAgainLater": "Please try again later.",
+            "requestSentMessage": "Your event request has been sent. You will be notified by email as soon as your request has been processed.",
+            "singleEventDeleted": "Single event deleted successfully.",
+            "single": {
+                "index": {
+                    "title": "Single events",
+                    "create": "Create single event",
+                    "deleteTitle": "Delete event",
+                    "deleteDescription": "You are about to delete the following event: {name}.\nThis cannot be undone.\n\nIf the event has already been promoted, you should set its status to \"Cancelled\" instead of deleting it."
+                },
+                "create": {
+                    "title": "Create single event",
+                    "submit": "Create single event"
+                }
+            },
+            "series": {
+                "index": {
+                    "title": "Recurring events",
+                    "create": "Create recurring event",
+                    "hint": "Recurring events are ideal for events that repeat with the same start time and duration. You can find more information in the {link}.",
+                    "deleted": "Recurring event and all associated single events deleted successfully."
+                },
+                "deleteTitle": "Delete entire recurring event",
+                "deleteDescription": "You are about to delete the following recurring event: {name}.\n\nAll single events it contains will also be permanently deleted. This cannot be undone.\n\nIf the events have already been promoted, you should set the status of the individual event to \"Cancelled\" instead of deleting the recurring event.",
+                "create": {
+                    "title": "Create recurring event",
+                    "hint": "Recurring events are ideal for events that repeat with the same start time and duration. You can find more information in the {link}.",
+                    "loadingTitle": "Creating recurring event",
+                    "loadingDescription": "All events of the series are created one after another. Depending on the number of events, this may take a few moments.",
+                    "templatePictureFailedTitle": "Template image could not be loaded",
+                    "templatePictureFailedContent": "The image from the template event could not be loaded. Please select the image manually, otherwise the recurring event will be created without an image.",
+                    "periodInfo": "The start and end date refer to the period of the entire event series. Start time and duration are applied to all events of the series.",
+                    "submit": "Create recurring event"
+                },
+                "show": {
+                    "title": "Recurring event",
+                    "deleteError": "Error deleting the recurring event. Please try again later or contact support."
+                }
+            },
+            "created": {
+                "edit": {
+                    "title": "Edit single event",
+                    "saveError": "An error occurred while saving the changes.",
+                    "approvalRequestTitle": "Change request sent",
+                    "approvalRequestContent": "Your changes have been successfully submitted for approval.",
+                    "currentStatus": "Current status:",
+                    "changeStatus": "Change status:",
+                    "pictureLoadFailedTitle": "Image could not be loaded",
+                    "pictureLoadFailedContent": "The existing event image could not be loaded and is therefore not displayed here. It will remain unchanged when saving. Reload the page to try again, or select a new image.",
+                    "submit": "Save changes"
+                }
+            },
+            "imported": {
+                "index": {
+                    "title": "Calendar integrations",
+                    "createTitle": "Connect iCal URL",
+                    "create": "iCal URL",
+                    "deleted": "Calendar integration and all associated events deleted successfully.",
+                    "deleteDescription": "You are about to delete the following calendar integration:\n{url}.\n\nAll imported events will also be permanently deleted. This cannot be undone.\n\nIf the events have already been promoted, you should set the status of the individual event to \"Cancelled\" instead of deleting the calendar integration."
+                },
+                "hint": "By connecting iCal URLs, external calendars (e.g. Outlook or Google Calendar) can be connected permanently and synchronised automatically. You can find more information in the {link}.",
+                "deleteTitle": "Delete entire calendar integration",
+                "show": {
+                    "deleteDescription": "You are about to delete the following calendar integration: {url}.\n\nAll imported events will also be permanently deleted. This cannot be undone.\n\nIf the events have already been promoted, you should set the status of the individual event to \"Cancelled\" instead of deleting the calendar integration.",
+                    "deleteError": "An error occurred while deleting the calendar integration. Please try again later.",
+                    "noDescription": "No description was provided."
+                },
+                "title": "Calendar integration (iCal URL)",
+                "create": {
+                    "urlLabel": "iCal URL",
+                    "urlInfo": "Enter the public iCal URL of an external calendar here (e.g. from Google Calendar, Outlook or Nextcloud). The events are updated automatically and regularly. Make sure that the URL is permanently accessible and supports the .ics format.",
+                    "submit": "Integrate calendar"
+                }
+            },
+            "uploaded": {
+                "index": {
+                    "title": "Calendar files",
+                    "upload": "Upload calendar file (iCal)",
+                    "hint": "The calendar files feature is ideal for importing several events at once from an external calendar program. You can find more information in the {link}.",
+                    "deleted": "Calendar file and all events it contains deleted successfully.",
+                    "deleteDescription": "You are about to delete the calendar file \"{filename}\".\n\nAll events it contains will also be permanently deleted. This cannot be undone.\n\nIf the events have already been promoted, you should set the status of the individual event to \"Cancelled\" instead of deleting the calendar file."
+                },
+                "deleteTitle": "Delete entire calendar file",
+                "show": {
+                    "deleteDescription": "You are about to delete the following calendar file: {filename}.\n\nAll events it contains will also be permanently deleted. This cannot be undone.\n\nIf the events have already been promoted, you should set the status of the individual event to \"Cancelled\" instead of deleting the calendar file.",
+                    "title": "Calendar file",
+                    "deleteError": "Error deleting the calendar file. Please try again later or contact support."
+                },
+                "create": {
+                    "title": "Upload calendar file",
+                    "hint": "Uploading a calendar file is ideal for importing several events at once from an external calendar program. You can find more information in the {link}.",
+                    "fileLabel": "Upload iCal file",
+                    "fileInfo": "You can either drag and drop your iCal file here or select it using the “Browse...” button. Please note: only iCal files (.ics) are supported.",
+                    "showEvents": "Show events",
+                    "noUpcomingEvents": "No upcoming events were found in the uploaded file.",
+                    "noNewEvents": "There are no new events.",
+                    "allAlreadyUploaded": "All events in this file have already been uploaded.",
+                    "genericError": "An error occurred. Please try again later.",
+                    "previewTitle": "iCal file: events",
+                    "previewHint": "The table shows all events that will be imported from the uploaded iCal file. After the import, individual events can be edited or supplemented manually if required. You can find more information in the {link}.",
+                    "acceptButton": "Create previewed events",
+                    "existingTitle": "Existing events",
+                    "existingHint": "The following events of the iCal file were recognised, but already exist in the calendar and will be skipped during creation. You can find more information in the {link}."
+                }
+            }
+        }
+    },
+    "auth": {
+        "hint": "Note:",
+        "information": "Information",
+        "errorOccurred": "An error occurred.",
+        "backToLogin": "Back to login",
+        "email": "Email address",
+        "password": "Password",
+        "passwordConfirm": "Confirm password",
+        "validation": {
+            "emailRequired": "The email address is required.",
+            "emailInvalid": "Please enter a valid email address.",
+            "passwordRequired": "The password is required.",
+            "passwordConfirmationRequired": "The password confirmation is required.",
+            "newPasswordMin8": "The new password must be at least 8 characters long.",
+            "passwordMin8": "The password must be at least 8 characters long.",
+            "passwordMin6": "The password must be at least 6 characters long.",
+            "passwordConfirmationMissing": "Please confirm your password.",
+            "passwordsDoNotMatch": "The passwords do not match.",
+            "passwordsDoNotMatchShort": "Passwords do not match.",
+            "acceptTerms": "You must accept the terms of use and the privacy policy.",
+            "nameRequired": "The name is required.",
+            "usernameRequired": "The username is required.",
+            "organisationUsernameNotEmpty": "The username of the organisation must not be empty."
+        },
+        "terms": {
+            "label": "Terms of use",
+            "text": "I have read and accept the {terms} and the {privacy}.",
+            "terms": "terms of use",
+            "privacy": "privacy policy"
+        },
+        "login": {
+            "title": "Log in",
+            "successDefault": "The action was completed successfully.",
+            "invalidCredentials": "Invalid email address or password.",
+            "accountDisabled": "The user account is deactivated.",
+            "emailNotVerified": "The email address has not been confirmed yet.",
+            "submit": "Log in",
+            "noAccount": "No account yet? Register now!",
+            "registerWithOrganisation": "Create a new account with an organisation!",
+            "forgotPassword": "Forgot your password?"
+        },
+        "forgotPassword": {
+            "title": "Forgot password",
+            "submit": "Reset password"
+        },
+        "register": {
+            "title": "Register",
+            "error": "The account could not be created.",
+            "submit": "Register now",
+            "success": "Your account has been created successfully. Please confirm your email address to continue."
+        },
+        "registerWithOrganisation": {
+            "title": "Registration with profile and organisation",
+            "error": "The registration could not be completed.",
+            "account": "Account",
+            "profile": "Profile",
+            "profileHint": "You can find more information in the {docs}.",
+            "fullName": "Your full name",
+            "fullNameInfo": "Your full name can be changed later.",
+            "username": "Your username",
+            "usernameInfo": "Your unique username is needed to invite you to organisations. It {notChangeable} later.",
+            "usernameInfoNotChangeable": "cannot be changed",
+            "organisation": "Organisation",
+            "organisationHint": "With this form you send a request to the operators of this calendar instance. You can find more information in the {docs}.",
+            "organisationName": "Organisation name",
+            "organisationNameInfo": "Enter the official name of your organisation.",
+            "organisationUsername": "Username of the organisation",
+            "organisationUsernameInfo": "The username cannot be changed later.",
+            "organisationSummary": "Description (for the public organisation page)",
+            "submit": "Complete registration"
+        },
+        "resetPassword": {
+            "title": "Reset password",
+            "newPassword": "New password",
+            "submit": "Save password"
+        },
+        "validate": {
+            "title": "Verification",
+            "success": "Your email address has been verified successfully. Please log in.",
+            "invalidToken": "The verification token is invalid."
         }
     }
 }

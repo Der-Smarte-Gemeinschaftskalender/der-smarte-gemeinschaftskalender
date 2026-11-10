@@ -25,7 +25,7 @@ defineProps<Props>();
     >
         <Badge
             v-if="organisation?.is_featured"
-            label="Empfohlen"
+            :label="$t('public.organisation.featured')"
             variant="primary"
             size="small"
             class="mb-2 px-2"

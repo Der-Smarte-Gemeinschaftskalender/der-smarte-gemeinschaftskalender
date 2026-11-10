@@ -17,7 +17,7 @@ defineProps<Props>();
             v-if="title"
             class="text-lg font-semibold text-theme-primary mb-2"
         >
-            {{ title || 'Legende' }}
+            {{ title || $t('app.shared.legend.title') }}
         </h3>
         <slot
             v-else
@@ -54,7 +54,7 @@ defineProps<Props>();
             </template>
         </ul>
         <template v-else>
-            <p class="text-900 mt-2">Keine Legenden vorhanden.</p>
+            <p class="text-900 mt-2">{{ $t('app.shared.legend.empty') }}</p>
         </template>
     </div>
 </template>

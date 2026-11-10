@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Dialog from './KERN/Dialog.vue';
 import Loader from './KERN/cosmetics/Loader.vue';
 
@@ -8,9 +10,10 @@ interface Props {
     hint?: string;
 }
 
-withDefaults(defineProps<Props>(), {
-    hint: 'Bitte schließen Sie das Browserfenster nicht und laden Sie die Seite nicht neu.',
-});
+const props = defineProps<Props>();
+const { t } = useI18n();
+
+const hintText = computed(() => props.hint ?? t('app.shared.loadingDialog.hint'));
 
 const model = defineModel<boolean>();
 </script>
@@ -32,10 +35,10 @@ const model = defineModel<boolean>();
             >
                 <p>{{ description }}</p>
                 <p
-                    v-if="hint"
+                    v-if="hintText"
                     class="mt-3 font-bold"
                 >
-                    {{ hint }}
+                    {{ hintText }}
                 </p>
             </div>
         </div>

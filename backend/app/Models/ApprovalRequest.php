@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Lang;
 
 /**
  * @property int $id
@@ -61,6 +62,20 @@ class ApprovalRequest extends Model
     public function handledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'handled_by_user_id');
+    }
+
+    /**
+     * Translated name of the request in the current locale, e.g. "Einzeltermin erstellen" / "single event creation".
+     */
+    public function getRequestTypeLabel(): string
+    {
+        $typeKey = 'emails.requestTypes.' . $this->requestable_type;
+        $actionKey = 'emails.requestActions.' . $this->request_type;
+
+        return __('emails.requestTypeName', [
+            'type' => Lang::has($typeKey) ? __($typeKey) : (string) $this->requestable_type,
+            'action' => Lang::has($actionKey) ? __($actionKey) : $this->request_type,
+        ]);
     }
 
     public function scopePending($query)

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { setOrganisationData } from '@/composables/OrganisationComposable';
 import { requested_organisation_status } from '@/lib/const';
@@ -14,6 +15,7 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 import type { Column } from '@/types/General';
 import type { IAlert } from '@/types/components/Alert';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
@@ -30,7 +32,7 @@ const columns: Array<Column> = [
     },
     {
         key: 'parent',
-        name: 'Name',
+        name: t('app.organisations.index.columnName'),
         format: (value: any) => {
             return value?.name;
         },
@@ -46,8 +48,8 @@ const columns: Array<Column> = [
 if (user.value?.type === 'admin') {
     columns.splice(1, 0, {
         key: 'is_featured',
-        name: 'Empfohlen',
-        format: (col: any) => (col ? 'Ja' : 'Nein'),
+        name: t('app.organisations.index.columnFeatured'),
+        format: (col: any) => (col ? t('common.yes') : t('common.no')),
         align: 'center',
     });
 }
@@ -60,15 +62,15 @@ const columnsRequestedOrganisations: Array<Column> = [
     },
     {
         key: 'requested_organisation_data',
-        name: 'Name',
+        name: t('app.organisations.index.columnName'),
         format: (col: any) => col?.name,
         align: 'left',
     },
     {
         key: 'status',
-        name: 'Status',
+        name: t('app.organisations.index.columnStatus'),
         format: (col: keyof typeof requested_organisation_status) => {
-            return requested_organisation_status[col] || 'Unbekannt';
+            return requested_organisation_status[col] || t('app.organisations.unknown');
         },
         align: 'center',
     },
@@ -84,8 +86,8 @@ const rejectInvitation = async (membershipId: string) => {
     } catch (error) {
         console.error(error);
         message.value = {
-            title: 'Fehler',
-            content: 'Die Einladung konnte nicht abgelehnt werden. Bitte versuchen Sie es später erneut.',
+            title: t('common.error'),
+            content: t('app.organisations.index.rejectError'),
             severity: 'danger',
         };
     }
@@ -102,8 +104,8 @@ const acceptInvitation = async (membershipId: string) => {
     } catch (error) {
         console.error(error);
         message.value = {
-            title: 'Fehler',
-            content: 'Die Einladung konnte nicht angenommen werden. Bitte versuchen Sie es später erneut.',
+            title: t('common.error'),
+            content: t('app.organisations.index.acceptError'),
             severity: 'danger',
         };
     }
@@ -119,34 +121,35 @@ const acceptInvitation = async (membershipId: string) => {
         :severity="message.severity"
     />
     <div class="flex align-items-center justify-content-between gap-2 mb-1">
-        <h1 class="kern-heading text-theme-primary">Meine Organisationen</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.organisations.index.title') }}</h1>
         <RouterLink :to="{ name: 'app.myOrganisations.request' }">
             <Button
-                title="Organisation erstellen"
-                aria-label="Organisation erstellen"
+                :title="t('app.organisations.index.create')"
+                :aria-label="t('app.organisations.index.create')"
                 variant="primary"
                 icon-left="add"
                 icon-size="lg"
                 class="mb-2"
                 :hide-text-on-mobile="true"
             >
-                Organisation erstellen
+                {{ t('app.organisations.index.create') }}
             </Button>
         </RouterLink>
     </div>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Hier finden Sie alle Organisationen in denen Sie Mitglied sind und können diese bearbeiten. Weitere
-        Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Organisation/"
-            fragment="organisationsadministration"
-        />.
+        <b>{{ t('app.organisations.hint') }}</b> <I18nT scope="global" keypath="app.organisations.index.hint">
+            <template #docs>
+                <LinkToDocs
+                    path="Terminverwaltung/Organisation/"
+                    fragment="organisationsadministration"
+                />
+            </template>
+        </I18nT>
     </p>
     <Alert
         v-if="route.query.requestSent === 'true'"
-        title="Anfrage gesendet"
-        content="Ihr Organisationsantrag wurde zur Genehmigung eingereicht. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde."
+        :title="t('app.organisations.index.requestSentTitle')"
+        :content="t('app.organisations.index.requestSentContent')"
         severity="info"
     />
 
@@ -170,12 +173,12 @@ const acceptInvitation = async (membershipId: string) => {
                     }"
                 >
                     <Button
-                        title="Bearbeiten"
-                        aria-label="Bearbeiten"
+                        :title="t('common.edit')"
+                        :aria-label="t('common.edit')"
                         icon-left="edit"
                         :hide-text-on-mobile="true"
                     >
-                        Bearbeiten
+                        {{ t('common.edit') }}
                     </Button>
                 </RouterLink>
                 <RouterLink
@@ -185,12 +188,12 @@ const acceptInvitation = async (membershipId: string) => {
                     }"
                 >
                     <Button
-                        title="Mitglieder"
-                        aria-label="Mitglieder"
+                        :title="t('app.organisations.index.members')"
+                        :aria-label="t('app.organisations.index.members')"
                         icon-left="group"
                         :hide-text-on-mobile="true"
                     >
-                        Mitglieder
+                        {{ t('app.organisations.index.members') }}
                     </Button>
                 </RouterLink>
                 <RouterLink
@@ -200,12 +203,12 @@ const acceptInvitation = async (membershipId: string) => {
                     }"
                 >
                     <Button
-                        title="Ansehen"
-                        aria-label="Ansehen"
+                        :title="t('app.organisations.index.view')"
+                        :aria-label="t('app.organisations.index.view')"
                         icon-left="visibility"
                         :hide-text-on-mobile="true"
                     >
-                        Ansehen
+                        {{ t('app.organisations.index.view') }}
                     </Button>
                 </RouterLink>
             </div>
@@ -214,27 +217,27 @@ const acceptInvitation = async (membershipId: string) => {
                 class="flex justify-content-end flex-wrap gap-2"
             >
                 <Button
-                    title="Annehmen"
-                    aria-label="Annehmen"
+                    :title="t('app.organisations.index.accept')"
+                    :aria-label="t('app.organisations.index.accept')"
                     variant="secondary"
                     :hide-text-on-mobile="true"
                     @click="acceptInvitation(row.id)"
                 >
-                    Einladung annehmen
+                    {{ t('app.organisations.index.acceptInvitation') }}
                 </Button>
                 <Button
-                    title="Ablehnen"
-                    aria-label="Ablehnen"
+                    :title="t('app.organisations.index.reject')"
+                    :aria-label="t('app.organisations.index.reject')"
                     variant="secondary"
                     :hide-text-on-mobile="true"
                     @click="rejectInvitation(row.id)"
                 >
-                    Einladung ablehnen
+                    {{ t('app.organisations.index.rejectInvitation') }}
                 </Button>
             </div>
         </template>
     </Table>
-    <h2 class="kern-heading font-medium text-theme-primary mt-6">Angefragte Organisationen</h2>
+    <h2 class="kern-heading font-medium text-theme-primary mt-6">{{ t('app.organisations.index.requestedTitle') }}</h2>
     <Table
         :api="{
             url: '/organisations/requestedOrganisationsFromMe',

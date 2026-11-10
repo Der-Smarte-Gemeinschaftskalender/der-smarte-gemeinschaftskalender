@@ -72,7 +72,7 @@ onBeforeUnmount(() => {
                     <slot name="footer">
                         <Button
                             variant="secondary"
-                            label="Abbrechen"
+                            :label="$t('common.cancel')"
                             @click="model = false"
                         />
                     </slot>

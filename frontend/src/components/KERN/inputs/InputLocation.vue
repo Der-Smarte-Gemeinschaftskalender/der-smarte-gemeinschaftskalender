@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { t, locale } = useI18n();
 
 const addressInput = ref<InstanceType<typeof InputText> | null>(null);
 const address = defineModel<string | undefined>('address');
@@ -127,7 +129,7 @@ const searchAddress = async (newAddress: string, showSuccess: boolean = true) =>
     fetching.value = true;
 
     try {
-        const results = await extendedSearchAddress(newAddress, 'de', 'ADMINISTRATIVE');
+        const results = await extendedSearchAddress(newAddress, locale.value, 'ADMINISTRATIVE');
         if (results.length > 0 && results[0]?.geom) {
             addressForm.value = results[0];
             const lat = results[0].geom.split(';')[1]!;
@@ -182,7 +184,7 @@ const setFocus = (isFocused: boolean, event: FocusEvent) => {
                     name="location_on"
                     color="white"
                     class="flex align-items-center hidden"
-                    aria-label="Ort suchen"
+                    :aria-label="t('app.shared.location.searchPlace')"
                     aria-hidden="true"
                 />
                 <Icon
@@ -190,14 +192,14 @@ const setFocus = (isFocused: boolean, event: FocusEvent) => {
                     name="check"
                     color="white"
                     class="flex align-items-center opacity-80"
-                    aria-label="Adresse gefunden"
+                    :aria-label="t('app.shared.location.addressFound')"
                 />
                 <Icon
                     v-else
                     name="sync"
                     color="white"
                     class="loader flex align-items-center opacity-80"
-                    aria-label="Lade Adresse"
+                    :aria-label="t('app.shared.location.loadingAddress')"
                 />
             </div>
 
@@ -207,8 +209,8 @@ const setFocus = (isFocused: boolean, event: FocusEvent) => {
                 name="address"
                 class="address-input w-full"
                 :class="props.inputTextClass"
-                placeholder="Ort oder Adresse"
-                aria-label="Ort oder Adresse suchen"
+                :placeholder="t('app.shared.location.placeholder')"
+                :aria-label="t('app.shared.location.searchAria')"
                 input-class="outline-none border-none"
                 :list="list"
                 :disabled="fetching"
@@ -217,7 +219,7 @@ const setFocus = (isFocused: boolean, event: FocusEvent) => {
             />
             <InputSelect
                 v-model="radius"
-                aria-label="Umkreis"
+                :aria-label="t('app.shared.location.radius')"
                 class="radius-select kern-form-input__select-wrapper w-fit bg-theme-primary text-white outline-none"
                 name="radius"
                 :options="radiusOptions"

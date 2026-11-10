@@ -1,5 +1,6 @@
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import i18n from '@/i18n';
 
 import Table from '@/components/KERN/Table.vue';
 
@@ -28,7 +29,7 @@ export const useEventIndexAlerts = (
         if (tableError) {
             alertMessage.value = {
                 severity: 'danger',
-                title: 'Fehler',
+                title: i18n.global.t('common.error'),
                 content: tableError,
             };
             return;
@@ -37,7 +38,7 @@ export const useEventIndexAlerts = (
         if (route.query.requestSent === 'true' && requestSentMessage) {
             alertMessage.value = {
                 severity: 'info',
-                title: 'Anfrage gesendet',
+                title: i18n.global.t('app.shared.requestSent'),
                 content: requestSentMessage,
             };
             return;
@@ -46,7 +47,7 @@ export const useEventIndexAlerts = (
         if (route.query.deleted === 'success') {
             alertMessage.value = {
                 severity: 'success',
-                title: 'Erfolg',
+                title: i18n.global.t('common.success'),
                 content: deletedMessage,
             };
             return;

@@ -85,7 +85,7 @@ watch(model, (newFile) => {
             <img
                 :src="imagePreview"
                 class="object-cover w-full h-full"
-                alt="Ereignisvorschau"
+                :alt="$t('app.shared.image.previewAlt')"
             />
             <Button
                 class="w-fit absolute delete-button"

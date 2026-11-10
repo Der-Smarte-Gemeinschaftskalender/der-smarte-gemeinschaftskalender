@@ -70,14 +70,14 @@ class OrganisationController extends Controller implements HasMiddleware
         $existingGroups = $adminClient->adminGetAllGroupsArray();
         foreach ($existingGroups as $group) {
             if ($group['preferredUsername'] === $validated['preferredUsername']) {
-                return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits vergeben ist.'], 422);
+                return response()->json(['error' => __('messages.organisations.usernameTaken')], 422);
             }
         }
 
     
         $userWithSameUsernameExists = (bool) $adminClient->findProfileByPreferredUsername($validated['preferredUsername']);
         if ($userWithSameUsernameExists) {
-            return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits von einem Benutzer verwendet wird.'], 422);
+            return response()->json(['error' => __('messages.organisations.usernameUsedByUser')], 422);
         }
         
 
@@ -142,7 +142,7 @@ class OrganisationController extends Controller implements HasMiddleware
             $existingGroups = $adminClient->adminGetAllGroupsArray();
             foreach ($existingGroups as $group) {
                 if ($group['preferredUsername'] === $organisation->requested_organisation_data['preferredUsername']) {
-                    return response()->json(['error' => 'Es kann keine Organisation mit diesem Benutzernamen erstellt werden, da dieser bereits vergeben ist.'], 422);
+                    return response()->json(['error' => __('messages.organisations.usernameTaken')], 422);
                 }
             }
             $organisation->load('requested_by_user');
@@ -155,7 +155,7 @@ class OrganisationController extends Controller implements HasMiddleware
                 $organisation->mobilizon_group_id = $createdMobilizonGroup['data']['createGroup']['id'];
             } catch (\Exception $e) {
                 Log::error('Error creating Mobilizon group: ' . $e->getMessage());
-                return response()->json(['error' => 'Organisation konnte nicht in Mobilizon von dem Benutzer erstellt werden'], 500);
+                return response()->json(['error' => __('messages.organisations.mobilizonCreateFailed')], 500);
             }
         }
 
@@ -228,7 +228,7 @@ class OrganisationController extends Controller implements HasMiddleware
         // Check for errors in the Mobilizon response
         if (isset($mresponse['errors']) || (isset($mresponse['data']) && isset($mresponse['data']['updateGroup']) && isset($mresponse['data']['updateGroup']['errors']))) {
             return response()->json([
-                'error' => 'Failed to update group',
+                'error' => __('messages.organisations.updateFailed'),
                 'details' => $mresponse['errors'] ?? $mresponse['data']['updateGroup']['errors'] ?? null,
             ], 400);
         }
@@ -250,7 +250,7 @@ class OrganisationController extends Controller implements HasMiddleware
                 $inivtedUserId = $mresponse['data']['inviteMember']['actor']['id'];
                 $user = User::where('mobilizon_profile_id', $inivtedUserId)->first();
                 if ($user) {
-                    Mail::to($user->email)
+                    Mail::to($user)
                         ->send(new SendOrganisationInviteToUserEmail($mresponse['data']['inviteMember']['parent']['name']));
                 }
             }
@@ -282,7 +282,7 @@ class OrganisationController extends Controller implements HasMiddleware
 
             $invitedByUser = User::where('mobilizon_profile_id', $invitedById)->first();
             if (!$invitedByUser) {
-                return ['error' => 'Invited by user not found'];
+                return ['error' => __('messages.organisations.inviterNotFound')];
             }
 
             $mclientInvitedBy = Mobilizon::getInstance(false, $invitedByUser, true);
@@ -290,7 +290,7 @@ class OrganisationController extends Controller implements HasMiddleware
             return $mresponse;
         } catch (Exception $e) {
             Log::error('Error accepting invitation: ' . $e->getMessage());
-            return ['error' => 'Failed to accept invitation in Mobilizon'];
+            return ['error' => __('messages.organisations.acceptInvitationFailed')];
         }
     }
 
@@ -306,7 +306,7 @@ class OrganisationController extends Controller implements HasMiddleware
         $mresponse = $mclient->removeGroupMember($memberShipId);
         if ($mclient->hasError($mresponse)) {
             return response()->json([
-                'error' => 'Fehler beim Entfernen des Mitglieds aus der Organisation',
+                'error' => __('messages.organisations.removeMemberFailed'),
                 'details' => $mresponse['errors'] ?? null,
             ], 400);
         }
@@ -320,20 +320,20 @@ class OrganisationController extends Controller implements HasMiddleware
                     $this->migrateImportedEvents($user, $groupId, $groupMembersResponse['members']['elements'] ?? []);
                 }
 
-                Mail::to($user->email)
+                Mail::to($user)
                     ->send(new SendOrganisationRemovedMembershipToUserEmail($mresponse['data']['removeMember']['parent']['name']));    
             }
             
         } catch (Exception $e) {
             Log::error('Error sending email removing user from organisation: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Mitglied wurde zwar aus der Organisation entfernt, aber es gab ein Problem beim Senden der Benachrichtigungs-E-Mail.',
+                'error' => __('messages.organisations.removeMemberMailFailed'),
                 'details' => $e->getMessage(),
             ], 200);
         }
 
         return response()->json([
-            'message' => 'Mitglied erfolgreich aus der Organisation entfernt',
+            'message' => __('messages.organisations.memberRemoved'),
         ], 200);
     }
 
@@ -348,7 +348,7 @@ class OrganisationController extends Controller implements HasMiddleware
         $mresponse = $mclient->leaveGroupAsMember($groupId);
         if ($mclient->hasError($mresponse)) {
             return response()->json([
-                'error' => 'Fehler beim Verlassen der Organisation',
+                'error' => __('messages.organisations.leaveFailed'),
                 'details' => $mresponse['errors'] ?? null,
             ], 400);
         }
@@ -358,7 +358,7 @@ class OrganisationController extends Controller implements HasMiddleware
         }
         
         return response()->json([
-            'message' => 'Erfolgreich aus der Organisation ausgetreten',
+            'message' => __('messages.organisations.left'),
         ], 200);
     }
 
@@ -375,14 +375,14 @@ class OrganisationController extends Controller implements HasMiddleware
         }
 
         if (!$imageUrl) {
-            return response()->json(['error' => 'Image not found'], 404);
+            return response()->json(['error' => __('messages.general.imageNotFound')], 404);
         }
 
         try {
             $imageResponse = Http::get($imageUrl);
 
             if (!$imageResponse->successful()) {
-                return response()->json(['error' => 'Failed to fetch image'], 502);
+                return response()->json(['error' => __('messages.general.imageFetchFailed')], 502);
             }
 
             $contentType = $imageResponse->header('Content-Type') ?? 'image/jpeg';
@@ -395,7 +395,7 @@ class OrganisationController extends Controller implements HasMiddleware
                 'Content-Disposition' => 'inline; filename="' . $fileName . '"',
             ]);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Unexpected error: ' . $e->getMessage()], 500);
+            return response()->json(['error' => __('messages.general.unexpectedErrorWithMessage', ['message' => $e->getMessage()])], 500);
         }
     }
 
@@ -487,13 +487,13 @@ class OrganisationController extends Controller implements HasMiddleware
             $organisationStatus->save();
 
             return response()->json([
-                'message' => 'Erfolgreich aktualisiert',
+                'message' => __('messages.organisations.recommendedUpdated'),
                 'organisation_status' => $organisationStatus
             ], 200);
 
         } catch (Exception $e) {
             Log::error('Error updating featured status: ' . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Aktualisieren des empfohlenen Status'], 500);
+            return response()->json(['error' => __('messages.organisations.recommendedUpdateFailed')], 500);
         }
     }
 

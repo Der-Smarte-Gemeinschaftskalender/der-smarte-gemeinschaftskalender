@@ -22,11 +22,6 @@ const { t } = useI18n();
 
 const { showNavigation = true } = defineProps<Props>();
 
-const showLanguageSwitch = computed(() => {
-    const path = route.path?.toString() || '';
-    const germanOnlyPages = ['app', 'material-generator', 'login', 'register', 'forgot-password', 'reset-password', 'validate'];
-    return !germanOnlyPages.some(page => path.includes(page));
-});
 
 const navigationItems = computed(() => {
     const items = [
@@ -148,7 +143,7 @@ watch(
                             variant="secondary"
                             @click="overlayable?.openOverlay()"
                         />
-                        <LanguageSwitch v-if="showLanguageSwitch" />
+                        <LanguageSwitch />
                     </div>
                 </nav>
                 <Overlayable
@@ -215,7 +210,6 @@ watch(
                         </a>
                     </template>
                     <LanguageSwitch
-                        v-if="showLanguageSwitch"
                         class="my-2 sm:px-3 hidden lg:block"
                     />
                 </Overlayable>

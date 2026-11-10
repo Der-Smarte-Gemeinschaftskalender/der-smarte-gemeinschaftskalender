@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { formatDateTime } from '@/lib/helper';
 
@@ -11,6 +12,8 @@ import Alert from '@/components/KERN/Alert.vue';
 
 import type { Column } from '@/types/General';
 
+const { t } = useI18n();
+
 const loading = ref(false);
 const showErrorMessage = ref(false);
 const errorMessageContent = ref('');
@@ -19,8 +22,8 @@ const organisationRequests = ref<any[]>([]);
 
 const getActionName = (actionType: string) => {
     const actionMap: Record<string, string> = {
-        updateGroup: 'Bearbeiten',
-        changeOrganisationStatus: 'Erstellen',
+        updateGroup: t('app.admin.approval.actions.update'),
+        changeOrganisationStatus: t('app.admin.approval.actions.create'),
     };
     return actionMap[actionType] || actionType;
 };
@@ -33,25 +36,25 @@ const columns: Array<Column> = [
     },
     {
         key: 'request_type',
-        name: 'Aktion',
+        name: t('app.admin.approval.columns.action'),
         format: (col: string) => getActionName(col),
         align: 'left',
     },
     {
         key: 'payload',
-        name: 'Organisationsname',
+        name: t('app.admin.organisationRequests.organisationName'),
         format: (col: any) => {
-            return col?.name || 'Unbekannt';
+            return col?.name || t('app.admin.shared.unknown');
         },
         align: 'left',
     },
     {
         key: 'created_by',
-        name: 'Erstellt von',
+        name: t('app.admin.approval.columns.createdBy'),
     },
     {
         key: 'created_at',
-        name: 'Erstellt am',
+        name: t('app.admin.approval.columns.createdAt'),
         format: (col: string) => formatDateTime(col),
         align: 'left',
     },
@@ -75,7 +78,7 @@ const fetchOrganisationRequests = async () => {
         console.error('Error fetching organisation requests:', error);
         showErrorMessage.value = true;
         errorMessageContent.value =
-            error?.response?.data?.error || 'Beim Laden der Anfragen ist ein Fehler aufgetreten.';
+            error?.response?.data?.error || t('app.admin.approval.loadRequestsError');
     } finally {
         loading.value = false;
     }
@@ -87,11 +90,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <h1 class="kern-heading text-theme-primary mb-4">Ausstehende Organisationsanfragen</h1>
+    <h1 class="kern-heading text-theme-primary mb-4">{{ t('app.admin.organisationRequests.indexTitle') }}</h1>
 
     <Alert
         v-if="showErrorMessage"
-        title="Fehler"
+        :title="t('common.error')"
         severity="danger"
         class="mb-4"
     >
@@ -100,21 +103,23 @@ onMounted(() => {
 
     <p class="mb-3">
         <span class="block">
-            <b>Hinweis:</b>
-            Werden Organisationen erstellt oder Organisationsinformationen bearbeitet, ist vor der Veröffentlichung eine
-            Freigabe durch die Instanzadministration erforderlich. Über den Button „Ansehen“ in der Tabelle können Sie
-            die angegebenen Informationen zur Organisation prüfen und die Organisationserstellung bzw. Änderungen
-            genehmigen oder ablehnen. Erst nach erfolgter Freigabe sind Organisationen und Änderungen öffentlich
-            sichtbar.
+            <b>{{ t('app.admin.shared.note') }}</b>
+            {{ t('app.admin.organisationRequests.indexHint') }}
         </span>
     </p>
     <p class="mb-6">
         <span>
-            Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/Instanz/"
-                fragment="organisationsfreigabe-–-strict-mode"
-            />.
+            <I18nT
+                keypath="app.admin.shared.moreInfo"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/Instanz/"
+                        fragment="organisationsfreigabe-–-strict-mode"
+                    />
+                </template>
+            </I18nT>
         </span>
     </p>
 
@@ -139,26 +144,26 @@ onMounted(() => {
                     v-if="!row.created_by.email_verified_at"
                     class="text-sm text-theme-secondary text-red-600"
                 >
-                    (E-Mail nicht bestätigt)
+                    {{ t('app.admin.approval.emailNotVerified') }}
                 </p>
             </template>
             <template #aktionen="{ row }">
                 <RouterLink :to="{ name: 'admin.organisations.requests.show', params: { id: row.id } }">
                     <Button
                         :icon-left="'visibility'"
-                        title="Ansehen"
-                        aria-label="Ansehen"
-                        label="Ansehen"
+                        :title="t('app.admin.approval.view')"
+                        :aria-label="t('app.admin.approval.view')"
+                        :label="t('app.admin.approval.view')"
                     />
                 </RouterLink>
             </template>
         </Table>
         <Alert
             v-else
-            title="Keine ausstehenden Organisationsanfragen"
+            :title="t('app.admin.organisationRequests.noneTitle')"
             type="info"
         >
-            Keine ausstehenden Organisationsanfragen vorhanden.
+            {{ t('app.admin.organisationRequests.none') }}
         </Alert>
     </div>
 </template>

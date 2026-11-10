@@ -8,6 +8,7 @@ import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputEmail from '@/components/KERN/inputs/InputEmail.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import { useRoute, useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import zod from '@/lib/zod';
 import { ZodType } from 'zod';
 import { user_types_options, user_is_active_options } from '@/lib/const';
@@ -17,6 +18,7 @@ import Alert from '@/components/KERN/Alert.vue';
 import axios from 'axios';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { user } from '@/composables/UserComposoable';
+import { localeOptions, SUPPORTED_LOCALES, type SupportedLocale } from '@/i18n';
 
 interface ServerError {
     message: string;
@@ -29,8 +31,10 @@ interface User {
     is_active: boolean;
     mobilizon_name?: string;
     mobilizon_preferred_username?: string;
+    locale?: SupportedLocale | null;
 }
 
+const { t } = useI18n();
 const router = useRouter();
 const userID: string = useRoute().path.split('/').pop() ?? '';
 const showErrorMessage = ref<boolean>(false);
@@ -46,6 +50,7 @@ const validationSchema = toTypedSchema(
         is_active: zod.boolean().default(true),
         mobilizon_name: zod.string().optional(),
         mobilizon_preferred_username: zod.string().optional(),
+        locale: zod.enum(SUPPORTED_LOCALES).optional(),
     }) satisfies ZodType<User>
 );
 
@@ -57,6 +62,7 @@ const { value: type } = useField<string>('type');
 const { value: is_active } = useField<boolean>('is_active');
 const { value: mobilizon_name } = useField<string>('mobilizon_name');
 const { value: mobilizon_preferred_username } = useField<string>('mobilizon_preferred_username');
+const { value: locale } = useField<SupportedLocale>('locale');
 
 const loadUser = async () => {
     try {
@@ -68,6 +74,7 @@ const loadUser = async () => {
         is_active.value = user.is_active;
         mobilizon_name.value = user.mobilizon_name || '';
         mobilizon_preferred_username.value = user.mobilizon_preferred_username || '';
+        locale.value = user.locale ?? 'de';
     } catch (error) {
         console.error(error);
         await router.push({ name: 'admin.index' });
@@ -95,7 +102,7 @@ const onSubmit = handleSubmit(async (values) => {
             errorMessageContent.value = error?.response?.data?.message;
         } else {
             console.error(error);
-            errorMessageContent.value = 'Benutzer konnte nicht gespeichert werden.';
+            errorMessageContent.value = t('app.admin.users.saveError');
         }
     }
 });
@@ -103,26 +110,30 @@ const onSubmit = handleSubmit(async (values) => {
 loadUser();
 </script>
 <template>
-    <h2 class="kern-heading text-theme-primary">Nutzer*in bearbeiten</h2>
+    <h2 class="kern-heading text-theme-primary">{{ t('app.admin.users.editTitle') }}</h2>
     <p class="mb-4">
-        <b>Hinweis:</b>
-        Als Administrator*in einer Instanz können Sie Einstellungen für Nutzer*innen aller Organisationen vornehmen.
-        Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Instanz/"
-            fragment="nutzer-innen-verwalten"
-        />.
+        <b>{{ t('app.admin.shared.note') }}</b> <I18nT
+            keypath="app.admin.users.editHint"
+            scope="global"
+        >
+            <template #link>
+                <LinkToDocs
+                    path="Terminverwaltung/Instanz/"
+                    fragment="nutzer-innen-verwalten"
+                />
+            </template>
+        </I18nT>
     </p>
     <Alert
         v-if="showErrorMessage"
-        title="Fehler"
+        :title="t('common.error')"
         :content="errorMessageContent"
         severity="danger"
     />
     <Alert
         v-if="showSuccessMessage"
-        title="Erfolg"
-        content="Benutzer erfolgreich aktualisiert."
+        :title="t('common.success')"
+        :content="t('app.admin.users.updateSuccess')"
         severity="success"
     />
     <form
@@ -134,7 +145,7 @@ loadUser();
                 <div class="w-full">
                     <InputText
                         v-model="mobilizon_name"
-                        label="Name"
+                        :label="t('app.admin.users.columns.name')"
                         name="mobilizon_name"
                         :disabled="true"
                     />
@@ -142,7 +153,7 @@ loadUser();
                 <div class="col-12 md:col-6 px-0">
                     <InputText
                         v-model="mobilizon_preferred_username"
-                        label="Benutzername"
+                        :label="t('app.admin.users.columns.username')"
                         name="mobilizon_preferred_username"
                         :disabled="true"
                     />
@@ -153,7 +164,7 @@ loadUser();
                 <div class="w-full flex flex-column gap-5">
                     <InputEmail
                         v-model="email"
-                        label="E-Mail"
+                        :label="t('app.admin.users.columns.email')"
                         name="email"
                         :errors="submitCount === 0 ? undefined : errors.email"
                         :disabled="true"
@@ -161,33 +172,40 @@ loadUser();
                 </div>
                 <div class="md:col-6 px-0 mt-2">
                     <Alert
-                        title="Information"
+                        :title="t('app.admin.shared.information')"
                         severity="info"
                     >
-                        <p>Diese E-Mail-Adresse benötigen Sie für den Login.</p>
+                        <p>{{ t('app.admin.users.emailLoginInfo') }}</p>
                     </Alert>
                 </div>
             </div>
             <InputSelect
                 v-model="type"
-                label="Rolle (Instanz)"
+                :label="t('app.admin.users.columns.role')"
                 name="type"
                 :options="user_types_options"
                 :errors="submitCount === 0 ? undefined : errors.type"
             />
             <InputSelect
                 v-model="is_active"
-                label="Status"
+                :label="t('app.admin.users.columns.status')"
                 name="is_active"
                 :options="user_is_active_options"
                 :errors="submitCount === 0 ? undefined : errors.is_active"
+            />
+            <InputSelect
+                v-model="locale"
+                :label="t('app.admin.users.emailLanguage')"
+                name="locale"
+                :options="localeOptions"
+                :errors="submitCount === 0 ? undefined : errors.locale"
             />
         </Fieldset>
 
         <ConfirmDialog
             v-model="showDeleteDialog"
-            title="Willst du diesen Benutzer wirklich löschen?"
-            :confirm-text="'Löschen'"
+            :title="t('app.admin.users.deleteConfirm')"
+            :confirm-text="t('common.delete')"
             @confirm="deleteUser"
         />
         <div class="flex flex-wrap justify-content-center gap-4 mt-6">
@@ -195,7 +213,7 @@ loadUser();
                 type="submit"
                 :disabled="isSubmitting"
             >
-                Änderungen speichern
+                {{ t('app.admin.shared.saveChanges') }}
             </Button>
             <Button
                 v-if="showDeleteOption"
@@ -205,7 +223,7 @@ loadUser();
                 icon-left="delete"
                 @click="showDeleteDialog = true"
             >
-                Benutzer löschen
+                {{ t('app.admin.users.deleteButton') }}
             </Button>
         </div>
     </form>

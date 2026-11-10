@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { updateProfileData, user } from '@/composables/UserComposoable';
 import { dsgApi } from '@/lib/dsgApi';
+import { LOCALE_LABELS, localeOptions, type SupportedLocale } from '@/i18n';
 
 import Button from '@/components/KERN/Button.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import InputEmail from '@/components/KERN/inputs/InputEmail.vue';
+import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 
 import { ProfileFormSchema, type ProfileForm } from '@/types/Profile';
 import type { AxiosError } from 'axios';
+
+const { t } = useI18n();
 
 const errorMessage = ref<string>('');
 const successMessage = ref<string>('');
@@ -22,11 +27,15 @@ const { errors, handleSubmit, submitCount, isSubmitting } = useForm<ProfileForm>
     initialValues: {
         email: user.value.email,
         mobilizon_name: user.value?.person?.name || '',
+        // Users logged in before the email language existed have no locale stored locally yet
+        locale: user.value?.locale ?? 'de',
     },
 });
 
 const { value: email } = useField<string>('email');
 const { value: mobilizon_name } = useField<string>('mobilizon_name');
+// Only used for emails, intentionally does not switch the UI language
+const { value: locale } = useField<SupportedLocale>('locale');
 const preferredUsername = ref<string>(user.value?.person?.preferredUsername || '');
 
 const onSubmit = handleSubmit(async (values) => {
@@ -41,7 +50,7 @@ const onSubmit = handleSubmit(async (values) => {
     } catch (error: AxiosError | any) {
         errorMessage.value =
             error.response?.data?.error ||
-            'Fehler beim Aktualisieren des Profils. Bitte versuchen Sie es später erneut.';
+            t('app.profile.form.updateError');
         console.error('Error updating profile:', error);
     }
 });
@@ -55,29 +64,30 @@ const onSubmit = handleSubmit(async (values) => {
         <Fieldset>
             <Alert
                 severity="info"
-                title="Gespeicherte personenbezogene Daten"
+                :title="t('app.profile.form.storedDataTitle')"
             >
                 <p>
-                    Wir speichern zu deinem Benutzerkonto die folgenden personenbezogenen Daten:
+                    {{ t('app.profile.form.storedDataIntro') }}
                 </p>
                 <ul class="list-disc ml-5">
-                    <li><b>Name:</b> {{ mobilizon_name || '–' }}</li>
-                    <li><b>Benutzername:</b> {{ preferredUsername || '–' }}</li>
-                    <li><b>E-Mail-Adresse:</b> {{ email || '–' }}</li>
+                    <li><b>{{ t('app.profile.form.storedName') }}</b> {{ mobilizon_name || '–' }}</li>
+                    <li><b>{{ t('app.profile.form.storedUsername') }}</b> {{ preferredUsername || '–' }}</li>
+                    <li><b>{{ t('app.profile.form.storedEmail') }}</b> {{ email || '–' }}</li>
+                    <li><b>{{ t('app.profile.form.storedEmailLanguage') }}</b> {{ LOCALE_LABELS[locale] || '–' }}</li>
                 </ul>
                 <p class="mt-2">
-                    Diese Daten werden ausschließlich für die Nutzung deines Kontos und die Anmeldung benötigt.
+                    {{ t('app.profile.form.storedDataPurpose') }}
                 </p>
             </Alert>
             <Alert
                 v-if="errorMessage.length"
-                title="Fehler"
+                :title="t('common.error')"
                 :content="errorMessage"
                 severity="danger"
             />
             <Alert
                 v-if="successMessage.length"
-                title="Erfolg"
+                :title="t('common.success')"
                 :content="successMessage"
                 severity="success"
             />
@@ -88,7 +98,7 @@ const onSubmit = handleSubmit(async (values) => {
                             v-model="mobilizon_name"
                             name="mobilizon_name"
                             class="w-full"
-                            label="Name"
+                            :label="t('app.profile.form.name')"
                             :errors="submitCount === 0 ? undefined : errors.mobilizon_name"
                         />
                     </div>
@@ -97,7 +107,7 @@ const onSubmit = handleSubmit(async (values) => {
                             v-model="preferredUsername"
                             name="mobilizon_preferred_username"
                             class="w-full"
-                            label="Benutzername"
+                            :label="t('app.profile.form.username')"
                             :disabled="true"
                         />
                     </div>
@@ -108,17 +118,37 @@ const onSubmit = handleSubmit(async (values) => {
                         <InputEmail
                             v-model="email"
                             name="email"
-                            label="E-Mail Adresse"
+                            :label="t('app.profile.form.email')"
                             required
                             :errors="submitCount === 0 ? undefined : errors.email"
                         />
                     </div>
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="t('app.profile.information')"
                             severity="info"
                         >
-                            <p>Diese E-Mail-Adresse benötigen Sie für den Login.</p>
+                            <p>{{ t('app.profile.form.emailInfo') }}</p>
+                        </Alert>
+                    </div>
+                </div>
+
+                <div class="flex flex-column md:flex-row gap-6">
+                    <div class="w-full">
+                        <InputSelect
+                            v-model="locale"
+                            name="locale"
+                            :label="t('app.profile.form.emailLanguage')"
+                            :options="localeOptions"
+                            :errors="submitCount === 0 ? undefined : errors.locale"
+                        />
+                    </div>
+                    <div class="md:col-6 px-0 mt-2">
+                        <Alert
+                            :title="t('app.profile.information')"
+                            severity="info"
+                        >
+                            <p>{{ t('app.profile.form.emailLanguageInfo') }}</p>
                         </Alert>
                     </div>
                 </div>
@@ -131,7 +161,7 @@ const onSubmit = handleSubmit(async (values) => {
                 class="mt-6"
                 :disabled="isSubmitting"
             >
-                Änderungen Speichern
+                {{ t('app.profile.form.submit') }}
             </Button>
         </div>
     </form>

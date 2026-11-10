@@ -2,6 +2,7 @@
 import { computed, ref, watch, isRef, type Ref } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import Button from '@/components/KERN/Button.vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
@@ -32,6 +33,7 @@ interface ResponseData {
 const props = defineProps<Props>();
 
 const router = useRouter();
+const { t } = useI18n();
 const pageSize = computed(() => props.pageSize ?? 10);
 const rawData = computed<Array<any>>(() => {
     if (props.api?.url) return [];
@@ -45,7 +47,7 @@ const allPages = ref(1);
 const showDeleteConfirmDialog = ref(false);
 const pendingDeleteRow = ref<any>(null);
 
-const deleteDialogTitle = computed(() => props.api?.deleteDialogTitle ?? 'Veranstaltung Löschen');
+const deleteDialogTitle = computed(() => props.api?.deleteDialogTitle ?? t('app.shared.table.deleteTitle'));
 
 const deleteDialogDescription = computed<string>(() => {
     return props.api?.deleteDialogDescription?.(pendingDeleteRow.value) || '';
@@ -125,7 +127,7 @@ const confirmDeleteEntry = async () => {
 
         if (props.api?.url) await loadData();
     } catch (deleteError: any) {
-        error.value = deleteError?.response?.data?.error || 'Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.';
+        error.value = deleteError?.response?.data?.error || t('app.shared.genericErrorTryLater');
         console.error('Fehler beim Löschen:', deleteError);
     } finally {
         pendingDeleteRow.value = null;
@@ -171,8 +173,8 @@ else handleArrayData();
             v-model="showDeleteConfirmDialog"
             :title="deleteDialogTitle"
             :description="deleteDialogDescription"
-            :confirm-text="'Löschen'"
-            :cancel-text="'Abbrechen'"
+            :confirm-text="t('common.delete')"
+            :cancel-text="t('common.cancel')"
             @cancel="pendingDeleteRow = null"
             @confirm="confirmDeleteEntry"
         />
@@ -256,7 +258,7 @@ else handleArrayData();
                             class="p-4 text-center text-600 absolute left-50 w-full"
                             style="transform: translateX(-50%)"
                         >
-                            Keine Einträge gefunden.
+                            {{ t('app.shared.table.noEntries') }}
                         </p>
                     </td>
                 </tr>
@@ -275,29 +277,29 @@ else handleArrayData();
                                     :disabled="currentPage <= 1"
                                     class="pagination-button text-3xl px-1"
                                     label="«"
-                                    aria-label="Erste Seite"
+                                    :aria-label="t('app.shared.table.firstPage')"
                                     @click="currentPage = 1"
                                 />
                                 <Button
                                     :disabled="currentPage <= 1"
                                     class="pagination-button text-3xl px-2"
                                     label="‹"
-                                    aria-label="Voherige Seite"
+                                    :aria-label="t('app.shared.table.previousPage')"
                                     @click="currentPage--"
                                 />
-                                <span class="pagination-info">Seite {{ currentPage }} von {{ allPages }}</span>
+                                <span class="pagination-info">{{ t('app.shared.table.pageOf', { current: currentPage, total: allPages }) }}</span>
                                 <Button
                                     :disabled="currentPage >= allPages"
                                     class="pagination-button text-3xl px-2"
                                     label="›"
-                                    aria-label="Nächste Seite"
+                                    :aria-label="t('app.shared.table.nextPage')"
                                     @click="currentPage++"
                                 />
                                 <Button
                                     :disabled="currentPage >= allPages"
                                     class="pagination-button text-3xl px-1"
                                     label="»"
-                                    aria-label="Letzte Seite"
+                                    :aria-label="t('app.shared.table.lastPage')"
                                     @click="currentPage = allPages"
                                 />
                             </div>
@@ -310,8 +312,8 @@ else handleArrayData();
 
         <ConfirmDialog
             v-model="showDeleteDialog"
-            title="Möchten Sie wirklich diesen Eintrag löschen?"
-            confirm-text="Löschen"
+            :title="t('app.shared.table.confirmDeleteEntry')"
+            :confirm-text="t('common.delete')"
             @confirm="executeDelete"
         />
     </div>

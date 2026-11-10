@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import zod from '@/lib/zod';
 import { ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { checkLogin } from '@/composables/UserComposoable';
 import { useRouter } from 'vue-router';
@@ -15,6 +16,7 @@ import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import InputCheckbox from '@/components/KERN/inputs/InputCheckbox.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 const showRegisterErrorMessage = ref(false);
 const registerErrorMessage = ref('');
@@ -31,29 +33,29 @@ const validationSchema = toTypedSchema(
         .object({
             email: zod
                 .string({
-                    required_error: 'Die E-Mail-Adresse ist erforderlich.',
+                    required_error: 'auth.validation.emailRequired',
                 })
-                .nonempty('Die E-Mail-Adresse ist erforderlich.')
-                .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+                .nonempty('auth.validation.emailRequired')
+                .email('auth.validation.emailInvalid'),
             password: zod
                 .string({
-                    required_error: 'Das Passwort ist erforderlich.',
+                    required_error: 'auth.validation.passwordRequired',
                 })
-                .nonempty('Das Passwort ist erforderlich.')
-                .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+                .nonempty('auth.validation.passwordRequired')
+                .min(8, 'auth.validation.newPasswordMin8')
                 .trim(),
             password_confirmation: zod
                 .string({
-                    required_error: 'Die Passwortbestätigung ist erforderlich.',
+                    required_error: 'auth.validation.passwordConfirmationRequired',
                 })
-                .nonempty('Das Passwort ist erforderlich.')
-                .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.')
+                .nonempty('auth.validation.passwordRequired')
+                .min(8, 'auth.validation.newPasswordMin8')
                 .trim()
                 .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
             accept_terms: zod
                 .boolean()
                 .refine((val) => val, {
-                    message: 'Die Nutzungsbedingungen und die Datenschutzerklärung müssen akzeptiert werden.',
+                    message: 'auth.validation.acceptTerms',
                 })
                 .default(false),
         })
@@ -62,7 +64,7 @@ const validationSchema = toTypedSchema(
                 ctx.addIssue({
                     path: ['password_confirmation'],
                     code: zod.ZodIssueCode.custom,
-                    message: 'Die Passwörter stimmen nicht überein.',
+                    message: 'auth.validation.passwordsDoNotMatch',
                 });
             }
         })
@@ -103,7 +105,7 @@ if (checkLogin()) {
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="register-card">
             <Card
-                title="Registrieren"
+                :title="t('auth.register.title')"
                 class="p-2"
             >
                 <Fieldset
@@ -112,8 +114,8 @@ if (checkLogin()) {
                 >
                     <Alert
                         v-if="showRegisterErrorMessage"
-                        title="Fehler"
-                        :content="registerErrorMessage ?? 'Account konnte nicht erstellt werden.'"
+                        :title="t('common.error')"
+                        :content="registerErrorMessage ?? t('auth.register.error')"
                         severity="danger"
                     />
                     <form
@@ -123,45 +125,48 @@ if (checkLogin()) {
                     >
                         <InputEmail
                             v-model="email"
-                            label="E-Mail-Adresse"
+                            :label="t('auth.email')"
                             name="email"
                             required
                             :errors="submitCount === 0 ? undefined : errors.email"
                         />
                         <InputPassword
                             v-model="password"
-                            label="Passwort"
+                            :label="t('auth.password')"
                             name="password"
                             :errors="submitCount === 0 ? undefined : errors.password"
                         />
                         <InputPassword
                             v-model="password_confirmation"
-                            label="Passwort bestätigen"
+                            :label="t('auth.passwordConfirm')"
                             name="password_confirmation"
                             :errors="submitCount === 0 ? undefined : errors.password_confirmation"
                         />
                         <InputCheckbox
                             v-model="accept_terms"
                             name="accept_terms"
-                            label="Nutzungsbedingungen"
+                            :label="t('auth.terms.label')"
                             :errors="submitCount === 0 ? undefined : errors.accept_terms"
                         >
                             <template #label>
-                                Ich habe die
-                                <RouterLink
-                                    :to="{ name: 'public.terms' }"
-                                    class="terms-link"
-                                >
-                                    Nutzungsbedingungen
-                                </RouterLink>
-                                und
-                                <RouterLink
-                                    :to="{ name: 'public.privacy' }"
-                                    class="terms-link"
-                                >
-                                    Datenschutzerklärung
-                                </RouterLink>
-                                gelesen und akzeptiere sie.
+                                <I18nT scope="global" keypath="auth.terms.text">
+                                    <template #terms>
+                                        <RouterLink
+                                            :to="{ name: 'public.terms' }"
+                                            class="terms-link"
+                                        >
+                                            {{ t('auth.terms.terms') }}
+                                        </RouterLink>
+                                    </template>
+                                    <template #privacy>
+                                        <RouterLink
+                                            :to="{ name: 'public.privacy' }"
+                                            class="terms-link"
+                                        >
+                                            {{ t('auth.terms.privacy') }}
+                                        </RouterLink>
+                                    </template>
+                                </I18nT>
                             </template>
                         </InputCheckbox>
                         <Button
@@ -169,14 +174,14 @@ if (checkLogin()) {
                             class="mt-3"
                             :disabled="isSubmitting"
                         >
-                            Jetzt registrieren
+                            {{ t('auth.register.submit') }}
                         </Button>
                     </form>
                 </Fieldset>
                 <Alert
                     v-else
-                    title="Erfolg"
-                    content="Dein Account wurde erfolgreich erstellt. Bitte bestätige deine E-Mail-Adresse, um fortzufahren."
+                    :title="t('common.success')"
+                    :content="t('auth.register.success')"
                     severity="success"
                 />
             </Card>

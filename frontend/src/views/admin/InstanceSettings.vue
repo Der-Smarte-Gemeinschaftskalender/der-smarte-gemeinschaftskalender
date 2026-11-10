@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 
 import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
@@ -11,6 +12,7 @@ import Table from '@/components/KERN/Table.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 
 import { emailEventTypeLabels } from '@/types/EmailTemplate';
+import { LOCALE_LABELS, type SupportedLocale } from '@/i18n';
 import type { Column } from '@/types/General';
 import type { UserView } from '@/types/User';
 import Badge from '@/components/KERN/cosmetics/Badge.vue';
@@ -20,6 +22,8 @@ enum CopyItem {
     Email = 'email',
     Password = 'password'
 }
+
+const { t } = useI18n();
 
 const errorMessage = ref<string>('');
 const successMessage = ref<string>('');
@@ -35,13 +39,18 @@ const route = useRoute();
 const emailColumns: Array<Column> = [
     {
         key: 'subject',
-        name: 'Betreff',
+        name: t('app.admin.emailTemplates.subject'),
         align: 'left',
     },
     {
         key: 'on_event',
-        name: 'Bei welchem Ereignis',
+        name: t('app.admin.emailTemplates.onEvent'),
         format: (value: keyof typeof emailEventTypeLabels) => emailEventTypeLabels[value] || value,
+        align: 'left',
+    },
+    {
+        key: 'locale',
+        name: t('app.admin.emailTemplates.locale'),
         align: 'left',
     },
     {
@@ -59,14 +68,14 @@ const loadInstanceCredentials = async () => {
     } catch (error: any) {
         console.error('Error loading Mobilizon credentials:', error);
         errorMessage.value =
-            error.response?.data?.error || 'Fehler beim Laden der Zugangsdaten. Bitte versuchen Sie es später erneut.';
+            error.response?.data?.error || t('app.admin.instance.credentialsLoadError');
     }
 };
 
 const showAlert = () => {
     const query = route.query;
     if (query.templateUpdated) {
-        successMessage.value = 'Vorlage erfolgreich aktualisiert.';
+        successMessage.value = t('app.admin.instance.templateUpdated');
     }
 };
 
@@ -96,26 +105,29 @@ const saveToClipboard = (text: string, item: CopyItem) => {
 <template>
     <Alert
         v-if="errorMessage.length"
-        title="Fehler"
+        :title="t('common.error')"
         :content="errorMessage"
         severity="danger"
         class="mb-5"
     />
     <Alert
         v-if="successMessage.length"
-        title="Erfolg"
+        :title="t('common.success')"
         :content="successMessage"
         severity="success"
         class="mb-5"
     />
 
-    <h1 class="kern-heading text-theme-primary">Instanz verwalten</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.admin.instance.title') }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Die zentrale Verwaltung Ihrer Instanz erfolgt über Mobilizon. Mobilizon ist die zugrunde liegende
-        Open-Source-Plattform, auf der der Smarte Gemeinschaftskalender basiert. Dort können Sie alle instanzweiten
-        Einstellungen und Funktionen administrieren. Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/Instanz/" fragment="instanz-verwalten" />.
+        <b>{{ t('app.admin.shared.note') }}</b> <I18nT
+            keypath="app.admin.instance.hint"
+            scope="global"
+        >
+            <template #link>
+                <LinkToDocs path="Terminverwaltung/Instanz/" fragment="instanz-verwalten" />
+            </template>
+        </I18nT>
     </p>
 
     <section class="mb-6 flex justify-content-center w-full">
@@ -128,40 +140,45 @@ const saveToClipboard = (text: string, item: CopyItem) => {
                 icon-right="open-in-new"
                 class=""
             >
-                Zur Instanzverwaltung auf Mobilizon
+                {{ t('app.admin.instance.toMobilizon') }}
             </Button>
         </a>
     </section>
 
     <section>
-        <h2 class="kern-heading text-theme-primary font-medium mb-3">Zugangsdaten</h2>
+        <h2 class="kern-heading text-theme-primary font-medium mb-3">{{ t('app.admin.instance.credentials') }}</h2>
         <div class="mb-6 flex flex-column md:flex-row gap-6">
             <div class="w-full mt-2">
                 <p class="mb-3">
-                    <span>Diese Zugangsdaten wurden automatisch bei der Installation erstellt.</span>
+                    <span>{{ t('app.admin.instance.credentialsCreated') }}</span>
                 </p>
                 <p>
-                    <span>
-                        Sie sind ausschließlich für die
-                        <strong>Anmeldung bei Mobilizon</strong>
-                        gedacht und dürfen
-                        <strong>nicht verändert oder weitergegeben</strong>
-                        werden.
-                    </span>
+                    <I18nT
+                        keypath="app.admin.instance.credentialsUsage"
+                        tag="span"
+                        scope="global"
+                    >
+                        <template #login>
+                            <strong>{{ t('app.admin.instance.credentialsUsageLogin') }}</strong>
+                        </template>
+                        <template #restriction>
+                            <strong>{{ t('app.admin.instance.credentialsUsageRestriction') }}</strong>
+                        </template>
+                    </I18nT>
                 </p>
             </div>
             <div class="md:col-6 p-0">
                 <Alert
-                    title="Warnung"
+                    :title="t('app.admin.instance.warning')"
                     severity="warning"
-                    :content="`Änderungen an diesen Daten in Mobilizon führen dazu, dass die Integration mit dem Smarten Gemeinschaftskalender nicht mehr funktioniert.`"
+                    :content="t('app.admin.instance.credentialsWarning')"
                 />
             </div>
         </div>
         <div class="flex flex-column sm:flex-row gap-6">
             <Fieldset
                 v-if="mobilizonEmail"
-                legend="E-Mail-Adresse"
+                :legend="t('app.admin.instance.emailAddress')"
                 class="w-full"
                 style="min-width: 0"
             >
@@ -175,8 +192,8 @@ const saveToClipboard = (text: string, item: CopyItem) => {
                     <Button
                         variant="secondary"
                         text
-                        title="E-Mail-Adresse kopieren"
-                        aria-label="E-Mail-Adresse kopieren"
+                        :title="t('app.admin.instance.copyEmail')"
+                        :aria-label="t('app.admin.instance.copyEmail')"
                         :icon-left="emailCopied ? 'check' : 'content-copy'"
                         :disabled="emailCopied"
                         @click="saveToClipboard(mobilizonEmail, CopyItem.Email)"
@@ -186,7 +203,7 @@ const saveToClipboard = (text: string, item: CopyItem) => {
 
             <Fieldset
                 v-if="mobilizonPassword"
-                legend="Passwort"
+                :legend="t('app.admin.users.password')"
                 class="w-full"
                 style="min-width: 0"
             >
@@ -204,16 +221,16 @@ const saveToClipboard = (text: string, item: CopyItem) => {
                     </span>
                     <div class="flex gap-2">
                         <Button
-                            title="Passwort anzeigen/verbergen"
-                            aria-label="Passwort anzeigen/verbergen"
+                            :title="t('app.admin.instance.togglePassword')"
+                            :aria-label="t('app.admin.instance.togglePassword')"
                             variant="secondary"
                             text
                             :icon-left="mobilizonPasswordVisible ? 'visibility-off' : 'visibility'"
                             @click="mobilizonPasswordVisible = !mobilizonPasswordVisible"
                         />
                         <Button
-                            title="Passwort kopieren"
-                            aria-label="Passwort kopieren"
+                            :title="t('app.admin.instance.copyPassword')"
+                            :aria-label="t('app.admin.instance.copyPassword')"
                             variant="secondary"
                             text
                             :icon-left="passwordCopied ? 'check' : 'content-copy'"
@@ -229,12 +246,16 @@ const saveToClipboard = (text: string, item: CopyItem) => {
     <Divider class="my-6" />
 
     <section>
-        <h2 class="kern-heading text-theme-primary font-medium mb-3">E-Mail-Vorlagen</h2>
+        <h2 class="kern-heading text-theme-primary font-medium mb-3">{{ t('app.admin.instance.emailTemplates') }}</h2>
         <p class="mb-6">
-            <b>Hinweis:</b>
-            Hier können Sie die E-Mail-Vorlagen verwalten, die für Benachrichtigungen der Nutzer*innen verwendet werden.
-            Weitere Informationen finden Sie im
-            <LinkToDocs path="Terminverwaltung/E-Mail-Benachrichtigungen/#e-mail-vorlagen" />.
+            <b>{{ t('app.admin.shared.note') }}</b> <I18nT
+                keypath="app.admin.instance.emailTemplatesHint"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs path="Terminverwaltung/E-Mail-Benachrichtigungen/#e-mail-vorlagen" />
+                </template>
+            </I18nT>
         </p>
         <Table
             :api="{
@@ -248,12 +269,15 @@ const saveToClipboard = (text: string, item: CopyItem) => {
                     :title="emailEventTypeLabels[row.on_event as keyof typeof emailEventTypeLabels] || row.on_event"
                 />
             </template>
+            <template #locale="{ row }">
+                {{ LOCALE_LABELS[row.locale as SupportedLocale] || row.locale }}
+            </template>
             <template #aktionen="{ row }">
                 <div class="flex justify-content-end flex-wrap gap-2 min-w-10rem">
                     <RouterLink :to="{ name: 'admin.emailTemplates.edit', params: { id: row?.id } }">
                         <Button
-                            title="Bearbeiten"
-                            aria-label="Bearbeiten"
+                            :title="t('common.edit')"
+                            :aria-label="t('common.edit')"
                             icon-left="edit"
                         />
                     </RouterLink>

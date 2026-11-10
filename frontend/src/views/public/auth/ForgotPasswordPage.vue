@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import zod from '@/lib/zod';
 
 import { useRouter } from 'vue-router';
@@ -15,6 +16,7 @@ import Alert from '@/components/KERN/Alert.vue';
 
 import { ZodType } from 'zod';
 
+const { t } = useI18n();
 const router = useRouter();
 const showErrorMessage = ref(false);
 const showSuccessMessage = ref(false);
@@ -28,10 +30,10 @@ const validationSchema = toTypedSchema(
     zod.object({
         email: zod
             .string({
-                required_error: 'Die E-Mail-Adresse ist erforderlich.',
+                required_error: 'auth.validation.emailRequired',
             })
-            .nonempty('Die E-Mail-Adresse ist erforderlich.')
-            .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+            .nonempty('auth.validation.emailRequired')
+            .email('auth.validation.emailInvalid')
             .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
     }) satisfies ZodType<ForgotPasswordForm>
 );
@@ -56,7 +58,7 @@ const onSubmit = handleSubmit(async (values) => {
         console.error(error);
         showErrorMessage.value = true;
         showSuccessMessage.value = false;
-        messageContent.value = error.response?.data?.message || 'Es ist ein Fehler aufgetreten.'
+        messageContent.value = error.response?.data?.message || t('auth.errorOccurred')
     }
 });
 </script>
@@ -65,19 +67,19 @@ const onSubmit = handleSubmit(async (values) => {
   <div class="flex align-self-center align-items-center justify-content-center">
     <div class="forgot-password-card">
       <Card
-          title="Passwort vergessen"
+          :title="t('auth.forgotPassword.title')"
           class="p-2"
       >
         <Fieldset class="px-1">
           <Alert
               v-if="showSuccessMessage"
-              title="Erfolg"
+              :title="t('common.success')"
               :content="messageContent"
               severity="success"
           />
           <Alert
               v-if="showErrorMessage"
-              title="Fehler"
+              :title="t('common.error')"
               :content="messageContent"
               severity="danger"
           />
@@ -88,7 +90,7 @@ const onSubmit = handleSubmit(async (values) => {
           >
             <InputEmail
                 v-model="email"
-                label="E-Mail-Adresse"
+                :label="t('auth.email')"
                 name="email"
                 required
                 :errors="submitCount === 0 ? undefined : errors.email"
@@ -98,12 +100,12 @@ const onSubmit = handleSubmit(async (values) => {
                 class="mt-3"
                 :disabled="isSubmitting"
             >
-              Passwort zurücksetzen
+              {{ t('auth.forgotPassword.submit') }}
             </Button>
           </form>
         </Fieldset>
         <div class="text-sm mt-3">
-          <RouterLink :to="{ name: 'login' }">Zurück zum Login</RouterLink>
+          <RouterLink :to="{ name: 'login' }">{{ t('auth.backToLogin') }}</RouterLink>
         </div>
       </Card>
     </div>

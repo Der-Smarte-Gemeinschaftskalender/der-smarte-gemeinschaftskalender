@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime, normalizeStreet, stripHtml } from '@/lib/helper';
 
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
@@ -18,6 +19,7 @@ interface Response {
     message: string;
 }
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
@@ -38,15 +40,15 @@ const adminComment = ref('');
 
 const getEventTypeName = (requestableType: string) => {
     const typeMap: Record<string, string> = {
-        Organisation: 'Organisation',
+        Organisation: t('app.admin.organisationRequests.typeOrganisation'),
     };
     return typeMap[requestableType] || requestableType;
 };
 
 const getActionName = (actionType: string) => {
     const actionMap: Record<string, string> = {
-        changeOrganisationStatus: 'Erstellen',
-        updateGroup: 'Bearbeiten',
+        changeOrganisationStatus: t('app.admin.approval.actions.create'),
+        updateGroup: t('app.admin.approval.actions.update'),
     };
     return actionMap[actionType] || actionType;
 };
@@ -71,31 +73,31 @@ const fetchApprovalRequest = async () => {
 
         descriptionListData.value = [
             {
-                name: 'Aktion',
+                name: t('app.admin.approval.columns.action'),
                 value: getActionName(approvalRequest.value.request_type),
             },
             {
-                name: 'Organisationsname',
+                name: t('app.admin.organisationRequests.organisationName'),
                 value: approvalRequest.value.payload.name,
             },
             {
-                name: 'Benutzername der Organisation',
+                name: t('app.admin.organisationRequests.organisationUsername'),
                 value: approvalRequest.value.payload.preferredUsername || approvalRequest.value.payload.name,
             },
             {
                 name: 'ID',
-                value: approvalRequest.value.payload.id ?? 'Noch nicht vergeben',
+                value: approvalRequest.value.payload.id ?? t('app.admin.approval.notAssignedYet'),
             },
             {
-                name: 'Erstellt von',
+                name: t('app.admin.approval.columns.createdBy'),
                 value: approvalRequest.value.created_by.mobilizon_name,
             },
             {
-                name: 'Erstellt am',
+                name: t('app.admin.approval.columns.createdAt'),
                 value: formatDateTime(approvalRequest.value.created_at),
             },
             {
-                name: `${approvalRequest.value.handled_by ? 'Bearbeitet von' : ''}`,
+                name: `${approvalRequest.value.handled_by ? t('app.admin.organisationRequests.handledBy') : ''}`,
                 value: approvalRequest.value.handled_by?.mobilizon_name,
             },
         ];
@@ -123,7 +125,7 @@ const approveRequest = async () => {
         });
         response.value = {
             type: 'success',
-            message: 'Anfrage erfolgreich freigegeben.',
+            message: t('app.admin.approval.approveSuccess'),
         };
 
         approvalRequest.value = null; // Reset to trigger reactivity
@@ -133,7 +135,7 @@ const approveRequest = async () => {
 
         response.value = {
             type: 'danger',
-            message: error?.response?.data?.error || 'Beim Freigeben der Anfrage ist ein Fehler aufgetreten.',
+            message: error?.response?.data?.error || t('app.admin.approval.approveError'),
         };
     } finally {
         showResponseMessage.value = true;
@@ -157,7 +159,7 @@ const rejectRequest = async () => {
         });
         response.value = {
             type: 'success',
-            message: 'Anfrage erfolgreich abgelehnt.',
+            message: t('app.admin.approval.rejectSuccess'),
         };
 
         approvalRequest.value = null; // Reset to trigger reactivity
@@ -166,7 +168,7 @@ const rejectRequest = async () => {
         console.error('Error rejecting request:', error);
         response.value = {
             type: 'danger',
-            message: error?.response?.data?.error || 'Beim Ablehnen der Anfrage ist ein Fehler aufgetreten.',
+            message: error?.response?.data?.error || t('app.admin.approval.rejectError'),
         };
     } finally {
         showResponseMessage.value = true;
@@ -176,9 +178,9 @@ const rejectRequest = async () => {
 };
 
 const statusMap: Record<string, string> = {
-    pending: 'Ausstehend',
-    approved: 'Genehmigt',
-    rejected: 'Abgelehnt',
+    pending: t('app.admin.approval.status.pending'),
+    approved: t('app.admin.approval.status.approved'),
+    rejected: t('app.admin.approval.status.rejected'),
 };
 
 onMounted(async () => {
@@ -187,19 +189,23 @@ onMounted(async () => {
 </script>
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary mb-4">Organisationsfreigabe – Detailansicht</h1>
+        <h1 class="kern-heading text-theme-primary mb-4">{{ t('app.admin.organisationRequests.showTitle') }}</h1>
         <p class="mb-3">
-            <b>Hinweis:</b>
-            Als Administrator*in der Instanz können Sie hier angefragte Organisationen bzw. Änderungen genehmigen oder
-            ablehnen. Organisationen und geänderte Informationen erscheinen erst nach Freigabe in der öffentlichen
-            Kalenderansicht.
+            <b>{{ t('app.admin.shared.note') }}</b>
+            {{ t('app.admin.organisationRequests.showHint') }}
         </p>
         <p class="mb-6">
-            Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/Instanz/"
-                fragment="organisationsfreigabe-–-strict-mode"
-            />.
+            <I18nT
+                keypath="app.admin.shared.moreInfo"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/Instanz/"
+                        fragment="organisationsfreigabe-–-strict-mode"
+                    />
+                </template>
+            </I18nT>
         </p>
         <div
             v-if="approvalRequest?.status"
@@ -208,10 +214,10 @@ onMounted(async () => {
             <EventStatusBadge
                 :text="
                     approvalRequest.status === 'approved'
-                        ? 'Genehmigt'
+                        ? t('app.admin.approval.status.approved')
                         : approvalRequest.status === 'rejected'
-                          ? 'Abgelehnt'
-                          : 'Ausstehend'
+                          ? t('app.admin.approval.status.rejected')
+                          : t('app.admin.approval.status.pending')
                 "
                 :status="
                     approvalRequest.status === 'approved'
@@ -224,7 +230,7 @@ onMounted(async () => {
         </div>
         <Alert
             v-if="showResponseMessage"
-            :title="response.type === 'success' ? 'Erfolg' : 'Fehler'"
+            :title="response.type === 'success' ? t('common.success') : t('common.error')"
             :severity="response.type === 'success' ? 'success' : 'danger'"
             class="mb-4"
             @close="showResponseMessage = false"
@@ -236,21 +242,21 @@ onMounted(async () => {
             <div v-if="approvalRequest">
                 <DescriptionList :data="descriptionListData" />
                 <div>
-                    <h5 class="kern-heading mt-4 mb-2">Beschreibung</h5>
+                    <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.description') }}</h5>
                     <div v-if="approvalRequest.payload.summary">
                         <p
                             class="kern-text prose"
                             v-html="
                                 stripHtml(approvalRequest.payload.summary)
                                     ? approvalRequest.payload.summary
-                                    : '<p>Keine Beschreibung angegeben.</p>'
+                                    : `<p>${t('app.admin.approval.noDescription')}</p>`
                             "
                         />
                     </div>
-                    <p v-else>Keine Beschreibung angegeben.</p>
+                    <p v-else>{{ t('app.admin.approval.noDescription') }}</p>
                 </div>
                 <div>
-                    <h5 class="kern-heading mt-4 mb-2">Adresse</h5>
+                    <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.address') }}</h5>
                     <div v-if="approvalRequest.payload.physicalAddress?.geom">
                         <p v-if="approvalRequest.payload.physicalAddress?.street">
                             {{ normalizeStreet(approvalRequest.payload.physicalAddress?.street) }},
@@ -260,23 +266,23 @@ onMounted(async () => {
                             {{ approvalRequest.payload.physicalAddress?.locality }}
                         </p>
                     </div>
-                    <p v-else>Keine Adresse angegeben.</p>
+                    <p v-else>{{ t('app.admin.approval.noAddress') }}</p>
                 </div>
                 <div>
-                    <h5 class="kern-heading mt-4 mb-2">Bild</h5>
+                    <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.image') }}</h5>
                     <div v-if="imageUrl">
                         <img
                             :src="imageUrl"
-                            alt="Angehängtes Bild"
+                            :alt="t('app.admin.approval.imageAlt')"
                             class="col-12 sm:col-10 md:col-8 lg:col-6 h-auto border p-0"
                         />
                     </div>
                     <p v-else-if="approvalRequest.status !== 'pending' && approvalRequest.payload._file_path">
-                        Nachdem die Anfrage bearbeitet wurde, ist das angehängte Bild nicht mehr verfügbar.
+                        {{ t('app.admin.approval.imageUnavailable') }}
                     </p>
-                    <p v-else>Kein Bild angehängt.</p>
+                    <p v-else>{{ t('app.admin.approval.noImage') }}</p>
                 </div>
-                <h5 class="kern-heading mb-2 mt-6">Kommentar der Administration (optional)</h5>
+                <h5 class="kern-heading mb-2 mt-6">{{ t('app.admin.approval.adminComment') }}</h5>
                 <div v-if="approvalRequest?.status === 'pending'">
                     <div class="flex flex-column md:flex-row gap-6">
                         <div class="w-full flex">
@@ -286,19 +292,16 @@ onMounted(async () => {
                                 name="adminComment"
                                 class="kern-input w-full mb-4 h-full"
                                 rows="4"
-                                placeholder="Fügen Sie hier einen Kommentar hinzu..."
+                                :placeholder="t('app.admin.approval.adminCommentPlaceholder')"
                             />
                         </div>
                         <div class="md:col-6 p-0">
                             <Alert
-                                title="Information"
+                                :title="t('app.admin.shared.information')"
                                 variant="info"
                                 class="mb-4"
                             >
-                                Der hier eingegebene Kommentar wird der Organisation nach Annahme oder Ablehnung der
-                                Termin- oder Bearbeitungsanfrage übermittelt. Sie können den Kommentar nutzen, um
-                                beispielsweise einen Ablehnungsgrund zu erläutern oder gewünschte Änderungen zu
-                                benennen, auch im Fall einer Annahme.
+                                {{ t('app.admin.approval.adminCommentInfo') }}
                             </Alert>
                         </div>
                     </div>
@@ -309,7 +312,7 @@ onMounted(async () => {
                             :disabled="loadingAction"
                             @click="approveRequest"
                         >
-                            Anfrage genehmigen
+                            {{ t('app.admin.approval.approve') }}
                         </Button>
                         <Button
                             :icon-left="'close'"
@@ -317,18 +320,18 @@ onMounted(async () => {
                             variant="secondary"
                             @click="rejectRequest"
                         >
-                            Anfrage ablehnen
+                            {{ t('app.admin.approval.reject') }}
                         </Button>
                     </div>
                 </div>
                 <div v-else>
                     <p>
-                        {{ approvalRequest.admin_comment ?? 'Kein Kommentar hinterlegt.' }}
+                        {{ approvalRequest.admin_comment ?? t('app.admin.approval.noComment') }}
                     </p>
                 </div>
             </div>
             <div v-else>
-                <p>Die Organisationsanfrage nicht gefunden.</p>
+                <p>{{ t('app.admin.organisationRequests.notFound') }}</p>
             </div>
         </div>
     </div>

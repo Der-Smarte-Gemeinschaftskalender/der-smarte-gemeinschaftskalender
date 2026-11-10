@@ -1,6 +1,7 @@
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { dsgApi } from '@/lib/dsgApi';
+import i18n from '@/i18n';
 import type { IAlert } from '@/types/components/Alert';
 
 interface UseEventShowDeleteOptions {
@@ -18,10 +19,10 @@ export const useEventShowDelete = ({
     getDeleteUrl,
     getParams,
     redirectRouteName,
-    deletedMessage = 'Einzeltermin erfolgreich gelöscht.',
-    requestSentMessage = 'Ihre Terminanfrage wurde gesendet. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde.',
-    deleteErrorTitle = 'Fehler beim Löschen',
-    fallbackErrorTitle = 'Fehler beim Löschen',
+    deletedMessage = i18n.global.t('app.events.singleEventDeleted'),
+    requestSentMessage = i18n.global.t('app.events.requestSentMessage'),
+    deleteErrorTitle = i18n.global.t('app.shared.deleteErrorTitle'),
+    fallbackErrorTitle = i18n.global.t('app.shared.deleteErrorTitle'),
     fallbackErrorText,
 }: UseEventShowDeleteOptions) => {
     const route = useRoute();
@@ -34,7 +35,7 @@ export const useEventShowDelete = ({
         if (route.query.requestSent === 'true' && requestSentMessage) {
             alertMessage.value = {
                 severity: 'info',
-                title: 'Anfrage gesendet',
+                title: i18n.global.t('app.shared.requestSent'),
                 content: requestSentMessage,
             };
             return;
@@ -43,7 +44,7 @@ export const useEventShowDelete = ({
         if (route.query.deleted === 'success' && deletedMessage) {
             alertMessage.value = {
                 severity: 'success',
-                title: 'Erfolg',
+                title: i18n.global.t('common.success'),
                 content: deletedMessage,
             };
             return;

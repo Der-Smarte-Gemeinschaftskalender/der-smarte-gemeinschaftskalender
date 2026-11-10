@@ -27,7 +27,7 @@ class InGroup
         $groupId = $this->resolveGroupId($request);
 
         if (!$groupId) {
-            return response()->json(['error' => 'Mobilizon Group ID ist erforderlich.'], 400);
+            return response()->json(['error' => __('messages.general.groupIdRequired')], 400);
         }
 
         $mobilizon = Mobilizon::getInstance();
@@ -35,7 +35,7 @@ class InGroup
         $groups = $mobilizon->getGroupsAsArray();
 
         if (!in_array($groupId, array_column($groups, 'id'))) {
-            return response()->json(['error' => 'Du bist nicht Teil der Gruppe oder die Gruppe existiert nicht.'], 403);
+            return response()->json(['error' => __('messages.general.notInGroup')], 403);
         }
 
         return $next($request);

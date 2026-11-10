@@ -1,11 +1,11 @@
 export const mimeTypes: Record<string, string> = {
     // all
-    'audio/*': 'alle Audioformate',
-    'video/*': 'alle Videoformate',
-    'image/*': 'alle Bildformate',
-    'text/*': 'alle Textformate',
-    'application/*': 'alle Anwendungsformate',
-    'calendar/*': 'Kalender',
+    'audio/*': 'validation.fileFormats.allAudio',
+    'video/*': 'validation.fileFormats.allVideo',
+    'image/*': 'validation.fileFormats.allImage',
+    'text/*': 'validation.fileFormats.allText',
+    'application/*': 'validation.fileFormats.allApplication',
+    'calendar/*': 'validation.fileFormats.calendar',
 
     // audio
     'audio/mpeg': 'MP3',

@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import { ref, defineModel } from 'vue';
+import { useI18n } from 'vue-i18n';
 import InputText from './KERN/inputs/InputText.vue';
 import Button from './KERN/Button.vue';
 import { current_organisation } from '@/composables/OrganisationComposable';
 import { dsgApi } from '@/lib/dsgApi';
 import Icon from './KERN/cosmetics/Icon.vue';
 
+const { t } = useI18n();
 const newTag = ref<string>('');
 const tags = defineModel<string[]>([]);
 const notUsedSuggestions = ref<string[]>([]);
@@ -59,7 +61,7 @@ const removeTag = (tag: string) => {
             <div class="col-12 md:col-6 px-0">
                 <InputText
                     v-model="newTag"
-                    label="Schlagwörter hinzufügen"
+                    :label="t('app.shared.tags.addLabel')"
                     name="tags"
                     @keydown.enter.prevent
                     @keyup.enter="addTag(newTag)"
@@ -72,7 +74,7 @@ const removeTag = (tag: string) => {
                     icon-left="add"
                     @click.prevent="addTag(newTag)"
                 >
-                    Hinzufügen
+                    {{ t('app.shared.tags.addButton') }}
                 </Button>
             </div>
         </div>
@@ -83,7 +85,7 @@ const removeTag = (tag: string) => {
                         name="info"
                         class="pt-2 mr-2"
                     />
-                    Du hast noch keine Schlagwörter ausgewählt.
+                    {{ t('app.shared.tags.none') }}
                 </p>
             </template>
             <template
@@ -101,7 +103,7 @@ const removeTag = (tag: string) => {
             </template>
         </div>
         <div v-if="notUsedSuggestions && notUsedSuggestions.length > 0">
-            <p class="kern-text mb-2">Vorschläge, basierend auf bisher genutzten Schlagwörtern deiner Organisation:</p>
+            <p class="kern-text mb-2">{{ t('app.shared.tags.suggestions') }}</p>
 
             <template
                 v-for="suggestion in notUsedSuggestions"

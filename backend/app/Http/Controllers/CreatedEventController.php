@@ -7,6 +7,7 @@ use App\Models\Mobilizon;
 use App\Models\SeriesEvent;
 use App\Models\SingleEvent;
 use Carbon\Carbon;
+use DateTimeZone;
 use Http;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\JsonResponse;
@@ -36,8 +37,8 @@ class CreatedEventController extends Controller implements HasMiddleware
 
         if ($pictureFile && !$pictureFile->isValid()) {
             $error = in_array($pictureFile->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE])
-                ? 'Das Bild überschreitet die maximal erlaubte Dateigröße von ' . ini_get('upload_max_filesize') . 'B. Bitte wählen Sie ein kleineres Bild.'
-                : 'Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.';
+                ? __('messages.events.imageTooLarge', ['size' => ini_get('upload_max_filesize') . 'B'])
+                : __('messages.events.imageUploadFailed');
 
             return response()->json(['error' => $error], 422);
         }
@@ -45,10 +46,23 @@ class CreatedEventController extends Controller implements HasMiddleware
         return null;
     }
 
+    /**
+     * Timezone of the event (Mobilizon event option), falls back to the instance timezone (APP_TIMEZONE).
+     */
+    static public function eventTimezone(Request $request): string
+    {
+        $timezone = $request->input('mobilizon_fields.options.timezone');
+
+        return is_string($timezone) && in_array($timezone, DateTimeZone::listIdentifiers(), true)
+            ? $timezone
+            : config('app.timezone');
+    }
+
     static public function buildMobilizonEventData(Request $request, SingleEvent|SeriesEvent $event, Mobilizon $mclient, array $customDateTimes = []): array
     {
         $mobilizonFields = $request->input('mobilizon_fields');
-        $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'));
+        $timezone = self::eventTimezone($request);
+        $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
 
         $durationSeparated = explode(':', $request->input('duration'));
         $durationMinutes = (int)$durationSeparated[0] * 60 + (int)$durationSeparated[1];
@@ -66,6 +80,7 @@ class CreatedEventController extends Controller implements HasMiddleware
             "attributedToId"   => $request->get('mobilizon_group_id'),
             "organizerActorId" => $mclient->person_id,
             "tags"             => $mobilizonFields['tags'] ?? [],
+            "options"          => ["timezone" => $timezone],
         ];
 
         if ($request->hasFile('mobilizon_fields.picture.media.file')) {
@@ -172,8 +187,10 @@ class CreatedEventController extends Controller implements HasMiddleware
 
         $mclient = Mobilizon::getInstance();
 
-        $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'));
+        $timezone = self::eventTimezone($request);
+        $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
         $mobilizonFields = $request->input('mobilizon_fields');
+        $mobilizonFields['options']['timezone'] = $timezone;
 
         $durationSeperated = explode(':', $request->input('duration'));
         $durationMinutes = (int)$durationSeperated[0] * 60 + (int)$durationSeperated[1];
@@ -189,6 +206,7 @@ class CreatedEventController extends Controller implements HasMiddleware
             "joinOptions" => Query::enum($mobilizonFields['joinOptions']),
             "language" => $mobilizonFields['language'],
             "tags" => $mobilizonFields['tags'] ?? [],
+            "options" => ["timezone" => $timezone],
         ];
 
         if ($request->hasFile('mobilizon_fields.picture.media.file')) {
@@ -243,8 +261,9 @@ class CreatedEventController extends Controller implements HasMiddleware
             ], 400);
         } else {
 
-            $createdEvent->start = Carbon::parse($eventStart)->format('Y-m-d'); // no Timezone
-            $createdEvent->time = Carbon::parse($eventStart)->format('H:i');
+            // wall-clock time in the event timezone
+            $createdEvent->start = $eventStart->format('Y-m-d');
+            $createdEvent->time = $eventStart->format('H:i');
             $createdEvent->duration = $request->input('duration');
 
             // if image changed, update the picture
@@ -320,7 +339,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         $createdEvent->delete();
 
         return response()->json([
-            'message' => 'Created event deleted successfully'
+            'message' => __('messages.events.deleted')
         ]);
     }
 
@@ -346,6 +365,9 @@ class CreatedEventController extends Controller implements HasMiddleware
         if ($pictureUuid = $pictureResponse['data']['event']['picture']['uuid'] ?? null) {
             $eventData['picture'] = ['mediaUuid' => $pictureUuid];
         }
+        if ($timezone = $pictureResponse['data']['event']['options']['timezone'] ?? null) {
+            $eventData['options'] = ['timezone' => $timezone];
+        }
 
         $mresponse = $mclient->updateEvent($eventData, false);
         if ($mclient->hasError($mresponse)) {
@@ -365,7 +387,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         $uuid = $request->input('uuid');
         $createdEvent = CreatedEvent::where('mobilizon_uuid', $uuid)->first();
         if (!$createdEvent) {
-            return response()->json(['error' => 'Created event not found'], 404);
+            return response()->json(['error' => __('messages.events.createdEventNotFound')], 404);
         }
         return response()->json($createdEvent->only('id'));
     }
@@ -379,7 +401,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         $imageUrl = $mresponse['data']['event']['picture']['url'] ?? null;
 
         if (!$imageUrl) {
-            return response()->json(['error' => 'Image not found'], 404);
+            return response()->json(['error' => __('messages.general.imageNotFound')], 404);
         }
 
         try {
@@ -400,7 +422,7 @@ class CreatedEventController extends Controller implements HasMiddleware
                 $imageResponse = $this->tryFetchImage($fallbackUrl);
 
                 if (!$imageResponse->successful()) {
-                    return response()->json(['error' => 'Failed to fetch image'], 502);
+                    return response()->json(['error' => __('messages.general.imageFetchFailed')], 502);
                 }
 
                 $imageUrl = $fallbackUrl;
@@ -420,7 +442,7 @@ class CreatedEventController extends Controller implements HasMiddleware
                 'url'   => $imageUrl,
                 'error' => $e->getMessage(),
             ]);
-            return response()->json(['error' => 'Unexpected error'], 500);
+            return response()->json(['error' => __('messages.general.unexpectedError')], 500);
         }
     }
 

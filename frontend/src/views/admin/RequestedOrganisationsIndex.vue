@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { requested_organisation_status } from '@/lib/const';
 
@@ -10,6 +11,8 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 import Alert from '@/components/KERN/Alert.vue';
 
 import type { Column } from '@/types/General';
+
+const { t } = useI18n();
 
 const loading = ref(false);
 const loadingNewState = ref(false);
@@ -24,7 +27,7 @@ const columns: Array<Column> = [
     },
     {
         key: 'requested_organisation_data',
-        name: 'Organisation',
+        name: t('app.admin.eventRequests.fields.organisation'),
         format: (col: any) => {
             return `${col?.name} (${col?.preferredUsername})`.slice(0, 30) + '...';
         },
@@ -32,9 +35,9 @@ const columns: Array<Column> = [
     },
     {
         key: 'status',
-        name: 'Status',
+        name: t('app.admin.users.columns.status'),
         format: (col: keyof typeof requested_organisation_status) => {
-            return requested_organisation_status[col] || 'Unbekannt';
+            return requested_organisation_status[col] || t('app.admin.shared.unknown');
         },
         align: 'left',
     },
@@ -54,7 +57,7 @@ const changeStatus = async (id: number, status: string) => {
         console.error('Error changing status:', error.response.data.error);
         showErrorMessage.value = true;
         errorMessageContent.value =
-            error?.response?.data?.error || 'Beim Ändern des Organisationsstatus ist ein Fehler aufgetreten.';
+            error?.response?.data?.error || t('app.admin.requestedOrganisations.changeStatusError');
     } finally {
         loadingNewState.value = false;
         loading.value = false;
@@ -63,31 +66,34 @@ const changeStatus = async (id: number, status: string) => {
 </script>
 <template>
     <div class="flex align-items-center justify-content-between mb-1">
-        <h1 class="kern-heading text-theme-primary">Ausstehende Organisationsanfragen</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.admin.organisationRequests.indexTitle') }}</h1>
     </div>
     <p class="mb-4">
         <span class="block mb-3">
-            <b>Hinweis:</b>
-            Als Administrator*in der Instanz können Sie hier Anfragen von Organisationen annehmen oder ablehnen.
-            Organisationen mit ausstehenden Anfragen können keine Termine erstellen.
+            <b>{{ t('app.admin.shared.note') }}</b>
+            {{ t('app.admin.requestedOrganisations.hint') }}
         </span>
         <span class="block mb-3">
-            Die Verwaltung aller aktiver Organisationen Ihrer Instanz können Sie im Bereich Instanz verwalten
-            (Seitenmenü) vornehmen.
+            {{ t('app.admin.requestedOrganisations.hintManage') }}
         </span>
         <span class="block">
-            Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/Instanz/"
-                fragment="organisationen-verwalten"
-            />
-            .
+            <I18nT
+                keypath="app.admin.shared.moreInfo"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/Instanz/"
+                        fragment="organisationen-verwalten"
+                    />
+                </template>
+            </I18nT>
         </span>
     </p>
     <Alert
         v-if="showErrorMessage"
-        title="Fehler"
-        :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
+        :title="t('common.error')"
+        :content="errorMessageContent || t('app.admin.shared.genericError')"
         severity="danger"
     />
     <Loader v-if="loading" />
@@ -101,25 +107,25 @@ const changeStatus = async (id: number, status: string) => {
             <template #aktionen="{ row }">
                 <div class="flex flex-wrap gap-3 justify-content-end">
                     <Button
-                        title="Annehmen"
-                        aria-label="Annehmen"
+                        :title="t('app.admin.requestedOrganisations.accept')"
+                        :aria-label="t('app.admin.requestedOrganisations.accept')"
                         @click="changeStatus(row.id, 'ACTIVE')"
                         icon-left="check"
                         :hide-text-on-mobile="true"
                         :disabled="loadingNewState"
                     >
-                        Annehmen
+                        {{ t('app.admin.requestedOrganisations.accept') }}
                     </Button>
                     <Button
-                        title="Ablehnen"
-                        aria-label="Ablehnen"
+                        :title="t('app.admin.requestedOrganisations.reject')"
+                        :aria-label="t('app.admin.requestedOrganisations.reject')"
                         @click="changeStatus(row.id, 'REQUEST_DENIED')"
                         icon-left="close"
                         variant="secondary"
                         :hide-text-on-mobile="true"
                         :disabled="loadingNewState"
                     >
-                        Ablehnen
+                        {{ t('app.admin.requestedOrganisations.reject') }}
                     </Button>
                 </div>
             </template>

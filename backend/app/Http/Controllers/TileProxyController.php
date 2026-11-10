@@ -20,14 +20,14 @@ class TileProxyController extends Controller
     public function proxy(Request $request, int $z, int $x, int $y)
     {
         if ($z < 0 || $z > 19 || $x < 0 || $y < 0) {
-            return response()->json(['error' => 'Ungültige Koordinaten'], 400);
+            return response()->json(['error' => __('messages.tiles.invalidCoordinates')], 400);
         }
 
         $appUrl = config('app.url');
         
         if (empty($appUrl)) {
             Log::error('TileProxy: APP_URL not configured in .env');
-            return response()->json(['error' => 'Serverkonfigurationsfehler'], 500);
+            return response()->json(['error' => __('messages.tiles.serverConfigError')], 500);
         }
 
         // Build OSM tile URL
@@ -52,7 +52,7 @@ class TileProxyController extends Controller
                 
         } catch (\Exception $e) {
             Log::error("TileProxy: Failed to fetch tile {$z}/{$x}/{$y}: " . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Abrufen der Kachel'], 500);
+            return response()->json(['error' => __('messages.tiles.fetchFailed')], 500);
         }
     }
 }

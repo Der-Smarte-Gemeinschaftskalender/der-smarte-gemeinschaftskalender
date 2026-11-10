@@ -1,22 +1,27 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 
 import Button from '@/components/KERN/Button.vue';
 
 import { IOrganisation } from '@/types/General';
 
+const { t } = useI18n();
+
 const featuredError = defineModel<string | null>('error');
 const organisation = defineModel<IOrganisation>('organisation');
 
 const featuredButtonLabel = computed(() =>
-    organisation.value?.is_featured ? 'Als nicht empfohlen markieren' : 'Als empfohlen markieren'
+    organisation.value?.is_featured
+        ? t('app.organisations.featured.markNotFeatured')
+        : t('app.organisations.featured.markFeatured')
 );
 
 const toggleFeatured = async (organisation?: IOrganisation) => {
     try {
         if (!organisation?.id) {
-            featuredError.value = 'Ungültige Organisation.';
+            featuredError.value = t('app.organisations.featured.invalidOrganisation');
             return;
         }
 
@@ -26,7 +31,7 @@ const toggleFeatured = async (organisation?: IOrganisation) => {
 
         organisation.is_featured = !organisation.is_featured;
     } catch (error: any) {
-        featuredError.value = 'Fehler beim Aktualisieren des empfohlenen Status.';
+        featuredError.value = t('app.organisations.featured.updateError');
         console.error('Error toggling featured status:', error);
     }
 };

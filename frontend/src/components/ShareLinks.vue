@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { createTextSingleEvent, createTextEventList, createFullEventUrl, createFullUrl } from '@/lib/shareInformation';
 import type { IEventDetailed } from '@/types/General';
+import { useI18n } from 'vue-i18n';
 
 interface PropsBase {
     type: 'singleEvent' | 'eventList';
@@ -22,13 +23,14 @@ interface EventListProps extends PropsBase {
 type Props = SingleEventProps | EventListProps;
 
 const { type, event, eventList, linkToUrl } = defineProps<Props>();
+const { t } = useI18n();
 const fullUrl: string = type === 'singleEvent' ? createFullEventUrl(event!.uuid) : createFullUrl(linkToUrl);
 const text: string =
     type === 'singleEvent'
         ? createTextSingleEvent(event, true)
-        : createTextEventList('Veranstaltungsübersicht', eventList);
+        : createTextEventList(t('public.share.eventListTitle'), eventList);
 const fullEncodedUrl: string = encodeURIComponent(fullUrl);
-const title: string = type === 'singleEvent' ? event.title : 'Veranstaltungsübersicht';
+const title: string = type === 'singleEvent' ? event.title : t('public.share.eventListTitle');
 const fullEncodedText: string = encodeURIComponent(text);
 
 const copyContent = () => {
@@ -46,8 +48,8 @@ const copyContent = () => {
         <slot />
         <a
             class="cursor-pointer"
-            aria-label="Kopieren"
-            title="Kopieren"
+            :aria-label="t('public.share.copy')"
+            :title="t('public.share.copy')"
             @click="copyContent()"
         >
             <!--<Icon
@@ -62,7 +64,7 @@ const copyContent = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
             >
-                <title>Kopieren</title>
+                <title>{{ t('public.share.copy') }}</title>
                 <path
                     fill-rule="evenodd"
                     clip-rule="evenodd"
@@ -75,7 +77,7 @@ const copyContent = () => {
                 type="text"
                 :value="text"
                 style="display: none"
-                aria-label="Link zum Suchergebnis"
+                :aria-label="t('public.share.copyTextAria')"
             />
         </a>
         <a

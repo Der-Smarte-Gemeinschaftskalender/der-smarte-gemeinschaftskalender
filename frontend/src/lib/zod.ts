@@ -2,13 +2,17 @@ import * as zod from "zod";
 import i18next from "i18next";
 import { zodI18nMap } from "zod-i18n-map";
 // Import your language translation files
-import translation from "@/translations/de/zod.json";
+import translationDe from "@/translations/de/zod.json";
+import translationEn from "zod-i18n-map/locales/en/zod.json";
+import i18n from "@/i18n";
 
 // lng and resources key depend on your locale.
 i18next.init({
-  lng: "de",
+  lng: i18n.global.locale.value,
+  fallbackLng: "de",
   resources: {
-    de: { zod: translation },
+    de: { zod: translationDe },
+    en: { zod: translationEn },
   },
 });
 zod.setErrorMap(zodI18nMap);

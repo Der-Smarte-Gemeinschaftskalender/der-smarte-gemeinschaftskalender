@@ -2,25 +2,19 @@
 
 namespace App\Mail;
 
-use App;
-use Carbon\Carbon;
-use Hash;
+use App\Enums\EmailTemplateType;
+use App\Mail\Concerns\RendersEmailTemplate;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Http\Controllers\EmailTemplateController;
-use App\Enums\EmailTemplateType;
 
 class SendConfirmEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, RendersEmailTemplate;
 
     public string $verificationToken;
-    public string $mailBody;
-    public string $mailSubject;
 
     /**
      * Create a new message instance.
@@ -28,16 +22,6 @@ class SendConfirmEmail extends Mailable
     public function __construct($verificationToken)
     {
         $this->verificationToken = $verificationToken;
-
-        $templateController = new EmailTemplateController();
-        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::VALIDATION);
-        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::VALIDATION);
-
-        $variables = [
-            ':appName' => config('app.name', 'Der Smarte Gemeinschaftskalender'),
-        ];
-        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
-        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
     }
 
     /**
@@ -46,7 +30,7 @@ class SendConfirmEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->mailSubject,
+            subject: $this->renderEmailTemplate(EmailTemplateType::VALIDATION)['subject'],
         );
     }
 
@@ -58,7 +42,7 @@ class SendConfirmEmail extends Mailable
         return new Content(
             view: 'emails.confirmEmailMail',
             with: [
-                'mailBody' => $this->mailBody,
+                'mailBody' => $this->renderEmailTemplate(EmailTemplateType::VALIDATION)['body'],
                 'verificationToken' => $this->verificationToken,
             ],
         );

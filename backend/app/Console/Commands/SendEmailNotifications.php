@@ -135,6 +135,6 @@ class SendEmailNotifications extends Command
     public function formatBeginsOn($beginsOn)
     {
         Carbon::setLocale(App::getLocale());
-        return Carbon::parse($beginsOn)->translatedFormat('D d.m.Y H:i') . ' Uhr';
+        return Carbon::parse($beginsOn)->translatedFormat(__('emails.notification.dateFormat'));
     }
 }

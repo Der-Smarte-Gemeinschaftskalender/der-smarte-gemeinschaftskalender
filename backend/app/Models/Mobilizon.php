@@ -333,10 +333,11 @@ class Mobilizon
     {
         $query = Query::query("event");
         $query->field("event")->attribute("uuid", $uuid);
-        $query->event->fields(['beginsOn', 'endsOn', 'description', 'title', 'category', 'tags', 'externalParticipationUrl', 'joinOptions', 'joinOptions', 'language', 'onlineAddress', 'status', 'url', 'physicalAddress', 'picture']);
+        $query->event->fields(['beginsOn', 'endsOn', 'description', 'title', 'category', 'tags', 'externalParticipationUrl', 'joinOptions', 'joinOptions', 'language', 'onlineAddress', 'status', 'url', 'physicalAddress', 'picture', 'options']);
         $query->event->physicalAddress->fields(['street', 'postalCode', 'locality', 'region', 'country', 'geom']);
         $query->event->tags->fields(['slug', 'title']);
         $query->event->picture->fields(['url']);
+        $query->event->options->fields(['timezone']);
 
         if ($this->debug) var_dump($query->build());
 
@@ -347,8 +348,9 @@ class Mobilizon
     {
         $query = Query::query("GetEventPicture");
         $query->field("event")->attribute('uuid', $uuid);
-        $query->event->fields(['picture']);
+        $query->event->fields(['picture', 'options']);
         $query->event->picture->fields(['uuid', 'url']);
+        $query->event->options->fields(['timezone']);
 
         return $this->requestWithoutMedia($query->build());
     }
@@ -625,7 +627,7 @@ class Mobilizon
 
                 if (!is_array($result)) {
                     Log::error('Mobilizon lieferte keine JSON-Antwort (HTTP ' . $response->getStatusCode() . ')');
-                    return ['error' => 'Mobilizon lieferte eine ungültige Antwort (HTTP ' . $response->getStatusCode() . ')'];
+                    return ['error' => __('messages.mobilizon.invalidResponse', ['status' => $response->getStatusCode()])];
                 }
 
                 if ($this->isRateLimitError($result)) {
@@ -645,7 +647,7 @@ class Mobilizon
             }
         }
 
-        return ['error' => 'Too many requests - max retries exceeded'];
+        return ['error' => __('messages.mobilizon.tooManyRequests')];
     }
 
     private function requestWithoutMedia(string $queryString, $token = true): array
@@ -671,7 +673,7 @@ class Mobilizon
 
                 if (!is_array($result)) {
                     Log::error('Mobilizon lieferte keine JSON-Antwort (HTTP ' . $response->getStatusCode() . ')');
-                    return ['error' => 'Mobilizon lieferte eine ungültige Antwort (HTTP ' . $response->getStatusCode() . ')'];
+                    return ['error' => __('messages.mobilizon.invalidResponse', ['status' => $response->getStatusCode()])];
                 }
 
                 if ($this->isRateLimitError($result)) {
@@ -691,6 +693,6 @@ class Mobilizon
             }
         }
 
-        return ['error' => 'Too many requests - max retries exceeded'];
+        return ['error' => __('messages.mobilizon.tooManyRequests')];
     }
 }

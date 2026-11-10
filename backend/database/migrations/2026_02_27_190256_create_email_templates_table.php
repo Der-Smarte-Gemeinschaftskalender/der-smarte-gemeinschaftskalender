@@ -21,8 +21,8 @@ return new class extends Migration
         foreach (EmailTemplateType::cases() as $type) {
             EmailTemplate::create([
                 'on_event' => $type->value,
-                'subject' => $type->getSubject(),
-                'body' => $type->getBody(),
+                'subject' => $type->getSubject('de'),
+                'body' => $type->getBody('de'),
             ]);
         }
     }

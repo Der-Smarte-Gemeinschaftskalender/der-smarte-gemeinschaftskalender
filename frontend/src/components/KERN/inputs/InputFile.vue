@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineProps } from 'vue';
 import { mimeTypes } from '@/types/File';
+import { translateMessage } from '@/i18n';
 import FormInputLabel from '@/components/KERN/inputs/FormInputLabel.vue';
 
 interface Props {
@@ -21,7 +22,7 @@ const getAccept = (): string => {
 
     const formatedAccept = accept.map((item) => {
         item = item.trim();
-        return mimeTypes[item as keyof typeof mimeTypes] ?? item;
+        return translateMessage(mimeTypes[item as keyof typeof mimeTypes] ?? item);
     });
     // remove duplicates
     const uniqueAccept = [...new Set(formatedAccept)];
@@ -49,7 +50,7 @@ const onClick = ($event: Event) => {
             :id="`input-${name}`"
             class="kern-form-input__hint w-full"
         >
-            Erlaubte Formate: {{ getAccept() }}
+            {{ $t('app.shared.file.allowedFormats', { formats: getAccept() }) }}
         </div>
 
         <input

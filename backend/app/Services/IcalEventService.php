@@ -47,6 +47,7 @@ class IcalEventService
                 'attributedToId'    => $mobilizon_group_id,
                 'organizerActorId'  => $mclient->person_id,
                 'sequence'          => $event['sequence'] ?? 0,
+                'options'           => ['timezone' => config('app.timezone')],
             ];
 
             if (isset($event['attachment'])) {
@@ -76,7 +77,7 @@ class IcalEventService
         try {
             $ical = new ICal($ical_try, array(
                 'httpUserAgent'               => config('app.url'),
-                'defaultTimeZone'             => 'Europe/Berlin',
+                'defaultTimeZone'             => config('app.timezone'),
                 'filterDaysBefore'            => 1,
                 'filterDaysAfter'             => 365,
             ));
@@ -87,7 +88,7 @@ class IcalEventService
         } catch (Throwable $e) {
             Log::error("Error parsing iCal data: " . $e->getMessage());
             return response()->json([
-                'error' => 'Error parsing ical: ' . $e->getMessage()
+                'error' => __('messages.uploads.icalParseError', ['message' => $e->getMessage()])
             ], 500);
         }
     }

@@ -1,5 +1,7 @@
 import zod from '@/lib/zod';
+import i18n, { isDe, translateMessage } from '@/i18n';
 import { stripHtml } from '@/lib/helper';
+import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { mimeTypes } from '@/types/File';
 import {
     mobilizon_category_options,
@@ -19,7 +21,7 @@ export const addressDefaults = {
     street: '',
     type: EventPlaceType.OFFICE,
     geom: '',
-    timezone: 'Europe/Berlin',
+    timezone: INSTANCE_TIMEZONE,
     id: null,
 };
 
@@ -48,7 +50,7 @@ export const AddressFormSchema = zod
             ctx.addIssue({
                 code: zod.ZodIssueCode.custom,
                 message:
-                    'Die Adresse konnte keinem Ort zugeordnet werden. Wählen einen Vorschlag aus der Liste aus. Die Vorschläge erscheinen nur, wenn eine Adresse eingeben wurde, die in OpenStreetMap hinterlegt ist.',
+                    'validation.address.notGeocoded',
             });
         }
     });
@@ -65,10 +67,10 @@ export const PICTURE_ALLOWED_MIME_TYPES = ['image/gif', 'image/png', 'image/jpeg
 
 const describeFileFormat = (file: File): string => {
     const knownFormat = mimeTypes[file.type];
-    if (knownFormat) return knownFormat;
+    if (knownFormat) return translateMessage(knownFormat);
 
     const extension = file.name.includes('.') ? file.name.split('.').pop() : '';
-    return extension ? extension.toUpperCase() : file.type || 'unbekannt';
+    return extension ? extension.toUpperCase() : file.type || i18n.global.t('validation.picture.unknownFormat');
 };
 
 export const validatePictureFile = (file: File | undefined, ctx: zod.RefinementCtx): void => {
@@ -78,7 +80,7 @@ export const validatePictureFile = (file: File | undefined, ctx: zod.RefinementC
         ctx.addIssue({
             code: zod.ZodIssueCode.custom,
             message:
-                'Die ausgewählte Datei ist leer oder konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.',
+                'validation.picture.unreadable',
         });
         return;
     }
@@ -86,16 +88,16 @@ export const validatePictureFile = (file: File | undefined, ctx: zod.RefinementC
     if (!PICTURE_ALLOWED_MIME_TYPES.includes(file.type)) {
         ctx.addIssue({
             code: zod.ZodIssueCode.custom,
-            message: `Das Format ${describeFileFormat(file)} wird nicht unterstützt. Bitte wählen Sie ein Bild im Format JPG, PNG, GIF oder WEBP.`,
+            message: i18n.global.t('validation.picture.unsupportedFormat', { format: describeFileFormat(file) }),
         });
         return;
     }
 
     if (file.size >= PICTURE_MAX_BYTES) {
-        const sizeInMb = (file.size / 1_048_576).toFixed(1).replace('.', ',');
+        const sizeInMb = (file.size / 1_048_576).toFixed(1).replace('.', isDe() ? ',' : '.');
         ctx.addIssue({
             code: zod.ZodIssueCode.custom,
-            message: `Das Bild ist mit ${sizeInMb} MB zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.`,
+            message: i18n.global.t('validation.picture.tooLarge', { size: sizeInMb }),
         });
     }
 };
@@ -135,7 +137,7 @@ export const MobilizonFieldsFormSchema = zod.object({
         .nullable()
         .optional()
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
-            message: 'Bei Angabe einer externen Teilnahme-URL bitte eine gültige URL eingeben.',
+            message: 'validation.url.externalParticipation',
         }),
     visibility: zod.string().nonempty().default(mobilizonFieldsDefaults.visibility),
     physicalAddress: AddressFormSchema.nullable().optional(),
@@ -143,9 +145,10 @@ export const MobilizonFieldsFormSchema = zod.object({
         .string()
         .nullable()
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
-            message: 'Bei Angabe einer Online-Adresse bitte eine gültige URL eingeben.',
+            message: 'validation.url.onlineAddress',
         })
         .default(mobilizonFieldsDefaults.onlineAddress),
+    timezone: zod.string().nonempty().default(INSTANCE_TIMEZONE),
 });
 
 export type MobilizonFieldsForm = zod.infer<typeof MobilizonFieldsFormSchema>;
@@ -154,7 +157,7 @@ export const MobilizonFieldsSchema = zod.object({
     picture: PictureSchema.optional().nullable(),
     description: zod
         .string()
-        .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' }),
+        .refine((val) => stripHtml(val).length > 0, { message: 'validation.description.notEmpty' }),
     category: zod.string().nonempty(),
     joinOptions: zod.string().nonempty(),
     externalParticipationUrl: zod
@@ -162,7 +165,7 @@ export const MobilizonFieldsSchema = zod.object({
         .optional()
         .nullable()
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
-            message: 'Bei Angabe einer externen Teilnahme-URL bitte eine gültige URL eingeben.',
+            message: 'validation.url.externalParticipation',
         }),
     language: zod.string().nonempty(),
     status: zod.string().nonempty(),
@@ -173,9 +176,15 @@ export const MobilizonFieldsSchema = zod.object({
         .nullable()
         .optional()
         .refine((val) => !val || /^(https?:\/\/)([\w-]+\.)+[\w-]{2,}(\/[\w.-]*)*(\?.*)?$/.test(val), {
-            message: 'Bei Angabe einer Online-Adresse bitte eine gültige URL eingeben.',
+            message: 'validation.url.onlineAddress',
         }),
     physicalAddress: AddressFormSchema.optional().nullable(),
+    options: zod
+        .object({
+            timezone: zod.string().nullable().optional(),
+        })
+        .optional()
+        .nullable(),
 });
 
 export type MobilizonFields = zod.infer<typeof MobilizonFieldsSchema>;

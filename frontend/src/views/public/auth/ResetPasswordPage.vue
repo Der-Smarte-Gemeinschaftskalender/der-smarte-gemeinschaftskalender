@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import zod from '@/lib/zod';
 
 import { useRoute, useRouter } from 'vue-router';
@@ -13,6 +14,7 @@ import InputPassword from '@/components/KERN/inputs/InputPassword.vue';
 import Button from '@/components/KERN/Button.vue';
 import Alert from '@/components/KERN/Alert.vue';
 
+const { t } = useI18n();
 const route = useRoute();
 
 const showErrorMessage = ref(false);
@@ -28,11 +30,11 @@ interface ResetPasswordForm {
 
 const validationSchema = toTypedSchema(
     zod.object({
-      password: zod.string().min(6, 'Das Passwort muss mindestens 6 Zeichen haben.'),
-      password_confirmation: zod.string().min(6, 'Bitte Passwortbestätigung eingeben.'),
+      password: zod.string().min(6, 'auth.validation.passwordMin6'),
+      password_confirmation: zod.string().min(6, 'auth.validation.passwordConfirmationMissing'),
     })
         .refine((data) => data.password === data.password_confirmation, {
-          message: 'Passwörter stimmen nicht überein.',
+          message: 'auth.validation.passwordsDoNotMatchShort',
           path: ['password_confirmation'],
         })
 );
@@ -58,7 +60,7 @@ const onSubmit = handleSubmit(async (values) => {
     catch (error: AxiosError|any) {
         console.error(error);
         showErrorMessage.value = true;
-        messageContent.value = error.response?.data?.error || 'Es ist ein Fehler aufgetreten.';
+        messageContent.value = error.response?.data?.error || t('auth.errorOccurred');
     }
 });
 </script>
@@ -66,17 +68,17 @@ const onSubmit = handleSubmit(async (values) => {
 <template>
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="reset-password-card">
-            <Card title="Passwort zurücksetzen">
+            <Card :title="t('auth.resetPassword.title')">
                 <Fieldset>
                     <Alert
                         v-if="showSuccessMessage"
-                        title="Erfolg"
+                        :title="t('common.success')"
                         :content="messageContent"
                         severity="success"
                     />
                     <Alert
                         v-if="showErrorMessage"
-                        title="Fehler"
+                        :title="t('common.error')"
                         :content="messageContent"
                         severity="danger"
                     />
@@ -88,7 +90,7 @@ const onSubmit = handleSubmit(async (values) => {
                     >
                         <InputPassword
                             v-model="password"
-                            label="Neues Passwort"
+                            :label="t('auth.resetPassword.newPassword')"
                             name="password"
                             required
                             :errors="submitCount === 0 ? undefined : errors.password"
@@ -96,20 +98,20 @@ const onSubmit = handleSubmit(async (values) => {
 
                         <InputPassword
                             v-model="password_confirmation"
-                            label="Passwort bestätigen"
+                            :label="t('auth.passwordConfirm')"
                             name="password_confirmation"
                             required
                             :errors="submitCount === 0 ? undefined : errors.password_confirmation"
                         />
 
                         <Button type="submit" class="mt-3" :disabled="isSubmitting">
-                            Passwort speichern
+                            {{ t('auth.resetPassword.submit') }}
                         </Button>
                     </form>
                 </Fieldset>
 
                 <div class="text-center mt-3">
-                    <RouterLink :to="{ name: 'login' }">Zurück zum Login</RouterLink>
+                    <RouterLink :to="{ name: 'login' }">{{ t('auth.backToLogin') }}</RouterLink>
                 </div>
             </Card>
         </div>

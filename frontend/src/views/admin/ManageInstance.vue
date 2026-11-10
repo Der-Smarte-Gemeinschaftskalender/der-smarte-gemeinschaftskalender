@@ -18,29 +18,26 @@ loadAdminData();
 </script>
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary">Instanz Verwalten</h1>
+        <h1 class="kern-heading text-theme-primary">{{ $t('app.admin.manageInstance.title') }}</h1>
         <p class="kern-text">
-            Die Einstellung zur verwaltung der Instanz können nur direkt in Mobilizon vorgenommen werden. Bitte besuchen
-            Sie die Mobilizon Weboberfläche, um Änderungen vorzunehmen:
+            {{ $t('app.admin.manageInstance.hint') }}
             <a
                 :href="`${mobilizonUrl}/login`"
                 target="_blank"
             >
-                Zur Mobilizon Instanz
+                {{ $t('app.admin.manageInstance.toMobilizon') }}
             </a>
         </p>
-        <h2 class="kern-heading text-theme-primary">Zugangsdaten</h2>
+        <h2 class="kern-heading text-theme-primary">{{ $t('app.admin.instance.credentials') }}</h2>
         <p class="kern-text">
-            Diese Zugangsdaten wurden bei der Installation automatisch generiert. Diese Daten dürfen Sie mit niemanden
-            teilen. Sie dürfen diese Daten auch nicht in der mobilizon Weboberfläche ändern, da sonst die Integration
-            nicht mehr funktioniert.
+            {{ $t('app.admin.manageInstance.credentialsInfo') }}
         </p>
         <p class="kern-text">
-            <b>E-Mail-Adresse:</b>
+            <b>{{ $t('app.admin.manageInstance.emailAddress') }}</b>
             <br />
             <code>{{ mobilizonAccessData?.mobilizon_email }}</code>
             <br />
-            <b>Passwort:</b>
+            <b>{{ $t('app.admin.manageInstance.password') }}</b>
             <br />
             <code>{{ mobilizonAccessData?.mobilizon_password }}</code>
         </p>

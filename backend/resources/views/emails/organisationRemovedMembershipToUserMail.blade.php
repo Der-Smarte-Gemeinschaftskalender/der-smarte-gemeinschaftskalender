@@ -4,13 +4,13 @@
 @include('emails.partials.header')
 
 <div class="content">
-    <h1>Moin</h1>
+    <h1>{{ __('emails.common.greeting') }}</h1>
 
     {!! $mailBody !!}
 
-    <a href="{{ $urlMyOrganisations }}" class="btn">Meine Organisationen ansehen</a>
+    <a href="{{ $urlMyOrganisations }}" class="btn">{{ __('emails.organisationRemoved.button') }}</a>
 
-    <p>Alternativ können sie auch folgende URL im Browser besuchen:</p>
+    <p>{{ __('emails.common.alternativeUrl') }}</p>
     <p>{{ $urlMyOrganisations }}</p>
 </div>
 

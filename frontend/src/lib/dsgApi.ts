@@ -1,5 +1,6 @@
 import { checkLogin, localLogout, user } from "@/composables/UserComposoable";
 import axios, { AxiosError } from "axios";
+import i18n from "@/i18n";
 
 const dsgApi = axios.create({
     baseURL: import.meta.env.VITE_DSG_API_URL,
@@ -11,6 +12,12 @@ const checkAuthDsgApi = () => {
 };
 
 checkAuthDsgApi();
+
+// Backend answers (error messages) in the language of the user
+dsgApi.interceptors.request.use((config) => {
+    config.headers["Accept-Language"] = i18n.global.locale.value;
+    return config;
+});
 
 dsgApi.interceptors.response.use(
     (response) => response,

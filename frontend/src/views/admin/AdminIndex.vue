@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { I18nT, useI18n } from 'vue-i18n';
 import { user_types_keys } from '@/lib/const';
 
 import Table from '@/components/KERN/Table.vue';
@@ -7,6 +8,8 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 
 import type { Column } from '@/types/General';
 import { dsgApi } from '@/lib/dsgApi';
+
+const { t } = useI18n();
 
 const columns: Array<Column> = [
     {
@@ -17,29 +20,29 @@ const columns: Array<Column> = [
     },
     {
         key: 'mobilizon_name',
-        name: 'Name',
+        name: t('app.admin.users.columns.name'),
         align: 'left',
     },
     {
         key: 'mobilizon_preferred_username',
-        name: 'Benutzername',
+        name: t('app.admin.users.columns.username'),
         align: 'left',
     },
     {
         key: 'email',
-        name: 'E-Mail',
+        name: t('app.admin.users.columns.email'),
         align: 'left',
     },
     {
         key: 'type',
-        name: 'Rolle (Instanz)',
+        name: t('app.admin.users.columns.role'),
         format: (value: string) => user_types_keys[value as keyof typeof user_types_keys] || value,
         align: 'left',
     },
     {
         key: 'is_active',
-        name: 'Status',
-        format: (value: string) => (value ? 'Aktiv' : 'Inaktiv'),
+        name: t('app.admin.users.columns.status'),
+        format: (value: string) => (value ? t('app.const.userIsActive.active') : t('app.const.userIsActive.inactive')),
         align: 'left',
     },
     {
@@ -71,7 +74,7 @@ const exportUserEmails = async () => {
 </script>
 <template>
     <div class="flex align-items-center justify-content-between mb-1 gap-2">
-        <h1 class="kern-heading text-theme-primary">Nutzer*innen der Instanz</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.admin.users.indexTitle') }}</h1>
         <RouterLink
             class=""
             :to="{ name: 'admin.user.create' }"
@@ -81,18 +84,22 @@ const exportUserEmails = async () => {
                 icon-left="add"
                 icon-size="lg"
             >
-                Nutzer*in anlegen
+                {{ t('app.admin.users.createButton') }}
             </Button>
         </RouterLink>
     </div>
     <p class="mb-4">
-        <b>Hinweis:</b>
-        Als Administrator*in der Instanz können Sie hier die Mitglieder aller Organisationen einsehen und bearbeiten.
-        Über den Button Bearbeiten können sie Nutzer*innen entfernen. Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Instanz/"
-            fragment="nutzer-innen-verwalten"
-        />.
+        <b>{{ t('app.admin.shared.note') }}</b> <I18nT
+            keypath="app.admin.users.indexHint"
+            scope="global"
+        >
+            <template #link>
+                <LinkToDocs
+                    path="Terminverwaltung/Instanz/"
+                    fragment="nutzer-innen-verwalten"
+                />
+            </template>
+        </I18nT>
     </p>
     <div class="flex justify-content-end">
         <Button
@@ -102,7 +109,7 @@ const exportUserEmails = async () => {
             variant="secondary"
             class="mb-4"
         >
-            Export der E-Mail-Adressen aktiver Nutzer
+            {{ t('app.admin.users.exportEmails') }}
         </Button>
     </div>
     <Table
@@ -120,7 +127,7 @@ const exportUserEmails = async () => {
                         icon-left="edit"
                         :hide-text-on-mobile="true"
                     >
-                        Bearbeiten
+                        {{ t('common.edit') }}
                     </Button>
                 </RouterLink>
             </div>

@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import type { MgTemplate } from './materialGeneratorConstants';
 import { dsgApi } from '@/lib/dsgApi';
+import i18n from '@/i18n';
 import { current_organisation } from '@/composables/OrganisationComposable';
 
 export function useMgTemplates() {
@@ -19,7 +20,7 @@ export function useMgTemplates() {
             });
             templates.value = data.data as MgTemplate[];
         } catch {
-            error.value = 'Vorlagen konnten nicht geladen werden.';
+            error.value = i18n.global.t('app.materialGenerator.errors.templatesLoad');
         } finally {
             loading.value = false;
         }
@@ -43,7 +44,7 @@ export function useMgTemplates() {
             await fetchTemplates();
             return data.data as MgTemplate;
         } catch {
-            error.value = 'Vorlage konnte nicht gespeichert werden.';
+            error.value = i18n.global.t('app.materialGenerator.errors.templateSave');
             return null;
         }
     }
@@ -57,7 +58,7 @@ export function useMgTemplates() {
             });
             await fetchTemplates();
         } catch {
-            error.value = 'Vorlage konnte nicht gelöscht werden.';
+            error.value = i18n.global.t('app.materialGenerator.errors.templateDelete');
         }
     }
 

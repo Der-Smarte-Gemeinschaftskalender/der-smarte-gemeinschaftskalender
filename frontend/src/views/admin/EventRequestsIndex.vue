@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, toDisplayString } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { formatDateTime } from '@/lib/helper';
 
@@ -11,6 +12,8 @@ import Alert from '@/components/KERN/Alert.vue';
 
 import type { Column } from '@/types/General';
 
+const { t } = useI18n();
+
 const loading = ref(false);
 const showErrorMessage = ref(false);
 const errorMessageContent = ref('');
@@ -19,8 +22,8 @@ const eventRequests = ref<any[]>([]);
 
 const getEventTypeName = (requestableType: string) => {
     const typeMap: Record<string, string> = {
-        CreatedEvent: 'Einzeltermin',
-        SingleEvent: 'Einzeltermin',
+        CreatedEvent: t('app.admin.approval.types.singleEvent'),
+        SingleEvent: t('app.admin.approval.types.singleEvent'),
         //'SeriesEvent': 'Serientermin',
         //'UploadedEvent': 'Kalenderdatei',
         //'ImportedEvent': 'Importierter Termin',
@@ -30,10 +33,10 @@ const getEventTypeName = (requestableType: string) => {
 
 const getActionName = (actionType: string) => {
     const actionMap: Record<string, string> = {
-        create: 'Erstellen',
-        store: 'Erstellen',
-        update: 'Bearbeiten',
-        delete: 'Löschen',
+        create: t('app.admin.approval.actions.create'),
+        store: t('app.admin.approval.actions.create'),
+        update: t('app.admin.approval.actions.update'),
+        delete: t('app.admin.approval.actions.delete'),
         //'accept_upload': 'Hochladen',
     };
     return actionMap[actionType] || actionType;
@@ -55,26 +58,26 @@ const columns: Array<Column> = [
      */
     {
         key: 'request_type',
-        name: 'Aktion',
+        name: t('app.admin.approval.columns.action'),
         format: (col: string) => `${getActionName(col)}`,
         align: 'left',
     },
     {
         key: 'payload',
-        name: 'Titel',
+        name: t('app.admin.approval.columns.title'),
         format: (col: any) => {
-            return col?.name || 'Unbekannt';
+            return col?.name || t('app.admin.shared.unknown');
         },
         align: 'left',
     },
     {
         key: 'created_by',
-        name: 'Erstellt von',
+        name: t('app.admin.approval.columns.createdBy'),
         align: 'left',
     },
     {
         key: 'created_at',
-        name: 'Erstellt am',
+        name: t('app.admin.approval.columns.createdAt'),
         format: (col: string) => formatDateTime(col),
         align: 'left',
     },
@@ -98,7 +101,7 @@ const fetchEventRequests = async () => {
         console.error('Error fetching event requests:', error);
         showErrorMessage.value = true;
         errorMessageContent.value =
-            error?.response?.data?.error || 'Beim Laden der Anfragen ist ein Fehler aufgetreten.';
+            error?.response?.data?.error || t('app.admin.approval.loadRequestsError');
     } finally {
         loading.value = false;
     }
@@ -111,12 +114,12 @@ onMounted(() => {
 
 <template>
     <div class="flex align-items-center justify-content-between mb-1">
-        <h1 class="kern-heading text-theme-primary">Ausstehende Terminanfragen</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.admin.eventRequests.indexTitle') }}</h1>
     </div>
 
     <Alert
         v-if="showErrorMessage"
-        title="Fehler"
+        :title="t('common.error')"
         severity="danger"
         class="mb-4"
     >
@@ -125,21 +128,23 @@ onMounted(() => {
 
     <p class="mb-3">
         <span class="block">
-            <b>Hinweis:</b>
-            Werden Termine von Organisationen erstellt oder bearbeitet, ist vor der Veröffentlichung eine Freigabe durch
-            die Instanzadministration erforderlich. Über den Button „Ansehen” in der Tabelle können Sie die von der
-            Organisation angegebenen Informationen zum Termin prüfen und den Termin bzw. die Terminänderung genehmigen
-            oder ablehnen. Nach erfolgter Freigabe erscheinen Termine und Änderungen in der öffentlichen
-            Kalenderansicht.
+            <b>{{ t('app.admin.shared.note') }}</b>
+            {{ t('app.admin.eventRequests.indexHint') }}
         </span>
     </p>
     <p class="mb-6">
         <span>
-            Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/Instanz/"
-                fragment="terminfreigabe-–-strict-mode"
-            />.
+            <I18nT
+                keypath="app.admin.shared.moreInfo"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/Instanz/"
+                        fragment="terminfreigabe-–-strict-mode"
+                    />
+                </template>
+            </I18nT>
         </span>
     </p>
 
@@ -164,26 +169,26 @@ onMounted(() => {
                     v-if="!row.created_by.email_verified_at"
                     class="text-sm text-theme-secondary text-red-600"
                 >
-                    (E-Mail nicht bestätigt)
+                    {{ t('app.admin.approval.emailNotVerified') }}
                 </p>
             </template>
             <template #aktionen="{ row }">
                 <RouterLink :to="{ name: 'admin.events.requests.show', params: { id: row.id } }">
                     <Button
                         :icon-left="'visibility'"
-                        title="Ansehen"
-                        aria-label="Ansehen"
-                        label="Ansehen"
+                        :title="t('app.admin.approval.view')"
+                        :aria-label="t('app.admin.approval.view')"
+                        :label="t('app.admin.approval.view')"
                     />
                 </RouterLink>
             </template>
         </Table>
         <Alert
             v-else
-            title="Keine ausstehenden Freigabeanfragen"
+            :title="t('app.admin.eventRequests.noneTitle')"
             type="info"
         >
-            Keine ausstehenden Freigabeanfragen vorhanden.
+            {{ t('app.admin.eventRequests.none') }}
         </Alert>
     </div>
 </template>

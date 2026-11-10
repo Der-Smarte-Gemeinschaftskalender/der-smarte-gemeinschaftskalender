@@ -125,8 +125,9 @@ class FetchImportedEvents implements ShouldQueue
                         $createdEvent->ical_update_sequence = $event['sequence'];
                         unset($event['sequence']);
 
-                        $createdEvent->start = Carbon::parse($event['beginsOn'])->format('Y-m-d');
-                        $createdEvent->time = Carbon::parse($event['beginsOn'])->format('H:i');
+                        $eventStart = Carbon::parse($event['beginsOn'])->setTimezone($event['options']['timezone']);
+                        $createdEvent->start = $eventStart->format('Y-m-d');
+                        $createdEvent->time = $eventStart->format('H:i');
                         $createdEvent->duration = IcalEventService::calculateDuration($event['beginsOn'], $event['endsOn']);
 
                         $mresponse = $existingEvents->get($uid) 

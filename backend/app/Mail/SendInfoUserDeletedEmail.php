@@ -23,7 +23,7 @@ class SendInfoUserDeletedEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Löschung Benutzerkonto ' . env('APP_NAME'),
+            subject: __('emails.subjects.userDeleted', ['appName' => config('app.name')]),
         );
     }
 

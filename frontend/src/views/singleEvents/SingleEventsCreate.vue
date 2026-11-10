@@ -2,12 +2,13 @@
 import zod from '@/lib/zod';
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { I18nT, useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSingleEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { formatInputDate, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { useTimezoneCheck } from '@/composables/TimezoneComposable';
+import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import { createEventDefaults } from '@/lib/instanceConfig';
@@ -25,6 +26,7 @@ import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
+import InputTimezone from '@/components/KERN/inputs/InputTimezone.vue';
 import InputUrl from '@/components/KERN/inputs/InputUrl.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import Map from '@/components/Map.vue';
@@ -66,6 +68,7 @@ const { value: name } = useField<string>('name');
 const { value: start } = useField<string>('start');
 const { value: time } = useField<string>('time');
 const { value: duration } = useField<string>('duration');
+const { value: timezone } = useField<string>('timezone');
 const { value: mobilizon_group_id } = useField<number>('mobilizon_group_id');
 const { value: description } = useField<string>('description');
 const { value: category } = useField<string>('category');
@@ -130,6 +133,7 @@ const createFromTemplate = async () => {
         start.value = formatInputDate(singleEvent?.created_event?.start);
         time.value = singleEvent?.created_event?.time;
         duration.value = singleEvent?.created_event?.duration;
+        timezone.value = singleEvent.mobilizon_fields.options?.timezone || INSTANCE_TIMEZONE;
         mobilizon_group_id.value = Number(singleEvent.mobilizon_group_id);
         category.value = singleEvent.mobilizon_fields.category;
         tags.value = singleEvent.mobilizon_fields.tags || [];
@@ -162,14 +166,16 @@ createFromTemplate();
 loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Einzeltermin erstellen</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.events.single.create.title') }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Einzeltermine/"
-            fragment="einzeltermine-erstellen"
-        />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+            <template #link>
+                <LinkToDocs
+                    path="Terminverwaltung/Einzeltermine/"
+                    fragment="einzeltermine-erstellen"
+                />
+            </template>
+        </I18nT>
     </p>
     <form
         novalidate
@@ -179,28 +185,28 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <Fieldset>
             <Alert
                 v-if="errorMessageContent.length"
-                title="Fehler"
+                :title="$t('common.error')"
                 :content="errorMessageContent"
                 severity="danger"
             />
             <div class="flex flex-column gap-5">
                 <InputText
                     v-model="name"
-                    label="Titel der Veranstaltung"
+                    :label="$t('app.events.form.eventTitle')"
                     name="name"
                     :errors="submitCount === 0 ? undefined : errors.name"
                 />
                 <InputImage
                     v-model="picture"
                     v-model:alt="pictureAlt"
-                    label="Bild (optional)"
+                    :label="$t('app.events.form.picture')"
                     name="picture"
                     :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                     :errors="submitCount === 0 ? undefined : errors.picture"
                 />
                 <InputRichText
                     v-model="description"
-                    label="Beschreibung"
+                    :label="$t('app.events.form.description')"
                     name="description"
                     :errors="submitCount === 0 ? undefined : errors.description"
                 />
@@ -208,35 +214,39 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <InputDate
                     v-model="start"
                     name="start"
-                    label="Startdatum"
+                    :label="$t('app.events.form.startDate')"
                     :errors="submitCount === 0 ? undefined : errors.start"
                 />
                 <InputTime
                     v-model="time"
-                    label="Beginn (Uhrzeit)"
+                    :label="$t('app.events.form.startTime')"
                     name="time"
                     :errors="submitCount === 0 ? undefined : errors.time"
                 />
                 <InputTime
                     v-model="duration"
-                    label="Dauer"
+                    :label="$t('app.events.form.duration')"
                     name="duration"
                     :hours-max="999"
                     :errors="submitCount === 0 ? undefined : errors.duration"
                 />
+                <InputTimezone
+                    v-model="timezone"
+                    :errors="submitCount === 0 ? undefined : errors.timezone"
+                />
                 <p class="kern-text kern-text--small text-color-secondary">
-                    {{ t('public.timezoneFormHint.stored') }}
+                    {{ t('public.timezoneFormHint.stored', { timezone }) }}
                 </p>
                 <Alert
-                    v-if="tzMismatch"
+                    v-if="tzMismatch && detectedTz !== timezone"
                     severity="warning"
                     :title="$t('public.timezoneNotice.title')"
-                    :content="t('public.timezoneFormHint.browserMismatch', { detectedTz })"
+                    :content="t('public.timezoneFormHint.browserMismatch', { detectedTz, timezone })"
                 />
                 <Divider class="my-5" />
                 <InputSelect
                     v-model="mobilizon_group_id"
-                    label="Organisation"
+                    :label="$t('app.events.form.organisation')"
                     name="mobilizon_group_id"
                     :options="mobilizionGroupOptions"
                     :errors="submitCount === 0 ? undefined : errors.mobilizon_group_id"
@@ -244,7 +254,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 />
                 <InputSelect
                     v-model="category"
-                    label="Kategorie"
+                    :label="$t('app.events.form.category')"
                     name="category"
                     :options="mobilizon_category_options"
                     :errors="submitCount === 0 ? undefined : errors.category"
@@ -255,7 +265,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     <div class="w-full flex flex-column gap-5">
                         <InputRadios
                             v-model="joinOptions"
-                            label="Anmeldeoptionen"
+                            :label="$t('app.events.form.joinOptions')"
                             name="joinOptions"
                             :radios="reconstructOptions(mobilizon_event_join_options)"
                             :errors="submitCount === 0 ? undefined : errors?.joinOptions"
@@ -265,27 +275,27 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            label="Externe Anmeldeseite (URL)"
+                            :label="$t('app.events.form.externalParticipationUrl')"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
                     </div>
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="$t('app.shared.information')"
                             severity="info"
                         >
                             <p>
-                                Wenn Sie eine externe Anmeldeseite verwenden, geben Sie hier den entsprechenden Link an.
-                                Wenn Sie keine Online-Anmeldung nutzen, informieren Sie die Teilnehmer*innen in der
-                                Veranstaltungsbeschreibung über das Anmeldeverfahren und ob eine Anmeldung erforderlich
-                                ist.
+                                {{ $t('app.events.form.joinOptionsInfo') }}
                             </p>
                             <p>
-                                Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/Einzeltermine/"
-                                    fragment="beitrittsoptionen"
-                                />.
+                                <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                    <template #link>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Einzeltermine/"
+                                            fragment="beitrittsoptionen"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
@@ -293,21 +303,21 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <Divider class="my-5" />
                 <InputSelect
                     v-model="language"
-                    label="Sprache"
+                    :label="$t('app.events.form.language')"
                     name="language"
                     :options="mobilizon_event_language_options"
                     :errors="submitCount === 0 ? undefined : errors.language"
                 />
                 <InputSelect
                     v-model="status"
-                    label="Status"
+                    :label="$t('app.events.form.status')"
                     name="status"
                     :options="mobilizon_event_status"
                     :errors="submitCount === 0 ? undefined : errors.status"
                 />
                 <InputUrl
                     v-model="onlineAddress"
-                    label="Webseite (optional)"
+                    :label="$t('app.events.form.website')"
                     name="onlineAddress"
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
@@ -315,7 +325,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     v-model="rawAddress"
                     v-model:address="physicalAddress"
                     name="physicalAddress"
-                    label="Adresse (optional)"
+                    :label="$t('app.events.form.address')"
                     :suggestions="mapSuggestions"
                     :mobilizon-group-id="mobilizon_group_id"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
@@ -334,7 +344,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 icon-left="add"
                 :disabled="isSubmitting || isMapLoading"
             >
-                Einzeltermin anlegen
+                {{ t('app.events.single.create.submit') }}
             </Button>
         </div>
     </form>

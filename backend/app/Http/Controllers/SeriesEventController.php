@@ -85,7 +85,7 @@ class SeriesEventController extends Controller implements HasMiddleware
 
         if (Intervall::validate($request->get('intervall')) === false) {
             return response()->json([
-                'error' => 'Ungültiges Intervall.'
+                'error' => __('messages.series.invalidInterval')
             ], 400);
         }
 
@@ -100,9 +100,10 @@ class SeriesEventController extends Controller implements HasMiddleware
 
         $monthlyWeeks = array_values(array_unique(array_map('intval', $monthlyWeeksInput)));
         $mclient = Mobilizon::getInstance();
+        $timezone = CreatedEventController::eventTimezone($request);
 
-        $start = Carbon::parse($request->get('start') . ' ' . $request->get('time'));
-        $end = Carbon::parse($request->get('end'));
+        $start = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
+        $end = Carbon::parse($request->get('end'), $timezone);
         $period = CarbonPeriod::create($start, '1 day', $end->copy()->endOfDay());
 
         $durationSeperated = explode(':', $request->input('duration'));
@@ -110,6 +111,7 @@ class SeriesEventController extends Controller implements HasMiddleware
 
         $mobilizonFields = $request->input('mobilizon_fields');
         $mobilizonFields['description'] = $mobilizonFields['description'] ?: '';
+        $mobilizonFields['options']['timezone'] = $timezone;
 
         // Collect matching event dates first
         $eventDates = [];
@@ -155,7 +157,7 @@ class SeriesEventController extends Controller implements HasMiddleware
 
         if (empty($eventDates)) {
             return response()->json([
-                'error' => 'Es wurde kein Termin erstellt. Bitte überprüfe deine Angaben zum Intervall.'
+                'error' => __('messages.series.noEventCreated')
             ], 400);
         }
 
@@ -177,7 +179,7 @@ class SeriesEventController extends Controller implements HasMiddleware
 
             if (empty($eventDates)) {
                 return response()->json([
-                    'error' => 'Es wurden keine Termine erstellt. Alle Termine fallen auf Feiertage oder in Schulferien.',
+                    'error' => __('messages.series.allEventsOnHolidays'),
                 ], 422);
             }
         }
@@ -205,7 +207,7 @@ class SeriesEventController extends Controller implements HasMiddleware
         $pictureResponse = null;
 
         foreach ($eventDates as $dateString) {
-            $eventDate = Carbon::parse($dateString . ' ' . $request->get('time'));
+            $eventDate = Carbon::parse($dateString . ' ' . $request->get('time'), $timezone);
 
             $eventData = CreatedEventController::buildMobilizonEventData($request, $seriesEvent, $mclient, [
                 "beginsOn"  => $eventDate->toAtomString(),
@@ -254,7 +256,7 @@ class SeriesEventController extends Controller implements HasMiddleware
                     $this->rollbackSeriesEvent($seriesEvent, $mclient);
 
                     return response()->json([
-                        'error' => 'Das Bild konnte nicht gespeichert werden. Die Datei ist möglicherweise beschädigt oder liegt in einem Format vor, das nicht unterstützt wird. Der Serientermin wurde nicht angelegt - bitte wählen Sie ein anderes Bild (JPG, PNG, GIF oder WEBP).'
+                        'error' => __('messages.series.imageSaveFailed')
                     ], 422);
                 }
             }
@@ -302,7 +304,7 @@ class SeriesEventController extends Controller implements HasMiddleware
             if ($mclient->hasError($mresponse) && $mclient->getError($mresponse) !== 'Veranstaltung nicht gefunden') {
                 Log::error("Error deleting event with Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse));
                 return response()->json([
-                    'error' => "Fehler beim Löschen der Veranstaltung mit Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse)
+                    'error' => __('messages.events.deleteFailed', ['id' => $createdEvent->mobilizon_id, 'error' => $mclient->getError($mresponse)])
                 ]);
             }
 
@@ -312,14 +314,14 @@ class SeriesEventController extends Controller implements HasMiddleware
         $seriesEvent->delete();
 
         return response()->json([
-            'success' => 'Alle Veranstaltungen der Serie wurden erfolgreich gelöscht.'
+            'success' => __('messages.series.deleted')
         ]);
     }
 
     public function fetchStateHolidays(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'state' => 'string|in:all_states,none,sh,hh,nw,he,rp,by,sl,bw,th,st,sn,be,bb,mv,ni,augsburg',
+            'state' => 'required|string|in:all_states,none,sh,hh,nw,he,rp,by,sl,bw,th,st,sn,be,bb,mv,ni,augsburg',
         ]);
 
         $state = $validated['state'];
@@ -335,7 +337,7 @@ class SeriesEventController extends Controller implements HasMiddleware
         } catch (\Exception $e) {
             Log::error("Error fetching holidays for state {$state}: " . $e->getMessage());
             return response()->json([
-                'error' => 'Fehler beim Abrufen der Feiertage. Bitte versuche es später erneut.'
+                'error' => __('messages.series.holidaysFetchFailed')
             ], 500);
         }
     }

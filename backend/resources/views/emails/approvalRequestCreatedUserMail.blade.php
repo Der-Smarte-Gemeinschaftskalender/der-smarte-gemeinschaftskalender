@@ -1,24 +1,24 @@
-@extends('emails.partials.body')
+@extends('emails.partials.body', ['title' => __('emails.approvalRequestCreated.heading')])
 
 @section('content')
 @include('emails.partials.header')
 
 <div class="content">
-    <h1>Genehmigungsanfrage eingereicht</h1>
+    <h1>{{ __('emails.approvalRequestCreated.heading') }}</h1>
 
     {!! $mailBody !!}
 
     <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p style="margin: 0 0 10px 0;"><strong>Anfrageart:</strong> {{ $requestTypeName }}</p>
-        <p style="margin: 0;"><strong>Anfrage-ID:</strong> #{{ $requestId }}</p>
+        <p style="margin: 0 0 10px 0;"><strong>{{ __('emails.common.requestType') }}</strong> {{ $requestTypeName }}</p>
+        <p style="margin: 0;"><strong>{{ __('emails.common.requestId') }}</strong> #{{ $requestId }}</p>
     </div>
 
     <p>
-        Ein Administrator wird Ihre Anfrage überprüfen und Sie werden per E-Mail benachrichtigt, wenn die Anfrage genehmigt oder abgelehnt wird.
+        {{ __('emails.approvalRequestCreated.reviewInfo') }}
     </p>
 
     <p>
-        <strong>Vielen Dank für Ihre Geduld!</strong>
+        <strong>{{ __('emails.approvalRequestCreated.thanks') }}</strong>
     </p>
 </div>
 

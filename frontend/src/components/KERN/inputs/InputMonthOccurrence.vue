@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import InputWeekDays from './InputWeekDays.vue';
 import InputCheckbox from './InputCheckbox.vue';
 import { monthlyIntervalWeekOptions } from '@/lib/const';
+import { translateMessage } from '@/i18n';
 
 
 interface Props {
@@ -19,6 +21,14 @@ withDefaults(defineProps<Props>(), {
     disabled: false,
     label: '',
 });
+
+const { t } = useI18n();
+
+const weekOptionKeys: Record<number, string> = { 1: 'first', 2: 'second', 3: 'third', 4: 'fourth', [-1]: 'last' };
+const weekOptions = monthlyIntervalWeekOptions.map((option) => ({
+    ...option,
+    text: weekOptionKeys[option.value] ? t(`app.shared.monthOccurrence.weekOptions.${weekOptionKeys[option.value]}`) : option.text,
+}));
 
 const weeks = defineModel<number[]>('weeks', { default: () => [1] });
 const weekDay = defineModel<number>('weekDay', { default: 0 });
@@ -56,11 +66,11 @@ const updateWeek = (value: number, checked: boolean) => {
         </label>
         <div class="month-occurrence-content">
             <p class="kern-form-input__label month-occurrence-content__title">
-                Woche(n)
+                {{ t('app.shared.monthOccurrence.weeks') }}
             </p>
             <div class="month-occurrence-content__weeks-grid">
                 <InputCheckbox
-                    v-for="option in monthlyIntervalWeekOptions"
+                    v-for="option in weekOptions"
                     :key="option.value"
                     :name="`${nameWeeks}-${option.value}`"
                     :label="option.text"
@@ -72,7 +82,7 @@ const updateWeek = (value: number, checked: boolean) => {
             </div>
             <InputWeekDays
                 v-model="weekDay"
-                label="Wochentag"
+                :label="t('app.shared.monthOccurrence.weekDay')"
                 class="mt-3"
                 :name="nameWeekDay"
                 :disabled="disabled"
@@ -82,7 +92,7 @@ const updateWeek = (value: number, checked: boolean) => {
             v-if="errors"
             class="kern-form-input__error"
         >
-            {{ errors }}
+            {{ translateMessage(errors) }}
         </p>
     </div>
 </template>

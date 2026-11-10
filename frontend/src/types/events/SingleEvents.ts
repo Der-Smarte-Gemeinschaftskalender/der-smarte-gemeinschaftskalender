@@ -12,13 +12,13 @@ import { isStrictModeEnabled } from "@/lib/instanceConfig";
 export const SingleEventRequestSchema = DefaultEventSchema.extend({
     name: zod
         .string({
-            required_error: 'Der Name des Termins ist erforderlich.',
+            required_error: 'validation.name.eventRequired',
         })
-        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
-        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .min(3, 'validation.name.min')
+        .max(100, 'validation.name.max')
         .refine(
             (val) => val.trim().length > 0, {
-                message: "Der Name darf nicht leer sein."
+                message: "validation.name.notEmpty"
         }),
     start: zod
         .string()
@@ -59,19 +59,19 @@ export type SingleEventCreateResponse = zod.infer<typeof SingleEventCreateRespon
 export const SingleEventFormSchema = DefaultEventFormSchema.extend({
     name: zod
         .string({
-            required_error: 'Der Name ist erforderlich.',
+            required_error: 'validation.name.required',
         })
-        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
-        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .min(3, 'validation.name.min')
+        .max(100, 'validation.name.max')
         .refine(
             (val) => val.trim().length >= 3, {
-                message: "Der Name darf nicht leer sein."
+                message: "validation.name.notEmpty"
         }),
     description: zod
         .string()
         .refine(
             (val) => stripHtml(val).length > 0, {
-                message: "Die Beschreibung darf nicht leer sein."
+                message: "validation.description.notEmpty"
         }),
     start: zod
         .string()
@@ -83,7 +83,7 @@ export const SingleEventFormSchema = DefaultEventFormSchema.extend({
         .string()
         .nonempty()
         .regex(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/, {
-            message: 'Bitte eine gültige Uhrzeit im Format HH:mm eingeben.'
+            message: 'validation.time.invalid'
         })
         .default(dayjs().startOf('hour').format('HH:mm')),
     duration: zod
@@ -91,7 +91,7 @@ export const SingleEventFormSchema = DefaultEventFormSchema.extend({
         .nonempty()
         //HHH:mm format
         .regex(/^([0-9]{1,3}):[0-5][0-9]$/, {
-            message: 'Bitte eine gültige Dauer im Format HHH:MM eingeben.'
+            message: 'validation.duration.invalid'
         })
         .default('1:00'),
 

@@ -4,14 +4,14 @@
 @include('emails.partials.header')
 
 <div class="content">
-    <h1>Moin</h1>
+    <h1>{{ __('emails.common.greeting') }}</h1>
     <p>
-        Es wurde die Erstellung einer neuen Organisation mit dem Namen "{{ $requestOrganisationNamen }}" angefragt.
+        {{ __('emails.adminRequestOrganisationCreation.text', ['organisationName' => $requestOrganisationNamen]) }}
     </p>
 
-    <a href="{{ $urlRequestedOrganisations }}" class="btn">Jetzt Anfrage prüfen</a>
+    <a href="{{ $urlRequestedOrganisations }}" class="btn">{{ __('emails.common.reviewRequest') }}</a>
 
-    <p>Alternativ können sie auch folgende URL im Browser besuchen:</p>
+    <p>{{ __('emails.common.alternativeUrl') }}</p>
     <p>{{ $urlRequestedOrganisations }}</p>
 </div>
 

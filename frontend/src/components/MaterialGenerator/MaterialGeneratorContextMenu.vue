@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 
@@ -18,6 +19,8 @@ const emit = defineEmits<{
     duplicate: [];
     delete: [];
 }>();
+
+const { t } = useI18n();
 
 const menuRef = ref<HTMLElement | null>(null);
 
@@ -84,7 +87,7 @@ onBeforeUnmount(() => {
                 name="keyboard_arrow_up"
                 size="sm"
             />
-            Ebene nach vorne
+            {{ t('app.materialGenerator.contextMenu.bringForward') }}
         </button>
         <button
             class="mg-context-menu__item flex align-items-center gap-2 w-full border-none bg-transparent cursor-pointer white-space-nowrap py-1 px-3"
@@ -94,7 +97,7 @@ onBeforeUnmount(() => {
                 name="keyboard_arrow_down"
                 size="sm"
             />
-            Ebene nach hinten
+            {{ t('app.materialGenerator.contextMenu.sendBackward') }}
         </button>
         <button
             class="mg-context-menu__item flex align-items-center gap-2 w-full border-none bg-transparent cursor-pointer white-space-nowrap py-1 px-3"
@@ -104,7 +107,7 @@ onBeforeUnmount(() => {
                 name="keyboard_double_arrow_up"
                 size="sm"
             />
-            Ganz nach vorne
+            {{ t('app.materialGenerator.contextMenu.bringToFront') }}
         </button>
         <button
             class="mg-context-menu__item flex align-items-center gap-2 w-full border-none bg-transparent cursor-pointer white-space-nowrap py-1 px-3"
@@ -114,7 +117,7 @@ onBeforeUnmount(() => {
                 name="keyboard_double_arrow_down"
                 size="sm"
             />
-            Ganz nach hinten
+            {{ t('app.materialGenerator.contextMenu.sendToBack') }}
         </button>
         <Divider class="my-1" />
         <button
@@ -125,7 +128,7 @@ onBeforeUnmount(() => {
                 name="content-copy"
                 size="sm"
             />
-            Duplizieren
+            {{ t('app.materialGenerator.contextMenu.duplicate') }}
         </button>
         <button
             class="mg-context-menu__item mg-context-menu__item--danger flex align-items-center gap-2 w-full border-none bg-transparent cursor-pointer white-space-nowrap py-1 px-3"
@@ -135,7 +138,7 @@ onBeforeUnmount(() => {
                 name="delete"
                 size="sm"
             />
-            Löschen
+            {{ t('common.delete') }}
         </button>
     </div>
 </template>

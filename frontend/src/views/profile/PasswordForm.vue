@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { dsgApi } from '@/lib/dsgApi';
@@ -11,6 +12,8 @@ import InputPassword from '@/components/KERN/inputs/InputPassword.vue';
 
 import { PasswordFormSchema, type PasswordForm } from '@/types/Profile';
 import type { AxiosError } from 'axios';
+
+const { t } = useI18n();
 
 const errorMessage = ref<string>('');
 const successMessage = ref<string>('');
@@ -34,7 +37,7 @@ const resetPassword = handleSubmit(async (values) => {
     } catch (error: AxiosError | any) {
         errorMessage.value =
             error.response?.data?.error ||
-            'Fehler beim Zurücksetzen des Passworts. Bitte versuchen Sie es später erneut.';
+            t('app.profile.password.error');
         console.error('Error resetting password:', error);
     }
 });
@@ -46,17 +49,17 @@ const resetPassword = handleSubmit(async (values) => {
         class="mt-6"
         @submit.prevent="resetPassword"
     >
-        <h3 class="kern-heading text-theme-primary mb-3">Passwort ändern</h3>
+        <h3 class="kern-heading text-theme-primary mb-3">{{ t('app.profile.password.title') }}</h3>
         <Fieldset>
             <Alert
                 v-if="errorMessage.length"
-                title="Fehler"
+                :title="t('common.error')"
                 :content="errorMessage"
                 severity="danger"
             />
             <Alert
                 v-if="successMessage.length"
-                title="Erfolg"
+                :title="t('common.success')"
                 :content="successMessage"
                 severity="success"
             />
@@ -66,7 +69,7 @@ const resetPassword = handleSubmit(async (values) => {
                     name="current_password"
                     type="password"
                     class="col-12 md:col-6 md:pr-4"
-                    label="Aktuelles Passwort"
+                    :label="t('app.profile.password.current')"
                     required
                     :errors="submitCount === 0 ? undefined : errors.current_password"
                 />
@@ -77,7 +80,7 @@ const resetPassword = handleSubmit(async (values) => {
                         name="new_password"
                         type="password"
                         class="w-full"
-                        label="Neues Passwort"
+                        :label="t('app.profile.password.new')"
                         required
                         :errors="submitCount === 0 ? undefined : errors.new_password"
                     />
@@ -87,7 +90,7 @@ const resetPassword = handleSubmit(async (values) => {
                         name="new_password_confirm"
                         type="password"
                         class="w-full"
-                        label="Neues Passwort bestätigen"
+                        :label="t('app.profile.password.confirm')"
                         required
                         :errors="submitCount === 0 ? undefined : errors.new_password_confirm"
                     />
@@ -100,7 +103,7 @@ const resetPassword = handleSubmit(async (values) => {
                 class="mt-6"
                 :disabled="isSubmitting"
             >
-                Passwort ändern
+                {{ t('app.profile.password.submit') }}
             </Button>
         </div>
     </form>
