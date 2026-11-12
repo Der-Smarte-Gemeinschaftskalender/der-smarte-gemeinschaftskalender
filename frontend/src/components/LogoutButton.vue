@@ -15,5 +15,5 @@ const logout = () => {
 };
 </script>
 <template>
-    <Button type="tertiary" icon-left="logout" @click="logout"> Abmelden </Button>
+    <Button type="tertiary" icon-left="logout" @click="logout"> {{ $t('app.shared.logout') }} </Button>
 </template>

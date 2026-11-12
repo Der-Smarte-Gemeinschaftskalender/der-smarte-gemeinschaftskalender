@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch, computed } from 'vue';
+import { I18nT } from 'vue-i18n';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useRouter } from 'vue-router';
 import { handleSubmitCallback, prepareEventsValues } from '@/lib/dsgClient';
@@ -94,15 +95,16 @@ watch(joinOptions, (newValue) => {
 loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Kalenderintegration (iCal-URL)</h1>
+    <h1 class="kern-heading text-theme-primary">{{ $t('app.events.imported.title') }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Durch die Anbindung von iCal-URLs können externe Kalender (z. B. Outlook, Google Kalender, etc.) dauerhaft
-        angebunden und automatisch synchronisiert werden. Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Kalenderintegration/"
-            fragment="kalender-integrieren-ical-url-anbinden"
-        />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.imported.hint">
+            <template #link>
+                <LinkToDocs
+                    path="Terminverwaltung/Kalenderintegration/"
+                    fragment="kalender-integrieren-ical-url-anbinden"
+                />
+            </template>
+        </I18nT>
     </p>
     <form
         novalidate
@@ -111,14 +113,14 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <Fieldset>
             <Alert
                 v-if="errorMessageContent.length"
-                title="Fehler"
+                :title="$t('common.error')"
                 :content="errorMessageContent"
                 severity="danger"
             />
             <InputRichText
                 v-model="description"
                 class="mt-3"
-                label="Beschreibung (optional)"
+                :label="$t('app.events.form.descriptionOptional')"
                 name="description"
                 :errors="submitCount === 0 ? undefined : errors.description"
             />
@@ -127,28 +129,28 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <div class="w-full">
                     <InputUrl
                         v-model="url"
-                        label="iCal-Url"
+                        :label="$t('app.events.imported.create.urlLabel')"
                         name="url"
                         :errors="submitCount === 0 ? undefined : errors.url"
                     />
                 </div>
                 <div class="md:col-6 px-0 mt-2">
                     <Alert
-                        title="Information"
+                        :title="$t('app.shared.information')"
                         severity="info"
                     >
                         <p>
-                            Geben Sie hier die öffentliche iCal-URL eines externen Kalenders ein (z. B. von Google
-                            Calendar, Outlook oder Nextcloud). Die Termine werden automatisch und regelmäßig
-                            aktualisiert. Stellen Sie sicher, dass die URL dauerhaft erreichbar ist und das Format .ics
-                            unterstützt.
+                            {{ $t('app.events.imported.create.urlInfo') }}
                         </p>
                         <p>
-                            Weitere Informationen finden Sie im
-                            <LinkToDocs
-                                path="Terminverwaltung/Kalenderintegration/"
-                                fragment="kalender-integrieren-ical-url-anbinden"
-                            />.
+                            <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                <template #link>
+                                    <LinkToDocs
+                                        path="Terminverwaltung/Kalenderintegration/"
+                                        fragment="kalender-integrieren-ical-url-anbinden"
+                                    />
+                                </template>
+                            </I18nT>
                         </p>
                     </Alert>
                 </div>
@@ -159,7 +161,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <div class="flex flex-column gap-5">
                 <InputSelect
                     v-model="mobilizon_group_id"
-                    label="Organisation"
+                    :label="$t('app.events.form.organisation')"
                     name="mobilizon_group_id"
                     :options="mobilizionGroupOptions"
                     :errors="submitCount === 0 ? undefined : errors.mobilizon_group_id"
@@ -167,7 +169,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 />
                 <InputSelect
                     v-model="category"
-                    label="Kategorie"
+                    :label="$t('app.events.form.category')"
                     name="category"
                     :options="mobilizon_category_options"
                     :errors="submitCount === 0 ? undefined : errors.category"
@@ -177,7 +179,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     <div class="w-full flex flex-column gap-5">
                         <InputRadios
                             v-model="joinOptions"
-                            label="Anmeldeoptionen"
+                            :label="$t('app.events.form.joinOptions')"
                             name="joinOptions"
                             :radios="reconstructOptions(mobilizon_event_join_options)"
                             :errors="submitCount === 0 ? undefined : errors?.joinOptions"
@@ -187,48 +189,48 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            label="Externe Anmeldeseite (URL)"
+                            :label="$t('app.events.form.externalParticipationUrl')"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
                     </div>
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="$t('app.shared.information')"
                             severity="info"
                         >
                             <p>
-                                Wenn Sie eine externe Anmeldeseite verwenden, geben Sie hier den entsprechenden Link an.
-                                Wenn Sie keine Online-Anmeldung nutzen, informieren Sie die Teilnehmer*innen in der
-                                Veranstaltungsbeschreibung über das Anmeldeverfahren und ob eine Anmeldung erforderlich
-                                ist.
+                                {{ $t('app.events.form.joinOptionsInfo') }}
                             </p>
                             <p>
-                                Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/Einzeltermine/"
-                                    fragment="beitrittsoptionen"
-                                />.
+                                <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                    <template #link>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Einzeltermine/"
+                                            fragment="beitrittsoptionen"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
                 </div>
                 <InputSelect
                     v-model="language"
-                    label="Sprache"
+                    :label="$t('app.events.form.language')"
                     name="language"
                     :options="mobilizon_event_language_options"
                     :errors="submitCount === 0 ? undefined : errors.language"
                 />
                 <InputSelect
                     v-model="status"
-                    label="Status"
+                    :label="$t('app.events.form.status')"
                     name="status"
                     :options="mobilizon_event_status"
                     :errors="submitCount === 0 ? undefined : errors.status"
                 />
                 <InputUrl
                     v-model="onlineAddress"
-                    label="Webseite (optional)"
+                    :label="$t('app.events.form.website')"
                     name="onlineAddress"
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
@@ -237,7 +239,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 v-model="rawAddress"
                 v-model:address="physicalAddress"
                 name="physicalAddress"
-                label="Adresse (optional)"
+                :label="$t('app.events.form.address')"
                 :suggestions="mapSuggestions"
                 :mobilizon-group-id="mobilizon_group_id"
                 :errors="submitCount === 0 ? undefined : errors.physicalAddress"
@@ -256,7 +258,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 type="submit"
                 icon-left="add"
             >
-                Kalender integrieren
+                {{ $t('app.events.imported.create.submit') }}
             </Button>
         </div>
     </form>

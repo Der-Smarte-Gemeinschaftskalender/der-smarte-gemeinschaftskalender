@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 
 import Alert from '@/components/KERN/Alert.vue';
 import Button from '@/components/KERN/Button.vue';
 
 const route = useRoute();
+const { t } = useI18n();
 
 const loading = ref(false);
 const errorMessageContent = ref<string | null>(null);
@@ -17,7 +19,7 @@ const confirmEmail = async () => {
     loading.value = true;
     try {
         if (!route.params.verificationToken) {
-            errorMessageContent.value = 'Kein Bestätigungstoken gefunden.';
+            errorMessageContent.value = t('public.exports.email.confirm.noToken');
             return;
         }
         await dsgApi.post(`notifications/confirm`, {
@@ -25,7 +27,7 @@ const confirmEmail = async () => {
         });
         confirmSuccess.value = true;
     } catch (error) {
-        errorMessageContent.value = 'E-Mail-Adresse konnte nicht bestätigt werden.';
+        errorMessageContent.value = t('public.exports.email.confirm.confirmError');
         console.error(error);
     } finally {
         loading.value = false;
@@ -35,7 +37,7 @@ const disallowEmail = async () => {
     loading.value = true;
     try {
         if (!route.params.verificationToken) {
-            errorMessageContent.value = 'Kein Bestätigungstoken gefunden.';
+            errorMessageContent.value = t('public.exports.email.confirm.noToken');
             return;
         }
         await dsgApi.post(`notifications/disallow`, {
@@ -43,7 +45,7 @@ const disallowEmail = async () => {
         });
         disallowSuccess.value = true;
     } catch (error) {
-        errorMessageContent.value = 'E-Mail-Adresse konnte nicht blockiert werden.';
+        errorMessageContent.value = t('public.exports.email.confirm.disallowError');
         console.error(error);
     } finally {
         loading.value = false;
@@ -52,46 +54,60 @@ const disallowEmail = async () => {
 </script>
 <template>
     <div>
-        <h2 class="kern-heading font-medium p-0 mb-2 text-theme-primary">E-Mail-Adresse bestätigen</h2>
-        <p class="kern-text my-2">
-            Um Ihre Anmeldung für Veranstaltungsbenachrichtigungen abzuschließen,
-            <b>bestätigen Sie bitte Ihre E-Mail-Adresse.</b>
-        </p>
-        <p class="kern-text my-2">
-            Falls Sie diese Nachricht nicht angefordert haben, können Sie den Empfang weiterer
-            <b>E-Mails hier ablehnen.</b>
-        </p>
+        <h2 class="kern-heading font-medium p-0 mb-2 text-theme-primary">
+            {{ t('public.exports.email.confirm.title') }}
+        </h2>
+        <I18nT
+            scope="global"
+            keypath="public.exports.email.confirm.intro"
+            tag="p"
+            class="kern-text my-2"
+        >
+            <template #action>
+                <b>{{ t('public.exports.email.confirm.introAction') }}</b>
+            </template>
+        </I18nT>
+        <I18nT
+            scope="global"
+            keypath="public.exports.email.confirm.disallowIntro"
+            tag="p"
+            class="kern-text my-2"
+        >
+            <template #action>
+                <b>{{ t('public.exports.email.confirm.disallowIntroAction') }}</b>
+            </template>
+        </I18nT>
         <Alert
             v-if="errorMessageContent"
             class="my-3"
-            title="Fehler"
+            :title="t('common.error')"
             :content="errorMessageContent"
             severity="danger"
         />
         <template v-if="confirmSuccess">
             <Alert
-                title="E-Mail-Adresse bestätigt"
-                content="Deine E-Mail-Adresse wurde erfolgreich bestätigt. Du kannst nun Benachrichtigungen erhalten."
+                :title="t('public.exports.email.confirm.confirmedTitle')"
+                :content="t('public.exports.email.confirm.confirmedText')"
                 severity="success"
             />
             <div class="kern-row mt-3">
                 <div class="kern-col">
                     <RouterLink to="/">
-                        <Button label="Zurück zur Startseite" />
+                        <Button :label="t('public.exports.email.confirm.backToHome')" />
                     </RouterLink>
                 </div>
             </div>
         </template>
         <template v-else-if="disallowSuccess">
             <Alert
-                title="E-Mail-Adresse wurde blockiert"
-                content="Deine E-Mail-Adresse wurde erfolgreich blockiert. Du wirst keine weiteren E-Mails erhalten."
+                :title="t('public.exports.email.confirm.blockedTitle')"
+                :content="t('public.exports.email.confirm.blockedText')"
                 severity="success"
             />
             <div class="kern-row mt-3">
                 <div class="kern-col">
                     <RouterLink to="/">
-                        <Button label="Zurück zur Startseite" />
+                        <Button :label="t('public.exports.email.confirm.backToHome')" />
                     </RouterLink>
                 </div>
             </div>
@@ -100,7 +116,7 @@ const disallowEmail = async () => {
             <div class="kern-row">
                 <div class="kern-col">
                     <Button
-                        label="Jetzt E-Mail-Adresse bestätigen"
+                        :label="t('public.exports.email.confirm.confirmButton')"
                         icon-left="check"
                         :loading="loading"
                         @click="confirmEmail()"
@@ -108,7 +124,7 @@ const disallowEmail = async () => {
                 </div>
                 <div class="kern-col">
                     <Button
-                        label="Keine E-Mails mehr erhalten"
+                        :label="t('public.exports.email.confirm.disallowButton')"
                         variant="secondary"
                         icon-left="close"
                         :loading="loading"

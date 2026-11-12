@@ -7,7 +7,7 @@ use App\Models\ImportedEvent;
 use App\Models\Mobilizon;
 use App\Models\MobilizonTag;
 use App\Services\IcalEventService;
-use Carbon\Carbon;
+use App\Support\EventDateTime;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Log;
@@ -125,8 +125,9 @@ class FetchImportedEvents implements ShouldQueue
                         $createdEvent->ical_update_sequence = $event['sequence'];
                         unset($event['sequence']);
 
-                        $createdEvent->start = Carbon::parse($event['beginsOn'])->format('Y-m-d');
-                        $createdEvent->time = Carbon::parse($event['beginsOn'])->format('H:i');
+                        $eventStart = EventDateTime::startInEventTimezone($event);
+                        $createdEvent->start = $eventStart->format('Y-m-d');
+                        $createdEvent->time = $eventStart->format('H:i');
                         $createdEvent->duration = IcalEventService::calculateDuration($event['beginsOn'], $event['endsOn']);
 
                         $mresponse = $existingEvents->get($uid) 

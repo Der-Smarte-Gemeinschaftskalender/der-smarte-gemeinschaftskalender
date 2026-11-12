@@ -1,4 +1,5 @@
 import gql from 'graphql-tag';
+import { unref } from 'vue';
 import { apolloClient, getFetchPolicy } from '@/lib/mobilizonApi';
 import i18n from '@/i18n';
 
@@ -535,7 +536,7 @@ export const findOrganisationOptions = async (valueUsername = false, limit: numb
             text: group.name,
         };
     });
-    return [{ value: 'ALL', text: 'Alle Organisationen' }, ...groupOptions];
+    return [{ value: 'ALL', text: t('public.search.allOrganisations') }, ...groupOptions];
 };
 
 export const fetchOrganisationEvents = async (
@@ -723,7 +724,7 @@ export const getTerms = async (): Promise<object> => {
             }
         `,
         variables: {
-            locale: 'de',
+            locale: unref(i18n.global.locale),
         },
     });
     return response.data.config.terms || {};
@@ -745,7 +746,7 @@ export const getPrivacy = async (): Promise<object> => {
             }
         `,
         variables: {
-            locale: 'de',
+            locale: unref(i18n.global.locale),
         },
     });
     return response.data.config.privacy || {};

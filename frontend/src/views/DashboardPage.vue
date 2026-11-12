@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { I18nT } from 'vue-i18n';
 import { findMobilizonStatistics, findOrganisation } from '@/lib/mobilizonClient';
 import { getEventsStatistics } from '@/lib/dsgClient';
 import { loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
@@ -111,35 +112,39 @@ loadOrganisations();
 </script>
 <template>
     <h1 class="kern-heading text-theme-primary">
-        Dashboard
+        {{ $t('app.dashboard.title') }}
         <template v-if="current_organisation">{{ current_organisation.name }}</template>
     </h1>
     <template v-if="!user_organisations?.length">
-        <p class="kern-text">
-            Sie sind noch kein Mitglied einer Organisation. Um Termine anzulegen, können Sie entweder selbst eine
-            Organisation
-            <RouterLink :to="{ name: 'app.myOrganisations.request' }">erstellen</RouterLink>
-            oder sich in eine bestehende Organisation einladen lassen – dafür geben Sie einfach Ihren Profilnamen an die
-            Organisation weiter.
-        </p>
+        <I18nT scope="global"
+            keypath="app.dashboard.noMembership"
+            tag="p"
+            class="kern-text"
+        >
+            <template #link>
+                <RouterLink :to="{ name: 'app.myOrganisations.request' }">{{ $t('app.dashboard.noMembershipLink') }}</RouterLink>
+            </template>
+        </I18nT>
     </template>
     <template v-else>
         <p class="kern-text">
-            <b>Willkommen im Verwaltungsbereich des Smarten Gemeinschaftskalenders!</b>
-            Hier können Sie ganz einfach Ihre Organisation verwalten und Termine pflegen.
+            <b>{{ $t('app.dashboard.welcomeTitle') }}</b>
+            {{ $t('app.dashboard.welcomeText') }}
         </p>
     </template>
     <p class="kern-text mt-2">
-        <b>Hinweis:</b>
-        Eine Schritt-für-Schritt-Anleitung zur Terminverwaltung finden Sie im
-        <LinkToDocs path="" />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.dashboard.docsHint">
+            <template #link>
+                <LinkToDocs path="" />
+            </template>
+        </I18nT>
     </p>
 
     <div v-if="!loading">
-        <h2 class="kern-heading text-theme-primary mt-6">Gesamtübersicht der Kalenderinstanz</h2>
+        <h2 class="kern-heading text-theme-primary mt-6">{{ $t('app.dashboard.instanceOverview') }}</h2>
         <div class="flex flex-wrap gap-4 mt-5">
             <Card
-                title="Nutzer*innen"
+                :title="$t('app.dashboard.users')"
                 class="w-fit"
             >
                 <span class="text-theme-primary kern-text kern-text--large kern-text--bold">
@@ -147,7 +152,7 @@ loadOrganisations();
                 </span>
             </Card>
             <Card
-                title="Veranstaltungen"
+                :title="$t('app.dashboard.events')"
                 class="w-fit"
             >
                 <span class="text-theme-primary kern-text kern-text--large kern-text--bold">
@@ -155,7 +160,7 @@ loadOrganisations();
                 </span>
             </Card>
             <Card
-                title="Organisationen"
+                :title="$t('app.dashboard.organisations')"
                 class="w-fit"
             >
                 <span class="text-theme-primary kern-text kern-text--large kern-text--bold">
@@ -166,7 +171,7 @@ loadOrganisations();
     </div>
     <div v-if="current_organisation">
         <h2 class="kern-heading text-theme-primary mt-5">
-            Neue Termine anlegen
+            {{ $t('app.dashboard.createNewEvents') }}
             <template v-if="current_organisation">- {{ current_organisation.name }}</template>
         </h2>
         <div class="flex flex-wrap mt-4 gap-4 pr-3">
@@ -176,13 +181,13 @@ loadOrganisations();
                     :to="{ name: 'singleEvents.create' }"
                 >
                     <Button
-                        title="Einzeltermin anlegen"
-                        aria-label="Einzeltermin anlegen"
+                        :title="$t('app.dashboard.createSingleEvent')"
+                        :aria-label="$t('app.dashboard.createSingleEvent')"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
                     >
-                        Einzeltermin
+                        {{ $t('app.dashboard.singleEvent') }}
                     </Button>
                 </RouterLink>
             </div>
@@ -192,13 +197,13 @@ loadOrganisations();
                     :to="{ name: 'seriesEvents.create' }"
                 >
                     <Button
-                        title="Serientermin anlegen"
-                        aria-label="Serientermin anlegen"
+                        :title="$t('app.dashboard.createSeriesEvent')"
+                        :aria-label="$t('app.dashboard.createSeriesEvent')"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
                     >
-                        Serientermin
+                        {{ $t('app.dashboard.seriesEvent') }}
                     </Button>
                 </RouterLink>
             </div>
@@ -208,13 +213,13 @@ loadOrganisations();
                     :to="{ name: 'uploadedEvents.create' }"
                 >
                     <Button
-                        title="Kalenderdatei hochladen"
-                        aria-label="Kalenderdatei hochladen"
+                        :title="$t('app.dashboard.uploadCalendarFile')"
+                        :aria-label="$t('app.dashboard.uploadCalendarFile')"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
                     >
-                        Kalenderdatei
+                        {{ $t('app.dashboard.calendarFile') }}
                     </Button>
                 </RouterLink>
             </div>
@@ -224,13 +229,13 @@ loadOrganisations();
                     :to="{ name: 'importedEvents.create' }"
                 >
                     <Button
-                        title="Kalenderintegration anlegen"
-                        aria-label="Kalenderintegration anlegen"
+                        :title="$t('app.dashboard.createCalendarIntegration')"
+                        :aria-label="$t('app.dashboard.createCalendarIntegration')"
                         type="primary"
                         icon-left="add"
                         icon-size="lg"
                     >
-                        Kalenderintegration
+                        {{ $t('app.dashboard.calendarIntegration') }}
                     </Button>
                 </RouterLink>
             </div>
@@ -241,7 +246,7 @@ loadOrganisations();
         class="mt-6"
     >
         <h2 class="kern-heading text-theme-primary mt-6">
-            Bevorstehende Veranstaltungen
+            {{ $t('app.dashboard.upcomingEvents') }}
             <template v-if="current_organisation">- {{ current_organisation.name }}</template>
         </h2>
         <div
@@ -259,7 +264,7 @@ loadOrganisations();
             </div>
         </div>
         <div v-else>
-            <h3 class="kern-heading text-theme-primary mt-6 mb-4">Keine bevorstehenden Veranstaltungen</h3>
+            <h3 class="kern-heading text-theme-primary mt-6 mb-4">{{ $t('app.dashboard.noUpcomingEvents') }}</h3>
         </div>
     </div>
 </template>

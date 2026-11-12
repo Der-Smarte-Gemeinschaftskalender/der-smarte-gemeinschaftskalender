@@ -64,11 +64,11 @@ class ImportedEventController extends Controller implements HasMiddleware
     {
 
         if (!$request->has('mobilizon_fields')) {
-            return response()->json(['error' => 'Ungültige Mobilizon-Felder'], 400);
+            return response()->json(['error' => __('messages.imports.invalidMobilizonFields')], 400);
         }
 
         if (!$request->has('url')) {
-            return response()->json(['error' => 'URL ist erforderlich'], 400);
+            return response()->json(['error' => __('messages.imports.urlRequired')], 400);
         }
 
         $mobilizonFields = $request->input('mobilizon_fields');
@@ -102,7 +102,7 @@ class ImportedEventController extends Controller implements HasMiddleware
             if ($mclient->hasError($mresponse) && $mclient->getError($mresponse) !== 'Veranstaltung nicht gefunden') {
                 Log::error("Error deleting event with Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse));
                 return response()->json([
-                    'error' => "Fehler beim Löschen der Veranstaltung mit Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse)
+                    'error' => __('messages.events.deleteFailed', ['id' => $createdEvent->mobilizon_id, 'error' => $mclient->getError($mresponse)])
                 ]);
             }
 
@@ -112,7 +112,7 @@ class ImportedEventController extends Controller implements HasMiddleware
         $importedEvent->delete();
 
         return response()->json([
-            'message' => 'Erfolgreich gelöscht.'
+            'message' => __('messages.imports.deleted')
         ]);
     }
 

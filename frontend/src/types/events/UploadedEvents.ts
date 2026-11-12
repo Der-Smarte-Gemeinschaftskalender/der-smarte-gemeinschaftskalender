@@ -24,7 +24,7 @@ export const UploadedEventSchema = zod.object({
     duration: zod
         .string()
         .regex(/^([0-9]{1,3}):[0-5][0-9]$/, {
-            message: 'Bitte eine gültige Dauer im Format HHH:MM eingeben.'
+            message: 'validation.duration.invalid'
         })
         .nullable(),
     location: zod
@@ -53,7 +53,7 @@ export const UploadedEventRequestSchema = DefaultEventSchema.extend({
 
             const maxSize = 2_097_152;
             return maxSize > file.size && file.size > 0;
-        }, 'Bitte eine iCal-Datei (max. 2 MB) hochladen')
+        }, 'validation.ical.fileRequired')
 })
 
 export type UploadedEventRequest = zod.infer<typeof UploadedEventRequestSchema>;
@@ -69,7 +69,7 @@ export const UploadedEventFormSchema = DefaultEventFormSchema.extend({
 
             const maxSize = 2_097_152;
             return maxSize > file.size && file.size > 0;
-        }, 'Bitte eine iCal-Datei (max. 2 MB) hochladen')
+        }, 'validation.ical.fileRequired')
 });
 
 export type UploadedEventForm = zod.infer<typeof UploadedEventFormSchema>;

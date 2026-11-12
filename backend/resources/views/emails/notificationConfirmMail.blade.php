@@ -1,23 +1,25 @@
-@extends('emails.partials.body')
+@extends('emails.partials.body', ['title' => __('emails.notificationConfirm.heading')])
 @section('content')
 @include('emails.partials.header')
 
 <div class="content">
-    <h2>Bitte bestätigen Sie Ihre E-Mail-Adresse</h2>
+    <h2>{{ __('emails.notificationConfirm.heading') }}</h2>
 
+    {{-- The translations are trusted, only the inserted values are escaped --}}
     <h4>
-        Sie haben sich für Veranstaltungsbenachrichtigungen bei
-        <span class="highlight">{{ env('APP_NAME') }}</span>
-        angemeldet.
+        {!! __('emails.notificationConfirm.subscribed', [
+            'appName' => '<span class="highlight">' . e(\App\Support\Localization::appName()) . '</span>',
+        ]) !!}
     </h4>
 
     <h4>
-        Bitte <span class="highlight">bestätigen Sie Ihre E-Mail-Adresse</span>,
-        damit wir Sie regelmäßig über neue Veranstaltungen informieren dürfen.
+        {!! __('emails.notificationConfirm.confirmHint', [
+            'confirm' => '<span class="highlight">' . e(__('emails.notificationConfirm.confirmHighlight')) . '</span>',
+        ]) !!}
     </h4>
 
     <a href="{{ env('APP_URL') }}/exports/email/confirm/{{ $token }}"
-        class="btn">E-Mail-Adresse bestätigen</a>
+        class="btn">{{ __('emails.common.confirmEmail') }}</a>
 
 </div>
 

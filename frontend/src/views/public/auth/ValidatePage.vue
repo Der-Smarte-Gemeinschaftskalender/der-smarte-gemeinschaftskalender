@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { checkLogin } from '@/composables/UserComposoable';
 import { useRouter, useRoute } from 'vue-router';
@@ -7,6 +8,7 @@ import Card from '@/components/KERN/Card.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import Alert from '@/components/KERN/Alert.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const showErrorMessage = ref(false);
@@ -24,7 +26,7 @@ const submitValidation = async () => {
         } else {
             router.push({
                 name: 'login',
-                query: { message: 'Deine E-Mail-Adresse wurde erfolgreich verifiziert. Bitte melde dich an.' },
+                query: { message: 'auth.validate.success' },
             });
         }
     } catch (error) {
@@ -36,7 +38,7 @@ const submitValidation = async () => {
 
 if (!verificationToken) {
     showErrorMessage.value = true;
-    errorMessage.value = 'Der Verifizierungstoken ist ungültig';
+    errorMessage.value = t('auth.validate.invalidToken');
 } else {
     submitValidation();
 }
@@ -44,12 +46,12 @@ if (!verificationToken) {
 <template>
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="validation-card">
-            <Card title="Validierung">
+            <Card :title="t('auth.validate.title')">
                 <Fieldset>
                     <Alert
                         v-if="showErrorMessage"
-                        title="Fehler"
-                        :content="errorMessage ?? 'Es ist ein Fehler aufgetreten.'"
+                        :title="t('common.error')"
+                        :content="errorMessage ?? t('auth.errorOccurred')"
                         severity="danger"
                     />
                 </Fieldset>

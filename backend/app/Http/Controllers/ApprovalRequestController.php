@@ -65,7 +65,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
         $filePath = $approvalRequest->payload['_file_path'] ?? null;
 
         if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'File not found');
+            abort(404, __('messages.approval.fileNotFound'));
         }
 
         return response()->file(Storage::path($filePath));
@@ -78,7 +78,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
         $externalFileUrl = $payload['mobilizon_fields']['picture']['url'] ?? null;
 
         if (!$externalFileUrl) {
-            return response()->json(['error' => 'Datei-URL nicht gefunden'], 404);
+            return response()->json(['error' => __('messages.approval.fileUrlNotFound')], 404);
         }
 
 
@@ -88,7 +88,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                 ->get($externalFileUrl);
 
             if ($imageResponse->failed()) {
-                return response()->json(['error' => 'Fehler beim Abrufen der externen Datei'], 404);
+                return response()->json(['error' => __('messages.approval.externalFileFetchFailed')], 404);
             }
 
             $contentType = $imageResponse->header('Content-Type') ?? 'image/jpeg';
@@ -103,14 +103,14 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                 ]);
         } catch (\Exception $e) {
             Log::error('Error fetching external file: ' . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Abrufen der externen Datei'], 500);
+            return response()->json(['error' => __('messages.approval.externalFileFetchFailed')], 500);
         }
     }
 
     public function approve(ApprovalRequest $approvalRequest, Request $request, array $additionalPayload = []): JsonResponse
     {
         if ($approvalRequest->status !== 'pending') {
-            return response()->json(['error' => 'Anfrage wurde bereits bearbeitet'], 400);
+            return response()->json(['error' => __('messages.approval.alreadyHandled')], 400);
         }
 
         try {
@@ -136,26 +136,26 @@ class ApprovalRequestController extends Controller implements HasMiddleware
 
                 // Send email to user about approval
                 try {
-                    Mail::to($approvalRequest->createdBy->email)->send(new SendApprovalRequestHandledEmail($approvalRequest));
+                    Mail::to($approvalRequest->createdBy)->send(new SendApprovalRequestHandledEmail($approvalRequest));
                 } catch (Throwable $e) {
                     Log::error('Error sending approval handled email: ' . $e->getMessage());
                 }
 
                 return response()->json([
-                    'message' => 'Anfrage erfolgreich genehmigt',
+                    'message' => __('messages.approval.approved'),
                     'approval_request' => $approvalRequest,
                 ]);
             } else {
                 Log::error('Error processing approval request: ' . $result['error'], ['details' => $result['details'] ?? null]);
                 return response()->json([
-                    'error' => 'Fehler bei der Genehmigung der Anfrage',
+                    'error' => __('messages.approval.approveFailed'),
                     'details' => $result['error']
                 ], 500);
             }
         } catch (Throwable $e) {
             Log::error("Error approving request: " . $e->getMessage());
             return response()->json([
-                'error' => 'Failed to approve request',
+                'error' => __('messages.approval.approveError'),
                 'details' => $e->getMessage()
             ], 500);
         }
@@ -164,7 +164,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
     public function reject(ApprovalRequest $approvalRequest, Request $request): JsonResponse
     {
         if ($approvalRequest->status !== 'pending') {
-            return response()->json(['error' => 'Anfrage wurde bereits bearbeitet'], 400);
+            return response()->json(['error' => __('messages.approval.alreadyHandled')], 400);
         }
 
         try {
@@ -183,7 +183,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
 
             // Send email to user about rejection
             try {
-                Mail::to($approvalRequest->createdBy->email)->send(new SendApprovalRequestHandledEmail($approvalRequest));
+                Mail::to($approvalRequest->createdBy)->send(new SendApprovalRequestHandledEmail($approvalRequest));
             } catch (Throwable $e) {
                 Log::error('Error sending rejection email: ' . $e->getMessage());
             }
@@ -192,13 +192,13 @@ class ApprovalRequestController extends Controller implements HasMiddleware
             $this->clearUpStoredFile($approvalRequest);
 
             return response()->json([
-                'message' => 'Anfrage erfolgreich abgelehnt',
+                'message' => __('messages.approval.rejected'),
                 'approval_request' => $approvalRequest,
             ]);
         } catch (Throwable $e) {
             Log::error("Error rejecting request: " . $e->getMessage());
             return response()->json([
-                'error' => 'Fehler beim Ablehnen der Anfrage',
+                'error' => __('messages.approval.rejectFailed'),
                 'details' => $e->getMessage()
             ], 500);
         }
@@ -213,7 +213,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
             $method = $approvalRequest->request_type;
 
             if ($controller === null || !method_exists($controller, $method)) {
-                return ['success' => false, 'error' => 'Invalid requestable type or method'];
+                return ['success' => false, 'error' => __('messages.approval.invalidTypeOrMethod')];
             }
 
             // Reconstruct Request with user and file (if exists)
@@ -239,7 +239,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                             if (!$organisationStatus) {
                                 return [
                                     'success' => false, 
-                                    'error' => 'Organisation nicht gefunden'
+                                    'error' => __('messages.organisations.notFound')
                                 ];
                             }
 
@@ -265,7 +265,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                         
                         return [
                             'success' => false,
-                            'error' => $responseData['error'] ?? 'Failed to process organisation',
+                            'error' => $responseData['error'] ?? __('messages.approval.organisationProcessFailed'),
                             'details' => $responseData['details'] ?? null,
                         ];
                         break;
@@ -276,7 +276,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                         if (!$createdEventId) {
                             return [
                                 'success' => false, 
-                                'error' => 'Created event ID not found in payload'
+                                'error' => __('messages.approval.createdEventIdMissing')
                             ];
                         }
 
@@ -284,7 +284,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                         if (!$createdEvent) {
                             return [
                                 'success' => false, 
-                                'error' => 'Created event not found'
+                                'error' => __('messages.events.notFound')
                             ];
                         }
                     
@@ -304,7 +304,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                     default:
                         return [
                             'success' => false, 
-                            'error' => 'Unsupported requestable type'
+                            'error' => __('messages.approval.unsupportedType')
                         ];
                 }
                
@@ -334,7 +334,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
 
                 return [
                     'success' => false,
-                    'error' => $responseData['error'] ?? 'Unknown error',
+                    'error' => $responseData['error'] ?? __('messages.general.unknownError'),
                 ];
             } 
             finally {

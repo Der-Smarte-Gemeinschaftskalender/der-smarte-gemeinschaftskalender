@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime, formatInputDate, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { dsgApi } from '@/lib/dsgApi';
 import { handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
+import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { buildSuggestions } from '@/composables/EventCreateFormComposable';
 import {
     mobilizon_category_options,
@@ -23,6 +25,7 @@ import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
+import InputTimezone from '@/components/KERN/inputs/InputTimezone.vue';
 import InputUrl from '@/components/KERN/inputs/InputUrl.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
@@ -45,20 +48,52 @@ import {
     type CreatedEventDetails,
     CreatedEventFormSchema,
     CreatedEventUpdateResponseSchema,
+    getEventTypeLabel,
 } from '@/types/events/CreatedEvents';
 import { type AddressForm, type MobilizonFields, addressDefaults } from '@/types/Mobilizon';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const createdEvent = ref<CreatedEventDetails>();
-const descriptionListData = ref<DescriptionListData[]>([]);
 const loading = ref<boolean>(false);
 
 const createdEventData = ref<CreatedEventDetails | null>(null);
 const createdEventMetaData = ref<MobilizonFields | null>(null);
 const createdEventStatus = ref(null);
 const parentEventType = ref('');
+
+// computed so the labels follow a language switch. Missing data gets a fallback instead of
+// throwing, an error here would leave the page blank.
+const descriptionListData = computed<DescriptionListData[]>(() => {
+    if (!createdEvent.value || !createdEventData.value) return [];
+
+    return [
+        {
+            name: 'ID',
+            value: createdEvent.value.id,
+        },
+        {
+            name: t('app.events.columns.createdAt'),
+            value: formatDateTime(createdEventData.value.created_at!),
+        },
+        {
+            name: t('app.events.columns.eventType'),
+            value: getEventTypeLabel(parentEventType.value),
+        },
+        {
+            name: t('app.events.columns.createdBy'),
+            value: createdEvent.value.user?.mobilizon_name || t('common.notSpecified'),
+        },
+        {
+            name: t('app.events.columns.status'),
+            key: 'status',
+            value: createdEventStatus.value,
+            slot: true,
+        },
+    ];
+});
 const parentEventId = ref<any | null>(null);
 const rawAddress = ref<string>('');
 const mapRef = ref<InstanceType<typeof Map> | null>(null);
@@ -79,6 +114,7 @@ const { value: name } = useField<string>('name');
 const { value: start } = useField<string>('start');
 const { value: time } = useField<string>('time');
 const { value: duration } = useField<string>('duration');
+const { value: timezone } = useField<string>('timezone');
 const { value: mobilizon_group_id } = useField<number>('mobilizon_group_id');
 const { value: description } = useField<string>('description');
 const { value: category } = useField<string>('category');
@@ -126,7 +162,7 @@ const onSubmit = handleSubmit(async (values: CreatedEventForm) => {
         }
     } catch (error: any) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        errorMessageContent.value = error ?? 'Beim Speichern der Änderungen ist ein Fehler aufgetreten.';
+        errorMessageContent.value = error ?? t('app.events.created.edit.saveError');
     } finally {
         isSubmitting.value = false;
     }
@@ -154,31 +190,6 @@ const loadCreatedEvent = async () => {
 
         createdEventStatus.value = createdEventData.value!.status;
 
-        descriptionListData.value = [
-            {
-                name: 'ID',
-                value: createdEvent.value!.id,
-            },
-            {
-                name: 'Erstellt am',
-                value: formatDateTime(createdEventData.value!.created_at!),
-            },
-            {
-                name: 'Art des Termines',
-                value: getEventTypeLabel(parentEventType.value),
-            },
-            {
-                name: 'Erstellt von',
-                value: `${createdEvent.value!.user.mobilizon_name}`,
-            },
-            {
-                name: 'Status',
-                key: 'status',
-                value: createdEventStatus.value,
-                slot: true,
-            },
-        ];
-
         pictureLoadFailed.value = false;
         picture.value = createdEventData.value?.picture?.url
             ? (await loadCreatedEventImageByID(createdEvent.value?.id!)) || undefined
@@ -190,6 +201,7 @@ const loadCreatedEvent = async () => {
         start.value = formatInputDate(createdEvent.value?.start);
         time.value = createdEvent.value?.time!;
         duration.value = createdEvent.value?.duration!;
+        timezone.value = data.mobilizon_fields?.options?.timezone || INSTANCE_TIMEZONE;
         mobilizon_group_id.value = data.event?.mobilizon_group_id;
         category.value = createdEventData.value?.category;
         tags.value = createdEventData.value?.tags.map((tag: EventTag) => tag.title) || [];
@@ -214,17 +226,6 @@ const loadCreatedEvent = async () => {
     }
 };
 
-const getEventTypeLabel = (eventType: string): string => {
-    const types = {
-        series_event: 'Einzeltermin aus Terminserie',
-        single_event: 'Einzeltermin',
-        imported_event: 'Einzeltermin aus Kalenderintegration',
-        uploaded_event: 'Einzeltermin aus Kalenderdatei',
-    };
-
-    return types[eventType as keyof typeof types] || 'Unbekannter Termin';
-};
-
 watch(joinOptions, (newValue) => {
     if (newValue !== MobilizonEventJoinOptions.EXTERNAL) externalParticipationUrl.value = undefined;
     else if (!externalParticipationUrl.value) externalParticipationUrl.value = '';
@@ -233,27 +234,29 @@ watch(joinOptions, (newValue) => {
 loadCreatedEvent();
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Einzeltermin bearbeiten</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.events.created.edit.title') }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Einzeltermine/"
-            fragment="kalender-integrieren-ical-url-anbinden"
-        />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+            <template #link>
+                <LinkToDocs
+                    path="Terminverwaltung/Einzeltermine/"
+                    fragment="kalender-integrieren-ical-url-anbinden"
+                />
+            </template>
+        </I18nT>
     </p>
     <Alert
         v-if="errorMessageContent.length"
         class="mb-4"
-        title="Fehler"
+        :title="$t('common.error')"
         :content="errorMessageContent"
         severity="danger"
     />
     <Alert
         v-else-if="showApprovalRequestSuccessMessage"
         class="mb-4"
-        title="Änderungsanfrage gesendet"
-        content="Ihre Änderungen wurden erfolgreich zur Genehmigung eingereicht."
+        :title="t('app.events.created.edit.approvalRequestTitle')"
+        :content="t('app.events.created.edit.approvalRequestContent')"
         severity="info"
     />
     <template v-if="loading">
@@ -264,7 +267,7 @@ loadCreatedEvent();
             <template #status>
                 <div class="flex flex-column gap-2">
                     <span v-if="!!createdEventStatus">
-                        Aktueller Status:
+                        {{ t('app.events.created.edit.currentStatus') }}
                         <EventStatusBadge
                             :status="createdEventStatus"
                             class="ml-2"
@@ -274,7 +277,7 @@ loadCreatedEvent();
                         v-if="!!createdEvent"
                         class="flex align-items-center gap-2"
                     >
-                        <span class="mr-2">Status ändern:</span>
+                        <span class="mr-2">{{ t('app.events.created.edit.changeStatus') }}</span>
                         <span
                             v-for="{ value } in mobilizon_event_status"
                             :key="value"
@@ -303,52 +306,59 @@ loadCreatedEvent();
             <div class="flex flex-column gap-5">
                 <InputText
                     v-model="name"
-                    label="Titel"
+                    :label="$t('app.events.form.title')"
                     name="name"
                     :errors="submitCount === 0 ? undefined : errors.name"
                 />
                 <Alert
                     v-if="pictureLoadFailed"
-                    title="Bild konnte nicht geladen werden"
-                    content="Das vorhandene Veranstaltungsbild konnte nicht geladen werden und wird deshalb hier nicht angezeigt. Beim Speichern bleibt es unverändert erhalten. Laden Sie die Seite neu, um es erneut zu versuchen, oder wählen Sie ein neues Bild aus."
+                    :title="t('app.events.created.edit.pictureLoadFailedTitle')"
+                    :content="t('app.events.created.edit.pictureLoadFailedContent')"
                     severity="warning"
                 />
                 <InputImage
                     v-model="picture"
                     v-model:alt="pictureAlt"
-                    label="Bild (optional)"
+                    :label="$t('app.events.form.picture')"
                     name="picture"
                     :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                     :errors="submitCount === 0 ? undefined : errors.picture"
                 />
                 <InputRichText
                     v-model="description"
-                    label="Beschreibung"
+                    :label="$t('app.events.form.description')"
                     name="description"
                     :errors="submitCount === 0 ? undefined : errors.description"
                 />
                 <InputDate
                     v-model="start"
                     name="start"
-                    label="Startdatum"
+                    :label="$t('app.events.form.startDate')"
                     :errors="submitCount === 0 ? undefined : errors.start"
                 />
                 <InputTime
                     v-model="time"
-                    label="Beginn (Uhrzeit)"
+                    :label="$t('app.events.form.startTime')"
                     name="time"
                     :errors="submitCount === 0 ? undefined : errors.time"
                 />
                 <InputTime
                     v-model="duration"
-                    label="Dauer"
+                    :label="$t('app.events.form.duration')"
                     name="duration"
                     :hours-max="999"
                     :errors="submitCount === 0 ? undefined : errors.duration"
                 />
+                <InputTimezone
+                    v-model="timezone"
+                    :errors="submitCount === 0 ? undefined : errors.timezone"
+                />
+                <p class="kern-text kern-text--small text-color-secondary">
+                    {{ $t('public.timezoneFormHint.stored', { timezone }) }}
+                </p>
                 <InputSelect
                     v-model="category"
-                    label="Kategorie"
+                    :label="$t('app.events.form.category')"
                     name="category"
                     :options="mobilizon_category_options"
                     :errors="submitCount === 0 ? undefined : errors.category"
@@ -358,7 +368,7 @@ loadCreatedEvent();
                     <div class="w-full flex flex-column gap-5">
                         <InputRadios
                             v-model="joinOptions"
-                            label="Anmeldeoptionen"
+                            :label="$t('app.events.form.joinOptions')"
                             name="joinOptions"
                             :radios="reconstructOptions(mobilizon_event_join_options)"
                             :errors="submitCount === 0 ? undefined : errors?.joinOptions"
@@ -368,41 +378,41 @@ loadCreatedEvent();
                             v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            label="Externe Anmeldeseite (URL)"
+                            :label="$t('app.events.form.externalParticipationUrl')"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
                     </div>
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="$t('app.shared.information')"
                             severity="info"
                         >
                             <p>
-                                Wenn Sie eine externe Anmeldeseite verwenden, geben Sie hier den entsprechenden Link an.
-                                Wenn Sie keine Online-Anmeldung nutzen, informieren Sie die Teilnehmer*innen in der
-                                Veranstaltungsbeschreibung über das Anmeldeverfahren und ob eine Anmeldung erforderlich
-                                ist.
+                                {{ $t('app.events.form.joinOptionsInfo') }}
                             </p>
                             <p>
-                                Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/Einzeltermine/"
-                                    fragment="beitrittsoptionen"
-                                />.
+                                <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                    <template #link>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Einzeltermine/"
+                                            fragment="beitrittsoptionen"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
                 </div>
                 <InputSelect
                     v-model="language"
-                    label="Sprache"
+                    :label="$t('app.events.form.language')"
                     name="language"
                     :options="mobilizon_event_language_options"
                     :errors="submitCount === 0 ? undefined : errors.language"
                 />
                 <InputUrl
                     v-model="onlineAddress"
-                    label="Webseite (optional)"
+                    :label="$t('app.events.form.website')"
                     name="onlineAddress"
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
@@ -410,7 +420,7 @@ loadCreatedEvent();
                     v-model="rawAddress"
                     v-model:address="physicalAddress"
                     name="physicalAddress"
-                    label="Adresse (optional)"
+                    :label="$t('app.events.form.address')"
                     :suggestions="mapSuggestions"
                     :mobilizon-group-id="mobilizon_group_id"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
@@ -428,7 +438,7 @@ loadCreatedEvent();
                 :disabled="isSubmitting || isMapLoading"
                 type="submit"
             >
-                Änderungen speichern
+                {{ t('app.events.created.edit.submit') }}
             </Button>
 
             <DeleteCreatedEvent

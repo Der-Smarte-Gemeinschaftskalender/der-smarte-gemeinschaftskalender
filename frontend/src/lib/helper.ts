@@ -1,19 +1,12 @@
 import dayjs from '@/lib/dayjs';
 import zod from '@/lib/zod';
-import { isDe } from '@/i18n';
+import i18n, { isDe } from '@/i18n';
 
 import { mobilizon_event_language_options, mobilizon_main_category_options } from '@/lib/const';
 
 import type { AddressForm } from '@/types/Mobilizon';
 import { type IEvent, type Option, MobilizonCategory } from '@/types/General';
 import { defaultEventImageBasedOnCategory } from './instanceConfig';
-
-// Server-Speicher-Zeitzone: Eingaben in den Termin-Formularen werden vom
-// Backend (Laravel config/app.php) immer als Europa/Berlin interpretiert und
-// gespeichert. Die Anzeige im Frontend nutzt aber die jeweilige Browser-TZ
-// (dayjs Default), damit Nutzer in anderen Zeitzonen lokale Uhrzeit sehen.
-// useTimezoneCheck/TimezoneNotice nutzt diese Konstante als Referenz.
-export const DISPLAY_TIMEZONE = 'Europe/Berlin';
 
 // App
 /**
@@ -94,12 +87,12 @@ export const formatHourMinute = (date: string): string => {
     const [hour, minute] = date.split(':');
     let result = '';
 
-    if (!hour || !minute) return 'Invalid date';
-    if (hour === '00' && minute === '00') return '0 min';
+    if (!hour || !minute) return i18n.global.t('app.helper.invalidDate');
+    if (hour === '00' && minute === '00') return i18n.global.t('app.helper.minutes', { minutes: '0' });
 
-    if (parseInt(hour) > 0) result += `${hour} h `;
+    if (parseInt(hour) > 0) result += `${i18n.global.t('app.helper.hours', { hours: hour })} `;
 
-    result += `${minute} min`;
+    result += i18n.global.t('app.helper.minutes', { minutes: minute });
     return result.trim();
 };
 
@@ -197,7 +190,7 @@ export const formatCoordinates = (coordinates: string): [number, number] | null 
 export const formattedLanguage = (languageCode: string) => {
     if (!languageCode) return '';
     const language = mobilizon_event_language_options.value.find((lang) => lang.value === languageCode);
-    return language ? language.text : 'deutsch';
+    return language ? language.text : i18n.global.t('app.helper.languageFallback');
 };
 
 export const getBeginsEndsOn = (searchBegin: string): { beginsOn: dayjs.Dayjs; endsOn: dayjs.Dayjs | null } => {
@@ -297,16 +290,16 @@ export const convertToUsername = (inputName: string): string => {
 export const preferredUsernameSchema = zod
     .string()
     .regex(/^[a-z]/, {
-        message: 'Der Benutzername muss mit einem Kleinbuchstaben anfangen.',
+        message: 'validation.username.startLowercase',
     })
     .regex(/[a-z0-9]$/, {
-        message: 'Der Benutzername muss mit einem Kleinbuchstaben oder einer Zahl enden.',
+        message: 'validation.username.endLowercaseOrNumber',
     })
     .regex(/^[a-z][a-z0-9_]*$/, {
-        message: 'Bitte einen gültigen Benutzernamen eingeben. Erlaubt sind Kleinbuchstaben, Zahlen und Unterstrich',
+        message: 'validation.username.invalid',
     })
     .regex(/^(?!.*__)/, {
-        message: 'Der Benutzername darf keine aufeinanderfolgenden Unterstriche enthalten.',
+        message: 'validation.username.noConsecutiveUnderscores',
     });
 
 export const preventImplicitSubmit = (event: KeyboardEvent): void => {

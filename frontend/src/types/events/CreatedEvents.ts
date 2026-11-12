@@ -2,6 +2,22 @@ import zod from "@/lib/zod";
 import { ApprovalRequestResponseSchema, DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
 import { stripHtml } from "@/lib/helper";
 import { isStrictModeEnabled } from "@/lib/instanceConfig";
+import i18n from "@/i18n";
+
+/** Kind of event a created event belongs to. */
+export type CreatedEventParentType = 'single_event' | 'series_event' | 'uploaded_event' | 'imported_event';
+
+const createdEventParentTypes: CreatedEventParentType[] = ['series_event', 'single_event', 'imported_event', 'uploaded_event'];
+
+/**
+ * Translated label for the kind of event a created event belongs to.
+ * The value comes from the backend, so unexpected values fall back to "unknown".
+ */
+export const getEventTypeLabel = (eventType: string): string => {
+    return createdEventParentTypes.includes(eventType as CreatedEventParentType)
+        ? i18n.global.t(`app.shared.eventTypes.${eventType}`)
+        : i18n.global.t('app.shared.eventTypes.unknown');
+};
 
 export const CreatedEventSchema = zod.object({
     id: zod
@@ -95,19 +111,19 @@ export type CreatedEventRequest = zod.infer<typeof CreatedEventRequestSchema> & 
 export const CreatedEventFormSchema = DefaultEventFormSchema.extend({
     name: zod
         .string({
-            required_error: 'Der Name ist erforderlich.',
+            required_error: 'validation.name.required',
         })
-        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
-        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .min(3, 'validation.name.min')
+        .max(100, 'validation.name.max')
         .refine(
             (val) => val.trim().length >= 3, {
-                message: "Der Name darf nicht leer sein."
+                message: "validation.name.notEmpty"
         }),
     description: zod
         .string()
         .refine(
             (val) => stripHtml(val).length > 0,
-            { message: "Die Beschreibung darf nicht leer sein." }
+            { message: "validation.description.notEmpty" }
         ),
     start: zod
         .string()

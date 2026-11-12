@@ -10,8 +10,8 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-    title: 'Bestätigen',
-    cancelText: 'Abbrechen',
+    title: '',
+    cancelText: '',
     description: '',
 });
 
@@ -22,7 +22,7 @@ defineEmits(['confirm', 'cancel']);
 <template>
     <Dialog
         v-model="model"
-        :title="title"
+        :title="title || $t('app.shared.confirmDialog.title')"
         :show-content="!!description"
     >
         <p class="whitespace-pre-line">
@@ -32,7 +32,7 @@ defineEmits(['confirm', 'cancel']);
             <Button
                 class="reject-button"
                 variant="secondary"
-                :label="cancelText"
+                :label="cancelText || $t('common.cancel')"
                 @click="
                     $emit('cancel');
                     model = false;

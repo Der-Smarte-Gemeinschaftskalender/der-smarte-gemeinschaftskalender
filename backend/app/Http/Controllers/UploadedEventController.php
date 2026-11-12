@@ -7,11 +7,11 @@ use App\Models\MobilizonTag;
 use App\Models\UploadedEvent;
 use App\Models\CreatedEvent;
 use App\Services\IcalEventService;
+use App\Support\EventDateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Carbon\Carbon;
 use Illuminate\Routing\Controllers\Middleware;
 use Log;
 
@@ -100,7 +100,7 @@ class UploadedEventController extends Controller implements HasMiddleware
             $ical_try = $request->file('uploaded_file')->getPathName();
         } else {
             return response()->json([
-                'error' => 'Keine Daten hochgeladen. Bitte laden Sie eine gültige ICS-Datei hoch.'
+                'error' => __('messages.uploads.noData')
             ], 400);
         }
 
@@ -139,7 +139,7 @@ class UploadedEventController extends Controller implements HasMiddleware
         if (count($events) <= 0) {
             ini_set('max_execution_time', $normalTimeLimit);
             return response()->json([
-                'error' => 'No events selected or already created.'
+                'error' => __('messages.uploads.noEventsSelected')
             ], 400);
         }
 
@@ -162,8 +162,9 @@ class UploadedEventController extends Controller implements HasMiddleware
             $createdEvent->ical_update_sequence = $event['sequence'];
             unset($event['sequence']);
 
-            $createdEvent->start = Carbon::parse($event['beginsOn'])->format('Y-m-d');
-            $createdEvent->time = Carbon::parse($event['beginsOn'])->format('H:i');
+            $eventStart = EventDateTime::startInEventTimezone($event);
+            $createdEvent->start = $eventStart->format('Y-m-d');
+            $createdEvent->time = $eventStart->format('H:i');
             $createdEvent->duration = IcalEventService::calculateDuration($event['beginsOn'], $event['endsOn']);
             $createdEvent->save();
 
@@ -193,7 +194,7 @@ class UploadedEventController extends Controller implements HasMiddleware
         $uploadedEvent->save();
 
         return response()->json([
-            'success' => 'Events created successfully.'
+            'success' => __('messages.uploads.eventsCreated')
         ]);
     }
 
@@ -206,7 +207,7 @@ class UploadedEventController extends Controller implements HasMiddleware
             if ($mclient->hasError($mresponse) && $mclient->getError($mresponse) !== 'Veranstaltung nicht gefunden') {
                 Log::error("Error deleting event with Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse));
                 return response()->json([
-                    'error' => "Fehler beim Löschen der Veranstaltung mit Mobilizon ID {$createdEvent->mobilizon_id}: " . $mclient->getError($mresponse)
+                    'error' => __('messages.events.deleteFailed', ['id' => $createdEvent->mobilizon_id, 'error' => $mclient->getError($mresponse)])
                 ]);
             }
             
@@ -216,7 +217,7 @@ class UploadedEventController extends Controller implements HasMiddleware
         $uploadedEvent->delete();
 
         return response()->json([
-            'success' => 'Hochgeladene Datei und zugehörige Ereignisse wurden erfolgreich gelöscht.'
+            'success' => __('messages.uploads.deleted')
         ]);
     }
 

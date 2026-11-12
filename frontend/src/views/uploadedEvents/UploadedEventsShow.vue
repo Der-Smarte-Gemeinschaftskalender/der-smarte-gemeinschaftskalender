@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { formatDateTime } from '@/lib/helper';
 import { useEventShowDelete } from '@/composables/EventShowDeleteComposable';
@@ -29,14 +30,44 @@ const error = ref(false);
 const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const createdEvents = ref();
-const uploadedEventListData = ref<{ name: string; value: unknown }[]>([]);
 const uploadedEvent = ref<UploadedEventWithRelations>();
+
+// computed so the labels follow a language switch. Missing data gets a fallback instead of
+// throwing, an error here would leave the page blank.
+const uploadedEventListData = computed<{ name: string; value: unknown }[]>(() => {
+    const event = uploadedEvent.value;
+    if (!event) return [];
+
+    return [
+        {
+            name: 'ID',
+            value: event.id,
+        },
+        {
+            name: t('app.events.columns.name'),
+            value: event.filename,
+        },
+        {
+            name: t('app.events.columns.eventCount'),
+            value: createdEvents.value?.length,
+        },
+        {
+            name: t('app.events.columns.addedBy'),
+            value: event.user?.mobilizon_name || t('common.notSpecified'),
+        },
+        {
+            name: t('app.events.columns.addedAt'),
+            value: formatDateTime(event.created_at),
+        },
+    ];
+});
 
 const { deleting, showDeleteDialog, alertMessage, handleDelete } = useEventShowDelete({
     getDeleteUrl: () => `/uploaded-events/${route.params.id}`,
     redirectRouteName: 'uploadedEvents.index',
-    fallbackErrorText: 'Fehler beim Löschen der Kalenderdatei. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support.',
+    fallbackErrorText: t('app.events.uploaded.show.deleteError'),
 });
 
 const loadUploadedEvent = async () => {
@@ -51,30 +82,6 @@ const loadUploadedEvent = async () => {
 
         uploadedEvent.value = data.uploadedEvent;
         createdEvents.value = uploadedEvent.value.created_events;
-
-        uploadedEventListData.value = [
-            {
-                name: 'ID',
-                value: uploadedEvent.value.id,
-            },
-            {
-                name: 'Name',
-                value: uploadedEvent.value.filename,
-            },
-            {
-                name: 'Terminanzahl',
-                value: createdEvents.value.length,
-            },
-            {
-                name: 'Angelegt von',
-                value: `${uploadedEvent.value.user.mobilizon_name}`,
-            },
-            {
-                name: 'Angelegt am',
-                value: formatDateTime(uploadedEvent.value.created_at),
-            },
-        ];
-
     } catch (error) {
         console.error(error);
         await router.push({ name: 'notFound' });
@@ -89,14 +96,14 @@ loadUploadedEvent();
 
 <template>
     <div class="flex align-items-center justify-content-between mb-1">
-        <h1 class="kern-heading text-theme-primary">Kalenderdatei</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.events.uploaded.show.title') }}</h1>
         <Button
             variant="secondary"
             icon-left="delete"
             :disabled="deleting || loading"
             @click="showDeleteDialog = true"
         >
-            {{ deleting ? 'Wird gelöscht...' : 'Löschen' }}
+            {{ deleting ? t('app.shared.deleting') : t('common.delete') }}
         </Button>
     </div>
 
@@ -109,9 +116,9 @@ loadUploadedEvent();
     />
     <ConfirmDialog
         v-model="showDeleteDialog"
-        title="Gesamte Kalenderdatei löschen"
-        :description='`Sie sind dabei, folgende Kalenderdatei zu löschen: ${ uploadedEvent?.filename }.\n\n Alle darin enthaltenen Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf "Abgesagt" setzen, statt die Kalenderdatei zu löschen.`'
-        confirm-text="Löschen"
+        :title="t('app.events.uploaded.deleteTitle')"
+        :description="t('app.events.uploaded.show.deleteDescription', { filename: `${uploadedEvent?.filename}` })"
+        :confirm-text="t('common.delete')"
         @confirm="handleDelete"
     />
 
@@ -119,7 +126,7 @@ loadUploadedEvent();
         <div v-if="!error">
             <DescriptionList :data="uploadedEventListData" />
 
-            <h3 class="kern-heading mt-8 text-theme-primary">Angelegte Termine</h3>
+            <h3 class="kern-heading mt-8 text-theme-primary">{{ t('app.events.createdEvents') }}</h3>
             <CreatedEventsTable 
                 :data="createdEvents" 
                 type="uploaded_event"
@@ -127,11 +134,11 @@ loadUploadedEvent();
         </div>
         <Alert
             v-else
-            title="Fehler"
+            :title="$t('common.error')"
             type="error"
         >
-            <p>Die Datei konnte nicht geladen werden.</p>
-            <p>Bitte versuchen Sie es später erneut.</p>
+            <p>{{ t('app.events.fileLoadError') }}</p>
+            <p>{{ t('app.events.tryAgainLater') }}</p>
         </Alert>
     </div>
     <Loader

@@ -89,7 +89,7 @@ class MaterialGeneratorTemplateController extends Controller implements HasMiddl
         $materialGeneratorTemplate->delete();
 
         return response()->json([
-            'message' => 'Template wurde gelöscht'
+            'message' => __('messages.materialGenerator.templateDeleted')
         ]);
     }
 }

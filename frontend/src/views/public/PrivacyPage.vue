@@ -20,7 +20,7 @@ loadPrivacy();
 </script>
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary">Datenschutz</h1>
+        <h1 class="kern-heading text-theme-primary">{{ $t('public.privacy.title') }}</h1>
         <div v-if="loading">
             <Loader />
         </div>

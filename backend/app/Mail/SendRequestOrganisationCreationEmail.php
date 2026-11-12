@@ -30,7 +30,9 @@ class SendRequestOrganisationCreationEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Neue Organisationsanfrage: "' . $this->requestOrganisationNamen . '"',
+            subject: __('emails.subjects.adminRequestOrganisationCreation', [
+                'organisationName' => $this->requestOrganisationNamen,
+            ]),
         );
     }
 

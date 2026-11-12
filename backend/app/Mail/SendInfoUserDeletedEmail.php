@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Support\Localization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -23,7 +24,7 @@ class SendInfoUserDeletedEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Löschung Benutzerkonto ' . env('APP_NAME'),
+            subject: __('emails.subjects.userDeleted', ['appName' => Localization::appName()]),
         );
     }
 

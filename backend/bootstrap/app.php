@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\InGroup;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'is_admin' => IsAdmin::class,
             'in_group' => InGroup::class,
+        ]);
+
+        // Answer API requests in the language sent via the Accept-Language header (APP_SUPPORTED_LOCALES)
+        $middleware->api(prepend: [
+            SetLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

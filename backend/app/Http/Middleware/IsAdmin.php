@@ -13,7 +13,7 @@ class IsAdmin
     public function handle(Request $request, Closure $next): JsonResponse|Response
     {
         if (auth()->user()->type !== 'admin') {
-            return response()->json(['error' => 'Zugriff verweigert. Admin-Rechte erforderlich.'], 403);
+            return response()->json(['error' => __('messages.admin.accessDenied')], 403);
         }
         return $next($request);
     }

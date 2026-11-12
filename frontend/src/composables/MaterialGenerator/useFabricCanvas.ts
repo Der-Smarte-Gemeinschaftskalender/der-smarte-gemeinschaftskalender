@@ -5,6 +5,7 @@ import {
     util, loadSVGFromString,
 } from 'fabric';
 import { initAligningGuidelines } from '@/composables/useAligningGuidelines';
+import i18n from '@/i18n';
 import type { InfoBox, SerializedFabricObject } from './materialGeneratorConstants';
 
 const AUTO_TAG = '__auto';
@@ -423,7 +424,7 @@ export function useFabricCanvas(
 
     const addUserText = (font: string, textColor: string) => {
         if (!fabricCanvas) return;
-        const t = new Textbox('Neuer Text', {
+        const t = new Textbox(i18n.global.t('app.materialGenerator.canvas.newText'), {
             left: 100, top: 100, fontSize: 40,
             fontFamily: font, fill: textColor, width: 300, editable: true,
         });
@@ -483,7 +484,7 @@ export function useFabricCanvas(
         if (!files || !files[0] || !fabricCanvas) return;
         const file = files[0];
         if (file.size > 2 * 1024 * 1024) {
-            throw new Error('Die Datei ist zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.');
+            throw new Error(i18n.global.t('app.materialGenerator.errors.fileTooLarge'));
         }
 
         if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {

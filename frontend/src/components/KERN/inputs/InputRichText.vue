@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { watch, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
@@ -18,6 +19,7 @@ interface Props {
 
 const model = defineModel<string>();
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 const editor = useEditor({
     editorProps: {
@@ -45,7 +47,7 @@ function addLink() {
     if (!editor.value) return;
 
     const previousUrl = editor.value.getAttributes('link').href;
-    const url = window.prompt('Eingabe URL', previousUrl || 'https://');
+    const url = window.prompt(t('app.shared.richText.enterUrl'), previousUrl || 'https://');
 
     if (url === null) return;
     if (url === '') {

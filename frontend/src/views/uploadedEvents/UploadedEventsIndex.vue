@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
 import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
 import Table from '@/components/KERN/Table.vue';
@@ -10,26 +11,28 @@ import ButtonLegend from '@/components/ButtonLegend.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import type { Column } from '@/types/General';
 
+const { t } = useI18n();
 const tableRef = ref<InstanceType<typeof Table> | null>(null);
 const { alertMessage } = useEventIndexAlerts(tableRef, {
-    deletedMessage: 'Kalenderdatei und alle darin enthaltenen Termine erfolgreich gelöscht.',
+    deletedMessage: t('app.events.uploaded.index.deleted'),
 });
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'filename',
-        name: 'Dateiname',
+        name: t('app.events.columns.filename'),
         align: 'left',
     },
     {
         key: 'created_at',
-        name: 'Hochgeladen am',
+        name: t('app.events.columns.uploadedAt'),
         format: (value: string) => formatDateTime(value),
         align: 'center',
     },
     {
         key: 'created_events_count',
-        name: 'Terminanzahl',
+        name: t('app.events.columns.eventCount'),
         align: 'center',
     },
     {
@@ -37,16 +40,15 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const uploadedTableApi = {
+const uploadedTableApi = computed(() => ({
     url: '/uploaded-events',
     deleteUrl: '/uploaded-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
-    deleteDialogTitle: 'Gesamte Kalenderdatei löschen',
-    deleteDialogDescription: (row: any) =>
-        `Sie sind dabei, die Kalenderdatei "${row?.filename ?? ''}" zu löschen.\n\n Alle darin enthaltenen Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf "Abgesagt" setzen, statt die Kalenderdatei zu löschen.`,
-};
+    deleteDialogTitle: t('app.events.uploaded.deleteTitle'),
+    deleteDialogDescription: (row: any) => t('app.events.uploaded.index.deleteDescription', { filename: row?.filename ?? '' }),
+}));
 </script>
 <template>
     <Alert
@@ -58,7 +60,7 @@ const uploadedTableApi = {
     />
 
     <div class="flex align-items-center justify-content-between gap-2 mb-1">
-        <h1 class="kern-heading text-theme-primary">Kalenderdateien</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.events.uploaded.index.title') }}</h1>
         <RouterLink :to="{ name: 'uploadedEvents.create' }">
             <Button
                 type="primary"
@@ -66,17 +68,18 @@ const uploadedTableApi = {
                 icon-size="lg"
                 :hide-text-on-mobile="true"
                 class="mb-2"
-                title="Kalenderdatei (iCal) hochladen"
+                :title="t('app.events.uploaded.index.upload')"
             >
-                Kalenderdatei (iCal) hochladen
+                {{ t('app.events.uploaded.index.upload') }}
             </Button>
         </RouterLink>
     </div>
     <p class="mb-6">
-        <b>Hinweis:</b>
-        Die Kalenderdateien Funktion eignet sich, um mehrere Termine einmalig gesammelt aus einem externen
-        Kalenderprogramm zu übernehmen. Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/iCal-Dateien/" />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.uploaded.index.hint">
+            <template #link>
+                <LinkToDocs path="Terminverwaltung/iCal-Dateien/" />
+            </template>
+        </I18nT>
     </p>
     <Table
         ref="tableRef"
@@ -92,16 +95,16 @@ const uploadedTableApi = {
                 <RouterLink :to="{ name: 'uploadedEvents.show', params: { id: row.id } }">
                     <Button
                         icon-left="visibility"
-                        title="Ansehen"
-                        aria-label="Ansehen"
+                        :title="t('app.shared.actions.view')"
+                        :aria-label="t('app.shared.actions.view')"
                         icon-size="sm"
                     />
                 </RouterLink>
                 <Button
                     variant="secondary"
                     icon-left="delete"
-                    title="Löschen"
-                    aria-label="Löschen"
+                    :title="t('common.delete')"
+                    :aria-label="t('common.delete')"
                     icon-size="sm"
                     @click="deleteEntry(row)"
                 />

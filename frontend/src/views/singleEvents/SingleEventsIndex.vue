@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
 import { current_organisation } from '@/composables/OrganisationComposable';
 import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
@@ -16,35 +17,36 @@ import Alert from '@/components/KERN/Alert.vue';
 
 type Row = { created_event: CreatedEvent };
 
+const { t } = useI18n();
 const tableRef = ref<InstanceType<typeof Table> | null>(null);
 
 const { alertMessage } = useEventIndexAlerts(tableRef, {
-    deletedMessage: 'Einzeltermin erfolgreich gelöscht.',
-    requestSentMessage:
-        'Ihre Terminanfrage wurde gesendet. Sie werden per E-Mail benachrichtigt, sobald Ihre Anfrage bearbeitet wurde.',
+    deletedMessage: t('app.events.singleEventDeleted'),
+    requestSentMessage: t('app.events.requestSentMessage'),
 });
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'name',
-        name: 'Titel',
+        name: t('app.events.columns.title'),
         align: 'left',
     },
     {
         key: 'start',
-        name: 'Startdatum',
+        name: t('app.events.columns.startDate'),
         format: (value: string, row: Row) => formatDateTime(row?.created_event?.start),
         align: 'center',
     },
     {
         key: 'time',
-        name: 'Uhrzeit',
+        name: t('app.events.columns.time'),
         format: (value: string, row: Row) => row?.created_event?.time,
         align: 'center',
     },
     {
         key: 'duration',
-        name: 'Dauer',
+        name: t('app.events.columns.duration'),
         format: (value: string, row: Row) => row?.created_event?.duration,
         align: 'center',
     },
@@ -53,37 +55,38 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const singleTableApi = {
+const singleTableApi = computed(() => ({
     url: '/single-events',
     deleteUrl: '/created-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
-    deleteDialogTitle: 'Veranstaltung löschen',
-    deleteDialogDescription: (row: any) =>
-        `Sie sind dabei, folgende Veranstaltung zu löschen: ${row?.name ?? ''}.\n Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltung gemacht wurde, sollten Sie den Status der Veranstaltung auf "Abgesagt" setzen, statt die Veranstaltung zu löschen.`,
-};
+    deleteDialogTitle: t('app.events.single.index.deleteTitle'),
+    deleteDialogDescription: (row: any) => t('app.events.single.index.deleteDescription', { name: row?.name ?? '' }),
+}));
 </script>
 <template>
     <div class="flex align-items-center justify-content-between gap-2 mb-1">
-        <h1 class="kern-heading text-theme-primary">Einzeltermine</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.events.single.index.title') }}</h1>
         <RouterLink :to="{ name: 'singleEvents.create' }">
             <Button
                 type="primary"
                 icon-left="add"
                 icon-size="lg"
                 class="mb-2"
-                title="Einzeltermin anlegen"
+                :title="t('app.events.single.index.create')"
                 :hide-text-on-mobile="true"
             >
-                Einzeltermin anlegen
+                {{ t('app.events.single.index.create') }}
             </Button>
         </RouterLink>
     </div>
     <p class="mb-6">
-        <b>Hinweis:</b>
-        Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/Einzeltermine/" />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+            <template #link>
+                <LinkToDocs path="Terminverwaltung/Einzeltermine/" />
+            </template>
+        </I18nT>
     </p>
     <Alert
         class="mb-4"
@@ -106,8 +109,8 @@ const singleTableApi = {
                     :to="{ name: 'singleEvents.create', query: { templateEventId: row.id } }"
                 >
                     <Button
-                        title="Duplizieren"
-                        aria-label="Duplizieren"
+                        :title="t('app.shared.actions.duplicate')"
+                        :aria-label="t('app.shared.actions.duplicate')"
                         icon-left="content-copy"
                         icon-size="sm"
                     />
@@ -117,8 +120,8 @@ const singleTableApi = {
                     :to="{ name: 'createdEvent.edit', params: { id: row?.created_event?.id } }"
                 >
                     <Button
-                        title="Bearbeiten"
-                        aria-label="Bearbeiten"
+                        :title="t('common.edit')"
+                        :aria-label="t('common.edit')"
                         icon-left="edit"
                         icon-size="sm"
                     />
@@ -128,16 +131,16 @@ const singleTableApi = {
                         :to="{ name: 'materialGenerator.event', params: { uuid: row.created_event.mobilizon_uuid } }"
                     >
                         <Button
-                            title="Werbemittel generieren"
-                            aria-label="Werbemittel generieren"
+                            :title="t('app.shared.actions.generatePromoMaterials')"
+                            :aria-label="t('app.shared.actions.generatePromoMaterials')"
                             icon-left="wall_art"
                             icon-size="sm"
                         />
                     </RouterLink>
                     <RouterLink :to="{ name: 'public.event', params: { uuid: row.created_event.mobilizon_uuid } }">
                         <Button
-                            title="Zum Termin"
-                            aria-label="Zum Termin"
+                            :title="t('app.shared.actions.toEvent')"
+                            :aria-label="t('app.shared.actions.toEvent')"
                             icon-left="open-in-new"
                             icon-size="sm"
                         />
@@ -145,8 +148,8 @@ const singleTableApi = {
                 </template>
                 <Button
                     v-if="row?.created_event?.id"
-                    title="Löschen"
-                    aria-label="Löschen"
+                    :title="t('common.delete')"
+                    :aria-label="t('common.delete')"
                     icon-left="delete"
                     icon-size="sm"
                     variant="secondary"

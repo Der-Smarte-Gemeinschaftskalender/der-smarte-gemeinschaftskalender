@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import zod from '@/lib/zod';
 
 import { dsgApi, checkAuthDsgApi } from '@/lib/dsgApi';
@@ -20,10 +21,19 @@ import Alert from '@/components/KERN/Alert.vue';
 import type { AxiosError } from "axios";
 import type { MobilizonUser } from '@/types/Mobilizon';
 
+const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const showLoginErrorMessage = ref(false);
 const errorMessageContent = ref('');
+
+// Pages redirecting to the login can show one of these messages via ?message=<key>. Only known
+// keys are translated, the query parameter must not be able to inject arbitrary text.
+const LOGIN_MESSAGE_KEYS = ['auth.validate.success'];
+const loginMessage = computed(() => {
+    const key = route.query.message;
+    return typeof key === 'string' && LOGIN_MESSAGE_KEYS.includes(key) ? t(key) : t('auth.login.successDefault');
+});
 
 interface LoginForm {
     email: string;
@@ -34,12 +44,12 @@ const validationSchema = toTypedSchema(
     zod.object({
         email: zod
             .string()
-            .nonempty('Die E-Mail-Adresse ist erforderlich.')
-            .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+            .nonempty('validation.email.required')
+            .email('validation.email.invalid')
             .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
         password: zod
             .string()
-            .nonempty('Das Passwort ist erforderlich.')
+            .nonempty('validation.password.required')
             .trim()
             .default(import.meta.env.VITE_LOGIN_PASSWORD || '')
     })
@@ -71,13 +81,13 @@ const onSubmit = handleSubmit(async (values) => {
         console.error(error);
         showLoginErrorMessage.value = true;
         if (error.status === 401) {
-            errorMessageContent.value = 'E-Mail-Adresse und Passwort sind ungültig.';
+            errorMessageContent.value = t('auth.login.invalidCredentials');
         } else if (error.status === 403) {
-            errorMessageContent.value = 'Benutzerkonto ist deaktiviert.';
+            errorMessageContent.value = t('auth.login.accountDisabled');
         } else if (error.status === 404) {
-            errorMessageContent.value = 'E-Mail-Adresse wurde noch nicht bestätigt.';
+            errorMessageContent.value = t('auth.login.emailNotVerified');
         } else {
-            errorMessageContent.value = 'Es ist ein Fehler aufgetreten.';
+            errorMessageContent.value = t('auth.errorOccurred');
         }
     }
 });
@@ -90,19 +100,19 @@ if (checkLogin()) {
     <div class="flex align-self-center align-items-center justify-content-center">
         <div class="login-card">
             <Card
-                title="Login"
+                :title="t('auth.login.title')"
                 class="p-2"
             >
                 <Fieldset class="px-1">
                     <Alert
                         v-if="route.query.message"
-                        title="Erfolg"
-                        :content="route?.query?.message || 'Vorgang wurde erfolgreich durchgeführt.'"
+                        :title="t('common.success')"
+                        :content="loginMessage"
                         severity="success"
                     />
                     <Alert
                         v-if="showLoginErrorMessage"
-                        title="Fehler"
+                        :title="t('common.error')"
                         :content="errorMessageContent"
                         severity="danger"
                     />
@@ -112,14 +122,14 @@ if (checkLogin()) {
                     >
                         <InputEmail
                             v-model="email"
-                            label="E-Mail-Adresse"
+                            :label="t('auth.email')"
                             name="email"
                             required
                             :errors="submitCount === 0 ? undefined : errors.email"
                         />
                         <InputPassword
                             v-model="password"
-                            label="Passwort"
+                            :label="t('auth.password')"
                             name="password"
                             :errors="submitCount === 0 ? undefined : errors.password"
                         />
@@ -128,21 +138,21 @@ if (checkLogin()) {
                             class="mt-3"
                             :disabled="isSubmitting"
                         >
-                            Einloggen
+                            {{ t('auth.login.submit') }}
                         </Button>
                     </form>
                 </Fieldset>
                 <div class="mt-3 text-sm">
-                    <RouterLink :to="{ name: 'register' }">Noch kein Konto? Jetzt registrieren!</RouterLink>
+                    <RouterLink :to="{ name: 'register' }">{{ t('auth.login.noAccount') }}</RouterLink>
                 </div>
                 <div
                     v-if="isStrictModeEnabled" 
                     class="mt-2 text-sm"
                 >
-                    <RouterLink :to="{ name: 'registerWithProfileAndOrganisation' }">Neues Konto mit Organisation anlegen!</RouterLink>
+                    <RouterLink :to="{ name: 'registerWithProfileAndOrganisation' }">{{ t('auth.login.registerWithOrganisation') }}</RouterLink>
                 </div>
                 <div class="mt-2 text-sm">
-                    <RouterLink :to="{ name: 'forgotPassword' }">Passwort vergessen?</RouterLink>
+                    <RouterLink :to="{ name: 'forgotPassword' }">{{ t('auth.login.forgotPassword') }}</RouterLink>
                 </div>
             </Card>
         </div>

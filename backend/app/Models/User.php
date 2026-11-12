@@ -4,7 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\CustomResetPassword;
+use App\Support\Localization;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -17,6 +19,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  *
  * @property int $id
  * @property string $email
+ * @property string|null $locale
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
@@ -52,7 +55,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -64,6 +67,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $fillable = [
         'email',
+        'locale',
         'password',
         'type',
         'is_active',
@@ -141,5 +145,15 @@ class User extends Authenticatable implements JWTSubject
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new CustomResetPassword($token));
+    }
+
+    /**
+     * Language of the emails sent to this user. Used automatically by Laravel
+     * for Mail::to($user) and $user->notify(). Null (no or a disabled language)
+     * makes Laravel keep the current locale.
+     */
+    public function preferredLocale(): ?string
+    {
+        return Localization::isSupported($this->locale) ? $this->locale : null;
     }
 }

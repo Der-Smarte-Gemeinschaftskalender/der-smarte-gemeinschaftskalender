@@ -1,3 +1,5 @@
+import type { SupportedLocale } from '@/i18n';
+
 export interface User {
     id: number;
     email: string;
@@ -9,6 +11,8 @@ export interface User {
     deleted_at?: string | null;
     admin_note?: string | null;
     mobilizon_name?: string | null;
+    /** Language of the emails sent to the user (independent of the UI language) */
+    locale?: SupportedLocale | null;
 }
 
 export interface UserView {
@@ -16,6 +20,7 @@ export interface UserView {
     password: string;
     type: string;
     is_active: boolean;
+    locale?: SupportedLocale;
 }
 
 export interface FullUser extends User {

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute, useRouter } from 'vue-router';
-import { intervall_keys, monthlyIntervalWeekOptions } from '@/lib/const';
+import { useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
+import { getMonthWeekLabel, getWeekDayLabel, intervall_keys } from '@/lib/const';
 import { useEventShowDelete } from '@/composables/EventShowDeleteComposable';
 import { seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig';
 
@@ -25,39 +26,89 @@ interface SeriesEventWithRelations extends SeriesEvent {
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const loading = ref(false);
 const seriesEvent = ref<SeriesEventWithRelations>();
 const createdEvents = ref();
-const descriptionListData = ref<{ name: string; value: unknown }[]>([]);
 
-const weekDayLabels: Record<number, string> = {
-    0: 'Sonntag',
-    1: 'Montag',
-    2: 'Dienstag',
-    3: 'Mittwoch',
-    4: 'Donnerstag',
-    5: 'Freitag',
-    6: 'Samstag',
+const formatWeekDay = (day?: number): string => {
+    if (day === undefined || day === null) return t('app.shared.notSet');
+    return getWeekDayLabel(day) ?? String(day);
 };
 
-const getWeekDayLabel = (day?: number): string => {
-    if (day === undefined || day === null) return 'Nicht gesetzt';
-    return weekDayLabels[day] ?? String(day);
+const formatMonthWeeks = (weeks?: number[]): string => {
+    if (!weeks?.length) return t('app.shared.notSet');
+
+    return weeks.map((week) => getMonthWeekLabel(week) ?? String(week)).join(', ');
 };
 
-const getMonthWeeksLabel = (weeks?: number[]): string => {
-    if (!weeks?.length) return 'Nicht gesetzt';
+const getRecurrenceDetails = (event: SeriesEventWithRelations): Array<{ name: string; value: unknown }> => {
+    if (!seriesEventsDaysControlsEnabled) return [];
 
-    return weeks
-        .map((week) => monthlyIntervalWeekOptions.find((option) => option.value === week)?.text ?? String(week))
-        .join(', ');
+    if (event.intervall === Intervall.WEEKLY) {
+        return [{ name: t('app.events.columns.weekDay'), value: formatWeekDay(event.weekly_day) }];
+    }
+
+    if (event.intervall !== Intervall.MONTHLY) return [];
+
+    if (event.monthly_use_start_date_as_default) {
+        return [{ name: t('app.events.columns.useStartDate'), value: t('common.yes') }];
+    }
+
+    const details: Array<{ name: string; value: unknown }> = [];
+    if (event.monthly_weeks?.length) {
+        details.push({ name: t('app.events.columns.weeks'), value: formatMonthWeeks(event.monthly_weeks) });
+    }
+    if (event.monthly_week_day !== undefined) {
+        details.push({ name: t('app.events.columns.weekDay'), value: formatWeekDay(event.monthly_week_day) });
+    }
+    return details;
 };
+
+// computed so the labels follow a language switch. Missing data gets a fallback instead of
+// throwing, an error here would leave the page blank.
+const descriptionListData = computed<{ name: string; value: unknown }[]>(() => {
+    const event = seriesEvent.value;
+    if (!event) return [];
+
+    return [
+        {
+            name: 'ID',
+            value: event.id,
+        },
+        {
+            name: t('app.events.columns.title'),
+            value: event.name,
+        },
+        {
+            name: t('app.events.columns.eventCount'),
+            value: createdEvents.value?.length,
+        },
+        {
+            name: t('app.events.columns.startDate'),
+            value: formatDateTime(event.start),
+        },
+        {
+            name: t('app.events.columns.endDate'),
+            value: formatDateTime(event.end),
+        },
+        {
+            name: t('app.events.columns.intervall'),
+            value: intervall_keys.value[event.intervall?.toLowerCase() as keyof typeof intervall_keys.value] || event.intervall,
+        },
+        ...getRecurrenceDetails(event),
+        {
+            name: t('app.events.columns.addedBy'),
+            value: event.user?.mobilizon_name || t('common.notSpecified'),
+        },
+    ];
+});
 
 const { deleting, showDeleteDialog, alertMessage, handleDelete } = useEventShowDelete({
     getDeleteUrl: () => `/series-events/${route.params.id}`,
     redirectRouteName: 'seriesEvents.index',
-    fallbackErrorText: 'Fehler beim Löschen der Serientermine. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support.',
+    fallbackErrorText: t('app.events.series.show.deleteError'),
 });
 
 const loadSeriesEvent = async () => {
@@ -72,73 +123,6 @@ const loadSeriesEvent = async () => {
         
         seriesEvent.value = data.seriesEvent;
         createdEvents.value = seriesEvent.value.created_events;
-
-        const recurrenceDetails: Array<{ name: string; value: unknown }> = [];
-
-        if (seriesEvent.value!.intervall === Intervall.WEEKLY && seriesEventsDaysControlsEnabled) {
-            recurrenceDetails.push({
-                name: 'Wochentag',
-                value: getWeekDayLabel(seriesEvent.value!.weekly_day),
-            });
-        }
-        else if (seriesEvent.value!.intervall === Intervall.MONTHLY && seriesEventsDaysControlsEnabled) {
-            if (seriesEvent.value!.monthly_use_start_date_as_default) {
-                recurrenceDetails.push({
-                    name: 'Startdatum übernehmen',
-                    value: 'Ja',
-                });
-            }
-            else {
-                if (seriesEvent.value!.monthly_weeks?.length) {
-                    recurrenceDetails.push({
-                        name: 'Woche(n)',
-                        value: getMonthWeeksLabel(seriesEvent.value!.monthly_weeks),
-                    });
-                }
-
-                if (seriesEvent.value!.monthly_week_day !== undefined) {
-                    recurrenceDetails.push({
-                        name: 'Wochentag',
-                        value: getWeekDayLabel(seriesEvent.value!.monthly_week_day),
-                    });
-                }
-            }
-        }
-
-        descriptionListData.value = [
-            {
-                name: 'ID',
-                value: seriesEvent.value!.id,
-            },
-            {
-                name: 'Titel',
-                value: seriesEvent.value!.name,
-            },
-            {
-                name: 'Terminanzahl',
-                value: createdEvents.value.length,
-            },
-            {
-                name: 'Startdatum',
-                value: formatDateTime(seriesEvent.value!.start),
-            },
-            {
-                name: 'Enddatum',
-                value: formatDateTime(seriesEvent.value!.end),
-            },
-            {
-                name: 'Intervall',
-                value:
-                    intervall_keys[seriesEvent.value!.intervall.toLowerCase() as keyof typeof intervall_keys] ||
-                    seriesEvent.value!.intervall,
-            },
-            ...recurrenceDetails,
-            {
-                name: 'Angelegt von',
-                value: `${seriesEvent.value!.user.mobilizon_name}`,
-            },
-        ];
-
     } catch (error) {
         console.error(error);
         await router.push({ name: 'notFound' });
@@ -160,14 +144,14 @@ loadSeriesEvent();
     />
     <ConfirmDialog
         v-model="showDeleteDialog"
-        title="Gesamten Serientermin löschen"
-        :description='`Sie sind dabei, folgenden Serientermin zu löschen: ${ seriesEvent?.name }.\n\n Alle darin enthaltenen Einzeltermine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf "Abgesagt" setzen, statt den Serientermin zu löschen.`'
-        confirm-text="Löschen"
+        :title="t('app.events.series.deleteTitle')"
+        :description="t('app.events.series.deleteDescription', { name: `${seriesEvent?.name}` })"
+        :confirm-text="t('common.delete')"
         @confirm="handleDelete"
     />
 
     <div class="flex align-items-center justify-content-between mb-1">
-        <h1 class="kern-heading text-theme-primary">Serientermin</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.events.series.show.title') }}</h1>
         <div class="flex gap-2">
             <template v-if="!!seriesEvent">
                 <Button
@@ -176,14 +160,14 @@ loadSeriesEvent();
                     :disabled="deleting"
                     @click="showDeleteDialog = true"
                 >
-                    {{ deleting ? 'Wird gelöscht...' : 'Löschen' }}
+                    {{ deleting ? t('app.shared.deleting') : t('common.delete') }}
                 </Button>
             </template>
         </div>
     </div>
     <template v-if="!loading">
         <DescriptionList :data="descriptionListData" />
-        <h3 class="kern-heading mt-8 text-theme-primary">Angelegte Termine</h3>
+        <h3 class="kern-heading mt-8 text-theme-primary">{{ t('app.events.createdEvents') }}</h3>
         <CreatedEventsTable 
             :data="createdEvents" 
             type="series_event" 

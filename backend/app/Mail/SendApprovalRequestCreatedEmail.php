@@ -2,44 +2,30 @@
 
 namespace App\Mail;
 
+use App\Enums\EmailTemplateType;
+use App\Mail\Concerns\RendersEmailTemplate;
 use App\Models\ApprovalRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Http\Controllers\EmailTemplateController;
-use App\Enums\EmailTemplateType;
 
 class SendApprovalRequestCreatedEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, RendersEmailTemplate;
 
-    public string $requestTypeName;
-    public int $requestId;
-    public string $mailBody;
-    public string $mailSubject;
+    public ApprovalRequest $approvalRequest;
 
     public function __construct(ApprovalRequest $approvalRequest)
     {
-        $templateController = new EmailTemplateController();
-        $this->mailBody = $templateController->getEventDefaultTemplateBody(EmailTemplateType::APPROVAL_REQUEST_SENT);
-        $this->mailSubject = $templateController->getEventDefaultTemplateSubject(EmailTemplateType::APPROVAL_REQUEST_SENT);
-
-        $this->requestTypeName = $this->getRequestTypeName($approvalRequest->requestable_type, $approvalRequest->request_type);
-        $this->requestId = $approvalRequest->id;
-        $variables = [
-            ':appName' => config('app.name', 'Der Smarte Gemeinschaftskalender'),
-            ':requestTypeName' => $this->requestTypeName,
-        ];
-        $this->mailBody = str_replace(array_keys($variables), array_values($variables), $this->mailBody);
-        $this->mailSubject = str_replace(array_keys($variables), array_values($variables), $this->mailSubject);
+        $this->approvalRequest = $approvalRequest;
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: $this->mailSubject,
+            subject: $this->renderTemplate()['subject'],
         );
     }
 
@@ -48,9 +34,9 @@ class SendApprovalRequestCreatedEmail extends Mailable
         return new Content(
             view: 'emails.approvalRequestCreatedUserMail',
             with: [
-                'mailBody' => $this->mailBody,
-                'requestId' => $this->requestId,
-                'requestTypeName' => $this->requestTypeName,
+                'mailBody' => $this->renderTemplate()['body'],
+                'requestId' => $this->approvalRequest->id,
+                'requestTypeName' => $this->approvalRequest->getRequestTypeLabel(),
             ]
         );
     }
@@ -60,29 +46,13 @@ class SendApprovalRequestCreatedEmail extends Mailable
         return [];
     }
 
-    private function getRequestTypeName(string $requestableType, string $requestType): string
+    /**
+     * @return array{subject: string, body: string}
+     */
+    private function renderTemplate(): array
     {
-        $typeMap = [
-            'SingleEvent' => 'Einzeltermin',
-            'SeriesEvent' => 'Serienterm',
-            'CreatedEvent' => 'angelegter Termin',
-            'UploadedEvent' => 'hochgeladene Termine',
-            'ImportedEvent' => 'importierte Termine',
-            'Organisation' => 'Organisation',
-        ];
-
-        $actionMap = [
-            'store' => 'erstellen',
-            'create' => 'erstellen',
-            'update' => 'aktualisieren',
-            'delete' => 'löschen',
-            'updateGroup' => 'aktualisieren',
-            'changeOrganisationStatus' => 'erstellen',
-        ];
-
-        $type = $typeMap[$requestableType] ?? $requestableType;
-        $action = $actionMap[$requestType] ?? $requestType;
-
-        return $type . ' ' . $action;
+        return $this->renderEmailTemplate(EmailTemplateType::APPROVAL_REQUEST_SENT, [
+            ':requestTypeName' => $this->approvalRequest->getRequestTypeLabel(),
+        ]);
     }
 }

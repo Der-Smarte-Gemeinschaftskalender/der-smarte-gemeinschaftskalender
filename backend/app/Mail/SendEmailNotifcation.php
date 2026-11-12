@@ -40,7 +40,7 @@ class SendEmailNotifcation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Benachrichtigung Termine',
+            subject: __('emails.subjects.notification'),
         );
     }
 

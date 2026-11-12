@@ -43,7 +43,7 @@ class ApprovalRequestService
             if (!in_array($eventType, self::EVENT_CONTROLLER_MAP)) {
                 return [
                     'success' => false,
-                    'error' => 'Unbekannter Ereignistyp für Genehmigungsanforderung: ' . $eventType
+                    'error' => __('messages.approval.unknownEventType', ['type' => $eventType])
                 ];
             }
 
@@ -57,7 +57,9 @@ class ApprovalRequestService
             if ($requestableId && $this->hasPendingApprovalRequests($eventType, $actionType, $requestableId, $payload)) {
                 return [
                     'success' => false,
-                    'error' => 'Es gibt bereits eine ausstehende Anfrage für diese' . ($eventType === 'Organisation' ? ' Organisation' : 'n Termin') . '.'
+                    'error' => $eventType === 'Organisation'
+                        ? __('messages.approval.pendingExistsOrganisation')
+                        : __('messages.approval.pendingExistsEvent')
                 ];
             }
 
@@ -83,7 +85,7 @@ class ApprovalRequestService
             try {
                 $adminUsers = User::where('type', 'admin')->get();
                 foreach ($adminUsers as $adminUser) {
-                    Mail::to($adminUser->email)->send(new SendApprovalRequestEmail($approvalRequest));
+                    Mail::to($adminUser)->send(new SendApprovalRequestEmail($approvalRequest));
                 }
             } catch (Throwable $e) {
                 Log::error('Error sending approval request email: ' . $e->getMessage());
@@ -91,7 +93,7 @@ class ApprovalRequestService
 
             // Send confirmation email to the user
             try {
-                Mail::to($request->user()->email)->send(new SendApprovalRequestCreatedEmail($approvalRequest));
+                Mail::to($request->user())->send(new SendApprovalRequestCreatedEmail($approvalRequest));
             } catch (Throwable $e) {
                 Log::error('Error sending approval request created email to user: ' . $e->getMessage());
             }
@@ -99,13 +101,13 @@ class ApprovalRequestService
             return [
                 'success' => true,
                 'approval_request_id' => $approvalRequest->id,
-                'message' => 'Approval requested for ' . $eventType . ' ' . $actionType
+                'message' => __('messages.approval.requested', ['type' => $eventType, 'action' => $actionType])
             ];
         } catch (Throwable $e) {
             Log::error("Error creating approval request: " . $e->getMessage());
             return [
                 'success' => false,
-                'error' => 'Fehler beim Erstellen der Genehmigungsanforderung.',
+                'error' => __('messages.approval.createFailed'),
                 'details' => $e->getMessage(),
             ];
         }

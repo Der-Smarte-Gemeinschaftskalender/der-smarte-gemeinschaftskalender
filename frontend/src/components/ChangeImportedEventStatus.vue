@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 
 import Button from './KERN/Button.vue';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 const alertMessage = defineModel<IAlert | null>('alertMessage', { default: null });
 
@@ -35,10 +37,10 @@ const changeStatus = async () => {
 
             const message =
                 error.response?.data?.error ||
-                'Der Status konnte nicht geändert werden. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Support.';
+                t('app.shared.changeImportedStatus.error');
             alertMessage.value = {
                 severity: 'danger',
-                title: 'Fehler',
+                title: t('common.error'),
                 content: message,
             };
         }
@@ -59,7 +61,7 @@ defineExpose({
             newStatus = 'inactive';
         "
     >
-        Deaktivieren
+        {{ t('app.shared.changeImportedStatus.deactivate') }}
     </Button>
     <Button
         v-else-if="currentStatus === 'inactive'"
@@ -70,12 +72,12 @@ defineExpose({
             newStatus = 'active';
         "
     >
-        Aktivieren
+        {{ t('app.shared.changeImportedStatus.activate') }}
     </Button>
     <ConfirmDialog
         v-model="showDialog"
-        title="Status ändern"
-        :confirm-text="newStatus === 'active' ? 'Aktivieren' : 'Deaktivieren'"
+        :title="t('app.shared.changeStatus.title')"
+        :confirm-text="newStatus === 'active' ? t('app.shared.changeImportedStatus.activate') : t('app.shared.changeImportedStatus.deactivate')"
         @confirm="changeStatus"
     />
 </template>

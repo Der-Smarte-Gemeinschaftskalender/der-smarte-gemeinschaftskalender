@@ -1,7 +1,19 @@
+import type { SupportedLocale } from '@/i18n';
+
+/**
+ * A text shown to visitors: either one text for all languages or one per language, e.g.
+ * `{ de: 'Termine in Süderbrarup', en: 'Events in Süderbrarup' }`. Languages without an own
+ * text show the text of the default language (VITE_APP_LOCALE), or else any other given text.
+ */
+export type LocalizedText = string | Partial<Record<SupportedLocale, string>>;
+
 type OverwriteConfig = {
     isStrictModeEnabled?: boolean;
     showPhysicalAddressRouting?: Record<string, boolean>;
-    instanceInformation?: Record<string, string>;
+    instanceInformation?: {
+        name?: LocalizedText;
+        operatedBy?: LocalizedText;
+    };
     allowedEventCreationsMethods?: {
         singleEvent?: boolean;
         seriesEvent?: boolean;
@@ -9,19 +21,19 @@ type OverwriteConfig = {
         importedEvent?: boolean;
     };
     landingPage?: {
-        heading?: string;
-        description?: string;
-        descriptionHtml?: string;
+        heading?: LocalizedText;
+        description?: LocalizedText;
+        descriptionHtml?: LocalizedText;
         showNotification?: boolean;
         showCategories?: boolean;
         numberOfUpcomingEvents?: number;
-        upcomingEventsMapTitle?: string;
+        upcomingEventsMapTitle?: LocalizedText;
         upcomingEventsMapBeforeDateFromNowInDays?: number | null;
-        showNotificationImageAlt?: string;
+        showNotificationImageAlt?: LocalizedText;
     };
     searchPage?: {
-        description?: string;
-        descriptionHtml?: string;
+        description?: LocalizedText;
+        descriptionHtml?: LocalizedText;
     };
     searchDefaults?: {
         searchTerm?: string;
@@ -33,18 +45,18 @@ type OverwriteConfig = {
     mainHeader?: {
         showCalendarLink?: boolean;
         externalLinkUrl?: string;
-        externalLinkText?: string;
+        externalLinkText?: LocalizedText;
         externalLinkUrl2?: string | null;
-        externalLinkText2?: string | null;
+        externalLinkText2?: LocalizedText | null;
     };
     mainFooter?: {
-        disclaimerText?: string;
+        disclaimerText?: LocalizedText;
     };
     createEventDefaults?: {
         category?: string;
     };
     showEventPage?: {
-        eventShareTitle?: string;
+        eventShareTitle?: LocalizedText;
     };
     materialGeneratorDefaults?: {
         underlineColor?: string;
@@ -66,4 +78,5 @@ type OverwriteConfig = {
 export const overwriteConfig: OverwriteConfig = {
     // Add only values you want to overwrite.
     // All missing keys keep their defaults from instanceConfig.
+    // Texts can be given per language, see LocalizedText.
 };

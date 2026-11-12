@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Validation\Rule;
 use Log;
 
 class UserController extends Controller implements HasMiddleware
@@ -39,7 +40,7 @@ class UserController extends Controller implements HasMiddleware
             $user->mobilizon_profile_id = $response['data']['createPerson']['id'];
             $user->save();
             return response()->json([
-                'message' => 'Person registered successfully',
+                'message' => __('messages.users.personRegistered'),
                 'data' => $response['data']['createPerson'],
             ]);
         }
@@ -63,12 +64,18 @@ class UserController extends Controller implements HasMiddleware
                 'string',
                 'min:2',
                 'max:100',
-            ]
+            ],
+            // Language of the emails sent to this user, independent of the UI language
+            'locale' => [
+                'sometimes',
+                'required',
+                Rule::in(config('app.supported_locales')),
+            ],
         ]);
 
 
         if (!$validated) {
-            return response()->json(['error' => 'Bitte alle Felder ausfüllen'], 400);
+            return response()->json(['error' => __('messages.users.fillAllFields')], 400);
         }
 
         $user = auth()->user();
@@ -77,9 +84,13 @@ class UserController extends Controller implements HasMiddleware
             if ($validated['email'] !== $user->email) {
                 $existingUser = User::where('email', $validated['email'])->first();
                 if ($existingUser) {
-                    return response()->json(['error' => 'Diese E-Mail-Adresse ist bereits vergeben'], 400);
+                    return response()->json(['error' => __('messages.users.emailTaken')], 400);
                 }
                 $user->email = $validated['email'];
+            }
+
+            if (isset($validated['locale'])) {
+                $user->locale = $validated['locale'];
             }
 
             if ($validated['mobilizon_name'] !== $user->mobilizon_name) {
@@ -99,15 +110,16 @@ class UserController extends Controller implements HasMiddleware
             $mclient = Mobilizon::getInstance();
 
             return response()->json([
-                'message' => 'Profil erfolgreich aktualisiert',
+                'message' => __('messages.users.profileUpdated'),
                 'user' => [
-                    'email' => $user->email
+                    'email' => $user->email,
+                    'locale' => $user->locale,
                 ],
                 'person' => $mclient->person
             ]);
         } catch (\Exception $e) {
             Log::error('Fehler beim Aktualisieren des Profils: ' . $e->getMessage());
-            return response()->json(['error' => 'Fehler beim Aktualisieren des Profils: ' . $e->getMessage()], 500);
+            return response()->json(['error' => __('messages.users.profileUpdateFailed', ['message' => $e->getMessage()])], 500);
         }
     }
 
@@ -120,24 +132,24 @@ class UserController extends Controller implements HasMiddleware
         ]);
 
         if (!$validated) {
-            return response()->json(['error' => 'Bitte alle Felder ausfüllen'], 400);
+            return response()->json(['error' => __('messages.users.fillAllFields')], 400);
         }
 
         if ($validated['new_password'] !== $validated['new_password_confirm']) {
-            return response()->json(['error' => 'Die neuen Passwörter stimmen nicht überein'], 400);
+            return response()->json(['error' => __('messages.users.passwordsMismatch')], 400);
         }
 
         $user = auth()->user();
 
         if (!Hash::check($validated['current_password'], $user->password)) {
-            return response()->json(['error' => 'Aktuelles Passwort ist falsch'], 400);
+            return response()->json(['error' => __('messages.users.currentPasswordWrong')], 400);
         }
 
         $user->password = Hash::make($validated['new_password']);
         $user->save();
 
         return response()->json([
-            'message' => 'Passwort erfolgreich aktualisiert'
+            'message' => __('messages.users.passwordUpdated')
         ]);
     }
 

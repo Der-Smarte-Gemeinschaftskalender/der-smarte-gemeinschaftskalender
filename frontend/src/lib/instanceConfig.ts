@@ -1,6 +1,6 @@
 import { computed } from 'vue';
-import i18n from '@/i18n';
-import { overwriteConfig } from '@/lib/overwriteConfig';
+import i18n, { DEFAULT_LOCALE, type SupportedLocale } from '@/i18n';
+import { overwriteConfig, type LocalizedText } from '@/lib/overwriteConfig';
 
 /** 
  * IMPORTANT: 
@@ -31,6 +31,36 @@ const mergeWithOverwrite = <T>(defaults: T, overwrite?: unknown): T => {
     return overwrite as T;
 };
 
+/**
+ * Picks the text for the current language from a per-language overwrite.
+ * Languages without an own text fall back to the default language's text, then to any other given text.
+ * The built-in default is only used if the overwrite has no text at all: it describes the original
+ * instance (e.g. "Amt Süderbrarup") and would be wrong for an instance that overwrites the text.
+ */
+const pickLocalizedText = (text: Partial<Record<SupportedLocale, string | null>>, fallback: unknown): unknown => {
+    const locale = i18n.global.locale.value as SupportedLocale;
+    return text[locale] ?? text[DEFAULT_LOCALE] ?? Object.values(text).find((value) => value != null) ?? fallback;
+};
+
+/**
+ * Like mergeWithOverwrite, but the given text keys may be overwritten per language
+ * (`{ de: '…', en: '…' }`, see LocalizedText and pickLocalizedText).
+ */
+const mergeWithLocalizedOverwrite = <T extends Record<string, unknown>>(
+    defaults: T,
+    overwrite: Partial<Record<keyof T, unknown>> | undefined,
+    textKeys: Array<keyof T>
+): T => {
+    const merged = mergeWithOverwrite(defaults, overwrite);
+
+    textKeys.forEach((key) => {
+        const text = overwrite?.[key] as LocalizedText | null | undefined;
+        if (text && typeof text === 'object') merged[key] = pickLocalizedText(text, defaults[key]) as T[keyof T];
+    });
+
+    return merged;
+};
+
 export const isStrictModeEnabled = mergeWithOverwrite(
     String(import.meta.env?.VITE_DSG_STRICT_MODE ?? '').toLowerCase() === 'true',
     overwriteConfig.isStrictModeEnabled
@@ -46,12 +76,15 @@ export const showPhysicalAddressRouting: Record<string, boolean> = mergeWithOver
     overwriteConfig.showPhysicalAddressRouting
 );
 
-export const instanceInformation: Record<string, string> = mergeWithOverwrite(
-    {
-        name: 'Der Smarte Gemeinschaftskalender',
-        operatedBy: 'Amt Süderbrarup',
-    },
-    overwriteConfig.instanceInformation
+export const instanceInformation = computed<{ name: string; operatedBy: string }>(() =>
+    mergeWithLocalizedOverwrite(
+        {
+            name: 'Der Smarte Gemeinschaftskalender',
+            operatedBy: 'Amt Süderbrarup',
+        },
+        overwriteConfig.instanceInformation,
+        ['name', 'operatedBy']
+    )
 );
 
 export const allowedEventCreationsMethods: {
@@ -80,7 +113,7 @@ export const landingPage = computed<{
     upcomingEventsMapBeforeDateFromNowInDays: number | null;
     showNotificationImageAlt: string;
 }>(() =>
-    mergeWithOverwrite(
+    mergeWithLocalizedOverwrite(
         {
             heading: t('instanceConfig.landingPage.heading'),
             description: t('instanceConfig.landingPage.description'),
@@ -92,17 +125,19 @@ export const landingPage = computed<{
             upcomingEventsMapBeforeDateFromNowInDays: 30,
             showNotificationImageAlt: t('instanceConfig.landingPage.showNotificationImageAlt'),
         },
-        overwriteConfig.landingPage
+        overwriteConfig.landingPage,
+        ['heading', 'description', 'descriptionHtml', 'upcomingEventsMapTitle', 'showNotificationImageAlt']
     )
 );
 
 export const searchPage = computed<{ description: string; descriptionHtml: string }>(() =>
-    mergeWithOverwrite(
+    mergeWithLocalizedOverwrite(
         {
             description: t('instanceConfig.searchPage.description'),
             descriptionHtml: t('instanceConfig.searchPage.descriptionHTML'),
         },
-        overwriteConfig.searchPage
+        overwriteConfig.searchPage,
+        ['description', 'descriptionHtml']
     )
 );
 
@@ -130,7 +165,7 @@ export const mainHeader = computed<{
     externalLinkUrl2: string | null;
     externalLinkText2: string | null;
 }>(() =>
-    mergeWithOverwrite(
+    mergeWithLocalizedOverwrite(
         {
             showCalendarLink: true,
             externalLinkUrl: 'https://der-smarte-gemeinschaftskalender.de/',
@@ -138,16 +173,18 @@ export const mainHeader = computed<{
             externalLinkUrl2: null,
             externalLinkText2: null,
         },
-        overwriteConfig.mainHeader
+        overwriteConfig.mainHeader,
+        ['externalLinkText', 'externalLinkText2']
     )
 );
 
 export const mainFooter = computed<{ disclaimerText: string }>(() =>
-    mergeWithOverwrite(
+    mergeWithLocalizedOverwrite(
         {
             disclaimerText: t('instanceConfig.mainFooter.disclaimerText'),
         },
-        overwriteConfig.mainFooter
+        overwriteConfig.mainFooter,
+        ['disclaimerText']
     )
 );
 
@@ -159,11 +196,12 @@ export const createEventDefaults: { category: string } = mergeWithOverwrite(
 );
 
 export const showEventPage = computed<{ eventShareTitle: string }>(() =>
-    mergeWithOverwrite(
+    mergeWithLocalizedOverwrite(
         {
             eventShareTitle: t('instanceConfig.showEventPage.eventShareTitle'),
         },
-        overwriteConfig.showEventPage
+        overwriteConfig.showEventPage,
+        ['eventShareTitle']
     )
 );
 

@@ -35,6 +35,7 @@ class CreateFirstAdminUser extends Command
         // create first admin user and add mobilizon data
         $user = new User();
         $user->email = $this->option('email');
+        $user->locale = config('app.locale');
         $user->password = bcrypt($this->option('password'));
         $user->type = 'admin';
         $user->mobilizon_email = $this->option('mobilizon_email');

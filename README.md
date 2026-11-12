@@ -33,21 +33,23 @@ cp example.env .env
 
 Zuerst playwright installieren
 ```bash
+npm install
 npx playwright install
 ```
 
 ### Tests ausführen
 
-Beim Ausführen der Tests kann es zu Fehlern kommen, wenn mehr als ein Worker benutzt wird. 
+Die Worker-Zahl steht in der `playwright.config.ts` auf 2. Alle Worker teilen sich ein Backend und
+dessen Mobilizon-Ratelimit - mehr Parallelität macht den Lauf nicht schneller, nur roter.
 
 #### Alle Tests ausführen
 ```bash
-npx playwright test --workers=1
+npx playwright test
 ```
 
 #### Tests im UI Mode (empfohlen für Entwicklung)
 ```bash
-npx playwright test --ui --workers=1
+npx playwright test --ui
 ```
 Im UI Mode muss dann der "Start" Button oben links angeklickt werden um den test zu starten.
 

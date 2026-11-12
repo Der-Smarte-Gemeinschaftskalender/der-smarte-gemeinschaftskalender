@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 import { user } from '@/composables/UserComposoable';
 import { user_types_keys } from '@/lib/const';
+import type { USER_TYPES } from '@/types/General';
 import Card from '@/components/KERN/Card.vue';
 import LogoutButton from '@/components/LogoutButton.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
@@ -14,13 +16,14 @@ import { current_organisation, user_organisations } from '@/composables/Organisa
 import { isStrictModeEnabled } from '@/lib/instanceConfig';
 import { allowedEventCreationsMethods } from '@/lib/instanceConfig';
 
+const { t } = useI18n();
 const route = useRoute();
 
 const navigationItems = computed(() => {
-    const mainNavigationItems = [{ title: 'Dashboard', name: 'dashboard', icon: 'home' }];
+    const mainNavigationItems = [{ title: t('app.nav.dashboard'), name: 'dashboard', icon: 'home' }];
     if (allowedEventCreationsMethods.singleEvent) {
         mainNavigationItems.push({
-            title: 'Einzeltermine',
+            title: t('app.nav.singleEvents'),
             name: 'singleEvents.index',
             icon: 'calendar_month',
             disabled: !user_organisations.value?.length,
@@ -28,7 +31,7 @@ const navigationItems = computed(() => {
     }
     if (allowedEventCreationsMethods.seriesEvent) {
         mainNavigationItems.push({
-            title: 'Serientermine',
+            title: t('app.nav.seriesEvents'),
             name: 'seriesEvents.index',
             icon: 'autorenew',
             disabled: !user_organisations.value?.length,
@@ -36,7 +39,7 @@ const navigationItems = computed(() => {
     }
     if (allowedEventCreationsMethods.importedEvent) {
         mainNavigationItems.push({
-            title: 'Kalenderdateien',
+            title: t('app.nav.uploadedEvents'),
             name: 'uploadedEvents.index',
             icon: 'drive-folder-upload',
             disabled: !user_organisations.value?.length,
@@ -44,7 +47,7 @@ const navigationItems = computed(() => {
     }
     if (allowedEventCreationsMethods.uploadedEvent) {
         mainNavigationItems.push({
-            title: 'Kalenderintegrationen',
+            title: t('app.nav.importedEvents'),
             name: 'importedEvents.index',
             icon: 'link',
             disabled: !user_organisations.value?.length,
@@ -53,14 +56,14 @@ const navigationItems = computed(() => {
     return [
         ...mainNavigationItems,
         {
-            title: 'Werbemittel',
+            title: t('app.nav.materialGenerator'),
             name: 'materialGenerator.organisation',
             params: { preferredUsername: current_organisation.value?.preferredUsername },
             icon: 'wall_art',
             disabled: !user_organisations.value?.length,
         },
         {
-            title: 'Markenkit',
+            title: t('app.nav.brandkit'),
             name: 'brandkit',
             icon: 'home_repair_service',
             disabled: !user_organisations.value?.length,
@@ -68,22 +71,25 @@ const navigationItems = computed(() => {
     ];
 });
 
-const profileNavigationItems = [
-    { title: 'Meine Organisationen', name: 'app.myOrganisations', icon: 'checklist', disabled: !user.value?.person },
-    { title: 'Profil bearbeiten', name: 'app.profile', icon: 'edit' },
-];
-let adminNavigationItems: { title: string; name: string; icon: string }[] = [];
-if (user.value.type === 'admin') {
-    adminNavigationItems = [
-        { title: 'Organisationsanfragen', name: 'admin.organisations.requests', icon: 'checklist' },
-        { title: 'Nutzer*innen verwalten', name: 'admin.index', icon: 'person' },
-        { title: 'Instanz verwalten', name: 'admin.instance', icon: 'edit' },
+const profileNavigationItems = computed(() => [
+    { title: t('app.nav.myOrganisations'), name: 'app.myOrganisations', icon: 'checklist', disabled: !user.value?.person },
+    { title: t('app.nav.editProfile'), name: 'app.profile', icon: 'edit' },
+]);
+const adminNavigationItems = computed(() => {
+    if (user.value.type !== 'admin') {
+        return [];
+    }
+    const items: { title: string; name: string; icon: string }[] = [
+        { title: t('app.nav.organisationRequests'), name: 'admin.organisations.requests', icon: 'checklist' },
+        { title: t('app.nav.manageUsers'), name: 'admin.index', icon: 'person' },
+        { title: t('app.nav.manageInstance'), name: 'admin.instance', icon: 'edit' },
     ];
 
     if (isStrictModeEnabled) {
-        adminNavigationItems.splice(1, 0, { title: 'Terminanfragen', name: 'admin.events.requests', icon: 'event_available' });
+        items.splice(1, 0, { title: t('app.nav.eventRequests'), name: 'admin.events.requests', icon: 'event_available' });
     }
-}
+    return items;
+});
 
 const selectOption = async (option: any) => {
     await router.push({
@@ -113,7 +119,7 @@ const selected = (name: string) => {
                 v-if="user?.type"
                 class="kern-heading font-light p-0 text-600"
             >
-                {{ user_types_keys[user.type as keyof typeof user_types_keys] }}
+                {{ user_types_keys[user.type as USER_TYPES] }}
             </h6>
             <ChangeCurrentOrganisation />
         </div>

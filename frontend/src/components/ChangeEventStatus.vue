@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { defineProps, ref, defineModel } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { handleSubmitCallback } from '@/lib/dsgClient';
 import { mobilizon_event_status } from '@/lib/const';
 
@@ -17,6 +18,7 @@ interface Props {
     mobilizonGroupId?: any;
 }
 
+const { t } = useI18n();
 const showDialog = ref<boolean>(false);
 const { status, eventId, mobilizonId } = defineProps<Props>();
 const statusText = mobilizon_event_status.value.find((statusOption) => statusOption.value === status)?.text;
@@ -49,8 +51,8 @@ const changeEventStatus = async () => {
 <template>
     <ConfirmDialog
         v-model="showDialog"
-        title="Status ändern"
-        :confirm-text="`Status auf ${statusText} ändern`"
+        :title="t('app.shared.changeStatus.title')"
+        :confirm-text="t('app.shared.changeStatus.confirm', { status: statusText })"
         @confirm="changeEventStatus"
     />
     <Button

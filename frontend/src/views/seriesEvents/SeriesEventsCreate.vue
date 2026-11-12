@@ -4,13 +4,14 @@ import zod from '@/lib/zod';
 import { dsgApi } from '@/lib/dsgApi';
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+import { I18nT, useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { findSeriesEvent, handleSubmitCallback, loadCreatedEventImageByID, prepareEventsValues } from '@/lib/dsgClient';
 import { buildSuggestions, loadMobilizionGroups } from '@/composables/EventCreateFormComposable';
 import { formatInputDate, preventImplicitSubmit, reconstructOptions } from '@/lib/helper';
 import { useTimezoneCheck } from '@/composables/TimezoneComposable';
+import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { createEventDefaults, seriesEventsHolidaysFilter, seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig';
 import {
     intervall_options,
@@ -34,6 +35,7 @@ import InputRichText from '@/components/KERN/inputs/InputRichText.vue';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
 import InputTime from '@/components/KERN/inputs/InputTime.vue';
+import InputTimezone from '@/components/KERN/inputs/InputTimezone.vue';
 import InputWeekDays from '@/components/KERN/inputs/InputWeekDays.vue';
 import InputMonthOccurrence from '@/components/KERN/inputs/InputMonthOccurrence.vue';
 import Alert from '@/components/KERN/Alert.vue';
@@ -78,6 +80,7 @@ const { value: start } = useField<string>('start');
 const { value: end } = useField<string>('end');
 const { value: time } = useField<string>('time');
 const { value: duration } = useField<string>('duration');
+const { value: timezone } = useField<string>('timezone');
 const { value: mobilizon_group_id } = useField<number>('mobilizon_group_id');
 const { value: description } = useField<string>('description');
 const { value: category } = useField<string>('category');
@@ -156,6 +159,7 @@ const createFromTemplate = async () => {
         end.value = formatInputDate(seriesEvent.end);
         time.value = seriesEvent.time;
         duration.value = seriesEvent.duration;
+        timezone.value = seriesEvent.mobilizon_fields.options?.timezone || INSTANCE_TIMEZONE;
         intervall.value = seriesEvent.intervall;
         mobilizon_group_id.value = Number(seriesEvent.mobilizon_group_id);
         category.value = seriesEvent.mobilizon_fields.category;
@@ -234,20 +238,21 @@ createFromTemplate();
 loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Serientermin erstellen</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.events.series.create.title') }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Serientermine eignen sich für wiederkehrende Veranstaltungen mit gleichbleibender Uhrzeit und Dauer.Weitere
-        Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Serientermine/"
-            fragment="serientermin-erstellen"
-        />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.series.create.hint">
+            <template #link>
+                <LinkToDocs
+                    path="Terminverwaltung/Serientermine/"
+                    fragment="serientermin-erstellen"
+                />
+            </template>
+        </I18nT>
     </p>
     <LoadingDialog
         v-model="isSubmitting"
-        title="Serientermin wird angelegt"
-        description="Alle Termine der Serie werden nacheinander angelegt. Je nach Anzahl der Termine kann das einige Momente dauern."
+        :title="t('app.events.series.create.loadingTitle')"
+        :description="t('app.events.series.create.loadingDescription')"
     />
     <form
         novalidate
@@ -257,28 +262,28 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         <Alert
             v-if="errorMessageContent.length"
             class="mb-4"
-            title="Fehler"
+            :title="$t('common.error')"
             :content="errorMessageContent"
             severity="danger"
         />
         <Fieldset>
             <InputText
                 v-model="name"
-                label="Titel des Serientermins"
+                :label="$t('app.events.form.seriesTitle')"
                 name="name"
                 :errors="submitCount === 0 ? undefined : errors.name"
             />
             <Alert
                 v-if="templatePictureLoadFailed"
                 class="mb-3"
-                title="Bild der Vorlage konnte nicht geladen werden"
-                content="Das Bild aus dem Vorlagen-Termin konnte nicht geladen werden. Bitte wählen Sie das Bild manuell aus, sonst wird der Serientermin ohne Bild erstellt."
+                :title="t('app.events.series.create.templatePictureFailedTitle')"
+                :content="t('app.events.series.create.templatePictureFailedContent')"
                 severity="warning"
             />
             <InputImage
                 v-model="picture"
                 v-model:alt="pictureAlt"
-                label="Bild (optional)"
+                :label="$t('app.events.form.picture')"
                 name="picture"
                 :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                 :errors="submitCount === 0 ? undefined : errors.picture"
@@ -286,7 +291,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <InputRichText
                 v-model="description"
                 class="mt-3"
-                label="Beschreibung"
+                :label="$t('app.events.form.description')"
                 name="description"
                 :errors="submitCount === 0 ? undefined : errors.description"
             />
@@ -298,7 +303,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             <InputDate
                                 v-model="start"
                                 name="start"
-                                label="Startdatum"
+                                :label="$t('app.events.form.startDate')"
                                 :errors="submitCount === 0 ? undefined : errors.start"
                             />
                         </div>
@@ -306,7 +311,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         <div class="kern-col">
                             <InputDate
                                 v-model="end"
-                                label="Enddatum"
+                                :label="$t('app.events.form.endDate')"
                                 name="end"
                                 :errors="submitCount === 0 ? undefined : errors.end"
                             />
@@ -323,7 +328,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         />
                         <InputTime
                             v-model="time"
-                            label="Beginn (Uhrzeit)"
+                            :label="$t('app.events.form.startTime')"
                             name="time"
                             class="kern-col px-0-75rem"
                             :inputs-class="['px-2']"
@@ -333,7 +338,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         <div class="kern-col-1 center-dash"><span>—</span></div>
                         <InputTime
                             v-model="duration"
-                            label="Dauer"
+                            :label="$t('app.events.form.duration')"
                             name="duration"
                             class="kern-col px-0-75rem"
                             :inputs-class="['px-2']"
@@ -341,19 +346,24 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             :errors="submitCount === 0 ? undefined : errors.duration"
                         />
                     </div>
+                    <InputTimezone
+                        v-model="timezone"
+                        class="mt-5"
+                        :errors="submitCount === 0 ? undefined : errors.timezone"
+                    />
                     <p class="kern-text kern-text--small text-color-secondary">
-                        {{ t('public.timezoneFormHint.stored') }}
+                        {{ t('public.timezoneFormHint.stored', { timezone }) }}
                     </p>
                     <Alert
-                        v-if="tzMismatch"
+                        v-if="tzMismatch && detectedTz !== timezone"
                         severity="warning"
                         :title="$t('public.timezoneNotice.title')"
-                        :content="t('public.timezoneFormHint.browserMismatch', { detectedTz })"
+                        :content="t('public.timezoneFormHint.browserMismatch', { detectedTz, timezone })"
                     />
                     <div class="my-5">
                         <InputSelect
                             v-model="intervall"
-                            label="Intervall"
+                            :label="$t('app.events.form.intervall')"
                             name="intervall"
                             :options="intervall_options"
                             :errors="submitCount === 0 ? undefined : errors.intervall"
@@ -365,7 +375,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     >
                         <InputWeekDays
                             v-model="weekly_day"
-                            label="Wochentag"
+                            :label="$t('app.events.form.weekDay')"
                             name="weekDays"
                         />
                     </div>                   
@@ -383,26 +393,28 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         />
                         <InputCheckbox
                             v-model="monthly_use_start_date_as_default"
-                            label="Tag des Monats aus dem Startdatum übernehmen"
+                            :label="$t('app.events.form.useStartDateDay')"
                             name="monthly_use_start_date_as_default"
                         />
                     </div>                                    
                 </div>
                 <div class="md:col-5 lg:col-12 xl:col-5 px-0 mt-2">
                     <Alert
-                        title="Information"
+                        :title="$t('app.shared.information')"
                         severity="info"
                     >
                         <p>
-                            Das Start- und Enddatum beziehen sich auf den Zeitraum der gesamten Terminserie. Beginn und
-                            Dauer werden für alle Termine der Terminserie übernommen.
+                            {{ t('app.events.series.create.periodInfo') }}
                         </p>
                         <p>
-                            Weitere Informationen finden Sie im
-                            <LinkToDocs
-                                path="Terminverwaltung/Serientermine/"
-                                fragment="zeitraum-und-intervall-festlegen"
-                            />.
+                            <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                <template #link>
+                                    <LinkToDocs
+                                        path="Terminverwaltung/Serientermine/"
+                                        fragment="zeitraum-und-intervall-festlegen"
+                                    />
+                                </template>
+                            </I18nT>
                         </p>
                     </Alert>
                 </div>
@@ -413,7 +425,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
             <div class="flex flex-column gap-5">
                 <InputSelect
                     v-model="mobilizon_group_id"
-                    label="Organisation"
+                    :label="$t('app.events.form.organisation')"
                     name="mobilizon_group_id"
                     :options="mobilizionGroupOptions"
                     :errors="submitCount === 0 ? undefined : errors.mobilizon_group_id"
@@ -421,7 +433,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 />
                 <InputSelect
                     v-model="category"
-                    label="Kategorie"
+                    :label="$t('app.events.form.category')"
                     name="category"
                     :options="mobilizon_category_options"
                     :errors="submitCount === 0 ? undefined : errors.category"
@@ -431,7 +443,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     <div class="w-full flex flex-column gap-5">
                         <InputRadios
                             v-model="joinOptions"
-                            label="Anmeldeoptionen"
+                            :label="$t('app.events.form.joinOptions')"
                             name="joinOptions"
                             :radios="reconstructOptions(mobilizon_event_join_options)"
                             :errors="submitCount === 0 ? undefined : errors?.joinOptions"
@@ -441,48 +453,48 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             v-model="externalParticipationUrl"
                             :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                             name="externalParticipationUrl"
-                            label="Externe Anmeldeseite (URL)"
+                            :label="$t('app.events.form.externalParticipationUrl')"
                             :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                         />
                     </div>
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="$t('app.shared.information')"
                             severity="info"
                         >
                             <p>
-                                Wenn Sie eine externe Anmeldeseite verwenden, geben Sie hier den entsprechenden Link an.
-                                Wenn Sie keine Online-Anmeldung nutzen, informieren Sie die Teilnehmer*innen in der
-                                Veranstaltungsbeschreibung über das Anmeldeverfahren und ob eine Anmeldung erforderlich
-                                ist.
+                                {{ $t('app.events.form.joinOptionsInfo') }}
                             </p>
                             <p>
-                                Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/Einzeltermine/"
-                                    fragment="beitrittsoptionen"
-                                />.
+                                <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                    <template #link>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Einzeltermine/"
+                                            fragment="beitrittsoptionen"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
                 </div>
                 <InputSelect
                     v-model="language"
-                    label="Sprache"
+                    :label="$t('app.events.form.language')"
                     name="language"
                     :options="mobilizon_event_language_options"
                     :errors="submitCount === 0 ? undefined : errors.language"
                 />
                 <InputSelect
                     v-model="status"
-                    label="Status"
+                    :label="$t('app.events.form.status')"
                     name="status"
                     :options="mobilizon_event_status"
                     :errors="submitCount === 0 ? undefined : errors.status"
                 />
                 <InputUrl
                     v-model="onlineAddress"
-                    label="Webseite (optional)"
+                    :label="$t('app.events.form.website')"
                     name="onlineAddress"
                     :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                 />
@@ -490,7 +502,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     v-model="rawAddress"
                     v-model:address="physicalAddress"
                     name="physicalAddress"
-                    label="Adresse (optional)"
+                    :label="$t('app.events.form.address')"
                     :suggestions="mapSuggestions"
                     :mobilizon-group-id="mobilizon_group_id"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
@@ -509,7 +521,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 icon-left="add"
                 :disabled="isSubmitting || isMapLoading"
             >
-                Serientermin anlegen
+                {{ t('app.events.series.create.submit') }}
             </Button>
         </div>
     </form>

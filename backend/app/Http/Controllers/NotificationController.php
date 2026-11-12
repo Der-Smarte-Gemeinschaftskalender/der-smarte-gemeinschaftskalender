@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\NotificationDisallow;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Mail;
@@ -25,7 +26,7 @@ class NotificationController extends Controller
 
             if ($existingNotification || $disallowedNotification) {
                 return response()->json([
-                    'error' => 'Fehler beim Speichern der Benachrichtigung.',
+                    'error' => __('messages.notifications.saveFailed'),
                     'message' => ''
                 ], 500);
             }
@@ -35,6 +36,8 @@ class NotificationController extends Controller
             $notification->intervall = $request->input('intervall');
             $notification->category = $request->input('category');
             $notification->email = $request->input('email');
+            // The newsletter is sent in the language of the subscription request (see SetLocale)
+            $notification->locale = App::getLocale();
 
 
             if ($request->input('eventType') === 'INTERNAL') {
@@ -60,13 +63,13 @@ class NotificationController extends Controller
                 ]);
 
                 return response()->json([
-                    'error' => 'Fehler beim Erstellen der Benachrichtigung.',
+                    'error' => __('messages.notifications.createFailed'),
                     'message' => $e->getMessage()
                 ], 500);
             }
 
             return response()->json([
-                'message' => 'Erfolgreich abonniert.',
+                'message' => __('messages.notifications.subscribed'),
                 'notification' => $notification
             ], 201);
         } catch (Exception $e) {
@@ -75,7 +78,7 @@ class NotificationController extends Controller
             ]);
 
             return response()->json([
-                'error' => 'Fehler beim Speichern der Benachrichtigung.',
+                'error' => __('messages.notifications.saveFailed'),
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -85,7 +88,7 @@ class NotificationController extends Controller
     {
         if (!$request->input('token')) {
             return response()->json([
-                'error' => 'Token is required'
+                'error' => __('messages.notifications.tokenRequired')
             ], 400);
         }
 
@@ -96,7 +99,7 @@ class NotificationController extends Controller
 
             if (!$notification) {
                 return response()->json([
-                    'error' => 'Diese E-Mail hat kein Abonnement.'
+                    'error' => __('messages.notifications.noSubscription')
                 ], 404);
             }
 
@@ -119,12 +122,12 @@ class NotificationController extends Controller
             $notification->save();
 
             return response()->json([
-                'message' => 'Benachrichtigung erfolgreich aktualisiert.',
+                'message' => __('messages.notifications.updated'),
                 'notification' => $notification
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Fehler beim Aktualisieren der Benachrichtigung.',
+                'error' => __('messages.notifications.updateFailed'),
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -138,7 +141,7 @@ class NotificationController extends Controller
 
             if (!$notification) {
                 return response()->json([
-                    'error' => 'Verifizierungstoken nicht gefunden.'
+                    'error' => __('messages.notifications.tokenNotFound')
                 ], 404);
             }
 
@@ -146,12 +149,12 @@ class NotificationController extends Controller
             $notification->save();
 
             return response()->json([
-                'message' => 'Benachrichtigung erfolgreich bestätigt.',
+                'message' => __('messages.notifications.confirmed'),
                 'notification' => $notification
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Fehler bei der Bestätigung der Benachrichtigung.',
+                'error' => __('messages.notifications.confirmFailed'),
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -165,7 +168,7 @@ class NotificationController extends Controller
 
             if (!$notification) {
                 return response()->json([
-                    'error' => 'Verifizierungstoken nicht gefunden.'
+                    'error' => __('messages.notifications.tokenNotFound')
                 ], 404);
             }
 
@@ -176,12 +179,12 @@ class NotificationController extends Controller
             $disallowedNotification->save();
 
             return response()->json([
-                'message' => 'Benachrichtigung erfolgreich abgelehnt.',
+                'message' => __('messages.notifications.declined'),
                 'notification' => $notification
             ], 200);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Fehler beim Ablehnen der Benachrichtigung.',
+                'error' => __('messages.notifications.declineFailed'),
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -195,7 +198,7 @@ class NotificationController extends Controller
 
             if (!$notification) {
                 return response()->json([
-                    'error' => 'Diese E-Mail hat kein Abonnement.'
+                    'error' => __('messages.notifications.noSubscription')
                 ], 404);
             }
 
@@ -208,12 +211,12 @@ class NotificationController extends Controller
             $notification->delete();
 
             return response()->json([
-                'message' => 'Erfolgreich abgemeldet.',
+                'message' => __('messages.notifications.unsubscribed'),
                 'notification' => $notification
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Fehler beim Abmelden.',
+                'error' => __('messages.notifications.unsubscribeFailed'),
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -228,17 +231,17 @@ class NotificationController extends Controller
 
             if (!$notification) {
                 return response()->json([
-                    'error' => 'Diese E-Mail hat kein Abonnement.'
+                    'error' => __('messages.notifications.noSubscription')
                 ], 404);
             }
 
             return response()->json([
-                'message' => 'Abonnement gefunden.',
+                'message' => __('messages.notifications.subscriptionFound'),
                 'notification' => $notification
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Fehler beim Abrufen des Abonnements.',
+                'error' => __('messages.notifications.subscriptionFetchFailed'),
                 'message' => $e->getMessage()
             ], 500);
         }

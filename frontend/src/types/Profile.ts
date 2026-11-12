@@ -1,22 +1,26 @@
 import zod, { ZodType } from 'zod';
+import { SUPPORTED_LOCALES } from '@/i18n';
 
 
 
 export const ProfileFormSchema = zod.object({
     email: zod
         .string()
-        .nonempty('Die E-Mail-Adresse ist erforderlich.')
-        .email('Bitte geben Sie eine gültige E-Mail-Adresse ein.'),
+        .nonempty('validation.email.required')
+        .email('validation.email.invalid'),
     mobilizon_name: zod
         .string({
-            required_error: 'Der Name ist erforderlich.'
+            required_error: 'validation.name.required'
         })
-        .nonempty('Der Name ist erforderlich.')
-        .min(3, 'Der Name muss mindestens 3 Zeichen lang sein.')
-        .max(100, 'Der Name darf maximal 100 Zeichen lang sein.')
+        .nonempty('validation.name.required')
+        .min(3, 'validation.name.min')
+        .max(100, 'validation.name.max')
         .refine((val) => val.trim().length > 0, {
-            message: 'Der Name darf nicht leer sein.'
-        })
+            message: 'validation.name.notEmpty'
+        }),
+    // Language of the emails sent to the user, does not change the UI language.
+    // Optional: unknown until loaded for users whose cached data predates the field.
+    locale: zod.enum(SUPPORTED_LOCALES).optional()
 });
 
 
@@ -26,21 +30,21 @@ export type ProfileForm = zod.infer<typeof ProfileFormSchema>;
 export const PasswordFormSchema = zod.object({
     current_password: zod
         .string()
-        .nonempty('Das aktuelle Passwort ist erforderlich.'),
+        .nonempty('validation.password.currentRequired'),
     new_password: zod
         .string()
-        .nonempty('Das neue Passwort ist erforderlich.')
-        .min(8, 'Das neue Passwort muss mindestens 8 Zeichen lang sein.'),
+        .nonempty('validation.password.newRequired')
+        .min(8, 'validation.password.newMin'),
     new_password_confirm: zod
         .string()
-        .nonempty('Die Bestätigung des neuen Passworts ist erforderlich.')
-        .min(8, 'Die Bestätigung des neuen Passworts muss mindestens 8 Zeichen lang sein.')
+        .nonempty('validation.password.confirmRequired')
+        .min(8, 'validation.password.confirmMin')
 }).superRefine(({ new_password, new_password_confirm }, ctx) => {
     if (new_password !== new_password_confirm) {
         ctx.addIssue({
             path: ['new_password_confirm'],
             code: zod.ZodIssueCode.custom,
-            message: 'Die Passwörter stimmen nicht überein.',
+            message: 'validation.password.mismatch',
         });
     }
 });

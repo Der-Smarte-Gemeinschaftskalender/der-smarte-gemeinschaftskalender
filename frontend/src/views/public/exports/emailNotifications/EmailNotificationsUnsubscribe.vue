@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { I18nT, useI18n } from "vue-i18n";
 import { dsgApi } from "@/lib/dsgApi";
 
 import Alert from "@/components/KERN/Alert.vue";
@@ -11,6 +12,7 @@ import Divider from "@/components/KERN/cosmetics/Divider.vue";
 import Dialog from "@/components/KERN/Dialog.vue";
 
 const route = useRoute();
+const { t } = useI18n();
 
 const showUnsubscribeSuccess = ref<string>('');
 const showUnsubscribeError = ref<string>('');
@@ -30,7 +32,7 @@ onMounted(async () => {
         email.value = data.notification.email;
     }
     catch (error: AxiosError|any) {
-        showUnsubscribeInfoError.value = error.response?.data?.error || 'Fehler beim Laden der Abonnement-Informationen. Bitte versuchen Sie es später erneut.';
+        showUnsubscribeInfoError.value = error.response?.data?.error || t('public.exports.email.unsubscribe.loadError');
         console.error('Error loading unsubscribe info:', error);
     }
 });
@@ -47,7 +49,7 @@ const unsubscribe = async (disallow: boolean = false) => {
 
     }
     catch (error: AxiosError|any) {
-        showUnsubscribeError.value = error.response?.data?.error || 'Fehler beim Abmelden. Bitte versuchen Sie es später erneut.';
+        showUnsubscribeError.value = error.response?.data?.error || t('public.exports.email.unsubscribe.unsubscribeError');
     }
 };
 
@@ -56,20 +58,21 @@ const unsubscribe = async (disallow: boolean = false) => {
 <template>
     <Teleport to="#headerslot">
       <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6">
-            <h1 class="kern-heading text-theme-primary">E-Mail-Benachrichtigungen abbestellen</h1>
+            <h1 class="kern-heading text-theme-primary">{{ t('public.exports.email.unsubscribe.title') }}</h1>
         </div>
     </Teleport>
 
     <Dialog
         v-model="showDisallowDialog"
-        title="Alle E-Mail-Benachrichtigungen abbestellen"
+        :title="t('public.exports.email.unsubscribe.disallowTitle')"
     >
         <p class="mb-4">
-            Sind Sie sicher, dass Sie alle E-Mail-Benachrichtigungen für immer abbestellen möchten? Sie erhalten keine E-Mail-Benachrichtigungen mehr von dieser Plattform.
+            {{ t('public.exports.email.unsubscribe.disallowConfirm') }}
+            {{ t('public.exports.email.unsubscribe.noMoreEmails') }}
         </p>
         <Button
             class="w-full"
-            label="Alle E-Mail-Benachrichtigungen abbestellen"
+            :label="t('public.exports.email.unsubscribe.disallowTitle')"
             @click="unsubscribe(true); showDisallowDialog = false;"
         />
     </Dialog>
@@ -77,14 +80,14 @@ const unsubscribe = async (disallow: boolean = false) => {
     <div>
         <Alert
             v-if="!!showUnsubscribeSuccess"
-            title="Erfolg"
+            :title="t('common.success')"
             :content="showUnsubscribeSuccess"
             severity="success"
             class="mb-4"
         />
         <Alert
             v-if="!!showUnsubscribeError || !!showUnsubscribeInfoError"
-            title="Fehler"
+            :title="t('common.error')"
             :content="showUnsubscribeError || showUnsubscribeInfoError"
             severity="danger"
             class="mb-4"
@@ -92,14 +95,24 @@ const unsubscribe = async (disallow: boolean = false) => {
 
         <template v-if="!showUnsubscribeInfoError && !showUnsubscribeSuccess">
             <div>
-                <p>Möchten Sie keine E-Mail-Benachrichtigungen auf die Adresse <strong>{{ email }}</strong> mehr erhalten?</p>
-                <p class="mb-6">Klicken Sie auf "Abbestellen", um den Vorgang abzuschließen.</p>
+                <I18nT
+                    scope="global"
+                    keypath="public.exports.email.unsubscribe.question"
+                    tag="p"
+                >
+                    <template #email>
+                        <strong>{{ email }}</strong>
+                    </template>
+                </I18nT>
+                <p class="mb-6">
+                    {{ t('public.exports.email.unsubscribe.instruction', { button: t('public.exports.email.unsubscribe.button') }) }}
+                </p>
 
                 <div class="flex justify-content-center w-full">
                     <Button
                         class="w-full max-w-30rem"
                         variant="primary"
-                        label="Abbestellen"
+                        :label="t('public.exports.email.unsubscribe.button')"
                         :disabled="!!showUnsubscribeSuccess"
                         @click="unsubscribe()"
                     />
@@ -107,13 +120,13 @@ const unsubscribe = async (disallow: boolean = false) => {
             </div>
             <Divider class="my-6" />
             <div>
-                <p class="mb-4">Möchten Sie für immer keine E-Mail-Benachrichtigungen mehr erhalten? Klicken Sie auf die Schaltfläche unten, um alle E-Mail-Benachrichtigungen abzubestellen.</p>
+                <p class="mb-4">{{ t('public.exports.email.unsubscribe.disallowQuestion') }}</p>
 
                 <div class="flex justify-content-center w-full">
                     <Button
                         class="mt-2 w-full max-w-30rem"
                         variant="secondary"
-                        label="Für immer abbestellen"
+                        :label="t('public.exports.email.unsubscribe.disallowButton')"
                         :disabled="!!showUnsubscribeSuccess"
                         @click="showDisallowDialog = true;"
                     />
@@ -121,12 +134,15 @@ const unsubscribe = async (disallow: boolean = false) => {
             </div>
         </template>
         <template v-else-if="showUnsubscribeInfoError">
-            <p class="mb-2">Die Abonnement-Informationen konnten nicht geladen werden. Bitte versuchen Sie es später erneut.</p>
-            <a class="text-theme-primary" href="/">Zur Startseite</a>
+            <p class="mb-2">{{ t('public.exports.email.unsubscribe.loadFailed') }}</p>
+            <a class="text-theme-primary" href="/">{{ t('public.exports.email.unsubscribe.toHome') }}</a>
         </template>
         <template v-else>
-            <p class="mb-2">Sie haben sich erfolgreich abgemeldet. Sie erhalten keine E-Mail-Benachrichtigungen mehr von dieser Plattform.</p>
-            <a class="text-theme-primary" href="/">Zur Startseite</a>
+            <p class="mb-2">
+                {{ t('public.exports.email.unsubscribe.success') }}
+                {{ t('public.exports.email.unsubscribe.noMoreEmails') }}
+            </p>
+            <a class="text-theme-primary" href="/">{{ t('public.exports.email.unsubscribe.toHome') }}</a>
         </template>
     </div>
 </template>

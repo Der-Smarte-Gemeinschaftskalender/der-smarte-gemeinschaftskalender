@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime, formatInputTime } from '@/lib/helper';
 import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
 import Table from '@/components/KERN/Table.vue';
@@ -10,37 +11,39 @@ import ButtonLegend from '@/components/ButtonLegend.vue';
 import Alert from '@/components/KERN/Alert.vue';
 import type { Column } from '@/types/General';
 
+const { t } = useI18n();
 const tableRef = ref<InstanceType<typeof Table> | null>(null);
 const { alertMessage } = useEventIndexAlerts(tableRef, {
-    deletedMessage: 'Kalenderintegration und alle zugehörigen Termine erfolgreich gelöscht.',
+    deletedMessage: t('app.events.imported.index.deleted'),
 });
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'url',
-        name: 'iCal-URL',
+        name: t('app.events.columns.icalUrl'),
         align: 'left',
     },
     {
         key: 'created_at',
-        name: 'Erstellt am',
+        name: t('app.events.columns.createdAt'),
         format: (value: string) => formatDateTime(value),
         align: 'center',
     },
     {
         key: 'created_events_count',
-        name: 'Terminanzahl',
+        name: t('app.events.columns.eventCount'),
         align: 'center',
     },
     {
         key: 'is_active',
-        name: 'Status',
-        format: (value: number) => (value ? 'Aktiv' : 'Inaktiv'),
+        name: t('app.events.columns.status'),
+        format: (value: number) => (value ? t('app.shared.active') : t('app.shared.inactive')),
         align: 'left',
     },
     {
         key: 'updated_at',
-        name: 'Synchronisiert am',
+        name: t('app.events.columns.syncedAt'),
         format: (value: string) => (value ? formatDateTime(value) : '-'),
         align: 'center',
     },
@@ -49,16 +52,15 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const importedTableApi = {
+const importedTableApi = computed(() => ({
     url: '/imported-events',
     deleteUrl: '/imported-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
-    deleteDialogTitle: 'Gesamte Kalenderintegration löschen',
-    deleteDialogDescription: (row: any) =>
-        `Sie sind dabei, folgende Kalenderintegration zu löschen:\n ${row?.url ?? ''}.\n\n Alle importierten Termine werden ebenfalls dauerhaft gelöscht. Eine Wiederherstellung ist nicht möglich.\n\nWenn bereits Werbung für die Veranstaltungen gemacht wurde, sollten Sie den Status der einzelnen Veranstaltung auf "Abgesagt" setzen, statt die Kalenderintegration zu löschen.`,
-};
+    deleteDialogTitle: t('app.events.imported.deleteTitle'),
+    deleteDialogDescription: (row: any) => t('app.events.imported.index.deleteDescription', { url: row?.url ?? '' }),
+}));
 </script>
 <template>
     <Alert
@@ -70,7 +72,7 @@ const importedTableApi = {
     />
 
     <div class="flex align-items-end justify-content-between gap-2 mb-1">
-        <h1 class="kern-heading text-theme-primary">Kalenderintegrationen</h1>
+        <h1 class="kern-heading text-theme-primary">{{ t('app.events.imported.index.title') }}</h1>
         <RouterLink :to="{ name: 'importedEvents.create' }">
             <Button
                 type="primary"
@@ -78,17 +80,18 @@ const importedTableApi = {
                 icon-size="lg"
                 :hide-text-on-mobile="true"
                 class="mb-2"
-                title="iCal-URL anbinden"
+                :title="t('app.events.imported.index.createTitle')"
             >
-                iCal-URL
+                {{ t('app.events.imported.index.create') }}
             </Button>
         </RouterLink>
     </div>
     <p class="mb-6">
-        <b>Hinweis:</b>
-        Durch die Anbindung von iCal-URLs können externe Kalender (z. B. Outlook, Google Kalender, etc.) dauerhaft
-        angebunden und automatisch synchronisiert werden. Weitere Informationen finden Sie im
-        <LinkToDocs path="Terminverwaltung/Kalenderintegration/" />.
+        <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.imported.hint">
+            <template #link>
+                <LinkToDocs path="Terminverwaltung/Kalenderintegration/" />
+            </template>
+        </I18nT>
     </p>
     <Table
         ref="tableRef"
@@ -104,16 +107,16 @@ const importedTableApi = {
                 <RouterLink :to="{ name: 'importedEvents.show', params: { id: row.id } }">
                     <Button
                         icon-left="visibility"
-                        title="Ansehen"
-                        aria-label="Ansehen"
+                        :title="t('app.shared.actions.view')"
+                        :aria-label="t('app.shared.actions.view')"
                         icon-size="sm"
                     />
                 </RouterLink>
                 <Button
                     variant="secondary"
                     icon-left="delete"
-                    title="Löschen"
-                    aria-label="Löschen"
+                    :title="t('common.delete')"
+                    :aria-label="t('common.delete')"
                     icon-size="sm"
                     @click="deleteEntry(row)"
                 />

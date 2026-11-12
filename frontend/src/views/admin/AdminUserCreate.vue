@@ -2,11 +2,13 @@
 import { ref } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import zod from '@/lib/zod';
 import { ZodType } from 'zod';
 import { user_types_options, user_is_active_options } from '@/lib/const';
+import { DEFAULT_LOCALE, localeOptions, SUPPORTED_LOCALES } from '@/i18n';
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputEmail from '@/components/KERN/inputs/InputEmail.vue';
@@ -18,6 +20,7 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 import type { UserView } from '@/types/User';
 import type { AxiosError } from 'axios';
 
+const { t } = useI18n();
 const router = useRouter();
 const showErrorMessage = ref<boolean>(false);
 const errorMessageContent = ref<string | undefined>(undefined);
@@ -25,32 +28,35 @@ const errorMessageContent = ref<string | undefined>(undefined);
 const validationSchema = toTypedSchema(
     zod.object({
         email: zod.string({
-                required_error: 'Die E-Mail-Adresse ist erforderlich.',
+                required_error: 'validation.email.required',
             })
             .email({
-                message: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+                message: 'validation.email.invalid',
             }),
         password: zod
             .string({
-                required_error: 'Das Passwort ist erforderlich.'
+                required_error: 'validation.password.required'
             })
-            .min(8, 'Das Passwort muss mindestens 8 Zeichen lang sein.')
+            .min(8, 'validation.password.min')
             .refine((val) => val.trim().length > 0, {
-                message: 'Das Passwort darf nicht leer sein.'
+                message: 'validation.password.notEmpty'
             }),
         type: zod
             .string()
             .nonempty()
             .default('user'),
+        locale: zod.enum(SUPPORTED_LOCALES).default(DEFAULT_LOCALE),
     }) satisfies ZodType<UserView>
 );
 
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
     validationSchema,
+    initialValues: { locale: DEFAULT_LOCALE },
 });
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');
 const { value: type } = useField<string>('type');
+const { value: locale } = useField<string>('locale');
 
 const onSubmit = handleSubmit(async (values) => {
     try {
@@ -62,15 +68,15 @@ const onSubmit = handleSubmit(async (values) => {
     } catch (error: any | AxiosError) {
         showErrorMessage.value = true;
         console.error(error);
-        errorMessageContent.value = error?.response?.data?.error || 'Benutzer konnte nicht gespeichert werden.';
+        errorMessageContent.value = error?.response?.data?.error || t('app.admin.users.saveError');
     }
 });
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Neuen Benutzer anlegen</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.admin.users.createTitle') }}</h1>
     <p class="mb-4">
-        <b>Hinweis:</b>
-        Als Administrator*in können Sie hier manuell neue Nutzer*innen für Ihre Instanz anlegen.
+        <b>{{ t('app.admin.shared.note') }}</b>
+        {{ t('app.admin.users.createHint') }}
         <LinkToDocs
             path="Terminverwaltung/Instanz/"
             fragment="nutzer-innen-verwalten"
@@ -78,7 +84,7 @@ const onSubmit = handleSubmit(async (values) => {
     </p>
     <Alert
         v-if="showErrorMessage"
-        title="Fehler"
+        :title="t('common.error')"
         :content="errorMessageContent"
         severity="danger"
     />
@@ -89,22 +95,29 @@ const onSubmit = handleSubmit(async (values) => {
         <Fieldset>
             <InputEmail
                 v-model="email"
-                label="E-Mail"
+                :label="t('app.admin.users.columns.email')"
                 name="email"
                 :errors="submitCount === 0 ? undefined : errors.email"
             />
             <InputPassword
                 v-model="password"
-                label="Passwort"
+                :label="t('app.admin.users.password')"
                 name="password"
                 :errors="submitCount === 0 ? undefined : errors.password"
             />
             <InputSelect
                 v-model="type"
-                label="Typ"
+                :label="t('app.admin.users.type')"
                 name="type"
                 :options="user_types_options"
                 :errors="submitCount === 0 ? undefined : errors.type"
+            />
+            <InputSelect
+                v-model="locale"
+                :label="t('app.admin.users.emailLanguage')"
+                name="locale"
+                :options="localeOptions"
+                :errors="submitCount === 0 ? undefined : errors.locale"
             />
         </Fieldset>
         <Button
@@ -112,7 +125,7 @@ const onSubmit = handleSubmit(async (values) => {
             :disabled="isSubmitting"
             class="mt-2"
         >
-            Benutzer anlegen
+            {{ t('app.admin.users.createSubmit') }}
         </Button>
     </form>
 </template>

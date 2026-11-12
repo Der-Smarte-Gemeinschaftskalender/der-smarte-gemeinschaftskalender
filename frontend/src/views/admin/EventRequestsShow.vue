@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime, formatHourMinute, normalizeStreet, stripHtml } from '@/lib/helper';
 
 import Loader from '@/components/KERN/cosmetics/Loader.vue';
@@ -19,12 +20,13 @@ interface Response {
     message: string;
 }
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
 const approvalRequest = ref<any>(null);
 const imageUrl = ref<string | null>(null);
-const descriptionListData = ref<Array<any>>([]);
+const organisationDetails = ref<{ name: string; preferredUsername: string } | null>(null);
 
 const loading = ref(false);
 const loadingAction = ref(false);
@@ -39,15 +41,15 @@ const adminComment = ref('');
 
 const buildExternalLinkHtml = (url: string) => {
     return `
-        <p class="mb-2">Anmeldung über externen Link erforderlich</p>
+        <p class="mb-2">${t('app.admin.eventRequests.externalRegistrationRequired')}</p>
         <a href="${url}" target="_blank" rel="noopener noreferrer" class="text-theme-primary hover:underline">${url}</a>
     `;
 };
 
 const getEventTypeName = (requestableType: string) => {
     const typeMap: Record<string, string> = {
-        CreatedEvent: 'Einzeltermin',
-        SingleEvent: 'Einzeltermin',
+        CreatedEvent: t('app.admin.approval.types.singleEvent'),
+        SingleEvent: t('app.admin.approval.types.singleEvent'),
         //SeriesEvent: 'Serientermin',
         //UploadedEvent: 'Kalenderdatei',
         //ImportedEvent: 'Kalenderintegration',
@@ -57,14 +59,103 @@ const getEventTypeName = (requestableType: string) => {
 
 const getActionName = (actionType: string) => {
     const actionMap: Record<string, string> = {
-        create: 'Erstellen',
-        store: 'Erstellen',
-        update: 'Bearbeiten',
-        delete: 'Löschen',
+        create: t('app.admin.approval.actions.create'),
+        store: t('app.admin.approval.actions.create'),
+        update: t('app.admin.approval.actions.update'),
+        delete: t('app.admin.approval.actions.delete'),
         //'accept_upload': 'Hochladen',
     };
     return actionMap[actionType] || actionType;
 };
+
+// computed so the labels follow a language switch.
+// Missing data gets a fallback instead of throwing: an error here would leave the page blank,
+// without the approve/reject buttons.
+const descriptionListData = computed<Array<any>>(() => {
+    const request = approvalRequest.value;
+    if (!request) return [];
+
+    const organisation = organisationDetails.value;
+    const fields = request.payload?.mobilizon_fields;
+
+    return [
+        {
+            name: t('app.admin.approval.columns.action'),
+            value: getActionName(request.request_type),
+        },
+        {
+            name: t('app.admin.approval.columns.title'),
+            value: request.payload.name,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.organisation'),
+            value: organisation?.name || request.payload.organisation_name || t('app.admin.approval.notSpecified'),
+            type: organisation ? 'link' : undefined,
+            local_url: organisation ? `/organisation/${organisation.preferredUsername}` : undefined,
+        },
+        {
+            name: 'ID',
+            value: request.requestable_id ?? request.payload.id ?? t('app.admin.approval.notAssignedYet'),
+        },
+        {
+            name: t('app.admin.approval.columns.createdBy'),
+            value: request.created_by?.mobilizon_name || t('app.admin.approval.notSpecified'),
+        },
+        {
+            name: t('app.admin.approval.columns.createdAt'),
+            value: formatDateTime(request.created_at),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.start'),
+            value: t('app.admin.eventRequests.startAt', {
+                date: formatDateTime(request.payload.start),
+                time: request.payload.time,
+            }),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.duration'),
+            value: formatHourMinute(request.payload.duration),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.category'),
+            value: fields?.category
+                ? (mobilizon_category_options.value.find((option) => option.value === fields.category)?.text ??
+                  fields.category)
+                : t('app.admin.eventRequests.noCategory'),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.tags'),
+            value: fields?.tags ? fields.tags : t('app.admin.eventRequests.noTags'),
+            type: fields?.tags ? 'tags' : undefined,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.joinOptions'),
+            value:
+                fields?.joinOptions === 'EXTERNAL'
+                    ? buildExternalLinkHtml(fields.externalParticipationUrl)
+                    : t('app.admin.eventRequests.noJoinOptions'),
+            formatAsHtml: fields?.externalParticipationUrl ? true : false,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.language'),
+            value: fields?.language
+                ? (mobilizon_event_language_options.value.find((option) => option.value === fields.language)?.text ??
+                  fields.language)
+                : mobilizon_event_language_options.value[0]?.text,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.website'),
+            value: fields?.onlineAddress || t('app.admin.approval.notSpecified'),
+            type: fields?.onlineAddress ? 'link' : undefined,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.status'),
+            value:
+                mobilizon_event_status.value.find((status) => status.value === fields?.status)?.text ||
+                t('app.admin.shared.unknown'),
+        },
+    ];
+});
 
 const fetchApprovalRequest = async () => {
     loading.value = true;
@@ -94,90 +185,7 @@ const fetchApprovalRequest = async () => {
             }
         }
 
-        const organisationDetails = await fetchOrganisationDetails(approvalRequest.value.payload.mobilizon_group_id);
-
-        descriptionListData.value = [
-            {
-                name: 'Aktion',
-                value: getActionName(approvalRequest.value.request_type),
-            },
-            {
-                name: 'Titel',
-                value: approvalRequest.value.payload.name,
-            },
-            {
-                name: 'Organisation',
-                value: organisationDetails?.name || approvalRequest.value.payload.organisation_name || 'Keine Angabe',
-                type: organisationDetails ? 'link' : undefined,
-                local_url: organisationDetails ? `/organisation/${organisationDetails.preferredUsername}` : undefined,
-            },
-            {
-                name: 'ID',
-                value:
-                    approvalRequest.value.requestable_id ?? approvalRequest.value.payload.id ?? 'Noch nicht vergeben',
-            },
-            {
-                name: 'Erstellt von',
-                value: approvalRequest.value.created_by.mobilizon_name,
-            },
-            {
-                name: 'Erstellt am',
-                value: formatDateTime(approvalRequest.value.created_at),
-            },
-            {
-                name: 'Start',
-                value: `${formatDateTime(approvalRequest.value.payload.start)} um ${approvalRequest.value.payload.time} Uhr`,
-            },
-            {
-                name: 'Dauer',
-                value: formatHourMinute(approvalRequest.value.payload.duration),
-            },
-            {
-                name: 'Kategorie',
-                value: approvalRequest.value.payload?.mobilizon_fields?.category
-                    ? mobilizon_category_options.value.find(
-                          (option) => option.value === approvalRequest.value.payload.mobilizon_fields.category
-                      )!.text
-                    : 'Keine Kategorie',
-            },
-            {
-                name: 'Schlagwörter (optional)',
-                value: approvalRequest.value.payload?.mobilizon_fields?.tags
-                    ? approvalRequest.value.payload.mobilizon_fields.tags
-                    : 'Keine Schlagwörter',
-                type: approvalRequest.value.payload?.mobilizon_fields?.tags ? 'tags' : undefined,
-            },
-            {
-                name: 'Anmeldeoptionen',
-                value:
-                    approvalRequest.value.payload?.mobilizon_fields?.joinOptions === 'EXTERNAL'
-                        ? buildExternalLinkHtml(approvalRequest.value.payload.mobilizon_fields.externalParticipationUrl)
-                        : 'Keine Anmeldeoptionen',
-                formatAsHtml: approvalRequest.value.payload?.mobilizon_fields?.externalParticipationUrl ? true : false,
-            },
-            {
-                name: 'Sprache',
-                value: approvalRequest.value.payload?.mobilizon_fields?.language
-                    ? mobilizon_event_language_options.value.find(
-                          (option) => option.value === approvalRequest.value.payload.mobilizon_fields.language
-                      )?.text
-                    : mobilizon_event_language_options.value[0].text,
-            },
-            {
-                name: 'Webseite',
-                value: approvalRequest.value.payload?.mobilizon_fields?.onlineAddress || 'Keine Angabe',
-                type: approvalRequest.value.payload?.mobilizon_fields?.onlineAddress ? 'link' : undefined,
-            },
-            {
-                name: 'Status',
-                value:
-                    mobilizon_event_status.value.find(
-                        (status) => status.value === approvalRequest.value.payload?.mobilizon_fields?.status
-                    )?.text || 'Unbekannt',
-            },
-        ];
-
-        descriptionListData.value = descriptionListData.value.filter((item) => item !== null);
+        organisationDetails.value = await fetchOrganisationDetails(approvalRequest.value.payload.mobilizon_group_id);
     } catch (error) {
         console.error('Error fetching approval request:', error);
         await router.push({ name: 'notFound' });
@@ -200,7 +208,7 @@ const approveRequest = async () => {
         });
         response.value = {
             type: 'success',
-            message: 'Anfrage erfolgreich freigegeben.',
+            message: t('app.admin.approval.approveSuccess'),
         };
 
         approvalRequest.value = null; // Reset to trigger reactivity
@@ -210,7 +218,7 @@ const approveRequest = async () => {
 
         response.value = {
             type: 'danger',
-            message: error?.response?.data?.error || 'Beim Freigeben der Anfrage ist ein Fehler aufgetreten.',
+            message: error?.response?.data?.error || t('app.admin.approval.approveError'),
         };
     } finally {
         showResponseMessage.value = true;
@@ -234,7 +242,7 @@ const rejectRequest = async () => {
         });
         response.value = {
             type: 'success',
-            message: 'Anfrage erfolgreich abgelehnt.',
+            message: t('app.admin.approval.rejectSuccess'),
         };
 
         approvalRequest.value = null; // Reset to trigger reactivity
@@ -243,7 +251,7 @@ const rejectRequest = async () => {
         console.error('Error rejecting request:', error);
         response.value = {
             type: 'danger',
-            message: error?.response?.data?.error || 'Beim Ablehnen der Anfrage ist ein Fehler aufgetreten.',
+            message: error?.response?.data?.error || t('app.admin.approval.rejectError'),
         };
     } finally {
         showResponseMessage.value = true;
@@ -263,9 +271,9 @@ const fetchOrganisationDetails = async (mobilizon_group_id: number): Promise<any
 };
 
 const statusMap: Record<string, string> = {
-    pending: 'Ausstehend',
-    approved: 'Genehmigt',
-    rejected: 'Abgelehnt',
+    pending: t('app.admin.approval.status.pending'),
+    approved: t('app.admin.approval.status.approved'),
+    rejected: t('app.admin.approval.status.rejected'),
 };
 
 onMounted(async () => {
@@ -274,18 +282,23 @@ onMounted(async () => {
 </script>
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary mb-4">Terminfreigabe – Detailansicht</h1>
+        <h1 class="kern-heading text-theme-primary mb-4">{{ t('app.admin.eventRequests.showTitle') }}</h1>
         <p class="mb-3">
-            <b>Hinweis:</b>
-            Als Administrator*in der Instanz können Sie hier Terminanfragen von Organisationen genehmigen oder ablehnen.
-            Termine erscheinen erst nach Freigabe in der öffentlichen Kalenderansicht.
+            <b>{{ t('app.admin.shared.note') }}</b>
+            {{ t('app.admin.eventRequests.showHint') }}
         </p>
         <p class="mb-6">
-            Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/Instanz/"
-                fragment="terminfreigabe-–-strict-mode"
-            />.
+            <I18nT
+                keypath="app.admin.shared.moreInfo"
+                scope="global"
+            >
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/Instanz/"
+                        fragment="terminfreigabe-–-strict-mode"
+                    />
+                </template>
+            </I18nT>
         </p>
         <div
             v-if="approvalRequest?.status"
@@ -294,10 +307,10 @@ onMounted(async () => {
             <EventStatusBadge
                 :text="
                     approvalRequest.status === 'approved'
-                        ? 'Genehmigt'
+                        ? t('app.admin.approval.status.approved')
                         : approvalRequest.status === 'rejected'
-                          ? 'Abgelehnt'
-                          : 'Ausstehend'
+                          ? t('app.admin.approval.status.rejected')
+                          : t('app.admin.approval.status.pending')
                 "
                 :status="
                     approvalRequest.status === 'approved'
@@ -310,7 +323,7 @@ onMounted(async () => {
         </div>
         <Alert
             v-if="showResponseMessage"
-            :title="response.type === 'success' ? 'Erfolg' : 'Fehler'"
+            :title="response.type === 'success' ? t('common.success') : t('common.error')"
             :severity="response.type === 'success' ? 'success' : 'danger'"
             class="mb-4"
             @close="showResponseMessage = false"
@@ -322,19 +335,19 @@ onMounted(async () => {
             <div v-if="approvalRequest">
                 <DescriptionList :data="descriptionListData" />
                 <div>
-                    <h5 class="kern-heading mt-4 mb-2">Beschreibung</h5>
+                    <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.description') }}</h5>
                     <p
                         class="kern-text prose"
                         v-html="
-                            stripHtml(approvalRequest.payload.mobilizon_fields.description)
+                            stripHtml(approvalRequest.payload.mobilizon_fields?.description)
                                 ? approvalRequest.payload.mobilizon_fields.description
-                                : '<p>Keine Beschreibung angegeben.</p>'
+                                : `<p>${t('app.admin.approval.noDescription')}</p>`
                         "
                     />
                 </div>
                 <div>
-                    <h5 class="kern-heading mt-4 mb-2">Adresse</h5>
-                    <div v-if="approvalRequest.payload.mobilizon_fields.physicalAddress?.geom">
+                    <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.address') }}</h5>
+                    <div v-if="approvalRequest.payload.mobilizon_fields?.physicalAddress?.geom">
                         <p v-if="approvalRequest.payload.mobilizon_fields.physicalAddress?.street">
                             {{ normalizeStreet(approvalRequest.payload.mobilizon_fields.physicalAddress?.street) }},
                         </p>
@@ -343,23 +356,23 @@ onMounted(async () => {
                             {{ approvalRequest.payload.mobilizon_fields.physicalAddress?.locality }}
                         </p>
                     </div>
-                    <p v-else>Keine Adresse angegeben.</p>
+                    <p v-else>{{ t('app.admin.approval.noAddress') }}</p>
                 </div>
                 <div>
-                    <h5 class="kern-heading mt-4 mb-2">Bild</h5>
+                    <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.image') }}</h5>
                     <div v-if="imageUrl">
                         <img
                             :src="imageUrl"
-                            alt="Angehängtes Bild"
+                            :alt="t('app.admin.approval.imageAlt')"
                             class="col-12 sm:col-10 md:col-8 lg:col-6 h-auto border p-0"
                         />
                     </div>
                     <p v-else-if="approvalRequest.status !== 'pending' && approvalRequest.payload._file_path">
-                        Nachdem die Anfrage bearbeitet wurde, ist das angehängte Bild nicht mehr verfügbar.
+                        {{ t('app.admin.approval.imageUnavailable') }}
                     </p>
-                    <p v-else>Kein Bild angehängt.</p>
+                    <p v-else>{{ t('app.admin.approval.noImage') }}</p>
                 </div>
-                <h5 class="kern-heading mb-2 mt-6">Kommentar der Administration (optional)</h5>
+                <h5 class="kern-heading mb-2 mt-6">{{ t('app.admin.approval.adminComment') }}</h5>
                 <div v-if="approvalRequest?.status === 'pending'">
                     <div class="flex flex-column md:flex-row gap-6">
                         <div class="w-full flex">
@@ -369,19 +382,16 @@ onMounted(async () => {
                                 name="adminComment"
                                 class="kern-input w-full mb-4 h-full"
                                 rows="4"
-                                placeholder="Fügen Sie hier einen Kommentar hinzu..."
+                                :placeholder="t('app.admin.approval.adminCommentPlaceholder')"
                             />
                         </div>
                         <div class="md:col-6 p-0">
                             <Alert
-                                title="Information"
+                                :title="t('app.admin.shared.information')"
                                 variant="info"
                                 class="mb-4"
                             >
-                                Der hier eingegebene Kommentar wird der Organisation nach Annahme oder Ablehnung der
-                                Termin- oder Bearbeitungsanfrage übermittelt. Sie können den Kommentar nutzen, um
-                                beispielsweise einen Ablehnungsgrund zu erläutern oder gewünschte Änderungen zu
-                                benennen, auch im Fall einer Annahme.
+                                {{ t('app.admin.approval.adminCommentInfo') }}
                             </Alert>
                         </div>
                     </div>
@@ -392,7 +402,7 @@ onMounted(async () => {
                             :disabled="loadingAction"
                             @click="approveRequest"
                         >
-                            Anfrage genehmigen
+                            {{ t('app.admin.approval.approve') }}
                         </Button>
                         <Button
                             :disabled="loadingAction"
@@ -400,18 +410,18 @@ onMounted(async () => {
                             variant="secondary"
                             @click="rejectRequest"
                         >
-                            Anfrage ablehnen
+                            {{ t('app.admin.approval.reject') }}
                         </Button>
                     </div>
                 </div>
                 <div v-else>
                     <p>
-                        {{ approvalRequest.admin_comment ?? 'Kein Kommentar hinterlegt.' }}
+                        {{ approvalRequest.admin_comment ?? t('app.admin.approval.noComment') }}
                     </p>
                 </div>
             </div>
             <div v-else>
-                <p>Die Terminanfrage nicht gefunden.</p>
+                <p>{{ t('app.admin.eventRequests.notFound') }}</p>
             </div>
         </div>
     </div>

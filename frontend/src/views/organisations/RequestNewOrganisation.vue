@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import zod from '@/lib/zod';
 import { useRouter } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
@@ -19,6 +20,7 @@ import type { ZodType } from 'zod';
 import type { AxiosError } from 'axios';
 
 
+const { t } = useI18n();
 const router = useRouter();
 const showErrorMessage = ref(false);
 const errorMessageContent = ref('');
@@ -33,15 +35,15 @@ const validationSchema = toTypedSchema(
     zod.object({
         name: zod
             .string({
-                required_error: 'Der Name der Organisation ist erforderlich.',
+                required_error: 'validation.organisation.nameRequired',
             })
-            .nonempty('Der Name der Organisation darf nicht leer sein.'),
+            .nonempty('validation.organisation.nameNotEmpty'),
         preferredUsername: preferredUsernameSchema,
         summary: zod
             .string({
-                required_error: 'Die Beschreibung der Organisation ist erforderlich.',
+                required_error: 'validation.organisation.summaryRequired',
             })
-            .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' })
+            .refine((val) => stripHtml(val).length > 0, { message: 'validation.description.notEmpty' })
     }) satisfies ZodType<RequestOrganisationForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
@@ -64,7 +66,7 @@ const onSubmit = handleSubmit(async (values) => {
     } catch (error: any | AxiosError) {
         showErrorMessage.value = true;
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        errorMessageContent.value = error?.response?.data?.error || 'Es ist ein Fehler aufgetreten.';
+        errorMessageContent.value = error?.response?.data?.error || t('app.organisations.errorOccurred');
     }
 });
 watch(name, async (newName) => {
@@ -72,16 +74,16 @@ watch(name, async (newName) => {
 });
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">Organisation erstellen</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.organisations.request.title') }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        Mit diesem Formular stellen Sie eine Anfrage an die Betreiber*innen dieser Kalenderinstanz. Sobald Ihre Anfrage
-        genehmigt ist, können Sie für Ihre Organisation Termine erstellen und Organisationsmitglieder hinzufügen.
-        Weitere Informationen finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Organisation/"
-            fragment="organisation-erstellen-zugang-fur-veranstalter-innen"
-        />.
+        <b>{{ t('app.organisations.hint') }}</b> <I18nT scope="global" keypath="app.organisations.request.hint">
+            <template #docs>
+                <LinkToDocs
+                    path="Terminverwaltung/Organisation/"
+                    fragment="organisation-erstellen-zugang-fur-veranstalter-innen"
+                />
+            </template>
+        </I18nT>
     </p>
     <form
         novalidate
@@ -90,8 +92,8 @@ watch(name, async (newName) => {
         <Alert
             v-if="showErrorMessage"
             class="mb-4"
-            title="Fehler"
-            :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
+            :title="t('common.error')"
+            :content="errorMessageContent || t('app.organisations.errorOccurred')"
             severity="danger"
         />
 
@@ -101,18 +103,17 @@ watch(name, async (newName) => {
                     <InputText
                         v-model="name"
                         class="w-full"
-                        label="Organisationsname"
+                        :label="t('app.organisations.request.name')"
                         name="name"
                         :errors="submitCount === 0 ? undefined : errors.name"
                     />
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="t('app.organisations.information')"
                             severity="info"
                         >
                             <p>
-                                Geben Sie den offiziellen Namen Ihrer Organisation ein, unter dem Veranstaltungen
-                                veröffentlicht werden sollen.
+                                {{ t('app.organisations.request.nameInfo') }}
                             </p>
                         </Alert>
                     </div>
@@ -121,27 +122,28 @@ watch(name, async (newName) => {
                     <InputText
                         v-model="preferredUsername"
                         class="w-full"
-                        label="Benutzername der Organisation"
+                        :label="t('app.organisations.request.username')"
                         name="preferredUsername"
                         :errors="submitCount === 0 ? undefined : errors.preferredUsername"
                     />
 
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="t('app.organisations.information')"
                             severity="info"
                         >
                             <p>
-                                Der Benutzername ist erforderlich, um die Organisation eindeutig im System zu
-                                identifizieren. Dieser kann später nicht geändert werden.
+                                {{ t('app.organisations.request.usernameInfo') }}
                             </p>
                             <p>
-                                Weitere Informationen zur Wahl eines Benutzernamens finden Sie im
-
-                                <LinkToDocs
-                                    path="Terminverwaltung/Organisation/"
-                                    fragment="schritt-2-formular-zur-organisationserstellung"
-                                />.
+                                <I18nT scope="global" keypath="app.organisations.request.usernameMoreInfo">
+                                    <template #docs>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/Organisation/"
+                                            fragment="schritt-2-formular-zur-organisationserstellung"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
@@ -149,7 +151,7 @@ watch(name, async (newName) => {
 
                 <InputRichText
                     v-model="summary"
-                    label="Beschreibung (für die öffentliche Organisationsseite)"
+                    :label="t('app.organisations.request.summary')"
                     name="summary"
                     :errors="submitCount === 0 ? undefined : errors.summary"
                 />
@@ -162,7 +164,7 @@ watch(name, async (newName) => {
                 type="submit"
                 icon-left="add"
             >
-                Organisationserstellung anfragen
+                {{ t('app.organisations.request.submit') }}
             </Button>
         </div>
     </form>

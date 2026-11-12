@@ -1,11 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import Button from '@/components/KERN/Button.vue';
-
-interface WeekDay {
-    value: number;
-    label: string;
-    shortLabel: string;
-}
+import { translateMessage } from '@/i18n';
+import { weekDayOptions } from '@/lib/const';
 
 interface Props {
     label?: string;
@@ -17,19 +14,10 @@ interface Props {
 const selectedDay = defineModel<number | null>({ default: null });
 
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 const today = new Date().getDay();
 selectedDay.value = selectedDay.value === null ? today : selectedDay.value;
-
-const weekDays: WeekDay[] = [
-    { value: 1, label: 'Montag', shortLabel: 'Mo' },
-    { value: 2, label: 'Dienstag', shortLabel: 'Di' },
-    { value: 3, label: 'Mittwoch', shortLabel: 'Mi' },
-    { value: 4, label: 'Donnerstag', shortLabel: 'Do' },
-    { value: 5, label: 'Freitag', shortLabel: 'Fr' },
-    { value: 6, label: 'Samstag', shortLabel: 'Sa' },
-    { value: 0, label: 'Sonntag', shortLabel: 'So' },
-];
 
 const toggleDay = (dayValue: number) => {
     selectedDay.value = dayValue;
@@ -52,10 +40,10 @@ const isSelected = (dayValue: number) => {
         <div 
             class="week-days-grid"
             role="group"
-            :aria-label="label || 'Wochentage auswählen'"
+            :aria-label="label || t('app.shared.weekDays.select')"
         >
             <Button
-                v-for="day in weekDays"
+                v-for="day in weekDayOptions"
                 :key="day.value"
                 type="button"
                 :variant="isSelected(day.value) ? 'primary' : 'secondary'"
@@ -76,7 +64,7 @@ const isSelected = (dayValue: number) => {
             :id="`${name}-error`"
             class="kern-form-input__error"
         >
-            {{ errors }}
+            {{ translateMessage(errors) }}
         </p>
     </div>
 </template>

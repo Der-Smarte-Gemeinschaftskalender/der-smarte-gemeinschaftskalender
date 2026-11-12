@@ -2,6 +2,7 @@
 import zod from '@/lib/zod';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { I18nT, useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { dsgApi } from '@/lib/dsgApi';
@@ -43,6 +44,7 @@ import {
 import { type AddressForm, mobilizonFieldsDefaults } from '@/types/Mobilizon';
 
 const router = useRouter();
+const { t } = useI18n();
 const isSubmitting = ref<boolean>(false);
 const isUploading = ref<boolean>(false);
 const errorMessageContent = ref<string>('');
@@ -73,32 +75,33 @@ const { value: onlineAddress } = useField<string>('onlineAddress');
 const { value: physicalAddress } = useField<AddressForm>('physicalAddress');
 const { value: externalParticipationUrl } = useField<string | undefined>('externalParticipationUrl');
 
-const columns = [
+// computed so the labels follow a language switch
+const columns = computed(() => [
     {
         key: 'summary',
-        name: 'Name',
+        name: t('app.events.columns.name'),
     },
     {
         key: 'dtstart',
-        name: 'Startdatum',
+        name: t('app.events.columns.startDate'),
         format: (value: string) => formatDateTime(value),
     },
     {
         key: 'dtend',
-        name: 'Enddatum',
+        name: t('app.events.columns.endDate'),
         format: (value: string) => formatDateTime(value),
     },
     {
         key: 'start',
-        name: 'Start',
+        name: t('app.events.columns.start'),
         format: (_: string, row: UploadedEvent) => formatInputTime(row.dtstart),
     },
     {
         key: 'duration',
-        name: 'Dauer',
-        format: (value: string) => value ?? 'unbekannt',
+        name: t('app.events.columns.duration'),
+        format: (value: string) => value ?? t('app.shared.unknown'),
     },
-];
+]);
 
 const onSubmit = handleSubmit(async (values: UploadedEventForm) => {
     const preparedValues = prepareEventsValues<UploadedEventForm, UploadedEventRequest>(values, ['uploaded_file']);
@@ -117,8 +120,7 @@ const onSubmit = handleSubmit(async (values: UploadedEventForm) => {
             })) ?? [];
 
         if (uploadedEvents.value.length === 0) {
-            errorMessageContent.value =
-                'Es wurden keine bevorstehende Veranstaltungen in der hochgeladenen Datei gefunden.';
+            errorMessageContent.value = t('app.events.uploaded.create.noUpcomingEvents');
         }
     } catch (error: any) {
         errorMessageContent.value = error;
@@ -138,7 +140,7 @@ const accept = async () => {
         await dsgApi.post('/uploaded-events/accept', prepareAcceptPayload());
         await router.push({ name: 'uploadedEvents.index' });
     } catch (error: any) {
-        errorMessageContent.value = error || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+        errorMessageContent.value = error || t('app.events.uploaded.create.genericError');
         console.error(error);
     } finally {
         isUploading.value = false;
@@ -149,7 +151,7 @@ const prepareAcceptPayload = (): UploadedEventAcceptPayload => {
     const filteredEvents = uploadedEvents.value.filter((event: UploadedEvent) => !event.already_exists);
 
     if (!filteredEvents.length) {
-        errorMessageContent.value = 'Es sind keine neuen Veranstaltungen vorhanden.';
+        errorMessageContent.value = t('app.events.uploaded.create.noNewEvents');
         throw new Error('No new events found');
     }
 
@@ -200,16 +202,17 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         class="upload-section"
     >
         <div class="mb-1">
-            <h1 class="kern-heading text-theme-primary">Kalenderdatei hochladen</h1>
+            <h1 class="kern-heading text-theme-primary">{{ t('app.events.uploaded.create.title') }}</h1>
         </div>
         <p class="mb-6">
-            <b>Hinweis:</b>
-            Die Kalenderdateien Funktion Upload eignet sich, um mehrere Termine gesammelt aus einem externen
-            Kalenderprogramm zu übernehmen. Weitere Informationen finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/iCal-Dateien/"
-                fragment="ical-datei-hochladen"
-            />.
+            <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.uploaded.create.hint">
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/iCal-Dateien/"
+                        fragment="ical-datei-hochladen"
+                    />
+                </template>
+            </I18nT>
         </p>
         <form
             novalidate
@@ -218,7 +221,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         >
             <Alert
                 v-if="errorMessageContent.length"
-                title="Fehler"
+                :title="$t('common.error')"
                 class="mb-4"
                 severity="danger"
                 :content="errorMessageContent"
@@ -228,7 +231,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <InputRichText
                     v-model="description"
                     name="description"
-                    label="Beschreibung (optional)"
+                    :label="$t('app.events.form.descriptionOptional')"
                     :errors="submitCount === 0 ? undefined : errors.description"
                 />
 
@@ -238,7 +241,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     <div class="w-full">
                         <InputFile
                             name="file"
-                            label="iCal-Datei hochladen"
+                            :label="t('app.events.uploaded.create.fileLabel')"
                             :accept="['text/calendar', 'application/ics']"
                             :errors="submitCount === 0 ? undefined : errors.uploaded_file"
                             @change="onFileChange"
@@ -246,20 +249,21 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                     </div>
                     <div class="md:col-6 px-0 mt-2">
                         <Alert
-                            title="Hinweis"
+                            :title="$t('app.shared.hintTitle')"
                             severity="info"
                         >
                             <p class="mb-4">
-                                Sie können Ihre iCal-Datei entweder per Drag & Drop hier hineinziehen oder über den
-                                Button “Durchsuchen...” auswählen. Bitte beachten Sie: Nur iCal-Dateien (.ics) werden
-                                unterstützt.
+                                {{ t('app.events.uploaded.create.fileInfo') }}
                             </p>
                             <p>
-                                Weitere Informationen finden Sie im
-                                <LinkToDocs
-                                    path="Terminverwaltung/iCal-Dateien/"
-                                    fragment="ical-datei-hochladen"
-                                />.
+                                <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                    <template #link>
+                                        <LinkToDocs
+                                            path="Terminverwaltung/iCal-Dateien/"
+                                            fragment="ical-datei-hochladen"
+                                        />
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
@@ -270,14 +274,14 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                 <div class="flex flex-column gap-5">
                     <InputSelect
                         v-model="mobilizon_group_id"
-                        label="Organisation"
+                        :label="$t('app.events.form.organisation')"
                         name="mobilizon_group_id"
                         :options="mobilizionGroupOptions"
                         disabled
                     />
                     <InputSelect
                         v-model="category"
-                        label="Kategorie"
+                        :label="$t('app.events.form.category')"
                         name="category"
                         :options="mobilizon_category_options"
                         :errors="submitCount === 0 ? undefined : errors.category"
@@ -287,7 +291,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         <div class="w-full flex flex-column gap-5">
                             <InputRadios
                                 v-model="joinOptions"
-                                label="Anmeldeoptionen"
+                                :label="$t('app.events.form.joinOptions')"
                                 name="joinOptions"
                                 :radios="reconstructOptions(mobilizon_event_join_options)"
                                 :errors="submitCount === 0 ? undefined : errors?.joinOptions"
@@ -297,41 +301,41 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                                 v-model="externalParticipationUrl"
                                 :disabled="joinOptions === MobilizonEventJoinOptions.FREE"
                                 name="externalParticipationUrl"
-                                label="Externe Anmeldeseite (URL)"
+                                :label="$t('app.events.form.externalParticipationUrl')"
                                 :errors="submitCount === 0 ? undefined : errors.externalParticipationUrl"
                             />
                         </div>
                         <div class="md:col-6 px-0 mt-2">
                             <Alert
-                                title="Information"
+                                :title="$t('app.shared.information')"
                                 severity="info"
                             >
                                 <p>
-                                    Wenn Sie eine externe Anmeldeseite verwenden, geben Sie hier den entsprechenden Link
-                                    an. Wenn Sie keine Online-Anmeldung nutzen, informieren Sie die Teilnehmer*innen in
-                                    der Veranstaltungsbeschreibung über das Anmeldeverfahren und ob eine Anmeldung
-                                    erforderlich ist.
+                                    {{ $t('app.events.form.joinOptionsInfo') }}
                                 </p>
                                 <p>
-                                    Weitere Informationen finden Sie im
-                                    <LinkToDocs
-                                        path="Terminverwaltung/Einzeltermine/"
-                                        fragment="beitrittsoptionen"
-                                    />.
+                                    <I18nT scope="global" keypath="app.shared.moreInfoInDocs">
+                                        <template #link>
+                                            <LinkToDocs
+                                                path="Terminverwaltung/Einzeltermine/"
+                                                fragment="beitrittsoptionen"
+                                            />
+                                        </template>
+                                    </I18nT>
                                 </p>
                             </Alert>
                         </div>
                     </div>
                     <InputSelect
                         v-model="language"
-                        label="Sprache"
+                        :label="$t('app.events.form.language')"
                         name="language"
                         :options="mobilizon_event_language_options"
                         :errors="submitCount === 0 ? undefined : errors.language"
                     />
                     <InputSelect
                         v-model="status"
-                        label="Status"
+                        :label="$t('app.events.form.status')"
                         name="state"
                         :options="mobilizon_event_status"
                         :errors="submitCount === 0 ? undefined : errors.status"
@@ -339,7 +343,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
 
                     <InputUrl
                         v-model="onlineAddress"
-                        label="Webseite (optional)"
+                        :label="$t('app.events.form.website')"
                         name="onlineAddress"
                         :errors="submitCount === 0 ? undefined : errors.onlineAddress"
                     />
@@ -347,7 +351,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         v-model="rawAddress"
                         v-model:address="physicalAddress"
                         name="physicalAddress"
-                        label="Adresse (optional)"
+                        :label="$t('app.events.form.address')"
                         :suggestions="mapSuggestions"
                         :mobilizon-group-id="mobilizon_group_id"
                         :errors="submitCount === 0 ? undefined : errors.physicalAddress"
@@ -370,7 +374,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         name="visibility"
                         color="white"
                     />
-                    Veranstaltungen anzeigen
+                    {{ t('app.events.uploaded.create.showEvents') }}
                 </span>
             </Button>
         </form>
@@ -381,17 +385,17 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
         class="preview-section"
     >
         <div class="mb-1">
-            <h2 class="kern-heading">iCal-Datei: Veranstaltungen</h2>
+            <h2 class="kern-heading">{{ t('app.events.uploaded.create.previewTitle') }}</h2>
         </div>
         <p class="mb-4">
-            <b>Hinweis:</b>
-            Die Tabelle zeigt Ihnen alle Termine, die aus der hochgeladenen iCal-Datei übernommen werden. Nach dem
-            Import können einzelne Termine bei Bedarf manuell bearbeitet oder ergänzt werden. Weitere Informationen
-            finden Sie im
-            <LinkToDocs
-                path="Terminverwaltung/iCal-Dateien/"
-                fragment="ical-datei-hochladen"
-            />.
+            <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.uploaded.create.previewHint">
+                <template #link>
+                    <LinkToDocs
+                        path="Terminverwaltung/iCal-Dateien/"
+                        fragment="ical-datei-hochladen"
+                    />
+                </template>
+            </I18nT>
         </p>
 
         <template v-if="newUploadedEvents.length">
@@ -412,33 +416,34 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                         color="white"
                         size="lg"
                     />
-                    Vorschautermine anlegen
+                    {{ t('app.events.uploaded.create.acceptButton') }}
                 </span>
             </Button>
         </template>
         <div v-else>
             <Alert
-                title="Hinweis"
+                :title="$t('app.shared.hintTitle')"
                 severity="info"
                 class="mb-4"
             >
-                <p>Es sind keine neuen Veranstaltungen vorhanden.</p>
-                <p>Alle Termine in dieser Datei sind schon hochgeladen wurden.</p>
+                <p>{{ t('app.events.uploaded.create.noNewEvents') }}</p>
+                <p>{{ t('app.events.uploaded.create.allAlreadyUploaded') }}</p>
             </Alert>
         </div>
 
         <section v-if="toBeFilteredUploadedEvents.length">
             <div class="self-start">
-                <h3 class="kern-heading">Bereits vorhandene Termine</h3>
+                <h3 class="kern-heading">{{ t('app.events.uploaded.create.existingTitle') }}</h3>
             </div>
             <p class="mb-4">
-                <b>Hinweis:</b>
-                Die folgenden Termine der iCal-Datei wurden erkannt, sind jedoch bereits im Kalender vorhanden und
-                werden beim Anlegen übersprungen. Weitere Informationen finden Sie im
-                <LinkToDocs
-                    path="Terminverwaltung/iCal-Dateien/"
-                    fragment="bereits-vorhandene-termine"
-                />.
+                <b>{{ $t('app.shared.hint') }}</b> <I18nT scope="global" keypath="app.events.uploaded.create.existingHint">
+                    <template #link>
+                        <LinkToDocs
+                            path="Terminverwaltung/iCal-Dateien/"
+                            fragment="bereits-vorhandene-termine"
+                        />
+                    </template>
+                </I18nT>
             </p>
 
             <Table

@@ -1,19 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { switchDayjsLocale } from '@/lib/dayjs';
+import { setLocale, SUPPORTED_LOCALES, LOCALE_LABELS } from '@/i18n';
 import { useI18n } from 'vue-i18n';
 import Button from '@/components/KERN/Button.vue';
 import Icon from '@/components/KERN/cosmetics/Icon.vue';
 import DropdownList from '@/components/DropdownList.vue';
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const dropdownRef = ref<HTMLElement | null>(null);
 const listRef = ref<InstanceType<typeof DropdownList> | null>(null);
 
-const languages = computed(() => [
-    { code: 'de', label: 'Deutsch' },
-    { code: 'en', label: 'English' },
-]);
+const languages = computed(() => SUPPORTED_LOCALES.map((code) => ({ code, label: LOCALE_LABELS[code] })));
 
 const currentLanguage = computed(() => languages.value.find((lang) => lang.code === locale.value));
 
@@ -29,10 +26,7 @@ const toggleDropdown = () => {
 };
 
 const switchLanguage = (langCode: string) => {
-    locale.value = langCode;
-    localStorage.setItem('locale', langCode);
-    document.documentElement.setAttribute('lang', langCode);
-    switchDayjsLocale(langCode);
+    setLocale(langCode);
 };
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -51,7 +45,9 @@ onUnmounted(() => {
 </script>
 
 <template>
+    <!-- Nothing to switch on instances with only one enabled language -->
     <div
+        v-if="languages.length > 1"
         ref="dropdownRef"
         class="language-switcher relative"
     >
@@ -59,7 +55,7 @@ onUnmounted(() => {
             variant="secondary"
             class="language-btn text-sm px-2"
             body-class="flex align-items-center"
-            :aria-label="`${currentLanguage?.label} - Change language`"
+            :aria-label="`${currentLanguage?.label} - ${t('common.changeLanguage')}`"
             :title="currentLanguage?.label"
             @click="toggleDropdown"
         >

@@ -1,4 +1,4 @@
-import { Page, Request, expect } from '@playwright/test';
+import { Locator, Page, Request, expect } from '@playwright/test';
 import dotenv from 'dotenv';
 
 export interface TestConfig {
@@ -155,15 +155,17 @@ export async function fillEventForm(page: Page, data: EventFormData): Promise<vo
     }
 
     if (data.date) {
-        await page.locator('#start').pressSequentially(data.date.day, { delay: 150 });
-        await page.locator("input[placeholder='hh']").first().pressSequentially(data.date.startHour, { delay: 150 });
-        await page.locator("input[placeholder='mm']").first().pressSequentially(data.date.startMinute, { delay: 150 });
+        await fillDateInput(page.locator('#start'), data.date.day);
+        // fill() statt pressSequentially(): Die Felder sind vorbelegt (Startzeit = aktuelle volle Stunde),
+        // getippte Ziffern würden angehängt und von InputTime auf das Maximum (23) geklemmt.
+        await page.locator("input[placeholder='hh']").first().fill(data.date.startHour);
+        await page.locator("input[placeholder='mm']").first().fill(data.date.startMinute);
 
         if (data.date.durationHours) {
-            await page.locator("input[placeholder='hh']").nth(1).pressSequentially(data.date.durationHours);
+            await page.locator("input[placeholder='hh']").nth(1).fill(data.date.durationHours);
         }
         if (data.date.durationMinutes) {
-            await page.locator("input[placeholder='mm']").nth(1).pressSequentially(data.date.durationMinutes);
+            await page.locator("input[placeholder='mm']").nth(1).fill(data.date.durationMinutes);
         }
     }
 
@@ -288,14 +290,10 @@ export async function copyEventFromList(page: Page, eventName: string): Promise<
 export async function copySerialEventFromList(page: Page, eventName: string): Promise<void> {
     await page.waitForLoadState('networkidle');
 
-    const rows = await page.locator('tr.kern-table__row').all();
-    for (const row of rows) {
-        const rowText = await row.textContent();
-        if (rowText && rowText.includes(eventName)) {
-            await row.locator('.kern-icon--content-copy').first().click();
-            break;
-        }
-    }
+    // Locator statt .all(): .all() wartet nicht, nach einem reinen Hash-Wechsel ist die Tabelle unter
+    // Last oft noch nicht gerendert - dann wurde nichts geklickt. Der Locator wartet auf die Zeile.
+    const row = page.locator('tr.kern-table__row', { hasText: eventName }).first();
+    await row.locator('.kern-icon--content-copy').first().click();
     await expect(page).toHaveURL(/.*\/app\/series-events\/create\?templateEventId=.*/);
 }
 
@@ -372,7 +370,7 @@ export async function verifyEventDetails(page: Page, data: EventFormData): Promi
             // Mobilizon hoch (dsgClient.ts benennt es dabei in "event_image.<ext>" um) - der
             // ursprüngliche Dateiname steht danach nicht mehr in der URL.
             const eventImage = page
-                .locator(`img[src*="${imageName}"], img[alt="Event Bild"][src*="event_image"]`)
+                .locator(`img[src*="${imageName}"], img[alt="Veranstaltungsbild"][src*="event_image"]`)
                 .first();
             await expect(eventImage, `Bild "${imageName}" fehlt auf der Terminseite`).toBeVisible();
         }
@@ -465,6 +463,18 @@ export function getFutureDate(monthsInFuture: number = 4): string {
     });
 }
 
+/**
+ * Setzt ein <input type="date"> auf ein Datum im Format TT.MM.JJJJ (wie getFutureDate es liefert).
+ * Ziffern in ein Datumsfeld zu tippen funktioniert in WebKit nicht (der Wert bleibt unverändert),
+ * fill() mit ISO-Datum funktioniert in allen Browsern.
+ */
+export async function fillDateInput(input: Locator, germanDate: string): Promise<void> {
+    if (!germanDate) return;
+
+    const [day, month, year] = germanDate.split('.');
+    await input.fill(`${year}-${month}-${day}`);
+}
+
 export async function expectErrorMessage(page: Page, errorText: string): Promise<void> {
     await expect(page.getByText(errorText)).toBeVisible();
 }
@@ -512,18 +522,19 @@ export async function fillSerialEventFormWithCustomDate(
     }
 
     if (data.endDate) {
-        await page.locator('#end').pressSequentially(data.endDate, { delay: 150 });
+        await fillDateInput(page.locator('#end'), data.endDate);
     }
 
     if (data.date) {
-        await page.locator("input[placeholder='hh']").first().pressSequentially(data.date.startHour, { delay: 150 });
-        await page.locator("input[placeholder='mm']").first().pressSequentially(data.date.startMinute, { delay: 150 });
+        // fill() statt pressSequentially(): siehe fillEventForm (vorbelegte Zeitfelder)
+        await page.locator("input[placeholder='hh']").first().fill(data.date.startHour);
+        await page.locator("input[placeholder='mm']").first().fill(data.date.startMinute);
 
         if (data.date.durationHours) {
-            await page.locator("input[placeholder='hh']").nth(1).pressSequentially(data.date.durationHours);
+            await page.locator("input[placeholder='hh']").nth(1).fill(data.date.durationHours);
         }
         if (data.date.durationMinutes) {
-            await page.locator("input[placeholder='mm']").nth(1).pressSequentially(data.date.durationMinutes);
+            await page.locator("input[placeholder='mm']").nth(1).fill(data.date.durationMinutes);
         }
     }
 

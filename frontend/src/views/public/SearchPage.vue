@@ -499,12 +499,12 @@ if (route.query.page) {
                                                 endsOn: searchBeginsEndsOn.endsOn?.toISOString(),
                                             },
                                         }"
-                                        aria-label="Zur Infomonitor Anzeige der Organisation"
+                                        :aria-label="t('public.organisation.navigateToInfoMonitor')"
                                     >
                                         <Icon
                                             name="info"
                                             class="w-2rem h-2rem sm:w-3rem sm:h-3rem"
-                                            title="Infomonitor anzeige"
+                                            :title="t('public.organisation.infoMonitorDisplay')"
                                         />
                                     </RouterLink>
                                 </ShareLinks>

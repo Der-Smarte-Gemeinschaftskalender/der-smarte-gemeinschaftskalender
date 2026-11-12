@@ -3,7 +3,6 @@ import { checkLogin, user } from "@/composables/UserComposoable";
 import type { RouteToMeta } from "@/types/Route";
 import { isStrictModeEnabled } from "@/lib/instanceConfig";
 import { allowedEventCreationsMethods } from '@/lib/instanceConfig';
-import i18n from '@/i18n';
 
 const router = createRouter({
     history: import.meta.env.PROD ? createWebHistory() : createWebHashHistory(),
@@ -408,12 +407,6 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-    // Force German locale for all app pages and auth pages
-    const authPages = ['login', 'register', 'registerWithProfileAndOrganisation', 'forgotPassword', 'resetPassword', 'validate'];
-    if (to.path?.startsWith('/app') || to.path?.startsWith('/material-generator') || authPages.includes(to.name as string)) {
-        i18n.global.locale.value = 'de';
-    }
-
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
     if (requiresAuth && !checkLogin()) next({ name: 'login', query: { redirect: to.fullPath } });

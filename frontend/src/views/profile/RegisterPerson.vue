@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRouter, useRoute } from 'vue-router';
 import { useField, useForm } from 'vee-validate';
@@ -15,6 +16,7 @@ import Divider from '@/components/KERN/cosmetics/Divider.vue';
 import { setUserPersonData, user } from '@/composables/UserComposoable';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
+const { t } = useI18n();
 const router = useRouter();
 const showErrorMessage = ref(false);
 const errorMessageContent = ref('');
@@ -48,7 +50,7 @@ const onSubmit = handleSubmit(async (values) => {
         showErrorMessage.value = true;
         errorMessageContent.value =
             error?.response?.data?.error ||
-            'Es ist ein Fehler aufgetreten. Bevor du deinen Benutzer weiter einrichten kannst, musst du erst deine E-Mail-Adresse bestätigen.';
+            t('app.profile.registerPerson.saveError');
     }
 });
 
@@ -57,19 +59,20 @@ watch(name, async (newName, oldName) => {
 });
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary mb-4">Ihr persönliches Profil einrichten</h1>
+    <h1 class="kern-heading text-theme-primary mb-4">{{ t('app.profile.registerPerson.title') }}</h1>
     <p class="mb-3">
-        <b>Hinweis:</b>
-        Nutzen Sie zur Profileinrichtung Ihre persönlichen Daten. Verwenden Sie nicht den Organisationsnamen. Ihr
-        persönliches Profil wird benötigt, um die Erstellung einer Organisation anzufragen. Eine Organisation kann von
-        mehreren Einzelnutzer*innen verwaltet werden.
+        <b>{{ t('app.profile.hint') }}</b>
+        {{ t('app.profile.registerPerson.hint') }}
     </p>
     <p class="mb-6">
-        Weitere Informationen zur Profileinrichtung finden Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Organisation/"
-            fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
-        />.
+        <I18nT scope="global" keypath="app.profile.registerPerson.moreInfo">
+            <template #docs>
+                <LinkToDocs
+                    path="Terminverwaltung/Organisation/"
+                    fragment="registrierung-fur-einzelpersonen-bzw-organisationsmitglieder"
+                />
+            </template>
+        </I18nT>
     </p>
     <Divider class="mb-6" />
     <form
@@ -78,8 +81,8 @@ watch(name, async (newName, oldName) => {
     >
         <Alert
             v-if="showErrorMessage"
-            title="Fehler"
-            :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
+            :title="t('common.error')"
+            :content="errorMessageContent || t('app.profile.errorOccurred')"
             severity="danger"
         />
 
@@ -89,20 +92,19 @@ watch(name, async (newName, oldName) => {
                     <div class="w-full">
                         <InputText
                             v-model="name"
-                            label="Name"
+                            :label="t('app.profile.registerPerson.name')"
                             name="name"
-                            placeholder="Vorname Nachname"
+                            :placeholder="t('app.profile.registerPerson.namePlaceholder')"
                             :errors="submitCount === 0 ? undefined : errors.name"
                         />
                     </div>
                     <div class="md:col-7 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="t('app.profile.information')"
                             severity="info"
                         >
                             <p>
-                                Geben Sie möglichst Ihren Name an (z. B.: Vorname Nachname). Ihr Name wird im Profil
-                                angezeigt. Dieser kann später geändert werden.
+                                {{ t('app.profile.registerPerson.nameInfo') }}
                             </p>
                         </Alert>
                     </div>
@@ -112,31 +114,35 @@ watch(name, async (newName, oldName) => {
                     <div class="w-full">
                         <InputText
                             v-model="preferredUsername"
-                            label="Persönlicher Benutzername"
+                            :label="t('app.profile.registerPerson.username')"
                             name="preferredUsername"
-                            placeholder="vorname_nachname"
+                            :placeholder="t('app.profile.registerPerson.usernamePlaceholder')"
                             :errors="submitCount === 0 ? undefined : errors.preferredUsername"
                         />
                     </div>
 
                     <div class="md:col-7 px-0 mt-2">
                         <Alert
-                            title="Information"
+                            :title="t('app.profile.information')"
                             severity="info"
                         >
                             <p class="mb-5">
-                                Bitte geben Sie eine Kombination aus Ihrem Vor- und Nachnamen
-                                <b>Vor- und Nachnamen</b>
-                                an (z. B. beate_beispiel) oder Ihrem Rufnamen an.
+                                <I18nT scope="global" keypath="app.profile.registerPerson.usernameInfo1">
+                                    <template #firstLastName>
+                                        <b>{{ t('app.profile.registerPerson.usernameInfo1Bold') }}</b>
+                                    </template>
+                                </I18nT>
                             </p>
 
                             <p class="pt-2">
-                                Verwenden Sie
-                                <b>keinen Organisationsnamen</b>
-                                , da dieser Benutzername immer Ihrem persönlichen Profil zugeordnet ist. Der
-                                Benutzername wird benötigt, um Sie zu Organisationen einzuladen, und kann später
-                                <b>nicht mehr geändert werden</b>
-                                . Bitte wählen Sie ihn sorgfältig.
+                                <I18nT scope="global" keypath="app.profile.registerPerson.usernameInfo2">
+                                    <template #noOrganisationName>
+                                        <b>{{ t('app.profile.registerPerson.usernameInfo2NoOrganisationName') }}</b>
+                                    </template>
+                                    <template #notChangeable>
+                                        <b>{{ t('app.profile.registerPerson.usernameInfo2NotChangeable') }}</b>
+                                    </template>
+                                </I18nT>
                             </p>
                         </Alert>
                     </div>
@@ -151,7 +157,7 @@ watch(name, async (newName, oldName) => {
                 type="submit"
                 icon-left="add"
             >
-                Profil erstellen
+                {{ t('app.profile.registerPerson.submit') }}
             </Button>
         </div>
     </form>

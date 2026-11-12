@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import InputText from '@/components/KERN/inputs/InputText.vue';
 import Card from '@/components/KERN/Card.vue';
@@ -22,6 +23,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     suggestions: () => [],
 });
+const { t } = useI18n();
 
 // Manuelle Eingabe: nur die Beschreibung setzen, <Map> ergänzt die Geokoordinaten.
 const onInput = () => {
@@ -60,8 +62,8 @@ const loadCards = async (groupId?: number | string | null) => {
         result.push(card);
     };
 
-    if (organisationAddress) push(toCard('Organisation', organisationAddress));
-    frequentAddresses.forEach((entry) => push(toCard('Häufig genutzt', entry)));
+    if (organisationAddress) push(toCard(t('app.shared.addressInput.organisation'), organisationAddress));
+    frequentAddresses.forEach((entry) => push(toCard(t('app.shared.addressInput.frequentlyUsed'), entry)));
 
     cards.value = result;
 };
@@ -105,7 +107,7 @@ watch(
                 <Button
                     type="button"
                     variant="primary"
-                    label="Adresse übernehmen"
+                    :label="t('app.shared.addressInput.apply')"
                     icon-left="check"
                     @click="selectCard(card)"
                 />

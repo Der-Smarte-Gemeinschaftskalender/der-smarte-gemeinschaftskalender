@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Localization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,6 +62,20 @@ class ApprovalRequest extends Model
     public function handledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'handled_by_user_id');
+    }
+
+    /**
+     * Translated name of the request in the current locale, e.g. "Einzeltermin erstellen" / "single event creation".
+     */
+    public function getRequestTypeLabel(): string
+    {
+        $typeKey = 'emails.requestTypes.' . $this->requestable_type;
+        $actionKey = 'emails.requestActions.' . $this->request_type;
+
+        return __('emails.requestTypeName', [
+            'type' => Localization::translateOr($typeKey, (string) $this->requestable_type),
+            'action' => Localization::translateOr($actionKey, $this->request_type),
+        ]);
     }
 
     public function scopePending($query)

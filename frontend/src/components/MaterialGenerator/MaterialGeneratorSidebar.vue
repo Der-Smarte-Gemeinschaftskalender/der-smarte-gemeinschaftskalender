@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import InputSelect from '@/components/KERN/inputs/InputSelect.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
 import InputDate from '@/components/KERN/inputs/InputDate.vue';
@@ -62,6 +63,8 @@ const emit = defineEmits<{
     (e: 'selectAllEvents', selectAll: boolean): void;
     (e: 'loadMoreEvents'): void;
 }>();
+
+const { t } = useI18n();
 
 const bgFileName = ref('');
 
@@ -166,7 +169,7 @@ function onDeleteTemplate() {
         <div class="flex flex-column gap-2 p-3">
             <Button
                 variant="primary"
-                label="Herunterladen"
+                :label="t('app.materialGenerator.sidebar.download')"
                 icon-left="download"
                 class="w-full"
                 @click="emit('download')"
@@ -174,7 +177,7 @@ function onDeleteTemplate() {
 
             <Divider />
 
-            <Fieldset legend="Format">
+            <Fieldset :legend="t('app.materialGenerator.sidebar.format')">
                 <InputSelect
                     v-model="localDimension"
                     name="dimensionOptions"
@@ -185,13 +188,13 @@ function onDeleteTemplate() {
             <template v-if="isInstanceAdmin && materialType === 'eventList'">
                 <Divider />
 
-                <Fieldset legend="Bereich">
+                <Fieldset :legend="t('app.materialGenerator.sidebar.scope')">
                     <InputRadios
                         v-model="localInstanceMode"
                         name="instanceMode"
                         :radios="[
-                            { label: 'Meine Organisation', value: false },
-                            { label: 'Gesamte Instanz', value: true },
+                            { label: t('app.materialGenerator.sidebar.myOrganisation'), value: false },
+                            { label: t('app.materialGenerator.sidebar.wholeInstance'), value: true },
                         ]"
                     />
                 </Fieldset>
@@ -200,13 +203,13 @@ function onDeleteTemplate() {
             <template v-if="materialType === 'eventList'">
                 <Divider />
 
-                <Fieldset legend="Zeitraum">
+                <Fieldset :legend="t('app.materialGenerator.sidebar.period')">
                     <div class="flex flex-column gap-2">
-                        <InputDate v-model="localFromDate" name="fromDate" label="Startdatum" />
-                        <InputDate v-model="localToDate" name="toDate" label="Enddatum" />
+                        <InputDate v-model="localFromDate" name="fromDate" :label="t('app.materialGenerator.sidebar.startDate')" />
+                        <InputDate v-model="localToDate" name="toDate" :label="t('app.materialGenerator.sidebar.endDate')" />
                     </div>
                     <p class="kern-form-input__hint mt-1" style="white-space: normal; word-break: break-word;">
-                        <b>Hinweis:</b> Es können maximal {{ maxEvents }} Veranstaltungen angezeigt werden
+                        <b>{{ t('app.materialGenerator.noteLabel') }}</b> {{ t('app.materialGenerator.sidebar.maxEventsHint', { count: maxEvents }) }}
                     </p>
                 </Fieldset>
 
@@ -214,23 +217,23 @@ function onDeleteTemplate() {
                     <Divider />
 
                     <div class="flex align-items-center justify-content-between gap-2 mb-1 mt-1 min-w-0">
-                        <span class="font-bold text-sm white-space-nowrap">Veranstaltungen</span>
+                        <span class="font-bold text-sm white-space-nowrap">{{ t('app.materialGenerator.sidebar.events') }}</span>
                         <Button
                             variant="secondary"
-                            :label="showEventPicker ? 'Schließen' : `Auswählen (${selectedCount}/${maxEvents})`"
+                            :label="showEventPicker ? t('common.close') : t('app.materialGenerator.sidebar.selectEvents', { selected: selectedCount, max: maxEvents })"
                             class="shrink-0"
                             @click="showEventPicker = !showEventPicker"
                         />
                     </div>
                     <p v-if="selectedCount > maxEvents" class="kern-form-input__hint" style="color: var(--kern-warning, #e67700)">
-                        Es werden nur die ersten {{ maxEvents }} ausgewählten Veranstaltungen auf der Grafik angezeigt.
+                        {{ t('app.materialGenerator.sidebar.onlyFirstSelected', { count: maxEvents }) }}
                     </p>
 
                     <div v-if="showEventPicker" class="kern-card mt-1 p-2" style="max-height: 320px; overflow: hidden auto;">
                         <div class="mb-1">
                             <Button
                                 variant="secondary"
-                                :label="allEventsSelected ? 'Alle abwählen' : 'Alle auswählen'"
+                                :label="allEventsSelected ? t('app.materialGenerator.sidebar.deselectAll') : t('app.materialGenerator.sidebar.selectAll')"
                                 @click="emit('selectAllEvents', !allEventsSelected)"
                             />
                         </div>
@@ -258,7 +261,7 @@ function onDeleteTemplate() {
                         <Button
                             v-if="hasMoreEvents"
                             variant="secondary"
-                            :label="loadingMoreEvents ? 'Laden …' : 'Weitere Veranstaltungen laden'"
+                            :label="loadingMoreEvents ? t('app.materialGenerator.sidebar.loadingMore') : t('app.materialGenerator.sidebar.loadMore')"
                             class="w-full mt-2"
                             :disabled="loadingMoreEvents"
                             @click="emit('loadMoreEvents')"
@@ -273,13 +276,13 @@ function onDeleteTemplate() {
                 <InputCheckbox
                     v-if="!(materialType === 'eventList' && instanceMode)"
                     v-model="localLoadLogo"
-                    label="Logo anzeigen"
+                    :label="t('app.materialGenerator.sidebar.showLogo')"
                     name="loadOrganisationLogo"
                 />
 
                 <Divider />
 
-                <Fieldset legend="Hintergrundbild">
+                <Fieldset :legend="t('app.materialGenerator.sidebar.backgroundImage')">
                     <InputFile
                         v-model="bgFileName"
                         name="bgFile"
@@ -294,24 +297,24 @@ function onDeleteTemplate() {
                             path="Werbemittelgenerator/"
                             fragment="hintergrunde-fur-veranstaltungsubersichten-gestalten"
                         >
-                            Layout-Vorlagen
+                            {{ t('app.materialGenerator.sidebar.layoutTemplates') }}
                         </LinkToDocs>
                     </p>
                 </Fieldset>
 
                 <Divider />
 
-                <Fieldset legend="Globale Einstellungen">
+                <Fieldset :legend="t('app.materialGenerator.sidebar.globalSettings')">
                     <div class="flex align-items-end gap-2">
                         <div class="flex-1 min-w-0">
                             <InputSelect
                                 v-model="localFont"
                                 name="selectedFont"
-                                label="Schriftart Texte"
+                                :label="t('app.materialGenerator.sidebar.fontTexts')"
                                 :options="fontSelectionOptions"
                             />
                         </div>
-                        <InputColor v-model="localTextColor" name="selectedTextColor" label="Farbe" />
+                        <InputColor v-model="localTextColor" name="selectedTextColor" :label="t('app.materialGenerator.sidebar.color')" />
                     </div>
 
                     <template v-if="materialType === 'eventList'">
@@ -320,26 +323,26 @@ function onDeleteTemplate() {
                                 <InputSelect
                                     v-model="localFontHeadline"
                                     name="selectedFontHeadline"
-                                    label="Schriftart Überschriften"
+                                    :label="t('app.materialGenerator.sidebar.fontHeadlines')"
                                     :options="fontSelectionOptions"
                                 />
                             </div>
-                            <InputColor v-model="localTextColorHeadline" name="selectedTextColorHeadline" label="Farbe" />
+                            <InputColor v-model="localTextColorHeadline" name="selectedTextColorHeadline" :label="t('app.materialGenerator.sidebar.color')" />
                         </div>
                         <InputText
                             v-model="localHeadline"
-                            label="Überschrift"
+                            :label="t('app.materialGenerator.sidebar.headline')"
                             name="headlineText"
                             class="mt-2"
                         />
                     </template>
 
-                    <InputColor v-model="localUnderlineColor" name="underlineColor" label="Trennlinien" class="mt-2" />
+                    <InputColor v-model="localUnderlineColor" name="underlineColor" :label="t('app.materialGenerator.sidebar.dividers')" class="mt-2" />
                 </Fieldset>
 
                 <Divider />
 
-                <Fieldset legend="Vorlagen">
+                <Fieldset :legend="t('app.materialGenerator.sidebar.templates')">
                     <div v-if="props.availableTemplates.length" class="flex flex-column gap-2">
                         <div
                             v-for="tpl in props.availableTemplates"
@@ -349,7 +352,7 @@ function onDeleteTemplate() {
                             <Button
                                 variant="secondary"
                                 :label="tpl.name"
-                                :title="'Vorlage laden: ' + tpl.name"
+                                :title="t('app.materialGenerator.sidebar.loadTemplate', { name: tpl.name })"
                                 class="flex-1 min-w-0"
                                 @click="onLoadTemplate(tpl.id)"
                             />
@@ -357,46 +360,46 @@ function onDeleteTemplate() {
                                 variant="secondary"
                                 icon-left="delete"
                                 icon-size="sm"
-                                title="Vorlage löschen"
-                                aria-label="Vorlage löschen"
+                                :title="t('app.materialGenerator.sidebar.deleteTemplate')"
+                                :aria-label="t('app.materialGenerator.sidebar.deleteTemplate')"
                                 @click.stop="confirmDeleteTemplate(tpl.id)"
                             />
                         </div>
                     </div>
                     <p v-else class="kern-form-input__hint">
-                        Keine Vorlagen für dieses Format gespeichert.
+                        {{ t('app.materialGenerator.sidebar.noTemplates') }}
                     </p>
 
                     <div class="flex align-items-end gap-2 mt-3">
                         <div class="flex-1">
                             <InputText
                                 v-model="newTemplateName"
-                                label="Neue Vorlage speichern unter"
+                                :label="t('app.materialGenerator.sidebar.saveTemplateAs')"
                                 name="newTemplateName"
                             />
                         </div>
                         <Button
                             variant="primary"
-                            label="Speichern"
+                            :label="t('common.save')"
                             @click="onSaveTemplate"
                         />
                     </div>
                 </Fieldset>
 
-                <Dialog v-model="showDeleteDialog" title="Vorlage löschen">
+                <Dialog v-model="showDeleteDialog" :title="t('app.materialGenerator.sidebar.deleteTemplate')">
                     <p>
-                        Vorlage „{{ templateToDeleteName }}" wirklich löschen?
+                        {{ t('app.materialGenerator.sidebar.deleteTemplateConfirm', { name: templateToDeleteName }) }}
                     </p>
                     <template #footer>
                         <div class="flex gap-2 justify-content-end">
                             <Button
                                 variant="secondary"
-                                label="Abbrechen"
+                                :label="t('common.cancel')"
                                 @click="showDeleteDialog = false"
                             />
                             <Button
                                 variant="primary"
-                                label="Löschen"
+                                :label="t('common.delete')"
                                 @click="onDeleteTemplate"
                             />
                         </div>

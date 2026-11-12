@@ -4,25 +4,21 @@
         style="max-width: 228px; width: 100%; margin-bottom: 15px;">
 
     <h4>
-        {{ env('APP_NAME') }} basiert auf Mobilizon im Fediverse.
+        {{ __('emails.footer.basedOn', ['appName' => \App\Support\Localization::appName()]) }}
     </h4>
 
     <div class="footer-links">
-        <a href="{{ env('APP_URL') }}/public/terms">Nutzungsbedingungen</a>
-        <a href="{{ env('APP_URL') }}/public/about">Impressum</a>
-        <a href="{{ env('APP_URL') }}/public/privacy">Datenschutz</a>
+        <a href="{{ env('APP_URL') }}/public/terms">{{ __('emails.footer.terms') }}</a>
+        <a href="{{ env('APP_URL') }}/public/about">{{ __('emails.footer.imprint') }}</a>
+        <a href="{{ env('APP_URL') }}/public/privacy">{{ __('emails.footer.privacy') }}</a>
     </div>
     @isset($unsubscribePath, $editPath)
+    {{-- The translation is trusted, only the inserted links are escaped --}}
     <p>
-        Wenn Sie keine Benachrichtigungen mehr erhalten möchten,
-        können Sie sich jederzeit
-        <a href="{{ env('APP_URL') }}{{ $unsubscribePath }}">
-            hier abmelden
-        </a>.
-        Oder Ihre Einstellungen
-        <a href="{{ env('APP_URL') }}{{ $editPath }}">
-            hier bearbeiten
-        </a>.
+        {!! __('emails.footer.unsubscribe', [
+            'unsubscribeLink' => '<a href="' . e(env('APP_URL') . $unsubscribePath) . '">' . e(__('emails.footer.unsubscribeLinkText')) . '</a>',
+            'editLink' => '<a href="' . e(env('APP_URL') . $editPath) . '">' . e(__('emails.footer.editLinkText')) . '</a>',
+        ]) !!}
     </p>
     @endisset
 </div>

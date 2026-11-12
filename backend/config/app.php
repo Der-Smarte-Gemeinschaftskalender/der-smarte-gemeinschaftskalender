@@ -1,5 +1,11 @@
 <?php
 
+// The default locale is always enabled and comes first, empty entries are dropped.
+$supportedLocales = array_values(array_unique([
+    env('APP_LOCALE', 'de'),
+    ...array_filter(array_map('trim', explode(',', (string) env('APP_SUPPORTED_LOCALES', 'de,en')))),
+]));
+
 return [
 
     /*
@@ -65,7 +71,7 @@ return [
     |
     */
 
-    'timezone' => 'Europe/Berlin',
+    'timezone' => env('APP_TIMEZONE', 'Europe/Berlin'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,9 +84,21 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    // Instance default language. Note: App::setLocale() (SetLocale middleware) overwrites
+    // this value per request, so within a request it holds the request language.
+    'locale' => env('APP_LOCALE', 'de'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'de'),
+
+    // Languages enabled on this instance (UI, emails, admin email templates), e.g. "de,en".
+    'supported_locales' => $supportedLocales,
+
+    // Optional instance name per language (e.g. APP_NAME_EN), used in emails instead of APP_NAME.
+    // See App\Support\Localization::appName().
+    'localized_names' => array_filter(array_combine(
+        $supportedLocales,
+        array_map(fn (string $locale) => env('APP_NAME_' . strtoupper($locale)), $supportedLocales),
+    )),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 

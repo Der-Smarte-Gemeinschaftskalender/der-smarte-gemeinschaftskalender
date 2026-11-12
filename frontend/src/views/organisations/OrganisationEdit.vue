@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import zod from '@/lib/zod';
 import { computed, ref } from 'vue';
+import { I18nT, useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { useRoute } from 'vue-router';
 import { toTypedSchema } from '@vee-validate/zod';
@@ -34,6 +35,8 @@ interface EditOrganisationForm {
     avatar?: any;
 }
 
+const { t } = useI18n();
+
 const showErrorMessage = ref<boolean>(false);
 const errorMessageContent = ref<string>('');
 const showSuccessMessage = ref<boolean>(false);
@@ -52,11 +55,11 @@ const featuredError = ref<string | null>(null);
 const validationSchema = toTypedSchema(
     zod.object({
         name: zod.string().refine((val) => val.trim().length > 0, {
-            message: 'Der Name der Organisation darf nicht leer sein.',
+            message: 'validation.organisation.nameNotEmpty',
         }),
         summary: zod
             .string()
-            .refine((val) => stripHtml(val).length > 0, { message: 'Die Beschreibung darf nicht leer sein.' }),
+            .refine((val) => stripHtml(val).length > 0, { message: 'validation.description.notEmpty' }),
         avatar: zod.any().optional(),
         physicalAddress: AddressFormSchema.optional(),
     }) satisfies ZodType<EditOrganisationForm>
@@ -103,14 +106,14 @@ const onSubmit = handleSubmit(async (values) => {
         showErrorMessage.value = true;
         errorMessageContent.value =
             error?.response?.data?.error ||
-            'Es ist ein Fehler aufgetreten. Bevor du deinen Benutzer weiter einrichten kannst, musst du erst deine E-Mail-Adresse bestätigen.';
+            t('app.organisations.edit.saveError');
     }
 });
 
 const loadOrganisation = async () => {
     if (!preferredUsername) {
         showErrorMessage.value = true;
-        errorMessageContent.value = 'Organisation konnte nicht geladen werden.';
+        errorMessageContent.value = t('app.organisations.loadError');
         return;
     }
     try {
@@ -137,7 +140,7 @@ const loadOrganisation = async () => {
     } catch (error) {
         console.error('Error loading organisation:', error);
         showErrorMessage.value = true;
-        errorMessageContent.value = 'Organisation konnte nicht geladen werden.';
+        errorMessageContent.value = t('app.organisations.loadError');
     }
 };
 
@@ -151,15 +154,16 @@ const updateAddress = (address: string) => {
 loadOrganisation();
 </script>
 <template>
-    <h1 class="kern-heading text-theme-primary">{{ name }} - Organisation bearbeiten</h1>
+    <h1 class="kern-heading text-theme-primary">{{ t('app.organisations.edit.title', { name }) }}</h1>
     <p class="mt-1 mb-6">
-        <b>Hinweis:</b>
-        In diesem Formular können Sie die öffentlichen Angaben Ihrer Organisation anpassen. Weitere Informationen finden
-        Sie im
-        <LinkToDocs
-            path="Terminverwaltung/Organisation/"
-            fragment="organisation-bearbeiten"
-        />.
+        <b>{{ t('app.organisations.hint') }}</b> <I18nT scope="global" keypath="app.organisations.edit.hint">
+            <template #docs>
+                <LinkToDocs
+                    path="Terminverwaltung/Organisation/"
+                    fragment="organisation-bearbeiten"
+                />
+            </template>
+        </I18nT>
     </p>
 
     <form
@@ -168,24 +172,24 @@ loadOrganisation();
     >
         <Alert
             v-if="showErrorMessage"
-            title="Fehler"
-            :content="errorMessageContent || 'Es ist ein Fehler aufgetreten.'"
+            :title="t('common.error')"
+            :content="errorMessageContent || t('app.organisations.errorOccurred')"
             severity="danger"
         />
         <Alert
             v-else-if="showSuccessMessage"
             class="mb-4"
-            title="Gespeichert"
+            :title="t('app.organisations.saved')"
             :content="
                 !isStrictModeEnabled
-                    ? 'Die Änderungen wurden erfolgreich gespeichert.'
-                    : 'Ihre Änderungen wurden gespeichert und werden von den Administrator*innen der Instanz überprüft.'
+                    ? t('app.organisations.edit.savedContent')
+                    : t('app.organisations.edit.savedContentStrict')
             "
             :severity="!isStrictModeEnabled ? 'success' : 'info'"
         />
         <Alert
             v-if="featuredError"
-            :title="'Fehler'"
+            :title="t('common.error')"
             :content="featuredError"
             severity="danger"
             class="mb-4"
@@ -210,19 +214,19 @@ loadOrganisation();
             <div class="flex flex-column gap-5">
                 <InputText
                     v-model="name"
-                    label="Name der Organisation"
+                    :label="t('app.organisations.edit.name')"
                     name="name"
                     :errors="submitCount === 0 ? undefined : errors.name"
                 />
                 <InputText
                     v-model="preferredUsername"
-                    label="Benutzername der Organisation"
+                    :label="t('app.organisations.edit.username')"
                     name="preferredUsername"
                     disabled
                 />
                 <InputRichText
                     v-model="summary"
-                    label="Beschreibung"
+                    :label="t('app.organisations.edit.summary')"
                     name="summary"
                     :errors="submitCount === 0 ? undefined : errors.summary"
                     rows="10"
@@ -230,7 +234,7 @@ loadOrganisation();
 
                 <InputImage
                     v-model="avatar"
-                    label="Profilbild (optional)"
+                    :label="t('app.organisations.edit.avatar')"
                     name="avatar"
                     :accept="['image/gif', 'image/png', 'image/jpeg', 'image/webp']"
                     :errors="submitCount === 0 ? undefined : errors.avatar"
@@ -238,7 +242,7 @@ loadOrganisation();
                 <InputText
                     v-model="rawAddress"
                     name="physicalAddress"
-                    label="Adresse (optional)"
+                    :label="t('app.organisations.edit.address')"
                     :list="mapSuggestions"
                     :errors="submitCount === 0 ? undefined : errors.physicalAddress"
                     @input="updateAddress(rawAddress)"
@@ -257,7 +261,7 @@ loadOrganisation();
                 class="mt-5"
                 type="submit"
             >
-                Änderung Speichern
+                {{ t('app.organisations.edit.submit') }}
             </Button>
         </div>
     </form>

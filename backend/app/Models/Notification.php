@@ -11,6 +11,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property string $email
+ * @property string|null $locale Language of the newsletter emails
  * @property string|null $intervall
  * @property string $category
  * @property int|null $radius
@@ -25,6 +26,7 @@ class Notification extends Model
 
     protected $fillable = [
         'email',
+        'locale',
         'organisation_id',
         'intervall',
         'category',

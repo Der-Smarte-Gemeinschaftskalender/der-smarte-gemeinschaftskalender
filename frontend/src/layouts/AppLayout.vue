@@ -18,8 +18,8 @@ const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
         </Overlayable>
         <main class="w-full overflow-x-auto px-2 pb-2">
             <Button
-                aria-label="Seitenmenü öffnen"
-                title="Seitenmenü öffnen"
+                :aria-label="$t('app.nav.openSideMenu')"
+                :title="$t('app.nav.openSideMenu')"
                 class="lg:hidden mb-5 mt-1"
                 icon-left="menu"
                 variant="secondary"

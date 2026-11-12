@@ -37,7 +37,7 @@ class EventController extends Controller implements HasMiddleware
         $tentativeEvents = $events->filter(fn($e) => $e->getStatus() === MobilizonEventStatus::TENTATIVE->value)->count();
         $cancelledEvents = $events->filter(fn($e) => $e->getStatus() === MobilizonEventStatus::CANCELLED->value)->count();
 
-        $incomingEvents = $events->filter(fn($e) => $e->start >= now());
+        $incomingEvents = $events->filter(fn($e) => $e->start >= now())->count();
 
         return response()->json([
             'singleEventsCount'     => $singleEventsCount,
@@ -48,8 +48,6 @@ class EventController extends Controller implements HasMiddleware
             'tentativeEventsCount'  => $tentativeEvents,
             'cancelledEventsCount'  => $cancelledEvents,
             'incomingEventsCount'   => $incomingEvents,
-            'test'                  => $events[0]->getRelatedEvent()->mobilizon_fields['status'] === MobilizonEventStatus::CONFIRMED,
-            'confirmed'             => MobilizonEventStatus::CONFIRMED
         ]);
     }
 

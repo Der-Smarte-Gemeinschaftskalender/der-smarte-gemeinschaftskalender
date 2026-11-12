@@ -51,8 +51,8 @@ watch(
                 color="white"
                 class="switch-password-visibility px-2"
                 :icon-left="showPassword ? 'visibility-off' : 'visibility'"
-                :title="showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'"
-                :aria-label="showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'"
+                :title="showPassword ? $t('app.shared.password.hide') : $t('app.shared.password.show')"
+                :aria-label="showPassword ? $t('app.shared.password.hide') : $t('app.shared.password.show')"
                 @click="togglePasswordVisibility"
             >
             </Button>

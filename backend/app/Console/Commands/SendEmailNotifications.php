@@ -4,16 +4,20 @@ namespace App\Console\Commands;
 
 use App;
 use App\Mail\SendEmailNotifcation;
+use App\Support\Localization;
 use Illuminate\Console\Command;
 use App\Models\Notification;
 use Carbon\Carbon;
 use App\Models\Mobilizon;
+use Illuminate\Support\Traits\Localizable;
 use Mail;
 use rdx\graphqlquery\Query;
 
 
 class SendEmailNotifications extends Command
 {
+    use Localizable;
+
     /**
      * The name and signature of the console command.
      *
@@ -38,29 +42,36 @@ class SendEmailNotifications extends Command
             ->where('is_verified', true)
             ->get();
         foreach ($notifications as $notification) {
-            try {
-                if ($intervall === 'WEEKLY') {
-                    $events = [
-                        'thisWeek' => $this->filteredWeek('thisWeek', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
-                        'nextWeek' => $this->filteredWeek('nextWeek', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
-                        'followingTwoWeeks' => $this->filteredWeek('followingTwoWeeks', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
-                    ];
-                } else if ($intervall === 'MONTHLY') {
-                    $events = [
-                        'thisMonth' => $this->filteredWeek('thisMonth', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
-                        'nextMonth' => $this->filteredWeek('nextMonth', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
-                    ];
-                } else {
-                    $this->error("Invalid intervall: {$intervall}");
-                    continue;
-                }
-                Mail::to($notification->email)
-                    ->send(new SendEmailNotifcation($notification->id, $notification->token, $events, $intervall));
-                $this->info("Email sent to {$notification->email} for notification ID {$notification->id}");
-            } catch (\Exception $e) {
-                $this->error("Error processing notification ID {$notification->id}: " . $e->getMessage());
-                continue;
+            // Send in the language of the subscription (unknown or disabled: the current locale).
+            // The event dates are formatted before the mail is built, so the whole work runs in that locale.
+            $locale = Localization::isSupported($notification->locale) ? $notification->locale : null;
+            $this->withLocale($locale, fn () => $this->sendNotification($notification, $intervall));
+        }
+    }
+
+    private function sendNotification(Notification $notification, string $intervall): void
+    {
+        try {
+            if ($intervall === 'WEEKLY') {
+                $events = [
+                    'thisWeek' => $this->filteredWeek('thisWeek', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
+                    'nextWeek' => $this->filteredWeek('nextWeek', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
+                    'followingTwoWeeks' => $this->filteredWeek('followingTwoWeeks', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
+                ];
+            } else if ($intervall === 'MONTHLY') {
+                $events = [
+                    'thisMonth' => $this->filteredWeek('thisMonth', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
+                    'nextMonth' => $this->filteredWeek('nextMonth', $notification->category, $notification->organisation_id, $notification->location_hash, $notification->radius),
+                ];
+            } else {
+                $this->error("Invalid intervall: {$intervall}");
+                return;
             }
+            Mail::to($notification->email)
+                ->send(new SendEmailNotifcation($notification->id, $notification->token, $events, $intervall));
+            $this->info("Email sent to {$notification->email} for notification ID {$notification->id}");
+        } catch (\Exception $e) {
+            $this->error("Error processing notification ID {$notification->id}: " . $e->getMessage());
         }
     }
 
@@ -135,6 +146,6 @@ class SendEmailNotifications extends Command
     public function formatBeginsOn($beginsOn)
     {
         Carbon::setLocale(App::getLocale());
-        return Carbon::parse($beginsOn)->translatedFormat('D d.m.Y H:i') . ' Uhr';
+        return Carbon::parse($beginsOn)->translatedFormat(__('emails.notification.dateFormat'));
     }
 }
