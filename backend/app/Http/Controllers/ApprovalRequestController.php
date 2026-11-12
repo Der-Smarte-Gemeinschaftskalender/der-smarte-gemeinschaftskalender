@@ -284,7 +284,7 @@ class ApprovalRequestController extends Controller implements HasMiddleware
                         if (!$createdEvent) {
                             return [
                                 'success' => false, 
-                                'error' => __('messages.events.createdEventNotFound')
+                                'error' => __('messages.events.notFound')
                             ];
                         }
                     

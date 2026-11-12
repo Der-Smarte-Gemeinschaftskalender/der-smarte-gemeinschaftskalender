@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime, formatInputTime } from '@/lib/helper';
 import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
@@ -17,7 +17,8 @@ const { alertMessage } = useEventIndexAlerts(tableRef, {
     deletedMessage: t('app.events.imported.index.deleted'),
 });
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'url',
         name: t('app.events.columns.icalUrl'),
@@ -51,15 +52,15 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const importedTableApi = {
+const importedTableApi = computed(() => ({
     url: '/imported-events',
     deleteUrl: '/imported-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
     deleteDialogTitle: t('app.events.imported.deleteTitle'),
     deleteDialogDescription: (row: any) => t('app.events.imported.index.deleteDescription', { url: row?.url ?? '' }),
-};
+}));
 </script>
 <template>
     <Alert

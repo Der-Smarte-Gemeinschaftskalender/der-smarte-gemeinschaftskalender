@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { user_types_keys } from '@/lib/const';
 
@@ -6,12 +7,13 @@ import Table from '@/components/KERN/Table.vue';
 import Button from '@/components/KERN/Button.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 
-import type { Column } from '@/types/General';
+import type { Column, USER_TYPES } from '@/types/General';
 import { dsgApi } from '@/lib/dsgApi';
 
 const { t } = useI18n();
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'id',
         name: 'ID',
@@ -36,7 +38,7 @@ const columns: Array<Column> = [
     {
         key: 'type',
         name: t('app.admin.users.columns.role'),
-        format: (value: string) => user_types_keys[value as keyof typeof user_types_keys] || value,
+        format: (value: string) => user_types_keys.value[value as USER_TYPES] || value,
         align: 'left',
     },
     {
@@ -50,7 +52,7 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
 const exportUserEmails = async () => {
     try {

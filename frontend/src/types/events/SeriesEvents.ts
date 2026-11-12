@@ -18,7 +18,7 @@ export const SeriesEventsDefaults = {
     start: formatInputDate(),
     end: formatInputDate(dayjs().add(1, 'day').toDate()),
     time: dayjs().startOf('hour').format('HH:mm'),
-    intervall: intervall_options[0]!.value,
+    intervall: intervall_options.value[0]!.value,
     mobilizon_group_id: 0,
     duration: '1:00',
     description: '',

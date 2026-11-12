@@ -18,7 +18,7 @@ import Alert from '@/components/KERN/Alert.vue';
 import axios from 'axios';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { user } from '@/composables/UserComposoable';
-import { localeOptions, SUPPORTED_LOCALES, type SupportedLocale } from '@/i18n';
+import { localeOptions, SUPPORTED_LOCALES, toSupportedLocale, type SupportedLocale } from '@/i18n';
 
 interface ServerError {
     message: string;
@@ -74,7 +74,8 @@ const loadUser = async () => {
         is_active.value = user.is_active;
         mobilizon_name.value = user.mobilizon_name || '';
         mobilizon_preferred_username.value = user.mobilizon_preferred_username || '';
-        locale.value = user.locale ?? 'de';
+        // A language disabled on this instance since it was stored is shown (and saved) as the default
+        locale.value = toSupportedLocale(user.locale);
     } catch (error) {
         console.error(error);
         await router.push({ name: 'admin.index' });

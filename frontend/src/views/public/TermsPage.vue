@@ -20,7 +20,7 @@ loadTerms();
 </script>
 <template>
     <div>
-        <h1 class="kern-heading text-theme-primary">Nutzungsbedingungen</h1>
+        <h1 class="kern-heading text-theme-primary">{{ $t('public.terms.title') }}</h1>
         <div v-if="loading">
             <Loader />
         </div>

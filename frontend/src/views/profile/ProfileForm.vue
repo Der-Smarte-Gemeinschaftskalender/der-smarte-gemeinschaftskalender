@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { updateProfileData, user } from '@/composables/UserComposoable';
+import { setUserLocale, updateProfileData, user } from '@/composables/UserComposoable';
 import { dsgApi } from '@/lib/dsgApi';
-import { LOCALE_LABELS, localeOptions, type SupportedLocale } from '@/i18n';
+import { LOCALE_LABELS, localeOptions, toSupportedLocale, type SupportedLocale } from '@/i18n';
 
 import Button from '@/components/KERN/Button.vue';
 import InputText from '@/components/KERN/inputs/InputText.vue';
@@ -22,13 +22,13 @@ const { t } = useI18n();
 const errorMessage = ref<string>('');
 const successMessage = ref<string>('');
 
-const { errors, handleSubmit, submitCount, isSubmitting } = useForm<ProfileForm>({
+const { errors, handleSubmit, submitCount, isSubmitting, setFieldValue } = useForm<ProfileForm>({
     validationSchema: toTypedSchema(ProfileFormSchema),
     initialValues: {
         email: user.value.email,
         mobilizon_name: user.value?.person?.name || '',
-        // Users logged in before the email language existed have no locale stored locally yet
-        locale: user.value?.locale ?? 'de',
+        // A language disabled on this instance since it was stored is shown (and saved) as the default
+        locale: user.value?.locale ? toSupportedLocale(user.value.locale) : undefined,
     },
 });
 
@@ -37,6 +37,25 @@ const { value: mobilizon_name } = useField<string>('mobilizon_name');
 // Only used for emails, intentionally does not switch the UI language
 const { value: locale } = useField<SupportedLocale>('locale');
 const preferredUsername = ref<string>(user.value?.person?.preferredUsername || '');
+
+// Users logged in before the email language existed have no locale in the locally cached user.
+// Load the stored one instead of guessing, otherwise saving the form would overwrite it.
+// Until it is loaded the field stays empty and is not sent (the backend keeps the stored value).
+onMounted(async () => {
+    if (user.value?.locale) return;
+
+    try {
+        const { data } = await dsgApi.post('/auth/me');
+        if (!data?.locale) return;
+
+        // Saving the form while the request was pending already cached the current value
+        if (!user.value?.locale) setUserLocale(data.locale);
+        // Keep a language the user picked while the request was pending
+        if (locale.value === undefined) setFieldValue('locale', toSupportedLocale(data.locale));
+    } catch (error) {
+        console.error('Error loading the email language:', error);
+    }
+});
 
 const onSubmit = handleSubmit(async (values) => {
     errorMessage.value = '';
@@ -73,7 +92,7 @@ const onSubmit = handleSubmit(async (values) => {
                     <li><b>{{ t('app.profile.form.storedName') }}</b> {{ mobilizon_name || '–' }}</li>
                     <li><b>{{ t('app.profile.form.storedUsername') }}</b> {{ preferredUsername || '–' }}</li>
                     <li><b>{{ t('app.profile.form.storedEmail') }}</b> {{ email || '–' }}</li>
-                    <li><b>{{ t('app.profile.form.storedEmailLanguage') }}</b> {{ LOCALE_LABELS[locale] || '–' }}</li>
+                    <li><b>{{ t('app.profile.form.storedEmailLanguage') }}</b> {{ (locale && LOCALE_LABELS[locale]) || '–' }}</li>
                 </ul>
                 <p class="mt-2">
                     {{ t('app.profile.form.storedDataPurpose') }}

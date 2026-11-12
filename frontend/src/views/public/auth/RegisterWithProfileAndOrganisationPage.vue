@@ -39,49 +39,49 @@ const validationSchema = toTypedSchema(
             // Account
             email: zod
                 .string({
-                    required_error: 'auth.validation.emailRequired',
+                    required_error: 'validation.email.required',
                 })
-                .nonempty('auth.validation.emailRequired')
-                .email('auth.validation.emailInvalid'),
+                .nonempty('validation.email.required')
+                .email('validation.email.invalid'),
             password: zod
                 .string({
-                    required_error: 'auth.validation.passwordRequired',
+                    required_error: 'validation.password.required',
                 })
-                .nonempty('auth.validation.passwordRequired')
-                .min(8, 'auth.validation.passwordMin8')
+                .nonempty('validation.password.required')
+                .min(8, 'validation.password.min')
                 .trim(),
             password_confirmation: zod
                 .string({
-                    required_error: 'auth.validation.passwordConfirmationRequired',
+                    required_error: 'validation.password.confirmationRequired',
                 })
-                .nonempty('auth.validation.passwordRequired')
-                .min(8, 'auth.validation.passwordMin8')
+                .nonempty('validation.password.required')
+                .min(8, 'validation.password.min')
                 .trim(),
             accept_terms: zod.boolean().refine((val) => val, {
-                message: 'auth.validation.acceptTerms',
+                message: 'validation.terms.acceptWithPrivacy',
             }),
             // Profile
-            name: zod.string().nonempty('auth.validation.nameRequired'),
-            preferredUsername: preferredUsernameSchema.nonempty('auth.validation.usernameRequired'),
+            name: zod.string().nonempty('validation.name.required'),
+            preferredUsername: preferredUsernameSchema.nonempty('validation.username.required'),
             // Organisation
             organisation_name: zod
                 .string({
-                    required_error: 'app.organisations.validation.nameRequired',
+                    required_error: 'validation.organisation.nameRequired',
                 })
-                .nonempty('app.organisations.validation.nameNotEmpty'),
-            organisation_preferredUsername: preferredUsernameSchema.nonempty('auth.validation.organisationUsernameNotEmpty'),
+                .nonempty('validation.organisation.nameNotEmpty'),
+            organisation_preferredUsername: preferredUsernameSchema.nonempty('validation.organisation.usernameNotEmpty'),
             organisation_summary: zod
                 .string({
-                    required_error: 'app.organisations.validation.summaryRequired',
+                    required_error: 'validation.organisation.summaryRequired',
                 })
-                .refine((val) => stripHtml(val).length > 0, { message: 'app.organisations.validation.summaryNotEmpty' }),
+                .refine((val) => stripHtml(val).length > 0, { message: 'validation.description.notEmpty' }),
             })
         .superRefine(({ password, password_confirmation }, ctx) => {
             if (password !== password_confirmation) {
                 ctx.addIssue({
                     path: ['password_confirmation'],
                     code: zod.ZodIssueCode.custom,
-                    message: 'auth.validation.passwordsDoNotMatch',
+                    message: 'validation.password.mismatch',
                 });
             }
         })

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import { user } from '@/composables/UserComposoable';
 import { user_types_keys } from '@/lib/const';
+import type { USER_TYPES } from '@/types/General';
 import Card from '@/components/KERN/Card.vue';
 import LogoutButton from '@/components/LogoutButton.vue';
 import Icon from './KERN/cosmetics/Icon.vue';
@@ -118,7 +119,7 @@ const selected = (name: string) => {
                 v-if="user?.type"
                 class="kern-heading font-light p-0 text-600"
             >
-                {{ user_types_keys[user.type as keyof typeof user_types_keys] }}
+                {{ user_types_keys[user.type as USER_TYPES] }}
             </h6>
             <ChangeCurrentOrganisation />
         </div>

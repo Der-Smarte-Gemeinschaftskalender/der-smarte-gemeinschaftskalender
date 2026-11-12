@@ -1,5 +1,5 @@
 import zod from '@/lib/zod';
-import i18n, { isDe, translateMessage } from '@/i18n';
+import i18n, { isDe } from '@/i18n';
 import { stripHtml } from '@/lib/helper';
 import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { mimeTypes } from '@/types/File';
@@ -67,10 +67,10 @@ export const PICTURE_ALLOWED_MIME_TYPES = ['image/gif', 'image/png', 'image/jpeg
 
 const describeFileFormat = (file: File): string => {
     const knownFormat = mimeTypes[file.type];
-    if (knownFormat) return translateMessage(knownFormat);
+    if (knownFormat) return knownFormat;
 
     const extension = file.name.includes('.') ? file.name.split('.').pop() : '';
-    return extension ? extension.toUpperCase() : file.type || i18n.global.t('validation.picture.unknownFormat');
+    return extension ? extension.toUpperCase() : file.type || i18n.global.t('app.shared.fileFormats.unknown');
 };
 
 export const validatePictureFile = (file: File | undefined, ctx: zod.RefinementCtx): void => {

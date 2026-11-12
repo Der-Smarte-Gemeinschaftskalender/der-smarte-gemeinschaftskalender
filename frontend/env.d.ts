@@ -6,4 +6,6 @@ declare module '*.svg?raw' {
 }
 interface ImportMetaEnv {
     readonly VITE_APP_TIMEZONE?: string;
+    readonly VITE_APP_LOCALE?: string;
+    readonly VITE_SUPPORTED_LOCALES?: string;
 }

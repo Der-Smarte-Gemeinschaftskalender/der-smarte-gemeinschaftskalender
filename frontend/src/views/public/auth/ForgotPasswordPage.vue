@@ -30,10 +30,10 @@ const validationSchema = toTypedSchema(
     zod.object({
         email: zod
             .string({
-                required_error: 'auth.validation.emailRequired',
+                required_error: 'validation.email.required',
             })
-            .nonempty('auth.validation.emailRequired')
-            .email('auth.validation.emailInvalid')
+            .nonempty('validation.email.required')
+            .email('validation.email.invalid')
             .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
     }) satisfies ZodType<ForgotPasswordForm>
 );

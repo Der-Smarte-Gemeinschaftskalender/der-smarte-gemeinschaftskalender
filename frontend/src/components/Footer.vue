@@ -4,7 +4,8 @@ import { useI18n } from 'vue-i18n';
 const logoUrl = '/logo.png';
 import { instanceInformation, mainFooter } from '@/lib/instanceConfig';
 
-const { name: instanceName, operatedBy } = instanceInformation;
+const instanceName = computed(() => instanceInformation.value.name);
+const operatedBy = computed(() => instanceInformation.value.operatedBy);
 const { t } = useI18n();
 
 const disclaimerText = computed(() =>

@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'in_group' => InGroup::class,
         ]);
 
-        // Answer API requests in the language sent via the Accept-Language header (de|en)
+        // Answer API requests in the language sent via the Accept-Language header (APP_SUPPORTED_LOCALES)
         $middleware->api(prepend: [
             SetLocale::class,
         ]);

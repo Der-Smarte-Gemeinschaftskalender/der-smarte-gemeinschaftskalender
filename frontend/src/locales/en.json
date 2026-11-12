@@ -157,7 +157,11 @@
             "allOrganisations": "All organisations",
             "orgnisationsFound": "organisations found",
             "organisationsStartingWith": "Organisations starting with \"{letter}\"",
-            "organisationSearchPlaceholder": "Search for organisations..."
+            "organisationSearchPlaceholder": "Search for organisations...",
+            "sortAlphabetically": "Sort alphabetically",
+            "filterByFirstCharacter": "Filter organisations starting with {letter}",
+            "specialCharacters": "Special characters",
+            "numbers": "Numbers"
         },
         "navigation": {
             "appleMaps": "Apple Maps",
@@ -224,13 +228,46 @@
                     "noEmailTitle": "If you did not receive an email:",
                     "noEmailTipSpam": "Check your spam folder",
                     "noEmailTipWait": "Wait a few minutes — it may take a little time",
-                    "submitError": "An error occurred. Please try again later.",
-                    "validation": {
-                        "invalidEmail": "Please enter a valid email address.",
-                        "termsRequired": "You must accept the terms of use.",
-                        "invalidPostalCode": "Please enter a valid postal code",
-                        "invalidRadius": "Please select a valid radius"
-                    }
+                    "submitError": "An error occurred. Please try again later."
+                },
+                "edit": {
+                    "title": "Edit notifications",
+                    "subtitle": "Manage your subscription settings or unsubscribe",
+                    "intro": "You are editing the email notification for {email}. Adjust the settings below and click \"{button}\" to save your changes.",
+                    "submitButton": "Update email notification"
+                },
+                "confirm": {
+                    "title": "Confirm email address",
+                    "intro": "To complete your registration for event notifications, {action}",
+                    "introAction": "please confirm your email address.",
+                    "disallowIntro": "If you did not request this message, you can {action}",
+                    "disallowIntroAction": "decline further emails here.",
+                    "noToken": "No confirmation token found.",
+                    "confirmError": "The email address could not be confirmed.",
+                    "disallowError": "The email address could not be blocked.",
+                    "confirmedTitle": "Email address confirmed",
+                    "confirmedText": "Your email address has been confirmed successfully. You will now receive notifications.",
+                    "blockedTitle": "Email address blocked",
+                    "blockedText": "Your email address has been blocked successfully. You will not receive any further emails.",
+                    "backToHome": "Back to the home page",
+                    "confirmButton": "Confirm email address now",
+                    "disallowButton": "Stop receiving emails"
+                },
+                "unsubscribe": {
+                    "title": "Unsubscribe from email notifications",
+                    "question": "Would you like to stop receiving email notifications at {email}?",
+                    "instruction": "Click \"{button}\" to complete the process.",
+                    "button": "Unsubscribe",
+                    "disallowQuestion": "Never want to receive email notifications again? Click the button below to unsubscribe from all email notifications.",
+                    "disallowButton": "Unsubscribe permanently",
+                    "disallowTitle": "Unsubscribe from all email notifications",
+                    "disallowConfirm": "Are you sure you want to permanently unsubscribe from all email notifications?",
+                    "noMoreEmails": "You will no longer receive any email notifications from this platform.",
+                    "success": "You have been unsubscribed successfully.",
+                    "loadError": "Error loading the subscription information. Please try again later.",
+                    "loadFailed": "The subscription information could not be loaded. Please try again later.",
+                    "unsubscribeError": "Error while unsubscribing. Please try again later.",
+                    "toHome": "Go to the home page"
                 }
             },
             "script": {
@@ -322,6 +359,7 @@
         "next": "Next",
         "yes": "Yes",
         "no": "No",
+        "notSpecified": "Not specified",
         "submit": "Submit",
         "close": "Close",
         "documentation": "documentation",
@@ -329,6 +367,7 @@
         "monthly": "Monthly",
         "mondayMorning": "Monday morning",
         "firstDayOfMonth": "first day of the month",
+        "changeLanguage": "Change language",
         "timezone": {
             "label": "Timezone"
         }
@@ -389,7 +428,12 @@
             "newMin": "The new password must be at least 8 characters long.",
             "confirmRequired": "Confirmation of the new password is required.",
             "confirmMin": "The confirmation of the new password must be at least 8 characters long.",
-            "mismatch": "The passwords do not match."
+            "mismatch": "The passwords do not match.",
+            "required": "The password is required.",
+            "confirmationRequired": "The password confirmation is required.",
+            "min": "The password must be at least 8 characters long.",
+            "min6": "The password must be at least 6 characters long.",
+            "notEmpty": "The password must not be empty."
         },
         "url": {
             "invalid": "Please enter a valid URL.",
@@ -411,8 +455,7 @@
         "picture": {
             "unreadable": "The selected file is empty or could not be read. Please select it again.",
             "unsupportedFormat": "The format {format} is not supported. Please select an image in JPG, PNG, GIF or WEBP format.",
-            "tooLarge": "At {size} MB, the image is too large. Please select an image of no more than 2 MB.",
-            "unknownFormat": "unknown"
+            "tooLarge": "At {size} MB, the image is too large. Please select an image of no more than 2 MB."
         },
         "ical": {
             "fileRequired": "Please upload an iCal file (max. 2 MB)"
@@ -421,15 +464,30 @@
             "startLowercase": "The username must start with a lowercase letter.",
             "endLowercaseOrNumber": "The username must end with a lowercase letter or a number.",
             "invalid": "Please enter a valid username. Lowercase letters, numbers and underscores are allowed.",
-            "noConsecutiveUnderscores": "The username must not contain consecutive underscores."
+            "noConsecutiveUnderscores": "The username must not contain consecutive underscores.",
+            "required": "The username is required.",
+            "notEmpty": "The username must not be empty."
         },
-        "fileFormats": {
-            "allAudio": "all audio formats",
-            "allVideo": "all video formats",
-            "allImage": "all image formats",
-            "allText": "all text formats",
-            "allApplication": "all application formats",
-            "calendar": "Calendar"
+        "terms": {
+            "acceptWithPrivacy": "You must accept the terms of use and the privacy policy.",
+            "accept": "You must accept the terms of use."
+        },
+        "organisation": {
+            "usernameNotEmpty": "The username of the organisation must not be empty.",
+            "nameRequired": "The name of the organisation is required.",
+            "nameNotEmpty": "The name of the organisation must not be empty.",
+            "summaryRequired": "The description of the organisation is required."
+        },
+        "emailTemplate": {
+            "invalidEventType": "Invalid event type",
+            "subjectMax": "The subject must not exceed 70 characters.",
+            "bodyRequired": "The message must not be empty."
+        },
+        "postalCode": {
+            "invalid": "Please enter a valid postal code"
+        },
+        "radius": {
+            "invalid": "Please select a valid radius"
         }
     },
     "app": {
@@ -585,7 +643,8 @@
                 "sizeLabel": "Size:",
                 "savedTitle": "Saved",
                 "savedContent": "The settings were saved successfully.",
-                "saveError": "The settings could not be saved."
+                "saveError": "The settings could not be saved.",
+                "defaultHeadline": "Our events"
             }
         },
         "organisations": {
@@ -595,14 +654,6 @@
             "loadError": "The organisation could not be loaded.",
             "saved": "Saved",
             "unknown": "Unknown",
-            "validation": {
-                "nameRequired": "The name of the organisation is required.",
-                "nameNotEmpty": "The name of the organisation must not be empty.",
-                "summaryRequired": "The description of the organisation is required.",
-                "summaryNotEmpty": "The description must not be empty.",
-                "usernameRequired": "The username is required.",
-                "usernameNotEmpty": "The username must not be empty."
-            },
             "index": {
                 "title": "My organisations",
                 "create": "Create organisation",
@@ -775,11 +826,6 @@
                     "handledStatus": "The status of the request (e.g. \"approved\" or \"rejected\")",
                     "organisationName": "The name of the organisation"
                 },
-                "validation": {
-                    "invalidEventType": "Invalid event type",
-                    "subjectMax": "The subject must not exceed 70 characters.",
-                    "bodyRequired": "The message must not be empty."
-                },
                 "loadError": "Error loading the template.",
                 "saveError": "Error saving the template.",
                 "editTitle": "Edit email template",
@@ -815,13 +861,6 @@
                 "createButton": "Create user",
                 "indexHint": "As an administrator of the instance, you can view and edit the members of all organisations here. You can remove users via the \"Edit\" button. You can find more information in the {link}.",
                 "exportEmails": "Export email addresses of active users",
-                "validation": {
-                    "emailRequired": "The email address is required.",
-                    "emailInvalid": "Please enter a valid email address.",
-                    "passwordRequired": "The password is required.",
-                    "passwordMin": "The password must be at least 8 characters long.",
-                    "passwordEmpty": "The password must not be empty."
-                },
                 "saveError": "The user could not be saved.",
                 "createTitle": "Create new user",
                 "createHint": "As an administrator, you can manually create new users for your instance here.",
@@ -1092,7 +1131,8 @@
                 "hide": "Hide password"
             },
             "image": {
-                "previewAlt": "Image preview"
+                "previewAlt": "Image preview",
+                "altText": "Alternative text (optional)"
             },
             "file": {
                 "allowedFormats": "Allowed formats: {formats}"
@@ -1131,14 +1171,16 @@
             },
             "monthOccurrence": {
                 "weeks": "Week(s)",
-                "weekDay": "Weekday",
-                "weekOptions": {
-                    "first": "1st (first)",
-                    "second": "2nd (second)",
-                    "third": "3rd (third)",
-                    "fourth": "4th (fourth)",
-                    "last": "Last"
-                }
+                "weekDay": "Weekday"
+            },
+            "fileFormats": {
+                "allAudio": "all audio formats",
+                "allVideo": "all video formats",
+                "allImage": "all image formats",
+                "allText": "all text formats",
+                "allApplication": "all application formats",
+                "calendar": "Calendar",
+                "unknown": "unknown"
             }
         },
         "dashboard": {
@@ -1332,22 +1374,6 @@
         "email": "Email address",
         "password": "Password",
         "passwordConfirm": "Confirm password",
-        "validation": {
-            "emailRequired": "The email address is required.",
-            "emailInvalid": "Please enter a valid email address.",
-            "passwordRequired": "The password is required.",
-            "passwordConfirmationRequired": "The password confirmation is required.",
-            "newPasswordMin8": "The new password must be at least 8 characters long.",
-            "passwordMin8": "The password must be at least 8 characters long.",
-            "passwordMin6": "The password must be at least 6 characters long.",
-            "passwordConfirmationMissing": "Please confirm your password.",
-            "passwordsDoNotMatch": "The passwords do not match.",
-            "passwordsDoNotMatchShort": "Passwords do not match.",
-            "acceptTerms": "You must accept the terms of use and the privacy policy.",
-            "nameRequired": "The name is required.",
-            "usernameRequired": "The username is required.",
-            "organisationUsernameNotEmpty": "The username of the organisation must not be empty."
-        },
         "terms": {
             "label": "Terms of use",
             "text": "I have read and accept the {terms} and the {privacy}.",

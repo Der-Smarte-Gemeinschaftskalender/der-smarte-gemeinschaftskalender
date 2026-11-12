@@ -1,3 +1,4 @@
+import { computed } from 'vue';
 import zod from '@/lib/zod';
 import type { Option } from './General';
 import { stripHtml } from '@/lib/helper';
@@ -28,59 +29,54 @@ export interface EmailTemplate {
     updated_at: string;
 }
 
-// Labels / descriptions use getters so they are translated on every access (language-reactive).
+// Labels / descriptions are computeds so they follow a language switch.
 const { t } = i18n.global;
 
-export const emailEventTypeLabels: Record<EmailEventType, string> = {
-    get [EmailEventType.VALIDATION]() { return t('app.admin.emailTemplates.events.validation'); },
-    get [EmailEventType.PASSWORD_RESET]() { return t('app.admin.emailTemplates.events.passwordReset'); },
+export const emailEventTypeLabels = computed<Record<EmailEventType, string>>(() => ({
+    [EmailEventType.VALIDATION]: t('app.admin.emailTemplates.events.validation'),
+    [EmailEventType.PASSWORD_RESET]: t('app.admin.emailTemplates.events.passwordReset'),
 
-    get [EmailEventType.APPROVAL_REQUEST_SENT]() { return t('app.admin.emailTemplates.events.approvalRequestSent'); },
-    get [EmailEventType.APPROVAL_REQUEST_HANDLED]() { return t('app.admin.emailTemplates.events.approvalRequestHandled'); },
+    [EmailEventType.APPROVAL_REQUEST_SENT]: t('app.admin.emailTemplates.events.approvalRequestSent'),
+    [EmailEventType.APPROVAL_REQUEST_HANDLED]: t('app.admin.emailTemplates.events.approvalRequestHandled'),
 
-    get [EmailEventType.ORGANISATION_INVITATION]() { return t('app.admin.emailTemplates.events.organisationInvitation'); },
-    get [EmailEventType.ORGANISATION_REMOVAL]() { return t('app.admin.emailTemplates.events.organisationRemoval'); },
-};
+    [EmailEventType.ORGANISATION_INVITATION]: t('app.admin.emailTemplates.events.organisationInvitation'),
+    [EmailEventType.ORGANISATION_REMOVAL]: t('app.admin.emailTemplates.events.organisationRemoval'),
+}));
 
-export const availableEmailVariables: Record<EmailEventType, { [key: string]: string }> = {
-    [EmailEventType.VALIDATION]: {
-        get appName() { return t('app.admin.emailTemplates.variables.appName'); },
-    },
-    [EmailEventType.PASSWORD_RESET]: {
-        get appName() { return t('app.admin.emailTemplates.variables.appName'); },
-    },
+export const availableEmailVariables = computed<Record<EmailEventType, { [key: string]: string }>>(() => {
+    const appName = t('app.admin.emailTemplates.variables.appName');
+    const organisationName = t('app.admin.emailTemplates.variables.organisationName');
 
-    [EmailEventType.APPROVAL_REQUEST_SENT]: {
-        get appName() { return t('app.admin.emailTemplates.variables.appName'); },
-        get requestTypeName() { return t('app.admin.emailTemplates.variables.requestTypeNameSent'); },
-    },
-    [EmailEventType.APPROVAL_REQUEST_HANDLED]: {
-        get appName() { return t('app.admin.emailTemplates.variables.appName'); },
-        get requestTypeName() { return t('app.admin.emailTemplates.variables.requestTypeNameHandled'); },
-        get handledStatus() { return t('app.admin.emailTemplates.variables.handledStatus'); },
-    },
+    return {
+        [EmailEventType.VALIDATION]: { appName },
+        [EmailEventType.PASSWORD_RESET]: { appName },
 
-    [EmailEventType.ORGANISATION_INVITATION]: {
-        get appName() { return t('app.admin.emailTemplates.variables.appName'); },
-        get organisationName() { return t('app.admin.emailTemplates.variables.organisationName'); },
-    },
-    [EmailEventType.ORGANISATION_REMOVAL]: {
-        get appName() { return t('app.admin.emailTemplates.variables.appName'); },
-        get organisationName() { return t('app.admin.emailTemplates.variables.organisationName'); },
-    },
-};
+        [EmailEventType.APPROVAL_REQUEST_SENT]: {
+            appName,
+            requestTypeName: t('app.admin.emailTemplates.variables.requestTypeNameSent'),
+        },
+        [EmailEventType.APPROVAL_REQUEST_HANDLED]: {
+            appName,
+            requestTypeName: t('app.admin.emailTemplates.variables.requestTypeNameHandled'),
+            handledStatus: t('app.admin.emailTemplates.variables.handledStatus'),
+        },
 
-export const emailTemplateOptions: Array<{ value: EmailEventType; text: string }> = (
-    Object.keys(emailEventTypeLabels) as EmailEventType[]
-).map((value) => ({
-    value,
-    get text() { return emailEventTypeLabels[value]; },
-})) as Option[];
+        [EmailEventType.ORGANISATION_INVITATION]: { appName, organisationName },
+        [EmailEventType.ORGANISATION_REMOVAL]: { appName, organisationName },
+    };
+});
+
+export const emailTemplateOptions = computed<Option[]>(() =>
+    (Object.entries(emailEventTypeLabels.value) as Array<[EmailEventType, string]>).map(([value, text]) => ({
+        value,
+        text,
+    }))
+);
 
 export const EmailTemplateFormSchema = zod.object({
-    on_event: zod.nativeEnum(EmailEventType, { message: 'app.admin.emailTemplates.validation.invalidEventType' }),
-    subject: zod.string().max(70, { message: 'app.admin.emailTemplates.validation.subjectMax' }),
+    on_event: zod.nativeEnum(EmailEventType, { message: 'validation.emailTemplate.invalidEventType' }),
+    subject: zod.string().max(70, { message: 'validation.emailTemplate.subjectMax' }),
     body: zod
         .string()
-        .refine((val) => stripHtml(val).length > 0, { message: 'app.admin.emailTemplates.validation.bodyRequired' }),
+        .refine((val) => stripHtml(val).length > 0, { message: 'validation.emailTemplate.bodyRequired' }),
 });

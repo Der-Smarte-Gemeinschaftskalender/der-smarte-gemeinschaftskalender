@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
@@ -32,8 +32,37 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const createdEvents = ref();
-const uploadedEventListData = ref<{ name: string; value: unknown }[]>([]);
 const uploadedEvent = ref<UploadedEventWithRelations>();
+
+// computed so the labels follow a language switch. Missing data gets a fallback instead of
+// throwing, an error here would leave the page blank.
+const uploadedEventListData = computed<{ name: string; value: unknown }[]>(() => {
+    const event = uploadedEvent.value;
+    if (!event) return [];
+
+    return [
+        {
+            name: 'ID',
+            value: event.id,
+        },
+        {
+            name: t('app.events.columns.name'),
+            value: event.filename,
+        },
+        {
+            name: t('app.events.columns.eventCount'),
+            value: createdEvents.value?.length,
+        },
+        {
+            name: t('app.events.columns.addedBy'),
+            value: event.user?.mobilizon_name || t('common.notSpecified'),
+        },
+        {
+            name: t('app.events.columns.addedAt'),
+            value: formatDateTime(event.created_at),
+        },
+    ];
+});
 
 const { deleting, showDeleteDialog, alertMessage, handleDelete } = useEventShowDelete({
     getDeleteUrl: () => `/uploaded-events/${route.params.id}`,
@@ -53,30 +82,6 @@ const loadUploadedEvent = async () => {
 
         uploadedEvent.value = data.uploadedEvent;
         createdEvents.value = uploadedEvent.value.created_events;
-
-        uploadedEventListData.value = [
-            {
-                name: 'ID',
-                value: uploadedEvent.value.id,
-            },
-            {
-                name: t('app.events.columns.name'),
-                value: uploadedEvent.value.filename,
-            },
-            {
-                name: t('app.events.columns.eventCount'),
-                value: createdEvents.value.length,
-            },
-            {
-                name: t('app.events.columns.addedBy'),
-                value: `${uploadedEvent.value.user.mobilizon_name}`,
-            },
-            {
-                name: t('app.events.columns.addedAt'),
-                value: formatDateTime(uploadedEvent.value.created_at),
-            },
-        ];
-
     } catch (error) {
         console.error(error);
         await router.push({ name: 'notFound' });

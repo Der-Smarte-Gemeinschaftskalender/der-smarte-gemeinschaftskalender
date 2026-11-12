@@ -55,11 +55,11 @@ const featuredError = ref<string | null>(null);
 const validationSchema = toTypedSchema(
     zod.object({
         name: zod.string().refine((val) => val.trim().length > 0, {
-            message: 'app.organisations.validation.nameNotEmpty',
+            message: 'validation.organisation.nameNotEmpty',
         }),
         summary: zod
             .string()
-            .refine((val) => stripHtml(val).length > 0, { message: 'app.organisations.validation.summaryNotEmpty' }),
+            .refine((val) => stripHtml(val).length > 0, { message: 'validation.description.notEmpty' }),
         avatar: zod.any().optional(),
         physicalAddress: AddressFormSchema.optional(),
     }) satisfies ZodType<EditOrganisationForm>

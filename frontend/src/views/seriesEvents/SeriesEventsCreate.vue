@@ -14,6 +14,7 @@ import { useTimezoneCheck } from '@/composables/TimezoneComposable';
 import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 import { createEventDefaults, seriesEventsHolidaysFilter, seriesEventsDaysControlsEnabled } from '@/lib/instanceConfig';
 import {
+    intervall_options,
     mobilizon_category_options,
     mobilizon_event_join_options,
     mobilizon_event_language_options,
@@ -59,10 +60,6 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const { isMismatch: tzMismatch, detectedTz } = useTimezoneCheck();
-const intervallOptions = computed<Option[]>(() => [
-    { value: Intervall.WEEKLY, text: t('common.weekly') },
-    { value: Intervall.MONTHLY, text: t('common.monthly') },
-]);
 const mobilizionGroupOptions = ref<Option[]>([]);
 const errorMessageContent = ref<string>('');
 const templatePictureLoadFailed = ref<boolean>(false);
@@ -368,7 +365,7 @@ loadMobilizionGroups(mobilizon_group_id, mobilizionGroupOptions);
                             v-model="intervall"
                             :label="$t('app.events.form.intervall')"
                             name="intervall"
-                            :options="intervallOptions"
+                            :options="intervall_options"
                             :errors="submitCount === 0 ? undefined : errors.intervall"
                         />
                     </div>

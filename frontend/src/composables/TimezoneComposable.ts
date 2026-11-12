@@ -1,5 +1,5 @@
 import dayjs from '@/lib/dayjs';
-import { DISPLAY_TIMEZONE } from '@/lib/helper';
+import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 
 export interface TimezoneCheck {
     isMismatch: boolean;
@@ -9,7 +9,7 @@ export interface TimezoneCheck {
 export const useTimezoneCheck = (): TimezoneCheck => {
     const detectedTz = dayjs.tz.guess();
     return {
-        isMismatch: detectedTz !== DISPLAY_TIMEZONE,
+        isMismatch: detectedTz !== INSTANCE_TIMEZONE,
         detectedTz,
     };
 };

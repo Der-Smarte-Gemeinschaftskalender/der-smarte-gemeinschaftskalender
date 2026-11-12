@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Mobilizon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Models\User;
-use App\Http\Middleware\SetLocale;
 use Illuminate\Validation\Rule;
 use Log;
 use rdx\graphqlquery\Query;
@@ -87,7 +87,7 @@ class AdminController extends Controller implements HasMiddleware
             'email' => 'required|email|unique:users',
             'type' => 'required',
             'password' => 'required',
-            'locale' => ['nullable', Rule::in(SetLocale::SUPPORTED_LOCALES)],
+            'locale' => ['nullable', Rule::in(config('app.supported_locales'))],
         ]);
 
         $type = $request->type;
@@ -99,7 +99,8 @@ class AdminController extends Controller implements HasMiddleware
 
         $user = new User();
         $user->email = $email;
-        $user->locale = $request->input('locale') ?: config('app.default_locale');
+        // Without a choice the user gets the language of the creating admin's request
+        $user->locale = $request->input('locale') ?: App::getLocale();
         $user->type = $type;
         $user->password = bcrypt($request->password);
         $user->mobilizon_email = $email;
@@ -158,7 +159,7 @@ class AdminController extends Controller implements HasMiddleware
             'type' => 'required',
             'password' => 'nullable',
             'is_active' => 'required',
-            'locale' => ['nullable', Rule::in(SetLocale::SUPPORTED_LOCALES)],
+            'locale' => ['nullable', Rule::in(config('app.supported_locales'))],
         ]);
 
         $user->email = strtolower($request->email);

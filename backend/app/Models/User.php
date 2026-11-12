@@ -3,8 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Http\Middleware\SetLocale;
 use App\Notifications\CustomResetPassword;
+use App\Support\Localization;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -149,12 +149,11 @@ class User extends Authenticatable implements JWTSubject, HasLocalePreference
 
     /**
      * Language of the emails sent to this user. Used automatically by Laravel
-     * for Mail::to($user) and $user->notify().
+     * for Mail::to($user) and $user->notify(). Null (no or a disabled language)
+     * makes Laravel keep the current locale.
      */
-    public function preferredLocale(): string
+    public function preferredLocale(): ?string
     {
-        return in_array($this->locale, SetLocale::SUPPORTED_LOCALES, true)
-            ? $this->locale
-            : config('app.default_locale');
+        return Localization::isSupported($this->locale) ? $this->locale : null;
     }
 }

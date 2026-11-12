@@ -28,6 +28,12 @@ export const updateProfileData = (
     localStorage.setItem('user', JSON.stringify(user.value));
 };
 
+export const setUserLocale = (locale: SupportedLocale): void => {
+    if (!user.value) return;
+    user.value = { ...user.value, locale };
+    localStorage.setItem('user', JSON.stringify(user.value));
+};
+
 export const localLogout = (): void => {
     user.value = null;
     localStorage.removeItem('user');

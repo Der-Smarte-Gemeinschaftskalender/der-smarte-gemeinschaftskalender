@@ -4,7 +4,7 @@
         style="max-width: 228px; width: 100%; margin-bottom: 15px;">
 
     <h4>
-        {{ __('emails.footer.basedOn', ['appName' => config('app.name')]) }}
+        {{ __('emails.footer.basedOn', ['appName' => \App\Support\Localization::appName()]) }}
     </h4>
 
     <div class="footer-links">

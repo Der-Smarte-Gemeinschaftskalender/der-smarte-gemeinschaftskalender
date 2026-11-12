@@ -4,6 +4,7 @@ namespace App\Mail\Concerns;
 
 use App\Enums\EmailTemplateType;
 use App\Models\EmailTemplate;
+use App\Support\Localization;
 
 /**
  * Renders an admin-editable email template (subject + body) in the current app locale.
@@ -22,7 +23,7 @@ trait RendersEmailTemplate
         $template = EmailTemplate::forEvent($type);
 
         $variables = [
-            ':appName' => config('app.name', 'Der Smarte Gemeinschaftskalender'),
+            ':appName' => Localization::appName(),
             ...$variables,
         ];
 

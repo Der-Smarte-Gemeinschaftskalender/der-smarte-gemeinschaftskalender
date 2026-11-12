@@ -1,3 +1,4 @@
+import { computed } from 'vue';
 import i18n from '@/i18n';
 
 export interface InfoBox {
@@ -58,11 +59,11 @@ export interface MgTemplate {
     };
 }
 
-export const getDimensionOptions = (): Array<{ text: string; value: string }> => [
+export const dimensionOptions = computed<Array<{ text: string; value: string }>>(() => [
     { text: i18n.global.t('app.materialGenerator.dimensions.post'), value: 'post' },
     { text: i18n.global.t('app.materialGenerator.dimensions.story'), value: 'story' },
     { text: i18n.global.t('app.materialGenerator.dimensions.text'), value: 'textWithEmojis' },
-];
+]);
 
 export const defaultBackgroundImagePaths = [
     { name: 'event_post', path: '/material_generator/event_post_default.png' },

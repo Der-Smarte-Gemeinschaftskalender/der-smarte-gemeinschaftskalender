@@ -5,12 +5,12 @@ namespace App\Mail;
 use App\Enums\EmailTemplateType;
 use App\Mail\Concerns\RendersEmailTemplate;
 use App\Models\ApprovalRequest;
+use App\Support\Localization;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Lang;
 
 class SendApprovalRequestHandledEmail extends Mailable
 {
@@ -56,7 +56,7 @@ class SendApprovalRequestHandledEmail extends Mailable
 
         return $this->renderEmailTemplate(EmailTemplateType::APPROVAL_REQUEST_HANDLED, [
             ':requestTypeName' => $this->approvalRequest->getRequestTypeLabel(),
-            ':handledStatus' => Lang::has($statusKey) ? __($statusKey) : $this->approvalRequest->status,
+            ':handledStatus' => Localization::translateOr($statusKey, $this->approvalRequest->status),
         ]);
     }
 }

@@ -16,6 +16,7 @@ use App\Mail\SendRequestOrganisationCreationEmail;
 use App\Models\ApprovalRequest;
 use App\Models\EmailTemplate;
 use App\Models\Mobilizon;
+use App\Models\Notification;
 use App\Models\User;
 use App\Notifications\CustomResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,7 +40,11 @@ class EmailLocaleTest extends TestCase
     {
         parent::setUp();
 
-        config(['app.default_locale' => 'de', 'app.fallback_locale' => 'en']);
+        config([
+            'app.supported_locales' => ['de', 'en'],
+            'app.fallback_locale' => 'en',
+            'app.localized_names' => [],
+        ]);
         App::setLocale('de');
     }
 
@@ -56,13 +61,24 @@ class EmailLocaleTest extends TestCase
         $this->assertSame('de', User::factory()->make(['locale' => 'de'])->preferredLocale());
     }
 
-    public function test_preferred_locale_falls_back_to_the_instance_default_not_the_request_locale(): void
+    public function test_preferred_locale_is_null_for_missing_or_disabled_languages(): void
     {
-        // App::setLocale() (SetLocale middleware) also overwrites config('app.locale')
-        App::setLocale('en');
+        // null makes Laravel keep the current locale (request language, in the console APP_LOCALE)
+        $this->assertNull(User::factory()->make(['locale' => null])->preferredLocale());
+        $this->assertNull(User::factory()->make(['locale' => 'fr'])->preferredLocale());
 
-        $this->assertSame('de', User::factory()->make(['locale' => null])->preferredLocale());
-        $this->assertSame('de', User::factory()->make(['locale' => 'fr'])->preferredLocale());
+        config(['app.supported_locales' => ['de']]);
+        $this->assertNull(User::factory()->make(['locale' => 'en'])->preferredLocale());
+    }
+
+    public function test_emails_to_a_user_without_a_supported_language_use_the_current_locale(): void
+    {
+        App::setLocale('en');
+        $user = User::factory()->create(['locale' => 'fr']);
+
+        Mail::to($user)->send(new SendConfirmEmail('t'));
+
+        $this->assertSame([self::EN_VALIDATION_SUBJECT], $this->sentSubjects());
     }
 
     public function test_templates_exist_for_every_event_in_every_supported_language(): void
@@ -117,6 +133,39 @@ class EmailLocaleTest extends TestCase
         $german = (new SendConfirmEmail('t'))->locale('de');
         $german->render();
         $german->assertHasSubject(self::DE_VALIDATION_SUBJECT);
+    }
+
+    public function test_admin_template_list_only_contains_enabled_languages(): void
+    {
+        config(['app.supported_locales' => ['de']]);
+        $admin = User::factory()->create(['type' => 'admin']);
+
+        $response = $this->actingAs($admin, 'api')
+            ->getJson('/dsgapi/email-templates?pageSize=100')
+            ->assertOk()
+            ->assertJsonPath('total', count(EmailTemplateType::cases()));
+
+        $this->assertSame(['de'], collect($response->json('data'))->pluck('locale')->unique()->values()->all());
+    }
+
+    public function test_app_name_can_be_set_per_language(): void
+    {
+        config(['app.name' => 'DSG', 'app.localized_names' => ['en' => 'Smart Calendar']]);
+        EmailTemplate::where('on_event', EmailTemplateType::VALIDATION)
+            ->update(['subject' => 'Welcome to :appName']);
+
+        $english = (new SendConfirmEmail('t'))->locale('en');
+        $english->render();
+        $english->assertHasSubject('Welcome to Smart Calendar');
+
+        $german = (new SendConfirmEmail('t'))->locale('de');
+        $german->render();
+        $german->assertHasSubject('Welcome to DSG');
+
+        $deleted = (new SendInfoUserDeletedEmail())->locale('en');
+        $deleted->assertSeeInHtml('<title>Smart Calendar</title>', false);
+        $deleted->assertDontSeeInHtml('DSG');
+        $deleted->assertHasSubject('Deletion of your Smart Calendar account');
     }
 
     public function test_emails_to_a_user_use_the_recipient_language_not_the_request_language(): void
@@ -206,6 +255,70 @@ class EmailLocaleTest extends TestCase
         }
     }
 
+    public function test_newsletter_subscription_stores_the_request_language(): void
+    {
+        $this->withHeader('Accept-Language', 'en')
+            ->postJson('/dsgapi/notifications', $this->subscriptionPayload('reader@example.com'))
+            ->assertCreated();
+
+        $this->assertSame('en', Notification::where('email', 'reader@example.com')->value('locale'));
+        // the confirmation email is sent in the request language as well
+        $this->assertSame([__('emails.subjects.notificationConfirm', [], 'en')], $this->sentSubjects());
+    }
+
+    public function test_requests_in_a_disabled_language_use_the_default_language(): void
+    {
+        config(['app.supported_locales' => ['de']]);
+
+        $this->withHeader('Accept-Language', 'en')
+            ->postJson('/dsgapi/notifications', $this->subscriptionPayload('reader@example.com'))
+            ->assertCreated()
+            ->assertJsonPath('message', __('messages.notifications.subscribed', [], 'de'));
+
+        $this->assertSame('de', Notification::where('email', 'reader@example.com')->value('locale'));
+    }
+
+    public function test_newsletter_is_sent_in_the_language_of_the_subscription(): void
+    {
+        $event = [
+            'uuid' => 'abc',
+            'title' => 'Concert',
+            'beginsOn' => '2027-01-04T10:00:00Z',
+            'attributedTo' => ['id' => '1', 'name' => 'Org'],
+        ];
+        // the newsletter template skips the first event of each section
+        $this->fakeMobilizonSearch([$event, $event]);
+
+        foreach (['en' => 'en', 'de' => 'de', 'fr' => 'fr', 'none' => null] as $name => $locale) {
+            Notification::forceCreate([
+                'email' => "$name@example.com",
+                'locale' => $locale,
+                'intervall' => 'WEEKLY',
+                'category' => 'ALL',
+                'token' => "token-$name",
+                'is_verified' => true,
+            ]);
+        }
+
+        $this->artisan('app:send-email-nofifications', ['--intervall' => 'WEEKLY'])->assertSuccessful();
+
+        $sent = collect(Mail::getSymfonyTransport()->messages())
+            ->map(fn ($sent) => $sent->getOriginalMessage())
+            ->keyBy(fn ($message) => $message->getTo()[0]->getAddress());
+
+        $this->assertSame('Event notification', $sent['en@example.com']->getSubject());
+        $this->assertStringContainsString('04/01/2027 10:00 AM', $sent['en@example.com']->getHtmlBody());
+        $this->assertStringNotContainsString('Uhr', $sent['en@example.com']->getHtmlBody());
+
+        // unknown, disabled or missing languages use the current locale
+        foreach (['de', 'fr', 'none'] as $name) {
+            $this->assertSame('Benachrichtigung Termine', $sent["$name@example.com"]->getSubject(), $name);
+            $this->assertStringContainsString('04.01.2027 10:00 Uhr', $sent["$name@example.com"]->getHtmlBody(), $name);
+        }
+
+        $this->assertSame('de', App::getLocale());
+    }
+
     public function test_password_reset_notification_uses_the_user_language(): void
     {
         $user = User::factory()->create(['locale' => 'en']);
@@ -285,6 +398,34 @@ class EmailLocaleTest extends TestCase
         $mobilizon = new Mobilizon();
         $mobilizon->person = ['name' => 'Jane'];
         $this->setMobilizonInstance($mobilizon);
+    }
+
+    /**
+     * Answers every event search with the given events (SendEmailNotifications uses the admin singleton).
+     */
+    private function fakeMobilizonSearch(array $events): void
+    {
+        $this->setMobilizonInstance(new class ($events) extends Mobilizon {
+            public function __construct(private array $events)
+            {
+            }
+
+            public function searchEvents(array $fieldsToSearch, $limit = null): array
+            {
+                return ['data' => ['searchEvents' => ['total' => count($this->events), 'elements' => $this->events]]];
+            }
+        });
+    }
+
+    private function subscriptionPayload(string $email): array
+    {
+        return [
+            'email' => $email,
+            'intervall' => 'WEEKLY',
+            'category' => 'ALL',
+            'eventType' => 'INTERNAL',
+            'organisation' => 'ALL',
+        ];
     }
 
     private function setMobilizonInstance(?Mobilizon $instance): void

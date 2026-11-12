@@ -7,11 +7,11 @@ use App\Models\MobilizonTag;
 use App\Models\UploadedEvent;
 use App\Models\CreatedEvent;
 use App\Services\IcalEventService;
+use App\Support\EventDateTime;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
-use Carbon\Carbon;
 use Illuminate\Routing\Controllers\Middleware;
 use Log;
 
@@ -162,7 +162,7 @@ class UploadedEventController extends Controller implements HasMiddleware
             $createdEvent->ical_update_sequence = $event['sequence'];
             unset($event['sequence']);
 
-            $eventStart = Carbon::parse($event['beginsOn'])->setTimezone($event['options']['timezone']);
+            $eventStart = EventDateTime::startInEventTimezone($event);
             $createdEvent->start = $eventStart->format('Y-m-d');
             $createdEvent->time = $eventStart->format('H:i');
             $createdEvent->duration = IcalEventService::calculateDuration($event['beginsOn'], $event['endsOn']);

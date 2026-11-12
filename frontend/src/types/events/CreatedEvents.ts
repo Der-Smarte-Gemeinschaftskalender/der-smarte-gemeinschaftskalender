@@ -2,6 +2,22 @@ import zod from "@/lib/zod";
 import { ApprovalRequestResponseSchema, DefaultEventFormSchema, DefaultEventSchema } from "@/types/events/DefaultEvents";
 import { stripHtml } from "@/lib/helper";
 import { isStrictModeEnabled } from "@/lib/instanceConfig";
+import i18n from "@/i18n";
+
+/** Kind of event a created event belongs to. */
+export type CreatedEventParentType = 'single_event' | 'series_event' | 'uploaded_event' | 'imported_event';
+
+const createdEventParentTypes: CreatedEventParentType[] = ['series_event', 'single_event', 'imported_event', 'uploaded_event'];
+
+/**
+ * Translated label for the kind of event a created event belongs to.
+ * The value comes from the backend, so unexpected values fall back to "unknown".
+ */
+export const getEventTypeLabel = (eventType: string): string => {
+    return createdEventParentTypes.includes(eventType as CreatedEventParentType)
+        ? i18n.global.t(`app.shared.eventTypes.${eventType}`)
+        : i18n.global.t('app.shared.eventTypes.unknown');
+};
 
 export const CreatedEventSchema = zod.object({
     id: zod

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
@@ -26,7 +26,7 @@ const router = useRouter();
 
 const approvalRequest = ref<any>(null);
 const imageUrl = ref<string | null>(null);
-const descriptionListData = ref<Array<any>>([]);
+const organisationDetails = ref<{ name: string; preferredUsername: string } | null>(null);
 
 const loading = ref(false);
 const loadingAction = ref(false);
@@ -68,6 +68,95 @@ const getActionName = (actionType: string) => {
     return actionMap[actionType] || actionType;
 };
 
+// computed so the labels follow a language switch.
+// Missing data gets a fallback instead of throwing: an error here would leave the page blank,
+// without the approve/reject buttons.
+const descriptionListData = computed<Array<any>>(() => {
+    const request = approvalRequest.value;
+    if (!request) return [];
+
+    const organisation = organisationDetails.value;
+    const fields = request.payload?.mobilizon_fields;
+
+    return [
+        {
+            name: t('app.admin.approval.columns.action'),
+            value: getActionName(request.request_type),
+        },
+        {
+            name: t('app.admin.approval.columns.title'),
+            value: request.payload.name,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.organisation'),
+            value: organisation?.name || request.payload.organisation_name || t('app.admin.approval.notSpecified'),
+            type: organisation ? 'link' : undefined,
+            local_url: organisation ? `/organisation/${organisation.preferredUsername}` : undefined,
+        },
+        {
+            name: 'ID',
+            value: request.requestable_id ?? request.payload.id ?? t('app.admin.approval.notAssignedYet'),
+        },
+        {
+            name: t('app.admin.approval.columns.createdBy'),
+            value: request.created_by?.mobilizon_name || t('app.admin.approval.notSpecified'),
+        },
+        {
+            name: t('app.admin.approval.columns.createdAt'),
+            value: formatDateTime(request.created_at),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.start'),
+            value: t('app.admin.eventRequests.startAt', {
+                date: formatDateTime(request.payload.start),
+                time: request.payload.time,
+            }),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.duration'),
+            value: formatHourMinute(request.payload.duration),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.category'),
+            value: fields?.category
+                ? (mobilizon_category_options.value.find((option) => option.value === fields.category)?.text ??
+                  fields.category)
+                : t('app.admin.eventRequests.noCategory'),
+        },
+        {
+            name: t('app.admin.eventRequests.fields.tags'),
+            value: fields?.tags ? fields.tags : t('app.admin.eventRequests.noTags'),
+            type: fields?.tags ? 'tags' : undefined,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.joinOptions'),
+            value:
+                fields?.joinOptions === 'EXTERNAL'
+                    ? buildExternalLinkHtml(fields.externalParticipationUrl)
+                    : t('app.admin.eventRequests.noJoinOptions'),
+            formatAsHtml: fields?.externalParticipationUrl ? true : false,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.language'),
+            value: fields?.language
+                ? (mobilizon_event_language_options.value.find((option) => option.value === fields.language)?.text ??
+                  fields.language)
+                : mobilizon_event_language_options.value[0]?.text,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.website'),
+            value: fields?.onlineAddress || t('app.admin.approval.notSpecified'),
+            type: fields?.onlineAddress ? 'link' : undefined,
+        },
+        {
+            name: t('app.admin.eventRequests.fields.status'),
+            value:
+                mobilizon_event_status.value.find((status) => status.value === fields?.status)?.text ||
+                t('app.admin.shared.unknown'),
+        },
+    ];
+});
+
 const fetchApprovalRequest = async () => {
     loading.value = true;
     try {
@@ -96,93 +185,7 @@ const fetchApprovalRequest = async () => {
             }
         }
 
-        const organisationDetails = await fetchOrganisationDetails(approvalRequest.value.payload.mobilizon_group_id);
-
-        descriptionListData.value = [
-            {
-                name: t('app.admin.approval.columns.action'),
-                value: getActionName(approvalRequest.value.request_type),
-            },
-            {
-                name: t('app.admin.approval.columns.title'),
-                value: approvalRequest.value.payload.name,
-            },
-            {
-                name: t('app.admin.eventRequests.fields.organisation'),
-                value: organisationDetails?.name || approvalRequest.value.payload.organisation_name || t('app.admin.approval.notSpecified'),
-                type: organisationDetails ? 'link' : undefined,
-                local_url: organisationDetails ? `/organisation/${organisationDetails.preferredUsername}` : undefined,
-            },
-            {
-                name: 'ID',
-                value:
-                    approvalRequest.value.requestable_id ?? approvalRequest.value.payload.id ?? t('app.admin.approval.notAssignedYet'),
-            },
-            {
-                name: t('app.admin.approval.columns.createdBy'),
-                value: approvalRequest.value.created_by.mobilizon_name,
-            },
-            {
-                name: t('app.admin.approval.columns.createdAt'),
-                value: formatDateTime(approvalRequest.value.created_at),
-            },
-            {
-                name: t('app.admin.eventRequests.fields.start'),
-                value: t('app.admin.eventRequests.startAt', {
-                    date: formatDateTime(approvalRequest.value.payload.start),
-                    time: approvalRequest.value.payload.time,
-                }),
-            },
-            {
-                name: t('app.admin.eventRequests.fields.duration'),
-                value: formatHourMinute(approvalRequest.value.payload.duration),
-            },
-            {
-                name: t('app.admin.eventRequests.fields.category'),
-                value: approvalRequest.value.payload?.mobilizon_fields?.category
-                    ? mobilizon_category_options.value.find(
-                          (option) => option.value === approvalRequest.value.payload.mobilizon_fields.category
-                      )!.text
-                    : t('app.admin.eventRequests.noCategory'),
-            },
-            {
-                name: t('app.admin.eventRequests.fields.tags'),
-                value: approvalRequest.value.payload?.mobilizon_fields?.tags
-                    ? approvalRequest.value.payload.mobilizon_fields.tags
-                    : t('app.admin.eventRequests.noTags'),
-                type: approvalRequest.value.payload?.mobilizon_fields?.tags ? 'tags' : undefined,
-            },
-            {
-                name: t('app.admin.eventRequests.fields.joinOptions'),
-                value:
-                    approvalRequest.value.payload?.mobilizon_fields?.joinOptions === 'EXTERNAL'
-                        ? buildExternalLinkHtml(approvalRequest.value.payload.mobilizon_fields.externalParticipationUrl)
-                        : t('app.admin.eventRequests.noJoinOptions'),
-                formatAsHtml: approvalRequest.value.payload?.mobilizon_fields?.externalParticipationUrl ? true : false,
-            },
-            {
-                name: t('app.admin.eventRequests.fields.language'),
-                value: approvalRequest.value.payload?.mobilizon_fields?.language
-                    ? mobilizon_event_language_options.value.find(
-                          (option) => option.value === approvalRequest.value.payload.mobilizon_fields.language
-                      )?.text
-                    : mobilizon_event_language_options.value[0].text,
-            },
-            {
-                name: t('app.admin.eventRequests.fields.website'),
-                value: approvalRequest.value.payload?.mobilizon_fields?.onlineAddress || t('app.admin.approval.notSpecified'),
-                type: approvalRequest.value.payload?.mobilizon_fields?.onlineAddress ? 'link' : undefined,
-            },
-            {
-                name: t('app.admin.eventRequests.fields.status'),
-                value:
-                    mobilizon_event_status.value.find(
-                        (status) => status.value === approvalRequest.value.payload?.mobilizon_fields?.status
-                    )?.text || t('app.admin.shared.unknown'),
-            },
-        ];
-
-        descriptionListData.value = descriptionListData.value.filter((item) => item !== null);
+        organisationDetails.value = await fetchOrganisationDetails(approvalRequest.value.payload.mobilizon_group_id);
     } catch (error) {
         console.error('Error fetching approval request:', error);
         await router.push({ name: 'notFound' });
@@ -336,7 +339,7 @@ onMounted(async () => {
                     <p
                         class="kern-text prose"
                         v-html="
-                            stripHtml(approvalRequest.payload.mobilizon_fields.description)
+                            stripHtml(approvalRequest.payload.mobilizon_fields?.description)
                                 ? approvalRequest.payload.mobilizon_fields.description
                                 : `<p>${t('app.admin.approval.noDescription')}</p>`
                         "
@@ -344,7 +347,7 @@ onMounted(async () => {
                 </div>
                 <div>
                     <h5 class="kern-heading mt-4 mb-2">{{ t('app.admin.approval.address') }}</h5>
-                    <div v-if="approvalRequest.payload.mobilizon_fields.physicalAddress?.geom">
+                    <div v-if="approvalRequest.payload.mobilizon_fields?.physicalAddress?.geom">
                         <p v-if="approvalRequest.payload.mobilizon_fields.physicalAddress?.street">
                             {{ normalizeStreet(approvalRequest.payload.mobilizon_fields.physicalAddress?.street) }},
                         </p>

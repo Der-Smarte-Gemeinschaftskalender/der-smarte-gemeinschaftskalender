@@ -1,20 +1,12 @@
 import dayjs from '@/lib/dayjs';
 import zod from '@/lib/zod';
 import i18n, { isDe } from '@/i18n';
-import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 
 import { mobilizon_event_language_options, mobilizon_main_category_options } from '@/lib/const';
 
 import type { AddressForm } from '@/types/Mobilizon';
 import { type IEvent, type Option, MobilizonCategory } from '@/types/General';
 import { defaultEventImageBasedOnCategory } from './instanceConfig';
-
-// Standard-Zeitzone der Instanz (VITE_APP_TIMEZONE). Eingaben in den Termin-
-// Formularen werden in der gewählten Termin-Zeitzone (Mobilizon options.timezone)
-// gespeichert, Standard ist diese Zeitzone. Die Anzeige im Frontend nutzt die
-// jeweilige Browser-TZ (dayjs Default), damit Nutzer lokale Uhrzeit sehen.
-// useTimezoneCheck/TimezoneNotice nutzt diese Konstante als Referenz.
-export const DISPLAY_TIMEZONE = INSTANCE_TIMEZONE;
 
 // App
 /**

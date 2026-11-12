@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import zod from '@/lib/zod';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { useField, useForm } from 'vee-validate';
 import { useRoute, useRouter } from 'vue-router';
@@ -47,10 +47,10 @@ const validationSchema = toTypedSchema(
     zod.object({
         invite_username: zod
             .string({
-                required_error: 'app.organisations.validation.usernameRequired',
+                required_error: 'validation.username.required',
             })
             .refine((val) => val.trim().length > 0, {
-                message: 'app.organisations.validation.usernameNotEmpty',
+                message: 'validation.username.notEmpty',
             }),
     }) satisfies ZodType<OrganisationMemberInviteForm>
 );
@@ -112,7 +112,8 @@ const loadOrganisation = async () => {
     }
 };
 
-const columns = [
+// computed so the labels follow a language switch
+const columns = computed(() => [
     {
         key: 'actor',
         name: t('app.organisations.members.columnName'),
@@ -126,7 +127,7 @@ const columns = [
     {
         key: 'role',
         name: t('app.organisations.members.columnRole'),
-        format: (value: keyof typeof member_role) => member_role[value] || t('app.organisations.unknown'),
+        format: (value: keyof typeof member_role.value) => member_role.value[value] || t('app.organisations.unknown'),
     },
     {
         key: 'insertedAt',
@@ -137,7 +138,7 @@ const columns = [
         key: 'aktionen',
         name: '',
     },
-];
+]);
 
 const removeMember = async (membershipId: string) => {
     try {

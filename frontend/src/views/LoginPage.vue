@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { translateMessage } from '@/i18n';
 import zod from '@/lib/zod';
 
 import { dsgApi, checkAuthDsgApi } from '@/lib/dsgApi';
@@ -28,6 +27,14 @@ const route = useRoute();
 const showLoginErrorMessage = ref(false);
 const errorMessageContent = ref('');
 
+// Pages redirecting to the login can show one of these messages via ?message=<key>. Only known
+// keys are translated, the query parameter must not be able to inject arbitrary text.
+const LOGIN_MESSAGE_KEYS = ['auth.validate.success'];
+const loginMessage = computed(() => {
+    const key = route.query.message;
+    return typeof key === 'string' && LOGIN_MESSAGE_KEYS.includes(key) ? t(key) : t('auth.login.successDefault');
+});
+
 interface LoginForm {
     email: string;
     password: string;
@@ -37,12 +44,12 @@ const validationSchema = toTypedSchema(
     zod.object({
         email: zod
             .string()
-            .nonempty('auth.validation.emailRequired')
-            .email('auth.validation.emailInvalid')
+            .nonempty('validation.email.required')
+            .email('validation.email.invalid')
             .default(import.meta.env.VITE_LOGIN_EMAIL || ''),
         password: zod
             .string()
-            .nonempty('auth.validation.passwordRequired')
+            .nonempty('validation.password.required')
             .trim()
             .default(import.meta.env.VITE_LOGIN_PASSWORD || '')
     })
@@ -100,7 +107,7 @@ if (checkLogin()) {
                     <Alert
                         v-if="route.query.message"
                         :title="t('common.success')"
-                        :content="translateMessage(route?.query?.message as string) || t('auth.login.successDefault')"
+                        :content="loginMessage"
                         severity="success"
                     />
                     <Alert

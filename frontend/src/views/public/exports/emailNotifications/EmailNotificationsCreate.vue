@@ -4,6 +4,7 @@ import { computed, ref } from 'vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useField, useForm } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
+import { translateMessage } from '@/i18n';
 import { axiosErrorHandler, dsgApi } from '@/lib/dsgApi';
 import { intervall_notification_options, mobilizon_category_options_all } from '@/lib/const';
 import { findOrganisationOptions } from '@/lib/mobilizonClient';
@@ -61,7 +62,7 @@ const validationSchema = toTypedSchema(
             intervall: zod.nativeEnum(Intervall),
             category: zod.nativeEnum(MobilizonCategoryAndAll),
             eventType: zod.nativeEnum(EventType),
-            email: zod.string().email(t('public.exports.email.create.validation.invalidEmail')),
+            email: zod.string().email('validation.email.invalid'),
             organisation: zod.string().optional(),
             postal_code: zod.string().optional(),
             radius: zod.nativeEnum(Radius).optional(),
@@ -69,7 +70,7 @@ const validationSchema = toTypedSchema(
                 .boolean()
                 .default(false)
                 .refine((val) => val === true, {
-                    message: t('public.exports.email.create.validation.termsRequired'),
+                    message: 'validation.terms.accept',
                 }),
         })
         // This is a custom refinement to validate the form based on the event type
@@ -79,14 +80,14 @@ const validationSchema = toTypedSchema(
                     ctx.addIssue({
                         path: ['postal_code'],
                         code: zod.ZodIssueCode.custom,
-                        message: t('public.exports.email.create.validation.invalidPostalCode'),
+                        message: 'validation.postalCode.invalid',
                     });
                 }
                 if (data.radius === undefined || !Object.values(Radius).includes(data.radius)) {
                     ctx.addIssue({
                         path: ['radius'],
                         code: zod.ZodIssueCode.custom,
-                        message: t('public.exports.email.create.validation.invalidRadius'),
+                        message: 'validation.radius.invalid',
                     });
                 }
             }
@@ -242,7 +243,7 @@ findOrganisationOptions().then((options) => {
                                 role="alert"
                             >
                                 <Icon name="danger" />
-                                {{ errors.postal_code || errors.radius }}
+                                {{ translateMessage(errors.postal_code || errors.radius || '') }}
                             </span>
                         </div>
                     </div>

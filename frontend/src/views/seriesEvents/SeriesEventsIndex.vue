@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
+import { intervall_keys } from '@/lib/const';
 import { current_organisation } from '@/composables/OrganisationComposable';
 import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
 
@@ -18,12 +19,8 @@ const { alertMessage } = useEventIndexAlerts(tableRef, {
     deletedMessage: t('app.events.series.index.deleted'),
 });
 
-const intervallLabels: Record<string, string> = {
-    weekly: t('common.weekly'),
-    monthly: t('common.monthly'),
-};
-
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'name',
         name: t('app.events.columns.title'),
@@ -55,7 +52,7 @@ const columns: Array<Column> = [
     {
         key: 'intervall',
         name: t('app.events.columns.intervall'),
-        format: (value: string) => intervallLabels[value.toLowerCase()] || value,
+        format: (value: string) => intervall_keys.value[value.toLowerCase() as keyof typeof intervall_keys.value] || value,
         align: 'left',
     },
     {
@@ -63,15 +60,15 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const seriesTableApi = {
+const seriesTableApi = computed(() => ({
     url: '/series-events',
     deleteUrl: '/series-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
     deleteDialogTitle: t('app.events.series.deleteTitle'),
     deleteDialogDescription: (row: any) => t('app.events.series.deleteDescription', { name: row?.name ?? '' }),
-};
+}));
 </script>
 <template>
     <Alert

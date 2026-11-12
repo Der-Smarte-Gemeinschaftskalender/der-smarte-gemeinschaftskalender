@@ -38,7 +38,6 @@ return [
 
     'events' => [
         'notFound'             => 'Termin nicht gefunden',
-        'createdEventNotFound' => 'Termin nicht gefunden',
         'imageSaveFailed'      => 'Das Bild konnte nicht gespeichert werden. Die Datei ist möglicherweise beschädigt oder liegt in einem Format vor, das nicht unterstützt wird. Der Termin wurde nicht angelegt - bitte wählen Sie ein anderes Bild (JPG, PNG, GIF oder WEBP).',
         'imageTooLarge'        => 'Das Bild überschreitet die maximal erlaubte Dateigröße von :size. Bitte wählen Sie ein kleineres Bild.',
         'imageUploadFailed'    => 'Das Bild konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.',

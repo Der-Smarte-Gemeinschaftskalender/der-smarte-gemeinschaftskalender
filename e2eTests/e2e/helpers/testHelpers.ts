@@ -482,10 +482,14 @@ export async function expectErrorMessage(page: Page, errorText: string): Promise
 export async function viewSerialEventFromList(page: Page, eventName: string): Promise<void> {
     await page.waitForLoadState('networkidle');
 
-    // Locator statt .all(): .all() wartet nicht, nach einem reinen Hash-Wechsel ist die Tabelle unter
-    // Last oft noch nicht gerendert - dann wurde nichts geklickt. Der Locator wartet auf die Zeile.
-    const row = page.locator('tr.kern-table__row', { hasText: eventName }).first();
-    await row.locator('button').filter({ hasText: 'Ansehen' }).click();
+    const rows = await page.locator('tr.kern-table__row').all();
+    for (const row of rows) {
+        const rowText = await row.textContent();
+        if (rowText && rowText.includes(eventName)) {
+            await row.locator('button').filter({ hasText: 'Ansehen' }).click();
+            break;
+        }
+    }
 
     // /create würde sonst ebenfalls passen, wenn die Serie noch gar nicht angelegt ist.
     await expect(page).toHaveURL(/\/app\/series-events\/\d+/);

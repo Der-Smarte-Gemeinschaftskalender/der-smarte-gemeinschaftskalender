@@ -536,7 +536,7 @@ export const findOrganisationOptions = async (valueUsername = false, limit: numb
             text: group.name,
         };
     });
-    return [{ value: 'ALL', text: 'Alle Organisationen' }, ...groupOptions];
+    return [{ value: 'ALL', text: t('public.search.allOrganisations') }, ...groupOptions];
 };
 
 export const fetchOrganisationEvents = async (

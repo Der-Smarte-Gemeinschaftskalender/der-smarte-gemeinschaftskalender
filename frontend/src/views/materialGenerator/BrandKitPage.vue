@@ -23,7 +23,7 @@ const underlineColor = ref<string>('#7dcce8');
 const selectedTextColor = ref<string>('#000000');
 const selectedFont = ref<string>('Arial');
 
-const headlineText = ref<string>('Unsere Termine');
+const headlineText = ref<string>(t('app.materialGenerator.brandKit.defaultHeadline'));
 const selectedFontHeadline = ref<string>('Arial');
 const selectedTextColorHeadline = ref<string>('#000000');
 
@@ -43,7 +43,8 @@ const loadBrandKit = async () => {
                 mobilizon_group_id: current_organisation.value.id,
             },
         });
-        headlineText.value = data.default_header_settings?.headlineText || 'Unsere Termine';
+        headlineText.value =
+            data.default_header_settings?.headlineText || t('app.materialGenerator.brandKit.defaultHeadline');
         underlineColor.value = data.default_text_settings?.underlineColor || '#7dcce8';
         selectedTextColor.value = data.default_text_settings?.selectedTextColor || '#000000';
         selectedFont.value = data.default_text_settings?.selectedFont || 'Arial';

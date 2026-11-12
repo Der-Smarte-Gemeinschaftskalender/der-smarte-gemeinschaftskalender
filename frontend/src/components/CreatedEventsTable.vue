@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
 import Table from './KERN/Table.vue';
 import Button from './KERN/Button.vue';
 import { useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
+import { getEventTypeLabel } from '@/types/events/CreatedEvents';
 import ButtonLegend from './ButtonLegend.vue';
 
 interface Props {
@@ -12,32 +14,25 @@ interface Props {
 }
 
 const { showCreatedAt = false, type } = defineProps<Props>();
-const { t, te } = useI18n();
+const { t } = useI18n();
 
-const columns = [
+// computed so the labels follow a language switch
+const columns = computed(() => [
     { name: 'ID', key: 'id' },
     { name: t('app.events.columns.date'), key: 'start', format: (value: string) => formatDateTime(value) },
     { name: t('app.events.columns.time'), key: 'time' },
     { name: t('app.events.columns.duration'), key: 'duration' },
+    ...(showCreatedAt
+        ? [{ name: t('app.events.columns.createdAt'), key: 'created_at', format: (value: string) => formatDateTime(value) }]
+        : []),
     { name: '', key: 'aktionen', slot: true },
-];
-if (showCreatedAt) {
-    columns.splice(4, 0, { name: t('app.events.columns.createdAt'), key: 'created_at', format: (value: string) => formatDateTime(value) });
-}
+]);
 
-const getEventTypeLabel = (eventType: string): string => {
-    const types = ['series_event', 'imported_event', 'uploaded_event'];
-
-    return types.includes(eventType) && te(`app.shared.eventTypes.${eventType}`)
-        ? t(`app.shared.eventTypes.${eventType}`)
-        : t('app.shared.eventTypes.unknown');
-};
-
-const createdEventsTableApi = {
+const createdEventsTableApi = computed(() => ({
     deleteUrl: '/created-events',
     deleteDialogTitle: t('app.shared.deleteCreatedEvent.title', { type: getEventTypeLabel(type) }),
     deleteDialogDescription: (_: any) => t('app.shared.deleteCreatedEvent.description', { type: getEventTypeLabel(type) }),
-};
+}));
 </script>
 <template>
     <p v-if="!data?.length">{{ t('app.shared.createdEventsTable.empty') }}</p>

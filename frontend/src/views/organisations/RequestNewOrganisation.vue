@@ -35,15 +35,15 @@ const validationSchema = toTypedSchema(
     zod.object({
         name: zod
             .string({
-                required_error: 'app.organisations.validation.nameRequired',
+                required_error: 'validation.organisation.nameRequired',
             })
-            .nonempty('app.organisations.validation.nameNotEmpty'),
+            .nonempty('validation.organisation.nameNotEmpty'),
         preferredUsername: preferredUsernameSchema,
         summary: zod
             .string({
-                required_error: 'app.organisations.validation.summaryRequired',
+                required_error: 'validation.organisation.summaryRequired',
             })
-            .refine((val) => stripHtml(val).length > 0, { message: 'app.organisations.validation.summaryNotEmpty' })
+            .refine((val) => stripHtml(val).length > 0, { message: 'validation.description.notEmpty' })
     }) satisfies ZodType<RequestOrganisationForm>
 );
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({

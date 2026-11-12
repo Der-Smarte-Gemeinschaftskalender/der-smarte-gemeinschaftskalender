@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\Localization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Lang;
 
 /**
  * @property int $id
@@ -73,8 +73,8 @@ class ApprovalRequest extends Model
         $actionKey = 'emails.requestActions.' . $this->request_type;
 
         return __('emails.requestTypeName', [
-            'type' => Lang::has($typeKey) ? __($typeKey) : (string) $this->requestable_type,
-            'action' => Lang::has($actionKey) ? __($actionKey) : $this->request_type,
+            'type' => Localization::translateOr($typeKey, (string) $this->requestable_type),
+            'action' => Localization::translateOr($actionKey, $this->request_type),
         ]);
     }
 

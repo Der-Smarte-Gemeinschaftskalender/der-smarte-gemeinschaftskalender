@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
 import { useEventIndexAlerts } from '@/composables/EventIndexAlertsComposable';
@@ -17,7 +17,8 @@ const { alertMessage } = useEventIndexAlerts(tableRef, {
     deletedMessage: t('app.events.uploaded.index.deleted'),
 });
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'filename',
         name: t('app.events.columns.filename'),
@@ -39,15 +40,15 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const uploadedTableApi = {
+const uploadedTableApi = computed(() => ({
     url: '/uploaded-events',
     deleteUrl: '/uploaded-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
     deleteDialogTitle: t('app.events.uploaded.deleteTitle'),
     deleteDialogDescription: (row: any) => t('app.events.uploaded.index.deleteDescription', { filename: row?.filename ?? '' }),
-};
+}));
 </script>
 <template>
     <Alert

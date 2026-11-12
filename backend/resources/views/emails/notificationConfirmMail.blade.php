@@ -8,7 +8,7 @@
     {{-- The translations are trusted, only the inserted values are escaped --}}
     <h4>
         {!! __('emails.notificationConfirm.subscribed', [
-            'appName' => '<span class="highlight">' . e(config('app.name')) . '</span>',
+            'appName' => '<span class="highlight">' . e(\App\Support\Localization::appName()) . '</span>',
         ]) !!}
     </h4>
 

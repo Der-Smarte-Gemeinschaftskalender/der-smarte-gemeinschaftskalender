@@ -4,7 +4,8 @@ import { computed } from 'vue';
 
 const t = i18n.global.t;
 
-export const getMobilizonCategoryOptions = (): Option[] => [
+// computeds so the labels follow a language switch
+export const mobilizon_category_options = computed<Option[]>(() => [
     { value: MobilizonCategoryAndAll.ARTS, text: t('categories.ARTS') },
     { value: MobilizonCategoryAndAll.BOOK_CLUBS, text: t('categories.BOOK_CLUBS') },
     { value: MobilizonCategoryAndAll.BUSINESS, text: t('categories.BUSINESS') },
@@ -38,9 +39,9 @@ export const getMobilizonCategoryOptions = (): Option[] => [
     { value: MobilizonCategoryAndAll.SPORTS, text: t('categories.SPORTS') },
     { value: MobilizonCategoryAndAll.THEATRE, text: t('categories.THEATRE') },
     { value: MobilizonCategoryAndAll.MEETING, text: t('categories.MEETING') },
-];
+]);
 
-export const getMobilizonMainCategoryOptions = (): Option[] => [
+export const mobilizon_main_category_options = computed<Option[]>(() => [
     {
         value: 'CULTURE_CREATIVE',
         text: t('categories.mainCategories.CULTURE_CREATIVE'),
@@ -108,14 +109,9 @@ export const getMobilizonMainCategoryOptions = (): Option[] => [
             MobilizonCategoryAndAll.BUSINESS,
         ],
     },
-];
+]);
 
-export const getMobilizonCategoryOptionsAll = (): Option[] => [
+export const mobilizon_category_options_all = computed<Option[]>(() => [
     { value: MobilizonCategoryAndAll.ALL, text: t('categories.ALL') },
-    ...getMobilizonCategoryOptions(),
-];
-
-// Reactive computed refs that update automatically when locale changes
-export const mobilizon_category_options = computed(() => getMobilizonCategoryOptions());
-export const mobilizon_main_category_options = computed(() => getMobilizonMainCategoryOptions());
-export const mobilizon_category_options_all = computed(() => getMobilizonCategoryOptionsAll());
+    ...mobilizon_category_options.value,
+]);

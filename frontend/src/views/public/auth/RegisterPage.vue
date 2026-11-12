@@ -33,29 +33,29 @@ const validationSchema = toTypedSchema(
         .object({
             email: zod
                 .string({
-                    required_error: 'auth.validation.emailRequired',
+                    required_error: 'validation.email.required',
                 })
-                .nonempty('auth.validation.emailRequired')
-                .email('auth.validation.emailInvalid'),
+                .nonempty('validation.email.required')
+                .email('validation.email.invalid'),
             password: zod
                 .string({
-                    required_error: 'auth.validation.passwordRequired',
+                    required_error: 'validation.password.required',
                 })
-                .nonempty('auth.validation.passwordRequired')
-                .min(8, 'auth.validation.newPasswordMin8')
+                .nonempty('validation.password.required')
+                .min(8, 'validation.password.min')
                 .trim(),
             password_confirmation: zod
                 .string({
-                    required_error: 'auth.validation.passwordConfirmationRequired',
+                    required_error: 'validation.password.confirmationRequired',
                 })
-                .nonempty('auth.validation.passwordRequired')
-                .min(8, 'auth.validation.newPasswordMin8')
+                .nonempty('validation.password.required')
+                .min(8, 'validation.password.min')
                 .trim()
                 .default(import.meta.env.VITE_LOGIN_PASSWORD || ''),
             accept_terms: zod
                 .boolean()
                 .refine((val) => val, {
-                    message: 'auth.validation.acceptTerms',
+                    message: 'validation.terms.acceptWithPrivacy',
                 })
                 .default(false),
         })
@@ -64,7 +64,7 @@ const validationSchema = toTypedSchema(
                 ctx.addIssue({
                     path: ['password_confirmation'],
                     code: zod.ZodIssueCode.custom,
-                    message: 'auth.validation.passwordsDoNotMatch',
+                    message: 'validation.password.mismatch',
                 });
             }
         })

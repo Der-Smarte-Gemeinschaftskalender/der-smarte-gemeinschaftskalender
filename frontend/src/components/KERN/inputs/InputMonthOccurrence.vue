@@ -24,17 +24,11 @@ withDefaults(defineProps<Props>(), {
 
 const { t } = useI18n();
 
-const weekOptionKeys: Record<number, string> = { 1: 'first', 2: 'second', 3: 'third', 4: 'fourth', [-1]: 'last' };
-const weekOptions = monthlyIntervalWeekOptions.map((option) => ({
-    ...option,
-    text: weekOptionKeys[option.value] ? t(`app.shared.monthOccurrence.weekOptions.${weekOptionKeys[option.value]}`) : option.text,
-}));
-
 const weeks = defineModel<number[]>('weeks', { default: () => [1] });
 const weekDay = defineModel<number>('weekDay', { default: 0 });
 
 
-const weekOrder = new Map(monthlyIntervalWeekOptions.map((option, index) => [option.value, index]));
+const weekOrder = new Map(monthlyIntervalWeekOptions.value.map((option, index) => [option.value, index]));
 
 const isWeekSelected = (value: number): boolean => {
     return weeks.value.includes(value);
@@ -70,7 +64,7 @@ const updateWeek = (value: number, checked: boolean) => {
             </p>
             <div class="month-occurrence-content__weeks-grid">
                 <InputCheckbox
-                    v-for="option in weekOptions"
+                    v-for="option in monthlyIntervalWeekOptions"
                     :key="option.value"
                     :name="`${nameWeeks}-${option.value}`"
                     :label="option.text"

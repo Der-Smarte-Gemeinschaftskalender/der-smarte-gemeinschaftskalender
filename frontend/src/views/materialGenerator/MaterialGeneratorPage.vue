@@ -46,7 +46,7 @@ const canvasHeight = computed(() => dimensions[selectedDimension.value].height);
 
 const fromDate = ref(formatInputDate());
 const toDate = ref(formatInputDate(new Date(dayjs().add(2, 'month').format('YYYY-MM-DD'))));
-const headlineText = ref('Unsere Termine');
+const headlineText = ref(t('app.materialGenerator.brandKit.defaultHeadline'));
 const selectedFontHeadline = ref('Arial');
 const selectedTextColorHeadline = ref('#111111');
 const formatTextOutput = ref('');
@@ -124,7 +124,7 @@ const { saveTemplate, deleteTemplate, getTemplate, listForContext, fetchTemplate
 
 const availableTemplates = computed(() => listForContext(materialType, selectedDimension.value));
 
-const editorFeatures: Record<string, string> = {
+const editorFeatures = computed<Record<string, string>>(() => ({
     'open-in-new': t('app.materialGenerator.editorFeatures.dragDrop'),
     'image': t('app.materialGenerator.editorFeatures.uploadImage'),
     'stamp': t('app.materialGenerator.editorFeatures.stamps'),
@@ -137,7 +137,7 @@ const editorFeatures: Record<string, string> = {
     'home_repair_service': t('app.materialGenerator.editorFeatures.templates'),
     'checklist': t('app.materialGenerator.editorFeatures.eventSelection'),
     'download': t('app.materialGenerator.editorFeatures.download'),
-};
+}));
 
 const infoBoxStartX = computed(() => selectedDimensionInfoBox.value?.infoBoxStartX ?? 0);
 const infoBoxStartY = computed(() => selectedDimensionInfoBox.value?.infoBoxStartY ?? 0);
@@ -261,7 +261,8 @@ const loadDefaultValues = async (groupId: string | null = null, mobilizonPreferr
             selectedFont.value = data.default_text_settings.selectedFont || 'Arial';
         }
         if (data.default_header_settings) {
-            headlineText.value = data.default_header_settings.headlineText || 'Unsere Termine';
+            headlineText.value =
+                data.default_header_settings.headlineText || t('app.materialGenerator.brandKit.defaultHeadline');
             selectedFontHeadline.value = data.default_header_settings.selectedFontHeadline || 'Arial';
             selectedTextColorHeadline.value = data.default_header_settings.selectedTextColorHeadline || '#000000';
         }
@@ -657,11 +658,11 @@ const stampSvgMap: Record<string, string> = {
     'AktualisiertBadge.svg': aktualisiertSvg,
 };
 
-const stampOptions: StampOption[] = [
+const stampOptions = computed<StampOption[]>(() => [
     { label: t('app.materialGenerator.stamps.cancelled'), file: 'AbgesagtBadge.svg' },
     { label: t('app.materialGenerator.stamps.postponed'), file: 'VerschobenBadge.svg' },
     { label: t('app.materialGenerator.stamps.updated'), file: 'AktualisiertBadge.svg' },
-];
+]);
 
 async function onAddStamp(file: string) {
     const svgString = stampSvgMap[file];

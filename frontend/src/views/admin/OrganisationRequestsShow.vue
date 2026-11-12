@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
@@ -25,7 +25,6 @@ const router = useRouter();
 
 const approvalRequest = ref<any>(null);
 const imageUrl = ref<string | null>(null);
-const descriptionListData = ref<Array<any>>([]);
 
 const loading = ref(false);
 const loadingAction = ref(false);
@@ -53,6 +52,45 @@ const getActionName = (actionType: string) => {
     return actionMap[actionType] || actionType;
 };
 
+// computed so the labels follow a language switch.
+// Missing data gets a fallback instead of throwing: an error here would leave the page blank,
+// without the approve/reject buttons.
+const descriptionListData = computed<Array<any>>(() => {
+    const request = approvalRequest.value;
+    if (!request) return [];
+
+    return [
+        {
+            name: t('app.admin.approval.columns.action'),
+            value: getActionName(request.request_type),
+        },
+        {
+            name: t('app.admin.organisationRequests.organisationName'),
+            value: request.payload.name,
+        },
+        {
+            name: t('app.admin.organisationRequests.organisationUsername'),
+            value: request.payload.preferredUsername || request.payload.name,
+        },
+        {
+            name: 'ID',
+            value: request.payload.id ?? t('app.admin.approval.notAssignedYet'),
+        },
+        {
+            name: t('app.admin.approval.columns.createdBy'),
+            value: request.created_by?.mobilizon_name || t('app.admin.approval.notSpecified'),
+        },
+        {
+            name: t('app.admin.approval.columns.createdAt'),
+            value: formatDateTime(request.created_at),
+        },
+        {
+            name: `${request.handled_by ? t('app.admin.organisationRequests.handledBy') : ''}`,
+            value: request.handled_by?.mobilizon_name,
+        },
+    ];
+});
+
 const fetchApprovalRequest = async () => {
     loading.value = true;
     try {
@@ -71,38 +109,6 @@ const fetchApprovalRequest = async () => {
             }
         }
 
-        descriptionListData.value = [
-            {
-                name: t('app.admin.approval.columns.action'),
-                value: getActionName(approvalRequest.value.request_type),
-            },
-            {
-                name: t('app.admin.organisationRequests.organisationName'),
-                value: approvalRequest.value.payload.name,
-            },
-            {
-                name: t('app.admin.organisationRequests.organisationUsername'),
-                value: approvalRequest.value.payload.preferredUsername || approvalRequest.value.payload.name,
-            },
-            {
-                name: 'ID',
-                value: approvalRequest.value.payload.id ?? t('app.admin.approval.notAssignedYet'),
-            },
-            {
-                name: t('app.admin.approval.columns.createdBy'),
-                value: approvalRequest.value.created_by.mobilizon_name,
-            },
-            {
-                name: t('app.admin.approval.columns.createdAt'),
-                value: formatDateTime(approvalRequest.value.created_at),
-            },
-            {
-                name: `${approvalRequest.value.handled_by ? t('app.admin.organisationRequests.handledBy') : ''}`,
-                value: approvalRequest.value.handled_by?.mobilizon_name,
-            },
-        ];
-
-        descriptionListData.value = descriptionListData.value.filter((item) => item !== null);
     } catch (error) {
         console.error('Error fetching approval request:', error);
         await router.push({ name: 'notFound' });

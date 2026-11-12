@@ -3,6 +3,7 @@ import type { Option } from '@/types/General';
 /**
  * Default timezone of the instance (VITE_APP_TIMEZONE, should match APP_TIMEZONE of the backend).
  * Used for events without an own timezone (Mobilizon event option "timezone").
+ * Dates are displayed in the browser timezone (dayjs default); useTimezoneCheck warns when it differs from this one.
  */
 export const INSTANCE_TIMEZONE: string = import.meta.env?.VITE_APP_TIMEZONE || 'Europe/Berlin';
 

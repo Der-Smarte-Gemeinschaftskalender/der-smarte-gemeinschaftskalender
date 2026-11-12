@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { createTextSingleEvent, createTextEventList, createFullEventUrl, createFullUrl } from '@/lib/shareInformation';
 import type { IEventDetailed } from '@/types/General';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface PropsBase {
@@ -25,13 +26,15 @@ type Props = SingleEventProps | EventListProps;
 const { type, event, eventList, linkToUrl } = defineProps<Props>();
 const { t } = useI18n();
 const fullUrl: string = type === 'singleEvent' ? createFullEventUrl(event!.uuid) : createFullUrl(linkToUrl);
-const text: string =
+// computed, so the shared texts follow a language switch
+const text = computed(() =>
     type === 'singleEvent'
         ? createTextSingleEvent(event, true)
-        : createTextEventList(t('public.share.eventListTitle'), eventList);
+        : createTextEventList(t('public.share.eventListTitle'), eventList)
+);
 const fullEncodedUrl: string = encodeURIComponent(fullUrl);
-const title: string = type === 'singleEvent' ? event.title : t('public.share.eventListTitle');
-const fullEncodedText: string = encodeURIComponent(text);
+const title = computed(() => (type === 'singleEvent' ? event.title : t('public.share.eventListTitle')));
+const fullEncodedText = computed(() => encodeURIComponent(text.value));
 
 const copyContent = () => {
     const copyText = document.getElementById('copyToClipboardInput') as HTMLInputElement;

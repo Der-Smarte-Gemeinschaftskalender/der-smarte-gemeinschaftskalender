@@ -21,7 +21,7 @@ import QRCodeVue3 from 'qrcode-vue3';
 import { createFullEventUrl } from '@/lib/shareInformation';
 import { instanceInformation } from '@/lib/instanceConfig';
 
-const instanceName = instanceInformation.name;
+const instanceName = computed(() => instanceInformation.value.name);
 
 const route = useRoute();
 

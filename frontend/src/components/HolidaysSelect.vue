@@ -41,7 +41,8 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const states = [
+// computed so the labels follow a language switch
+const states = computed(() => [
     'all_states',
     'bw',
     'by',
@@ -61,7 +62,7 @@ const states = [
     'th',
     'augsburg',
     'none',
-].map((value) => ({ value, text: t(`app.shared.holidays.states.${value}`) }));
+].map((value) => ({ value, text: t(`app.shared.holidays.states.${value}`) })));
 
 const holidayItems = computed(() => props.holidays.holiday ?? []);
 const schoolHolidayItems = computed(() => props.holidays.school_holiday ?? []);

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useField, useForm } from 'vee-validate';
+import { I18nT, useI18n } from 'vue-i18n';
 import type { AxiosError } from 'axios';
 
 import zod from '@/lib/zod';
@@ -44,10 +45,12 @@ enum Radius {
     '250 km' = 250,
 }
 
-const events = [
-    { label: 'Nur Veranstaltungen aus diesem Kalender', value: 'INTERNAL' },
-    { label: 'Alle Veranstaltungen aus dem Netzwerk anzeigen', value: 'GLOBAL' },
-];
+const { t } = useI18n();
+
+const events = computed(() => [
+    { label: t('public.exports.email.create.eventsInternal'), value: 'INTERNAL' },
+    { label: t('public.exports.email.create.eventsGlobal'), value: 'GLOBAL' },
+]);
 
 const route = useRoute();
 const token = ref<string>(route.path.split('/').at(-1) || '');
@@ -80,10 +83,8 @@ onMounted(async () => {
         }
     } catch (error: AxiosError | any) {
         message.value = {
-            title: 'Fehler',
-            content:
-                error.response?.data?.error ||
-                'Fehler beim Laden der Abonnement-Informationen. Bitte versuchen Sie es später erneut.',
+            title: t('common.error'),
+            content: error.response?.data?.error || t('public.exports.email.unsubscribe.loadError'),
             severity: 'danger',
             source: 'fetch',
         };
@@ -106,7 +107,7 @@ const unsubscribe = async (disallow: boolean = false) => {
             disallow
         });
         message.value = {
-            title: 'Erfolg',
+            title: t('common.success'),
             content: data.message,
             severity: 'success',
             source: disallow ? 'disallow' : 'unsubscribe',
@@ -115,8 +116,8 @@ const unsubscribe = async (disallow: boolean = false) => {
         unsubscribed.value = true;
     } catch (error: AxiosError | any) {
         message.value = {
-            title: 'Fehler',
-            content: error.response?.data?.error || 'Fehler beim Abmelden. Bitte versuchen Sie es später erneut.',
+            title: t('common.error'),
+            content: error.response?.data?.error || t('public.exports.email.unsubscribe.unsubscribeError'),
             severity: 'danger',
             source: disallow ? 'disallow' : 'unsubscribe',
         };
@@ -151,14 +152,14 @@ const validationSchema = toTypedSchema(
                     ctx.addIssue({
                         path: ['postal_code'],
                         code: zod.ZodIssueCode.custom,
-                        message: 'Bitte geben Sie eine gültige Postleitzahl ein',
+                        message: 'validation.postalCode.invalid',
                     });
                 }
                 if (data.radius === undefined || !Object.values(Radius).includes(data.radius)) {
                     ctx.addIssue({
                         path: ['radius'],
                         code: zod.ZodIssueCode.custom,
-                        message: 'Bitte wählen Sie einen gültigen Radius aus',
+                        message: 'validation.radius.invalid',
                     });
                 }
             }
@@ -197,7 +198,7 @@ const submitForm = handleSubmit(async (values) => {
 
         console.log('Form submitted successfully:', data);
         message.value = {
-            title: 'Erfolg',
+            title: t('common.success'),
             content: data.data.message,
             severity: 'success',
             source: 'update',
@@ -206,11 +207,11 @@ const submitForm = handleSubmit(async (values) => {
         console.error('Error submitting form:', error);
 
         message.value = {
-            title: 'Fehler',
+            title: t('common.error'),
             content:
                 axiosErrorHandler(error) && error?.response?.data?.error
                     ? error.response.data.error
-                    : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.',
+                    : t('public.exports.email.create.submitError'),
             severity: 'danger',
             source: 'update',
         };
@@ -224,21 +225,21 @@ const submitForm = handleSubmit(async (values) => {
 <template>
     <Teleport to="#headerslot">
         <div class="mb-3 mt-4 sm:mb-4 sm:mt-5 md:my-6">
-            <h1 class="kern-heading text-theme-primary">Benachrichtigungen bearbeiten</h1>
+            <h1 class="kern-heading text-theme-primary">{{ t('public.exports.email.edit.title') }}</h1>
             <h2 class="kern-heading font-semilight text-theme-primary">
-                Abonnement-Einstellungen verwalten oder abbestellen
+                {{ t('public.exports.email.edit.subtitle') }}
             </h2>
         </div>
     </Teleport>
 
     <Dialog
         v-model="showDisallowDialog"
-        title="Alle E-Mail-Benachrichtigungen abbestellen"
+        :title="t('public.exports.email.unsubscribe.disallowTitle')"
     >
-        <p class="mb-4">Sind Sie sicher, dass Sie alle E-Mail-Benachrichtigungen für immer abbestellen möchten?</p>
+        <p class="mb-4">{{ t('public.exports.email.unsubscribe.disallowConfirm') }}</p>
         <Button
             class="w-full"
-            label="Alle E-Mail-Benachrichtigungen abbestellen"
+            :label="t('public.exports.email.unsubscribe.disallowTitle')"
             @click="
                 unsubscribe(true);
                 showDisallowDialog = false;
@@ -266,12 +267,17 @@ const submitForm = handleSubmit(async (values) => {
         >
             <template v-if="!message || (message && message.source !== 'fetch')">
                 <div class="col-12 md:col-11 lg:col-10 xl:col-8 mt-1 mx-auto">
-                    <p class="mb-2">
-                        Sie bearbeiten die E-Mail-Benachrichtigung für
-                        <strong>{{ emailFromToken }}</strong>
-                        . Passen Sie die Einstellungen unten an und klicken Sie auf "E-Mail-Benachrichtigung
-                        aktualisieren", um Ihre Änderungen zu speichern.
-                    </p>
+                    <I18nT
+                        scope="global"
+                        keypath="public.exports.email.edit.intro"
+                        tag="p"
+                        class="mb-2"
+                    >
+                        <template #email>
+                            <strong>{{ emailFromToken }}</strong>
+                        </template>
+                        <template #button>{{ t('public.exports.email.edit.submitButton') }}</template>
+                    </I18nT>
                 </div>
 
                 <form
@@ -284,7 +290,7 @@ const submitForm = handleSubmit(async (values) => {
                                 v-model="intervall"
                                 class="w-full"
                                 name="intervall"
-                                label="Intervall"
+                                :label="t('public.exports.email.create.intervalLabel')"
                                 :options="intervall_notification_options"
                                 :errors="submitCount === 0 ? undefined : errors.intervall"
                             />
@@ -292,7 +298,7 @@ const submitForm = handleSubmit(async (values) => {
                                 v-model="category"
                                 class="w-full"
                                 name="category"
-                                label="Kategorien"
+                                :label="t('public.exports.email.create.categoriesLabel')"
                                 :options="mobilizon_category_options_all"
                                 :errors="submitCount === 0 ? undefined : errors.category"
                             />
@@ -306,23 +312,22 @@ const submitForm = handleSubmit(async (values) => {
                                     v-model="eventType"
                                     class="w-full mb-5"
                                     name="event-types"
-                                    label="Welche Veranstaltungen sollen angezeigt werden?"
+                                    :label="t('public.exports.email.create.eventTypeLabel')"
                                     :radios="events"
                                     :errors="submitCount === 0 ? undefined : errors.eventType"
                                 />
                                 <div class="w-full">
                                     <Alert
-                                        title="Hinweis"
+                                        :title="t('public.exports.email.create.noticeTitle')"
                                         type="info"
                                     >
                                         <p v-if="eventType === EventType.GLOBAL">
-                                            <span>"Alle Veranstaltungen aus dem Netzwerk"</span>
-                                            bedeutet, dass Sie zusätzlich Termine aus anderen Gemeinden und
-                                            Organisationen sehen.
+                                            <span>"{{ t('public.exports.email.create.alertGlobalTitle') }}"</span>
+                                            {{ t('public.exports.email.create.alertGlobalText') }}
                                         </p>
                                         <p v-else>
-                                            <span>"Nur Veranstaltungen aus diesem Kalender"</span>
-                                            bedeutet, dass Sie nur Termine aus dieser Instanz sehen.
+                                            <span>"{{ t('public.exports.email.create.alertInternalTitle') }}"</span>
+                                            {{ t('public.exports.email.create.alertInternalText') }}
                                         </p>
                                     </Alert>
                                 </div>
@@ -337,7 +342,7 @@ const submitForm = handleSubmit(async (values) => {
                                         hidden: eventType !== EventType.INTERNAL,
                                     }"
                                     name="organisation"
-                                    label="Organisationen"
+                                    :label="t('public.exports.email.create.organisationsLabel')"
                                     :options="organisationOptions"
                                     :errors="submitCount === 0 ? undefined : errors.organisation"
                                     :disabled="!organisationOptions.length"
@@ -355,7 +360,7 @@ const submitForm = handleSubmit(async (values) => {
                                         v-model:address="postal_code"
                                         v-model:radius="radius"
                                         name="location"
-                                        label="Postleitzahl"
+                                        :label="t('public.exports.email.create.postalCodeLabel')"
                                         :postal-code-only="true"
                                         :errors="submitCount === 0 ? undefined : errors.postal_code || errors.radius"
                                     />
@@ -383,7 +388,7 @@ const submitForm = handleSubmit(async (values) => {
                                     name="mail"
                                     color="white"
                                 />
-                                E-Mail-Benachrichtigung aktualisieren
+                                {{ t('public.exports.email.edit.submitButton') }}
                             </span>
                         </Button>
                     </div>
@@ -392,13 +397,19 @@ const submitForm = handleSubmit(async (values) => {
                 <Divider class="my-6" />
 
                 <div class="col-12 md:col-11 lg:col-10 xl:col-8 mt-7 mx-auto">
-                    <p class="mb-6">Klicken Sie auf "Abbestellen", um den Vorgang abzuschließen.</p>
+                    <p class="mb-6">
+                        {{
+                            t('public.exports.email.unsubscribe.instruction', {
+                                button: t('public.exports.email.unsubscribe.button'),
+                            })
+                        }}
+                    </p>
 
                     <div class="flex justify-content-center w-full">
                         <Button
                             class="mt-2 w-full max-w-30rem"
                             variant="primary"
-                            label="Abbestellen"
+                            :label="t('public.exports.email.unsubscribe.button')"
                             :disabled="isSubmitting"
                             @click="unsubscribe()"
                         />
@@ -408,15 +419,14 @@ const submitForm = handleSubmit(async (values) => {
                 <Divider class="my-6" />
                 <div class="col-12 md:col-11 lg:col-10 xl:col-8 mt-7 mx-auto">
                     <p class="mb-4">
-                        Möchten Sie für immer keine E-Mail-Benachrichtigungen mehr erhalten? Klicken Sie auf die
-                        Schaltfläche unten, um alle E-Mail-Benachrichtigungen abzubestellen.
+                        {{ t('public.exports.email.unsubscribe.disallowQuestion') }}
                     </p>
 
                     <div class="flex justify-content-center w-full">
                         <Button
                             class="mt-2 w-full max-w-30rem"
                             variant="secondary"
-                            label="Für immer abbestellen"
+                            :label="t('public.exports.email.unsubscribe.disallowButton')"
                             :disabled="isSubmitting"
                             @click="showDisallowDialog = true"
                         />

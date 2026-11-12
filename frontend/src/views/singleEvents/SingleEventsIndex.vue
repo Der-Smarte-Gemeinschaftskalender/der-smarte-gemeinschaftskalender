@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/lib/helper';
 import { current_organisation } from '@/composables/OrganisationComposable';
@@ -25,7 +25,8 @@ const { alertMessage } = useEventIndexAlerts(tableRef, {
     requestSentMessage: t('app.events.requestSentMessage'),
 });
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'name',
         name: t('app.events.columns.title'),
@@ -54,15 +55,15 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-const singleTableApi = {
+const singleTableApi = computed(() => ({
     url: '/single-events',
     deleteUrl: '/created-events',
     params: { mobilizon_group_id: current_organisation.value?.id },
     deleteDialogTitle: t('app.events.single.index.deleteTitle'),
     deleteDialogDescription: (row: any) => t('app.events.single.index.deleteDescription', { name: row?.name ?? '' }),
-};
+}));
 </script>
 <template>
     <div class="flex align-items-center justify-content-between gap-2 mb-1">

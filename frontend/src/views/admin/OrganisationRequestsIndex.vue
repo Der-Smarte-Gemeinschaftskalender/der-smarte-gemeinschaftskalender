@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { formatDateTime } from '@/lib/helper';
@@ -28,7 +28,8 @@ const getActionName = (actionType: string) => {
     return actionMap[actionType] || actionType;
 };
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'id',
         name: 'ID',
@@ -63,7 +64,7 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
 const fetchOrganisationRequests = async () => {
     loading.value = true;

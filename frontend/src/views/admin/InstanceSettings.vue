@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { dsgApi } from '@/lib/dsgApi';
 import { useRoute } from 'vue-router';
 import { I18nT, useI18n } from 'vue-i18n';
@@ -11,7 +11,7 @@ import LinkToDocs from '@/components/LinkToDocs.vue';
 import Table from '@/components/KERN/Table.vue';
 import Divider from '@/components/KERN/cosmetics/Divider.vue';
 
-import { emailEventTypeLabels } from '@/types/EmailTemplate';
+import { emailEventTypeLabels, type EmailEventType } from '@/types/EmailTemplate';
 import { LOCALE_LABELS, type SupportedLocale } from '@/i18n';
 import type { Column } from '@/types/General';
 import type { UserView } from '@/types/User';
@@ -36,7 +36,8 @@ const emailCopied = ref<boolean>(false);
 const instanceUrl = import.meta.env.VITE_MOBILIZON_URL || null;
 const route = useRoute();
 
-const emailColumns: Array<Column> = [
+// computed so the labels follow a language switch
+const emailColumns = computed<Array<Column>>(() => [
     {
         key: 'subject',
         name: t('app.admin.emailTemplates.subject'),
@@ -45,7 +46,7 @@ const emailColumns: Array<Column> = [
     {
         key: 'on_event',
         name: t('app.admin.emailTemplates.onEvent'),
-        format: (value: keyof typeof emailEventTypeLabels) => emailEventTypeLabels[value] || value,
+        format: (value: EmailEventType) => emailEventTypeLabels.value[value] || value,
         align: 'left',
     },
     {
@@ -58,7 +59,7 @@ const emailColumns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
 const loadInstanceCredentials = async () => {
     try {
@@ -266,7 +267,7 @@ const saveToClipboard = (text: string, item: CopyItem) => {
         >
             <template #on_event="{ row }">
                 <Badge
-                    :title="emailEventTypeLabels[row.on_event as keyof typeof emailEventTypeLabels] || row.on_event"
+                    :title="emailEventTypeLabels[row.on_event as EmailEventType] || row.on_event"
                 />
             </template>
             <template #locale="{ row }">

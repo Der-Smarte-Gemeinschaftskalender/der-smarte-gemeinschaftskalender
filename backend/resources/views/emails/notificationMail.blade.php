@@ -4,7 +4,7 @@
 <div>
     <h1>{{ __('emails.notification.heading.' . $intervall) }}</h1>
     <p>
-        {{ __('emails.notification.intro', ['appName' => config('app.name')]) }}
+        {{ __('emails.notification.intro', ['appName' => \App\Support\Localization::appName()]) }}
     </p>
     @foreach ($events as $key => $eventType)
     <h2>{{ __('emails.' . $key) }}</h2>

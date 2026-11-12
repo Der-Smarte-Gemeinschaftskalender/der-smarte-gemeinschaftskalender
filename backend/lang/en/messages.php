@@ -38,7 +38,6 @@ return [
 
     'events' => [
         'notFound'             => 'Event not found',
-        'createdEventNotFound' => 'Event not found',
         'imageSaveFailed'      => 'The image could not be saved. The file may be corrupted or in an unsupported format. The event was not created - please choose a different image (JPG, PNG, GIF or WEBP).',
         'imageTooLarge'        => 'The image exceeds the maximum allowed file size of :size. Please choose a smaller image.',
         'imageUploadFailed'    => 'The image could not be uploaded. Please try again.',

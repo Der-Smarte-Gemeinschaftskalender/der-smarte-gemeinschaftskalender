@@ -30,11 +30,11 @@ interface ResetPasswordForm {
 
 const validationSchema = toTypedSchema(
     zod.object({
-      password: zod.string().min(6, 'auth.validation.passwordMin6'),
-      password_confirmation: zod.string().min(6, 'auth.validation.passwordConfirmationMissing'),
+      password: zod.string().min(6, 'validation.password.min6'),
+      password_confirmation: zod.string().min(6, 'validation.password.confirmationRequired'),
     })
         .refine((data) => data.password === data.password_confirmation, {
-          message: 'auth.validation.passwordsDoNotMatchShort',
+          message: 'validation.password.mismatch',
           path: ['password_confirmation'],
         })
 );

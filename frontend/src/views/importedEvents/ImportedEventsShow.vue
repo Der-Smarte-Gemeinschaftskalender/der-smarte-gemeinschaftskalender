@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
@@ -35,7 +35,44 @@ const router = useRouter();
 const { t } = useI18n();
 const createdEvents = ref();
 const importedEvent = ref<ImportedEventWithRelations>();
-const importedEventListData = ref<{ name: string; value: unknown }[]>([]);
+
+// computed so the labels follow a language switch. Missing data gets a fallback instead of
+// throwing, an error here would leave the page blank.
+const importedEventListData = computed<{ name: string; value: unknown }[]>(() => {
+    const event = importedEvent.value;
+    if (!event) return [];
+
+    return [
+        {
+            name: 'ID',
+            value: event.id,
+        },
+        {
+            name: t('app.events.columns.url'),
+            value: event.url,
+        },
+        {
+            name: t('app.events.columns.eventCount'),
+            value: createdEvents.value?.length,
+        },
+        {
+            name: t('app.events.columns.status'),
+            value: event.is_active ? t('app.shared.active') : t('app.shared.inactive'),
+        },
+        {
+            name: t('app.events.columns.addedBy'),
+            value: event.user?.mobilizon_name || t('common.notSpecified'),
+        },
+        {
+            name: t('app.events.columns.addedAt'),
+            value: formatDateTime(event.created_at),
+        },
+        {
+            name: t('app.events.columns.syncedAt'),
+            value: formatDateTime(event.updated_at),
+        },
+    ];
+});
 
 const { deleting, showDeleteDialog, alertMessage, handleDelete } = useEventShowDelete({
     getDeleteUrl: () => `/imported-events/${route.params.id}`,
@@ -56,38 +93,6 @@ const loadImportedEvent = async () => {
 
         importedEvent.value = data.importedEvent;
         createdEvents.value = importedEvent.value.created_events;
-
-        importedEventListData.value = [
-            {
-                name: 'ID',
-                value: importedEvent.value.id,
-            },
-            {
-                name: t('app.events.columns.url'),
-                value: importedEvent.value.url,
-            },
-            {
-                name: t('app.events.columns.eventCount'),
-                value: createdEvents.value?.length,
-            },
-            {
-                name: t('app.events.columns.status'),
-                value: importedEvent.value.is_active ? t('app.shared.active') : t('app.shared.inactive'),
-            },
-            {
-                name: t('app.events.columns.addedBy'),
-                value: `${importedEvent.value.user.mobilizon_name}`,
-            },
-            {
-                name: t('app.events.columns.addedAt'),
-                value: formatDateTime(importedEvent.value.created_at),
-            },
-            {
-                name: t('app.events.columns.syncedAt'),
-                value: formatDateTime(importedEvent.value.updated_at),
-            },
-        ];
-
     } catch (error) {
         console.error(error);
         await router.push({ name: 'notFound' });

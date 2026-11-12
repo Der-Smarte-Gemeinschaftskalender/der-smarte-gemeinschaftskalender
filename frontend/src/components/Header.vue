@@ -15,7 +15,7 @@ interface Props {
 
 const logoUrl = '/logo.png';
 const overlayable = ref<InstanceType<typeof Overlayable> | null>(null);
-const instanceName = ref<string>(instanceInformation.name);
+const instanceName = computed(() => instanceInformation.value.name);
 
 const route = useRoute();
 const { t } = useI18n();

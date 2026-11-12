@@ -8,7 +8,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import zod from '@/lib/zod';
 import { ZodType } from 'zod';
 import { user_types_options, user_is_active_options } from '@/lib/const';
-import { localeOptions, SUPPORTED_LOCALES } from '@/i18n';
+import { DEFAULT_LOCALE, localeOptions, SUPPORTED_LOCALES } from '@/i18n';
 import Button from '@/components/KERN/Button.vue';
 import Fieldset from '@/components/KERN/Fieldset.vue';
 import InputEmail from '@/components/KERN/inputs/InputEmail.vue';
@@ -28,30 +28,30 @@ const errorMessageContent = ref<string | undefined>(undefined);
 const validationSchema = toTypedSchema(
     zod.object({
         email: zod.string({
-                required_error: 'app.admin.users.validation.emailRequired',
+                required_error: 'validation.email.required',
             })
             .email({
-                message: 'app.admin.users.validation.emailInvalid',
+                message: 'validation.email.invalid',
             }),
         password: zod
             .string({
-                required_error: 'app.admin.users.validation.passwordRequired'
+                required_error: 'validation.password.required'
             })
-            .min(8, 'app.admin.users.validation.passwordMin')
+            .min(8, 'validation.password.min')
             .refine((val) => val.trim().length > 0, {
-                message: 'app.admin.users.validation.passwordEmpty'
+                message: 'validation.password.notEmpty'
             }),
         type: zod
             .string()
             .nonempty()
             .default('user'),
-        locale: zod.enum(SUPPORTED_LOCALES).default('de'),
+        locale: zod.enum(SUPPORTED_LOCALES).default(DEFAULT_LOCALE),
     }) satisfies ZodType<UserView>
 );
 
 const { handleSubmit, errors, isSubmitting, submitCount } = useForm({
     validationSchema,
-    initialValues: { locale: 'de' },
+    initialValues: { locale: DEFAULT_LOCALE },
 });
 const { value: email } = useField<string>('email');
 const { value: password } = useField<string>('password');

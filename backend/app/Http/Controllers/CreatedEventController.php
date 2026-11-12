@@ -6,7 +6,6 @@ use App\Models\CreatedEvent;
 use App\Models\Mobilizon;
 use App\Models\SeriesEvent;
 use App\Models\SingleEvent;
-use Carbon\Carbon;
 use DateTimeZone;
 use Http;
 use Illuminate\Http\Client\Response;
@@ -19,6 +18,7 @@ use rdx\graphqlquery\Query;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Services\ApprovalRequestService;
+use App\Support\EventDateTime;
 use Throwable;
 
 class CreatedEventController extends Controller implements HasMiddleware
@@ -62,7 +62,7 @@ class CreatedEventController extends Controller implements HasMiddleware
     {
         $mobilizonFields = $request->input('mobilizon_fields');
         $timezone = self::eventTimezone($request);
-        $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
+        $eventStart = EventDateTime::fromDateAndTime($request->get('start'), $request->get('time'), $timezone);
 
         $durationSeparated = explode(':', $request->input('duration'));
         $durationMinutes = (int)$durationSeparated[0] * 60 + (int)$durationSeparated[1];
@@ -188,7 +188,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         $mclient = Mobilizon::getInstance();
 
         $timezone = self::eventTimezone($request);
-        $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
+        $eventStart = EventDateTime::fromDateAndTime($request->get('start'), $request->get('time'), $timezone);
         $mobilizonFields = $request->input('mobilizon_fields');
         $mobilizonFields['options']['timezone'] = $timezone;
 
@@ -387,7 +387,7 @@ class CreatedEventController extends Controller implements HasMiddleware
         $uuid = $request->input('uuid');
         $createdEvent = CreatedEvent::where('mobilizon_uuid', $uuid)->first();
         if (!$createdEvent) {
-            return response()->json(['error' => __('messages.events.createdEventNotFound')], 404);
+            return response()->json(['error' => __('messages.events.notFound')], 404);
         }
         return response()->json($createdEvent->only('id'));
     }

@@ -6,12 +6,12 @@ use App\Models\CreatedEvent;
 use App\Models\Mobilizon;
 use App\Models\MobilizonTag;
 use App\Models\SingleEvent;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Services\ApprovalRequestService;
+use App\Support\EventDateTime;
 use Log;
 use Throwable;
 
@@ -109,7 +109,7 @@ class SingleEventController extends Controller implements HasMiddleware
 
             $eventData = CreatedEventController::buildMobilizonEventData($request, $singleEvent, $mclient);
 
-            $eventStart = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
+            $eventStart = EventDateTime::fromDateAndTime($request->get('start'), $request->get('time'), $timezone);
 
             $createdEvent = new CreatedEvent();
             $createdEvent->single_events_id = $singleEvent->id;

@@ -47,7 +47,7 @@ defineProps<Props>();
                             v-else-if="row.type === 'prose'"
                             class="text-overflow-ellipsis prose"
                         >
-                            <span v-if="row.value === null">Keine Angabe</span>
+                            <span v-if="row.value === null">{{ $t('common.notSpecified') }}</span>
                             <span v-else>{{ row.value }}</span>
                         </p>
                         <a

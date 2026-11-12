@@ -18,8 +18,9 @@ export const ProfileFormSchema = zod.object({
         .refine((val) => val.trim().length > 0, {
             message: 'validation.name.notEmpty'
         }),
-    // Language of the emails sent to the user, does not change the UI language
-    locale: zod.enum(SUPPORTED_LOCALES)
+    // Language of the emails sent to the user, does not change the UI language.
+    // Optional: unknown until loaded for users whose cached data predates the field.
+    locale: zod.enum(SUPPORTED_LOCALES).optional()
 });
 
 

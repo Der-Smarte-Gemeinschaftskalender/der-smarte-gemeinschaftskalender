@@ -25,7 +25,6 @@ defineProps<Props>();
     >
         <Badge
             v-if="organisation?.is_featured"
-            :label="$t('public.organisation.featured')"
             variant="primary"
             size="small"
             class="mb-2 px-2"
@@ -36,7 +35,7 @@ defineProps<Props>();
                     name="star_outline"
                     size="sm"
                 />
-                Empfohlen
+                {{ $t('public.organisation.featured') }}
             </div>
         </Badge>
         <div class="flex gap-2 align-items-center">

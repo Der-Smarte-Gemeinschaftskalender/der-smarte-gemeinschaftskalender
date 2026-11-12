@@ -3,13 +3,14 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
+import { getEventTypeLabel, type CreatedEventParentType } from '@/types/events/CreatedEvents';
 
 import Button from './KERN/Button.vue';
 import ConfirmDialog from './ConfirmDialog.vue';
 
 interface Props {
     eventId: number;
-    eventType: 'single_event' | 'series_event' | 'uploaded_event' | 'imported_event';
+    eventType: CreatedEventParentType;
     parentEventId: number | null;
     onlyIcon?: boolean;
 }
@@ -32,12 +33,6 @@ const rerouteOptions: Record<string, string> = {
     series_event: 'seriesEvents.show',
     uploaded_event: 'uploadedEvents.show',
     imported_event: 'importedEvents.show',
-};
-
-const getEventTypeLabel = (eventType: string): string => {
-    const types = ['series_event', 'single_event', 'imported_event', 'uploaded_event'];
-
-    return types.includes(eventType) ? t(`app.shared.eventTypes.${eventType}`) : t('app.shared.eventTypes.unknown');
 };
 
 const deleteEvent = async () => {

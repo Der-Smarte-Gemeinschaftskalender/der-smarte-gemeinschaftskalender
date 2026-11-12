@@ -35,12 +35,16 @@ class EmailTemplateController extends Controller implements HasMiddleware
         $page = max($page, 1);
         $pageSize = max($pageSize, 1);
 
-        $data = EmailTemplate::orderBy('on_event')->orderBy('locale')->paginate(
-            $pageSize,
-            ['id', 'on_event', 'locale', 'subject'],
-            'page',
-            $page
-        );
+        // Templates of disabled languages are kept in the database but not offered for editing
+        $data = EmailTemplate::whereIn('locale', config('app.supported_locales'))
+            ->orderBy('on_event')
+            ->orderBy('locale')
+            ->paginate(
+                $pageSize,
+                ['id', 'on_event', 'locale', 'subject'],
+                'page',
+                $page
+            );
 
         return response()->json([
             'data' => $data->items(),

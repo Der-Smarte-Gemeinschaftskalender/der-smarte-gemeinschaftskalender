@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('locale', 5)->nullable()->after('email');
         });
 
-        DB::table('users')->whereNull('locale')->update(['locale' => config('app.default_locale')]);
+        // Existing users get the instance default language (console: not overwritten per request)
+        DB::table('users')->whereNull('locale')->update(['locale' => config('app.locale')]);
     }
 
     /**

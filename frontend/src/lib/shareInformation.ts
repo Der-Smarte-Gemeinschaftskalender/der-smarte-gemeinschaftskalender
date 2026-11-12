@@ -1,4 +1,5 @@
 import { formatOnDateTime } from "./helper";
+import i18n from "@/i18n";
 import type { IEventDetailed } from "@/types/General";
 
 export const createTextSingleEvent = (event: IEventDetailed, showPhysicalAddress: boolean = false, extraNewLine: boolean = false): string => {
@@ -12,8 +13,8 @@ export const createTextSingleEvent = (event: IEventDetailed, showPhysicalAddress
     return text;
 }
 
-export const createTextEventList = (headline: string = "Veranstaltungsübersicht", events: IEventDetailed[]): string => {
-    let text = `${headline}\n\n`;
+export const createTextEventList = (headline: string | undefined, events: IEventDetailed[]): string => {
+    let text = `${headline ?? i18n.global.t('public.share.eventListTitle')}\n\n`;
     text += events.map(event => createTextSingleEvent(event, false, true)).join('\n');
     return text;
 }

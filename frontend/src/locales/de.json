@@ -157,7 +157,11 @@
             "allOrganisations": "Alle Organisationen",
             "orgnisationsFound": "Organisationen gefunden",
             "organisationsStartingWith": "Organisationen, die mit „{letter}“ beginnen",
-            "organisationSearchPlaceholder": "Nach Organisationen suchen..."
+            "organisationSearchPlaceholder": "Nach Organisationen suchen...",
+            "sortAlphabetically": "Alphabetisch sortieren",
+            "filterByFirstCharacter": "Nach Organisationen filtern, die mit {letter} beginnen",
+            "specialCharacters": "Sonderzeichen",
+            "numbers": "Zahlen"
         },
         "navigation": {
             "appleMaps": "Apple Karten",
@@ -224,13 +228,46 @@
                     "noEmailTitle": "Wenn Sie keine E-Mail erhalten haben:",
                     "noEmailTipSpam": "Prüfen Sie Ihren Spam-Ordner",
                     "noEmailTipWait": "Warten Sie ein paar Minuten – es kann etwas dauern",
-                    "submitError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-                    "validation": {
-                        "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-                        "termsRequired": "Die Nutzungsbedingungen müssen akzeptiert werden.",
-                        "invalidPostalCode": "Bitte geben Sie eine gültige Postleitzahl ein",
-                        "invalidRadius": "Bitte wählen Sie einen gültigen Radius aus"
-                    }
+                    "submitError": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut."
+                },
+                "edit": {
+                    "title": "Benachrichtigungen bearbeiten",
+                    "subtitle": "Abonnement-Einstellungen verwalten oder abbestellen",
+                    "intro": "Sie bearbeiten die E-Mail-Benachrichtigung für {email}. Passen Sie die Einstellungen unten an und klicken Sie auf \"{button}\", um Ihre Änderungen zu speichern.",
+                    "submitButton": "E-Mail-Benachrichtigung aktualisieren"
+                },
+                "confirm": {
+                    "title": "E-Mail-Adresse bestätigen",
+                    "intro": "Um Ihre Anmeldung für Veranstaltungsbenachrichtigungen abzuschließen, {action}",
+                    "introAction": "bestätigen Sie bitte Ihre E-Mail-Adresse.",
+                    "disallowIntro": "Falls Sie diese Nachricht nicht angefordert haben, können Sie den Empfang weiterer {action}",
+                    "disallowIntroAction": "E-Mails hier ablehnen.",
+                    "noToken": "Kein Bestätigungstoken gefunden.",
+                    "confirmError": "E-Mail-Adresse konnte nicht bestätigt werden.",
+                    "disallowError": "E-Mail-Adresse konnte nicht blockiert werden.",
+                    "confirmedTitle": "E-Mail-Adresse bestätigt",
+                    "confirmedText": "Deine E-Mail-Adresse wurde erfolgreich bestätigt. Du kannst nun Benachrichtigungen erhalten.",
+                    "blockedTitle": "E-Mail-Adresse wurde blockiert",
+                    "blockedText": "Deine E-Mail-Adresse wurde erfolgreich blockiert. Du wirst keine weiteren E-Mails erhalten.",
+                    "backToHome": "Zurück zur Startseite",
+                    "confirmButton": "Jetzt E-Mail-Adresse bestätigen",
+                    "disallowButton": "Keine E-Mails mehr erhalten"
+                },
+                "unsubscribe": {
+                    "title": "E-Mail-Benachrichtigungen abbestellen",
+                    "question": "Möchten Sie keine E-Mail-Benachrichtigungen auf die Adresse {email} mehr erhalten?",
+                    "instruction": "Klicken Sie auf \"{button}\", um den Vorgang abzuschließen.",
+                    "button": "Abbestellen",
+                    "disallowQuestion": "Möchten Sie für immer keine E-Mail-Benachrichtigungen mehr erhalten? Klicken Sie auf die Schaltfläche unten, um alle E-Mail-Benachrichtigungen abzubestellen.",
+                    "disallowButton": "Für immer abbestellen",
+                    "disallowTitle": "Alle E-Mail-Benachrichtigungen abbestellen",
+                    "disallowConfirm": "Sind Sie sicher, dass Sie alle E-Mail-Benachrichtigungen für immer abbestellen möchten?",
+                    "noMoreEmails": "Sie erhalten keine E-Mail-Benachrichtigungen mehr von dieser Plattform.",
+                    "success": "Sie haben sich erfolgreich abgemeldet.",
+                    "loadError": "Fehler beim Laden der Abonnement-Informationen. Bitte versuchen Sie es später erneut.",
+                    "loadFailed": "Die Abonnement-Informationen konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+                    "unsubscribeError": "Fehler beim Abmelden. Bitte versuchen Sie es später erneut.",
+                    "toHome": "Zur Startseite"
                 }
             },
             "script": {
@@ -322,6 +359,7 @@
         "next": "Weiter",
         "yes": "Ja",
         "no": "Nein",
+        "notSpecified": "Keine Angabe",
         "submit": "Absenden",
         "close": "Schließen",
         "documentation": "Handbuch",
@@ -329,6 +367,7 @@
         "monthly": "Monatlich",
         "mondayMorning": "Montagmorgen",
         "firstDayOfMonth": "erster Tag des Monats",
+        "changeLanguage": "Sprache wechseln",
         "timezone": {
             "label": "Zeitzone"
         }
@@ -389,7 +428,12 @@
             "newMin": "Das neue Passwort muss mindestens 8 Zeichen lang sein.",
             "confirmRequired": "Die Bestätigung des neuen Passworts ist erforderlich.",
             "confirmMin": "Die Bestätigung des neuen Passworts muss mindestens 8 Zeichen lang sein.",
-            "mismatch": "Die Passwörter stimmen nicht überein."
+            "mismatch": "Die Passwörter stimmen nicht überein.",
+            "required": "Das Passwort ist erforderlich.",
+            "confirmationRequired": "Die Passwortbestätigung ist erforderlich.",
+            "min": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+            "min6": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+            "notEmpty": "Das Passwort darf nicht leer sein."
         },
         "url": {
             "invalid": "Bitte eine gültige URL eingeben.",
@@ -411,8 +455,7 @@
         "picture": {
             "unreadable": "Die ausgewählte Datei ist leer oder konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.",
             "unsupportedFormat": "Das Format {format} wird nicht unterstützt. Bitte wählen Sie ein Bild im Format JPG, PNG, GIF oder WEBP.",
-            "tooLarge": "Das Bild ist mit {size} MB zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB.",
-            "unknownFormat": "unbekannt"
+            "tooLarge": "Das Bild ist mit {size} MB zu groß. Bitte wählen Sie ein Bild mit maximal 2 MB."
         },
         "ical": {
             "fileRequired": "Bitte eine iCal-Datei (max. 2 MB) hochladen"
@@ -421,15 +464,30 @@
             "startLowercase": "Der Benutzername muss mit einem Kleinbuchstaben anfangen.",
             "endLowercaseOrNumber": "Der Benutzername muss mit einem Kleinbuchstaben oder einer Zahl enden.",
             "invalid": "Bitte einen gültigen Benutzernamen eingeben. Erlaubt sind Kleinbuchstaben, Zahlen und Unterstriche.",
-            "noConsecutiveUnderscores": "Der Benutzername darf keine aufeinanderfolgenden Unterstriche enthalten."
+            "noConsecutiveUnderscores": "Der Benutzername darf keine aufeinanderfolgenden Unterstriche enthalten.",
+            "required": "Der Benutzername ist erforderlich.",
+            "notEmpty": "Der Benutzername darf nicht leer sein."
         },
-        "fileFormats": {
-            "allAudio": "alle Audioformate",
-            "allVideo": "alle Videoformate",
-            "allImage": "alle Bildformate",
-            "allText": "alle Textformate",
-            "allApplication": "alle Anwendungsformate",
-            "calendar": "Kalender"
+        "terms": {
+            "acceptWithPrivacy": "Die Nutzungsbedingungen und die Datenschutzerklärung müssen akzeptiert werden.",
+            "accept": "Die Nutzungsbedingungen müssen akzeptiert werden."
+        },
+        "organisation": {
+            "usernameNotEmpty": "Der Benutzername der Organisation darf nicht leer sein.",
+            "nameRequired": "Der Name der Organisation ist erforderlich.",
+            "nameNotEmpty": "Der Name der Organisation darf nicht leer sein.",
+            "summaryRequired": "Die Beschreibung der Organisation ist erforderlich."
+        },
+        "emailTemplate": {
+            "invalidEventType": "Ungültiger Ereignistyp",
+            "subjectMax": "Der Betreff darf maximal 70 Zeichen lang sein.",
+            "bodyRequired": "Die Nachricht darf nicht leer sein."
+        },
+        "postalCode": {
+            "invalid": "Bitte geben Sie eine gültige Postleitzahl ein"
+        },
+        "radius": {
+            "invalid": "Bitte wählen Sie einen gültigen Radius aus"
         }
     },
     "app": {
@@ -585,7 +643,8 @@
                 "sizeLabel": "Größe:",
                 "savedTitle": "Gespeichert",
                 "savedContent": "Die Einstellungen wurden erfolgreich gespeichert.",
-                "saveError": "Die Einstellungen konnten nicht gespeichert werden."
+                "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
+                "defaultHeadline": "Unsere Termine"
             }
         },
         "organisations": {
@@ -595,14 +654,6 @@
             "loadError": "Organisation konnte nicht geladen werden.",
             "saved": "Gespeichert",
             "unknown": "Unbekannt",
-            "validation": {
-                "nameRequired": "Der Name der Organisation ist erforderlich.",
-                "nameNotEmpty": "Der Name der Organisation darf nicht leer sein.",
-                "summaryRequired": "Die Beschreibung der Organisation ist erforderlich.",
-                "summaryNotEmpty": "Die Beschreibung darf nicht leer sein.",
-                "usernameRequired": "Der Benutzername ist erforderlich.",
-                "usernameNotEmpty": "Der Benutzername darf nicht leer sein."
-            },
             "index": {
                 "title": "Meine Organisationen",
                 "create": "Organisation erstellen",
@@ -775,11 +826,6 @@
                     "handledStatus": "Der Status der Anfrage (z. B. „genehmigt“ oder „abgelehnt“)",
                     "organisationName": "Der Name der Organisation"
                 },
-                "validation": {
-                    "invalidEventType": "Ungültiger Ereignistyp",
-                    "subjectMax": "Der Betreff darf maximal 70 Zeichen lang sein.",
-                    "bodyRequired": "Die Nachricht darf nicht leer sein."
-                },
                 "loadError": "Fehler beim Laden der Vorlage.",
                 "saveError": "Fehler beim Speichern der Vorlage.",
                 "editTitle": "E-Mail-Vorlage bearbeiten",
@@ -815,13 +861,6 @@
                 "createButton": "Nutzer*in anlegen",
                 "indexHint": "Als Administrator*in der Instanz können Sie hier die Mitglieder aller Organisationen einsehen und bearbeiten. Über den Button „Bearbeiten“ können Sie Nutzer*innen entfernen. Weitere Informationen finden Sie im {link}.",
                 "exportEmails": "Export der E-Mail-Adressen aktiver Nutzer*innen",
-                "validation": {
-                    "emailRequired": "Die E-Mail-Adresse ist erforderlich.",
-                    "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-                    "passwordRequired": "Das Passwort ist erforderlich.",
-                    "passwordMin": "Das Passwort muss mindestens 8 Zeichen lang sein.",
-                    "passwordEmpty": "Das Passwort darf nicht leer sein."
-                },
                 "saveError": "Benutzer konnte nicht gespeichert werden.",
                 "createTitle": "Neuen Benutzer anlegen",
                 "createHint": "Als Administrator*in können Sie hier manuell neue Nutzer*innen für Ihre Instanz anlegen.",
@@ -1092,7 +1131,8 @@
                 "hide": "Passwort verbergen"
             },
             "image": {
-                "previewAlt": "Ereignisvorschau"
+                "previewAlt": "Ereignisvorschau",
+                "altText": "Alternativtext (optional)"
             },
             "file": {
                 "allowedFormats": "Erlaubte Formate: {formats}"
@@ -1131,14 +1171,16 @@
             },
             "monthOccurrence": {
                 "weeks": "Woche(n)",
-                "weekDay": "Wochentag",
-                "weekOptions": {
-                    "first": "1. (Erste)",
-                    "second": "2. (Zweite)",
-                    "third": "3. (Dritte)",
-                    "fourth": "4. (Vierte)",
-                    "last": "Letzte"
-                }
+                "weekDay": "Wochentag"
+            },
+            "fileFormats": {
+                "allAudio": "alle Audioformate",
+                "allVideo": "alle Videoformate",
+                "allImage": "alle Bildformate",
+                "allText": "alle Textformate",
+                "allApplication": "alle Anwendungsformate",
+                "calendar": "Kalender",
+                "unknown": "unbekannt"
             }
         },
         "dashboard": {
@@ -1332,22 +1374,6 @@
         "email": "E-Mail-Adresse",
         "password": "Passwort",
         "passwordConfirm": "Passwort bestätigen",
-        "validation": {
-            "emailRequired": "Die E-Mail-Adresse ist erforderlich.",
-            "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-            "passwordRequired": "Das Passwort ist erforderlich.",
-            "passwordConfirmationRequired": "Die Passwortbestätigung ist erforderlich.",
-            "newPasswordMin8": "Das neue Passwort muss mindestens 8 Zeichen lang sein.",
-            "passwordMin8": "Das Passwort muss mindestens 8 Zeichen lang sein.",
-            "passwordMin6": "Das Passwort muss mindestens 6 Zeichen lang sein.",
-            "passwordConfirmationMissing": "Bitte Passwortbestätigung eingeben.",
-            "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein.",
-            "passwordsDoNotMatchShort": "Passwörter stimmen nicht überein.",
-            "acceptTerms": "Die Nutzungsbedingungen und die Datenschutzerklärung müssen akzeptiert werden.",
-            "nameRequired": "Der Name ist erforderlich.",
-            "usernameRequired": "Der Benutzername ist erforderlich.",
-            "organisationUsernameNotEmpty": "Der Benutzername der Organisation darf nicht leer sein."
-        },
         "terms": {
             "label": "Nutzungsbedingungen",
             "text": "Ich habe die {terms} und {privacy} gelesen und akzeptiere sie.",

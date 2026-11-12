@@ -2,12 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import Button from '@/components/KERN/Button.vue';
 import { translateMessage } from '@/i18n';
-
-interface WeekDay {
-    value: number;
-    label: string;
-    shortLabel: string;
-}
+import { weekDayOptions } from '@/lib/const';
 
 interface Props {
     label?: string;
@@ -23,20 +18,6 @@ const { t } = useI18n();
 
 const today = new Date().getDay();
 selectedDay.value = selectedDay.value === null ? today : selectedDay.value;
-
-const weekDays: WeekDay[] = [
-    { value: 1, day: 'monday' },
-    { value: 2, day: 'tuesday' },
-    { value: 3, day: 'wednesday' },
-    { value: 4, day: 'thursday' },
-    { value: 5, day: 'friday' },
-    { value: 6, day: 'saturday' },
-    { value: 0, day: 'sunday' },
-].map(({ value, day }) => ({
-    value,
-    label: t(`app.shared.weekDays.long.${day}`),
-    shortLabel: t(`app.shared.weekDays.short.${day}`),
-}));
 
 const toggleDay = (dayValue: number) => {
     selectedDay.value = dayValue;
@@ -62,7 +43,7 @@ const isSelected = (dayValue: number) => {
             :aria-label="label || t('app.shared.weekDays.select')"
         >
             <Button
-                v-for="day in weekDays"
+                v-for="day in weekDayOptions"
                 :key="day.value"
                 type="button"
                 :variant="isSelected(day.value) ? 'primary' : 'secondary'"

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { findOrganisations } from '@/lib/mobilizonClient';
 import { getFeaturedOrganisations } from '@/lib/dsgClient';
 
@@ -15,10 +16,12 @@ const organisationsById = ref<Map<string, IOrganisation>>(new Map());
 
 const possibleFirstCharakters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ'.split(''), '#', '0-9'];
 
-const selectedFirstCharakterLabels: Record<string, string> = {
-    '#': 'Sonderzeichen',
-    '0-9': 'Zahlen',
-};
+const { t } = useI18n();
+
+const selectedFirstCharakterLabels = computed<Record<string, string>>(() => ({
+    '#': t('public.search.specialCharacters'),
+    '0-9': t('public.search.numbers'),
+}));
 
 const foundFirstCharakters = ref<string[]>([]);
 const selectedFirstCharakter = ref<string>('All');
@@ -213,7 +216,7 @@ loadOrganisations();
         >
             <InputText
                 v-model="searchTerm"
-                aria-label="Suchbegriff"
+                :aria-label="$t('public.search.searchLabel')"
                 name="searchTerm"
                 class="w-full"
                 :placeholder="$t('public.search.organisationSearchPlaceholder')"
@@ -228,8 +231,8 @@ loadOrganisations();
                 />
                 <Button
                     :variant="sortOrder !== 'none' ? 'primary' : 'secondary'"
-                    aria-label="Alphabetisch sortieren"
-                    title="Alphabetisch sortieren"
+                    :aria-label="$t('public.search.sortAlphabetically')"
+                    :title="$t('public.search.sortAlphabetically')"
                     class="min-h-1rem w-fit flex items-center"
                     @click.prevent="
                         sortOrganisations(sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? 'none' : 'asc')
@@ -269,7 +272,7 @@ loadOrganisations();
                 :key="char"
                 :variant="char === selectedFirstCharakter ? 'primary' : 'secondary'"
                 :label="char"
-                :aria-label="`Nach Organisationen filtern, die mit ${char} beginnen`"
+                :aria-label="$t('public.search.filterByFirstCharacter', { letter: char })"
                 class="h-2rem min-h-2rem p-0"
                 :class="char !== '0-9' ? 'w-2rem ' : 'w-fit'"
                 :disabled="!foundFirstCharakters.includes(char)"

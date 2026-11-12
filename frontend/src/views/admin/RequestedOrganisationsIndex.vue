@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { dsgApi } from '@/lib/dsgApi';
 import { requested_organisation_status } from '@/lib/const';
@@ -19,7 +19,8 @@ const loadingNewState = ref(false);
 const showErrorMessage = ref(false);
 const errorMessageContent = ref('');
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'id',
         name: 'ID',
@@ -36,8 +37,8 @@ const columns: Array<Column> = [
     {
         key: 'status',
         name: t('app.admin.users.columns.status'),
-        format: (col: keyof typeof requested_organisation_status) => {
-            return requested_organisation_status[col] || t('app.admin.shared.unknown');
+        format: (col: keyof typeof requested_organisation_status.value) => {
+            return requested_organisation_status.value[col] || t('app.admin.shared.unknown');
         },
         align: 'left',
     },
@@ -46,7 +47,7 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 const changeStatus = async (id: number, status: string) => {
     loadingNewState.value = true;
     showErrorMessage.value = false;

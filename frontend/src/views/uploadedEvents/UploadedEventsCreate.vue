@@ -75,7 +75,8 @@ const { value: onlineAddress } = useField<string>('onlineAddress');
 const { value: physicalAddress } = useField<AddressForm>('physicalAddress');
 const { value: externalParticipationUrl } = useField<string | undefined>('externalParticipationUrl');
 
-const columns = [
+// computed so the labels follow a language switch
+const columns = computed(() => [
     {
         key: 'summary',
         name: t('app.events.columns.name'),
@@ -100,7 +101,7 @@ const columns = [
         name: t('app.events.columns.duration'),
         format: (value: string) => value ?? t('app.shared.unknown'),
     },
-];
+]);
 
 const onSubmit = handleSubmit(async (values: UploadedEventForm) => {
     const preparedValues = prepareEventsValues<UploadedEventForm, UploadedEventRequest>(values, ['uploaded_file']);

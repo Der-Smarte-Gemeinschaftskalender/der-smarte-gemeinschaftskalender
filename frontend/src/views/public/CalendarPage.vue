@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, reactive, computed } from 'vue';
+import { ref, watch, reactive, computed, nextTick } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -65,10 +65,8 @@ const searchAccordions = computed<Accordion[]>(() => [
 
 const isMobile = window.innerWidth < 768;
 
-const calendarOptions = reactive<CalendarOptions>({
-    plugins: [dayGridPlugin, interactionPlugin],
-    initialView: isMobile ? 'dayGrid1Day' : 'dayGridWeek',
-    height: isMobile ? 'auto' : undefined,
+// Language-dependent FullCalendar options; copied into calendarOptions on a language switch (see watcher below)
+const localizedCalendarOptions = computed<CalendarOptions>(() => ({
     views: {
         dayGrid1Day: {
             type: 'dayGrid',
@@ -76,6 +74,21 @@ const calendarOptions = reactive<CalendarOptions>({
             buttonText: t('public.calendar.day'),
         },
     },
+    locale: locale.value === 'en' ? enLocale : deLocale,
+    buttonText: {
+        today: t('public.calendar.today'),
+        month: t('public.calendar.month'),
+        week: t('public.calendar.week'),
+        day: t('public.calendar.day'),
+        list: t('public.calendar.list'),
+    },
+}));
+
+const calendarOptions = reactive<CalendarOptions>({
+    ...localizedCalendarOptions.value,
+    plugins: [dayGridPlugin, interactionPlugin],
+    initialView: isMobile ? 'dayGrid1Day' : 'dayGridWeek',
+    height: isMobile ? 'auto' : undefined,
     events: async (
         fetchInfo: EventSourceFuncArg,
         successCallback: (events: EventInput[]) => void,
@@ -130,15 +143,9 @@ const calendarOptions = reactive<CalendarOptions>({
         right: 'dayGrid1Day,dayGridWeek,dayGridMonth',
     },
     firstDay: 1,
-    locale: locale.value === 'en' ? enLocale : deLocale,
-    buttonText: {
-        today: t('public.calendar.today'),
-        month: t('public.calendar.month'),
-        week: t('public.calendar.week'),
-        day: t('public.calendar.day'),
-        list: t('public.calendar.list'),
-    },
 });
+
+watch(localizedCalendarOptions, (options) => Object.assign(calendarOptions, options));
 
 const fullCalendarRefetchEvents = () => {
     if (!fullCalendar?.value) return;

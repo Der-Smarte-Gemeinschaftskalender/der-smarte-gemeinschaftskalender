@@ -8,7 +8,7 @@ test("internal area can be switched to english", async ({ page }) => {
   await navigateToApp(page, config);
   await createSingleEvent(page);
 
-  await page.getByRole("button", { name: /Change language/ }).first().click();
+  await page.getByRole("button", { name: /Sprache wechseln/ }).first().click();
   await page.getByText("English", { exact: true }).first().click();
 
   await expect(page.getByRole("heading", { name: "Create single event" })).toBeVisible();
@@ -28,6 +28,29 @@ test("internal area can be switched to english", async ({ page }) => {
   await page.getByRole("button", { name: /Change language/ }).first().click();
   await page.getByText("Deutsch", { exact: true }).first().click();
   await expect(page.getByText("Einzeltermine").first()).toBeVisible();
+});
+
+test.describe("browser language detection", () => {
+  test.use({ locale: "en-US" });
+
+  test("follows the browser until the user picks a language", async ({ page }) => {
+    const config = loadEnv();
+
+    await page.goto(config.siteUrl);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+    // Only an explicit choice in the language switch is remembered, otherwise a later change of
+    // the browser language would be ignored.
+    expect(await page.evaluate(() => window.localStorage.getItem("locale"))).toBeNull();
+
+    await page.getByRole("button", { name: /Change language/ }).first().click();
+    await page.getByText("Deutsch", { exact: true }).first().click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "de");
+    expect(await page.evaluate(() => window.localStorage.getItem("locale"))).toBe("de");
+
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("lang", "de");
+  });
 });
 
 test("email language can be changed in the profile without changing the UI language", async ({ page }) => {

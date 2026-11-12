@@ -9,13 +9,10 @@ import { INSTANCE_TIMEZONE } from '@/lib/timezone';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.locale((typeof window !== 'undefined' && window.localStorage.getItem('locale')) || 'de');
 dayjs.tz.setDefault(INSTANCE_TIMEZONE);
 
 export const switchDayjsLocale = (langCode: string) => {
     dayjs.locale(langCode);
 };
-
-
 
 export default dayjs;

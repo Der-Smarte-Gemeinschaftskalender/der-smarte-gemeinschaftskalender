@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\SetLocale;
 use App\Models\Mobilizon;
 use App\Models\User;
 use Hash;
@@ -70,7 +69,7 @@ class UserController extends Controller implements HasMiddleware
             'locale' => [
                 'sometimes',
                 'required',
-                Rule::in(SetLocale::SUPPORTED_LOCALES),
+                Rule::in(config('app.supported_locales')),
             ],
         ]);
 

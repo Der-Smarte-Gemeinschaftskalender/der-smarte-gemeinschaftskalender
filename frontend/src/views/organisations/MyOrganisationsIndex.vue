@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { I18nT, useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { setOrganisationData } from '@/composables/OrganisationComposable';
@@ -21,7 +21,8 @@ const route = useRoute();
 
 const message = ref<IAlert | null>(null);
 
-const columns: Array<Column> = [
+// computed so the labels follow a language switch
+const columns = computed<Array<Column>>(() => [
     {
         key: 'id',
         name: 'ID',
@@ -30,6 +31,16 @@ const columns: Array<Column> = [
         },
         align: 'center',
     },
+    ...(user.value?.type === 'admin'
+        ? [
+              {
+                  key: 'is_featured',
+                  name: t('app.organisations.index.columnFeatured'),
+                  format: (col: any) => (col ? t('common.yes') : t('common.no')),
+                  align: 'center' as const,
+              },
+          ]
+        : []),
     {
         key: 'parent',
         name: t('app.organisations.index.columnName'),
@@ -43,18 +54,9 @@ const columns: Array<Column> = [
         name: '',
         align: 'right',
     },
-];
+]);
 
-if (user.value?.type === 'admin') {
-    columns.splice(1, 0, {
-        key: 'is_featured',
-        name: t('app.organisations.index.columnFeatured'),
-        format: (col: any) => (col ? t('common.yes') : t('common.no')),
-        align: 'center',
-    });
-}
-
-const columnsRequestedOrganisations: Array<Column> = [
+const columnsRequestedOrganisations = computed<Array<Column>>(() => [
     {
         key: 'id',
         name: 'ID',
@@ -69,12 +71,12 @@ const columnsRequestedOrganisations: Array<Column> = [
     {
         key: 'status',
         name: t('app.organisations.index.columnStatus'),
-        format: (col: keyof typeof requested_organisation_status) => {
-            return requested_organisation_status[col] || t('app.organisations.unknown');
+        format: (col: keyof typeof requested_organisation_status.value) => {
+            return requested_organisation_status.value[col] || t('app.organisations.unknown');
         },
         align: 'center',
     },
-];
+]);
 
 const rejectInvitation = async (membershipId: string) => {
     try {

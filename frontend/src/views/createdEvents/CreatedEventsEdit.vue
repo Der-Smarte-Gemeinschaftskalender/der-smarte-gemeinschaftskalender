@@ -48,6 +48,7 @@ import {
     type CreatedEventDetails,
     CreatedEventFormSchema,
     CreatedEventUpdateResponseSchema,
+    getEventTypeLabel,
 } from '@/types/events/CreatedEvents';
 import { type AddressForm, type MobilizonFields, addressDefaults } from '@/types/Mobilizon';
 
@@ -56,13 +57,43 @@ const router = useRouter();
 const { t } = useI18n();
 
 const createdEvent = ref<CreatedEventDetails>();
-const descriptionListData = ref<DescriptionListData[]>([]);
 const loading = ref<boolean>(false);
 
 const createdEventData = ref<CreatedEventDetails | null>(null);
 const createdEventMetaData = ref<MobilizonFields | null>(null);
 const createdEventStatus = ref(null);
 const parentEventType = ref('');
+
+// computed so the labels follow a language switch. Missing data gets a fallback instead of
+// throwing, an error here would leave the page blank.
+const descriptionListData = computed<DescriptionListData[]>(() => {
+    if (!createdEvent.value || !createdEventData.value) return [];
+
+    return [
+        {
+            name: 'ID',
+            value: createdEvent.value.id,
+        },
+        {
+            name: t('app.events.columns.createdAt'),
+            value: formatDateTime(createdEventData.value.created_at!),
+        },
+        {
+            name: t('app.events.columns.eventType'),
+            value: getEventTypeLabel(parentEventType.value),
+        },
+        {
+            name: t('app.events.columns.createdBy'),
+            value: createdEvent.value.user?.mobilizon_name || t('common.notSpecified'),
+        },
+        {
+            name: t('app.events.columns.status'),
+            key: 'status',
+            value: createdEventStatus.value,
+            slot: true,
+        },
+    ];
+});
 const parentEventId = ref<any | null>(null);
 const rawAddress = ref<string>('');
 const mapRef = ref<InstanceType<typeof Map> | null>(null);
@@ -159,31 +190,6 @@ const loadCreatedEvent = async () => {
 
         createdEventStatus.value = createdEventData.value!.status;
 
-        descriptionListData.value = [
-            {
-                name: 'ID',
-                value: createdEvent.value!.id,
-            },
-            {
-                name: t('app.events.columns.createdAt'),
-                value: formatDateTime(createdEventData.value!.created_at!),
-            },
-            {
-                name: t('app.events.columns.eventType'),
-                value: getEventTypeLabel(parentEventType.value),
-            },
-            {
-                name: t('app.events.columns.createdBy'),
-                value: `${createdEvent.value!.user.mobilizon_name}`,
-            },
-            {
-                name: t('app.events.columns.status'),
-                key: 'status',
-                value: createdEventStatus.value,
-                slot: true,
-            },
-        ];
-
         pictureLoadFailed.value = false;
         picture.value = createdEventData.value?.picture?.url
             ? (await loadCreatedEventImageByID(createdEvent.value?.id!)) || undefined
@@ -218,12 +224,6 @@ const loadCreatedEvent = async () => {
     } finally {
         loading.value = false;
     }
-};
-
-const getEventTypeLabel = (eventType: string): string => {
-    const types = ['series_event', 'single_event', 'imported_event', 'uploaded_event'];
-
-    return types.includes(eventType) ? t(`app.shared.eventTypes.${eventType}`) : t('app.shared.eventTypes.unknown');
 };
 
 watch(joinOptions, (newValue) => {

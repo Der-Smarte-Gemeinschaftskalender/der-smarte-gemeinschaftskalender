@@ -15,7 +15,7 @@ import Dialog from '@/components/KERN/Dialog.vue';
 import LinkToDocs from '@/components/LinkToDocs.vue';
 import { fontSelectionOptions } from '@/lib/const';
 import { formatOnMonthDayTime } from '@/lib/helper';
-import { getDimensionOptions, type MgTemplate, type CalendarEvent } from '@/composables/MaterialGenerator/materialGeneratorConstants';
+import { dimensionOptions, type MgTemplate, type CalendarEvent } from '@/composables/MaterialGenerator/materialGeneratorConstants';
 
 const props = defineProps<{
     selectedDimension: string;
@@ -65,8 +65,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-
-const dimensionOptions = computed(() => getDimensionOptions());
 
 const bgFileName = ref('');
 

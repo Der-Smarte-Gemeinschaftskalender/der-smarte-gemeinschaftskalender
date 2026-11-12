@@ -74,7 +74,7 @@ watch(model, (newFile) => {
                 v-if="imagePreview"
                 v-model="altModel"
                 :name="`${name}Alt`"
-                label="Alternativtext (optional)"
+                :label="$t('app.shared.image.altText')"
             />
             -->
         </div>
@@ -91,6 +91,8 @@ watch(model, (newFile) => {
                 class="w-fit absolute delete-button"
                 style="bottom: 1rem; right: 1rem"
                 icon-left="delete"
+                :aria-label="$t('common.delete')"
+                :title="$t('common.delete')"
                 @click="clearModel"
             />
         </div>

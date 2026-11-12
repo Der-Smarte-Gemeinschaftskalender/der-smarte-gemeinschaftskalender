@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\NotificationDisallow;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Mail;
@@ -35,6 +36,8 @@ class NotificationController extends Controller
             $notification->intervall = $request->input('intervall');
             $notification->category = $request->input('category');
             $notification->email = $request->input('email');
+            // The newsletter is sent in the language of the subscription request (see SetLocale)
+            $notification->locale = App::getLocale();
 
 
             if ($request->input('eventType') === 'INTERNAL') {

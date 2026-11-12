@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Enums\Intervall;
+use App\Support\EventDateTime;
 use Illuminate\Support\Facades\Log;
 
 class SeriesEventController extends Controller implements HasMiddleware
@@ -102,7 +103,7 @@ class SeriesEventController extends Controller implements HasMiddleware
         $mclient = Mobilizon::getInstance();
         $timezone = CreatedEventController::eventTimezone($request);
 
-        $start = Carbon::parse($request->get('start') . ' ' . $request->get('time'), $timezone);
+        $start = EventDateTime::fromDateAndTime($request->get('start'), $request->get('time'), $timezone);
         $end = Carbon::parse($request->get('end'), $timezone);
         $period = CarbonPeriod::create($start, '1 day', $end->copy()->endOfDay());
 
@@ -207,7 +208,7 @@ class SeriesEventController extends Controller implements HasMiddleware
         $pictureResponse = null;
 
         foreach ($eventDates as $dateString) {
-            $eventDate = Carbon::parse($dateString . ' ' . $request->get('time'), $timezone);
+            $eventDate = EventDateTime::fromDateAndTime($dateString, $request->get('time'), $timezone);
 
             $eventData = CreatedEventController::buildMobilizonEventData($request, $seriesEvent, $mclient, [
                 "beginsOn"  => $eventDate->toAtomString(),
